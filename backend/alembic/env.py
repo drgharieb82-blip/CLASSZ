@@ -6,6 +6,10 @@ from sqlalchemy import engine_from_config, pool
 from app.core.config import settings
 from app.db.base import Base
 from app.models import user  # noqa: F401
+from app.modules.chapters import models as chapter_models  # noqa: F401
+from app.modules.courses import models as course_models  # noqa: F401
+from app.modules.lesson_blocks import models as lesson_block_models  # noqa: F401
+from app.modules.lessons import models as lesson_models  # noqa: F401
 
 config = context.config
 

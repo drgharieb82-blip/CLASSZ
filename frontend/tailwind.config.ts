@@ -25,8 +25,8 @@ export default {
         chalk: "#fffdf7",
       },
       fontFamily: {
-        display: ["Fraunces", "Georgia", "serif"],
-        sans: ["Manrope", "ui-sans-serif", "system-ui", "sans-serif"],
+        display: ["Poppins", "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       boxShadow: {
         panel: "0 18px 60px rgba(16, 22, 19, 0.12)",

@@ -2,7 +2,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
+from app.modules.chapters.router import router as chapters_router
 from app.modules.auth.router import router as auth_router
+from app.modules.courses.router import router as courses_router
+from app.modules.lesson_blocks.router import router as lesson_blocks_router
+from app.modules.lessons.router import router as lessons_router
 
 
 def create_app() -> FastAPI:
@@ -27,6 +31,10 @@ def create_app() -> FastAPI:
         return {"status": "ok", "service": settings.project_name}
 
     app.include_router(auth_router, prefix=settings.api_prefix)
+    app.include_router(courses_router, prefix=settings.api_prefix)
+    app.include_router(chapters_router, prefix=settings.api_prefix)
+    app.include_router(lessons_router, prefix=settings.api_prefix)
+    app.include_router(lesson_blocks_router, prefix=settings.api_prefix)
 
     return app
 
