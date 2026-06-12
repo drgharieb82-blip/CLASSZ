@@ -4,6 +4,7 @@ import { AdminLayout } from "../layouts/AdminLayout";
 import { ParentLayout } from "../layouts/ParentLayout";
 import { StudentLayout } from "../layouts/StudentLayout";
 import { TeacherLayout } from "../layouts/TeacherLayout";
+import { AssignmentDetailsPage, AssignmentSubmissionPage, AssignmentsPage } from "../modules/assignments";
 import { CourseDetailsPage } from "../modules/courses/CourseDetailsPage";
 import { CourseListPage } from "../modules/courses/CourseListPage";
 import { DashboardPage } from "../modules/dashboard/DashboardPage";
@@ -22,6 +23,9 @@ export const router = createBrowserRouter([
     element: <AdminLayout />,
     children: [
       { index: true, element: <DashboardPage /> },
+      { path: "assignments", element: <AssignmentsPage /> },
+      { path: "assignments/:assignmentId", element: <AssignmentDetailsPage /> },
+      { path: "assignments/:assignmentId/submit", element: <AssignmentSubmissionPage /> },
       { path: "courses", element: <CourseListPage /> },
       { path: "courses/:courseId", element: <CourseDetailsPage /> },
       { path: "courses/:courseId/lessons/:lessonId", element: <LessonPage /> },

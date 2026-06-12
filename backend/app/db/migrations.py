@@ -1,4 +1,5 @@
 from app.models import Role, User
+from app.modules.assignments.models import Assignment, AssignmentSubmission, AssignmentSubmissionStatus, SubmissionFile
 from app.modules.chapters.models import Chapter
 from app.modules.courses.models import Course
 from app.modules.lesson_blocks.models import BlockType, LessonBlock
@@ -21,6 +22,9 @@ from app.modules.videos.models import Video, VideoProvider
 
 __all__ = [
     "BlockType",
+    "Assignment",
+    "AssignmentSubmission",
+    "AssignmentSubmissionStatus",
     "Chapter",
     "Course",
     "Lesson",
@@ -42,6 +46,7 @@ __all__ = [
     "QuizResult",
     "QuestionResult",
     "Role",
+    "SubmissionFile",
     "User",
     "Video",
     "VideoProvider",
