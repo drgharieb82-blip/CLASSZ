@@ -14,6 +14,7 @@ from app.modules.progress import models as progress_models  # noqa: F401
 from app.modules.quiz_attempts import models as quiz_attempt_models  # noqa: F401
 from app.modules.question_bank import models as question_bank_models  # noqa: F401
 from app.modules.quizzes import models as quiz_models  # noqa: F401
+from app.modules.results import models as result_models  # noqa: F401
 from app.modules.videos import models as video_models  # noqa: F401
 
 config = context.config

@@ -13,6 +13,7 @@ import { LessonPage } from "../modules/lessons/LessonPage";
 import { QuestionBankPage, QuestionDetailsPage } from "../modules/question-bank";
 import { QuizPlayerPage } from "../modules/quiz-player";
 import { QuizBuilderPage } from "../modules/quizzes";
+import { QuizResultsPage } from "../modules/results";
 import { VideoPlayerPage } from "../modules/videos";
 
 export const router = createBrowserRouter([
@@ -31,6 +32,7 @@ export const router = createBrowserRouter([
       { path: "question-bank/:questionId", element: <QuestionDetailsPage /> },
       { path: "quizzes/builder", element: <QuizBuilderPage /> },
       { path: "quizzes/:quizId/player", element: <QuizPlayerPage /> },
+      { path: "quiz-attempts/:attemptId/results", element: <QuizResultsPage /> },
       { path: "people", element: <ModulePlaceholderPage name="People" /> },
       { path: "learning", element: <ModulePlaceholderPage name="Learning" /> },
     ],

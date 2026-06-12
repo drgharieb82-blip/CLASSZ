@@ -11,6 +11,7 @@ from app.modules.progress.router import router as progress_router
 from app.modules.quiz_attempts.router import router as quiz_attempts_router
 from app.modules.question_bank.router import router as question_bank_router
 from app.modules.quizzes.router import router as quizzes_router
+from app.modules.results.router import router as results_router
 from app.modules.videos.router import router as videos_router
 
 
@@ -45,6 +46,7 @@ def create_app() -> FastAPI:
     app.include_router(question_bank_router, prefix=settings.api_prefix)
     app.include_router(quizzes_router, prefix=settings.api_prefix)
     app.include_router(quiz_attempts_router, prefix=settings.api_prefix)
+    app.include_router(results_router, prefix=settings.api_prefix)
 
     return app
 
