@@ -1,4 +1,4 @@
-import { CheckSquare, ListChecks } from "lucide-react";
+import { CheckSquare, Images, ListChecks } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import type { Question } from "./api";
@@ -33,6 +33,12 @@ export function QuestionCard({ question }: { question: Question }) {
             <ListChecks className="mr-1.5 inline h-4 w-4 text-[#A855F7]" aria-hidden="true" />
             {question.choices.length} choices
           </span>
+          {question.media.length > 0 && (
+            <span className="col-span-2 rounded-2xl border border-white/10 bg-[#111827]/72 px-3 py-2 text-[#CBD5E1]">
+              <Images className="mr-1.5 inline h-4 w-4 text-[#10B981]" aria-hidden="true" />
+              {question.media.length} media item(s)
+            </span>
+          )}
         </div>
       </div>
     </Link>

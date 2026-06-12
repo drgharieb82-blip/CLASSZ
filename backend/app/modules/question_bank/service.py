@@ -5,8 +5,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.db import migrations  # noqa: F401
-from app.modules.question_bank.models import Question, QuestionChoice, QuestionTag
-from app.modules.question_bank.schemas import QuestionChoiceCreate, QuestionCreate, QuestionTagAttach
+from app.modules.question_bank.models import Question, QuestionChoice, QuestionMedia, QuestionTag
+from app.modules.question_bank.schemas import (
+    QuestionChoiceCreate,
+    QuestionCreate,
+    QuestionMediaCreate,
+    QuestionTagAttach,
+)
 
 
 def _question_options():
@@ -88,3 +93,43 @@ async def add_question_tag(
 
     await session.commit()
     return await get_question(session, question_id)
+
+
+async def list_question_media(session: AsyncSession, question_id: UUID) -> list[QuestionMedia] | None:
+    question = await get_question(session, question_id)
+    if question is None:
+        return None
+
+    result = await session.execute(
+        select(QuestionMedia)
+        .where(QuestionMedia.question_id == question_id)
+        .order_by(QuestionMedia.position.asc(), QuestionMedia.created_at.asc())
+    )
+    return list(result.scalars().all())
+
+
+async def add_question_media(
+    session: AsyncSession,
+    question_id: UUID,
+    payload: QuestionMediaCreate,
+) -> QuestionMedia | None:
+    question = await get_question(session, question_id)
+    if question is None:
+        return None
+
+    media = QuestionMedia(question_id=question_id, **payload.model_dump())
+    session.add(media)
+    await session.commit()
+    await session.refresh(media)
+    return media
+
+
+async def delete_question_media(session: AsyncSession, media_id: UUID) -> bool:
+    result = await session.execute(select(QuestionMedia).where(QuestionMedia.id == media_id))
+    media = result.scalar_one_or_none()
+    if media is None:
+        return False
+
+    await session.delete(media)
+    await session.commit()
+    return True

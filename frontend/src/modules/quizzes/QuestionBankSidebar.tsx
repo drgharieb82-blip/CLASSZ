@@ -1,4 +1,4 @@
-import { Plus, Search } from "lucide-react";
+import { Images, Plus, Search } from "lucide-react";
 
 import { formatQuestionType, type Difficulty, type Question, type QuestionType } from "../question-bank/api";
 import { QuestionDifficultyBadge } from "../question-bank/QuestionDifficultyBadge";
@@ -83,7 +83,15 @@ export function QuestionBankSidebar({
               </div>
               <h3 className="mt-3 font-[Poppins] text-base font-semibold leading-snug text-[#F8FAFC]">{question.title}</h3>
               <div className="mt-4 flex items-center justify-between gap-3">
-                <span className="text-sm font-semibold text-[#CBD5E1]">{question.points} pts</span>
+                <span className="text-sm font-semibold text-[#CBD5E1]">
+                  {question.points} pts
+                  {question.media.length > 0 && (
+                    <span className="ml-2 inline-flex items-center gap-1 text-[#10B981]">
+                      <Images className="h-3.5 w-3.5" aria-hidden="true" />
+                      {question.media.length}
+                    </span>
+                  )}
+                </span>
                 <button
                   type="button"
                   disabled={isSelected}

@@ -25,6 +25,13 @@ class Difficulty(str, enum.Enum):
     HARD = "HARD"
 
 
+class MediaType(str, enum.Enum):
+    IMAGE = "IMAGE"
+    PDF = "PDF"
+    AUDIO = "AUDIO"
+    VIDEO = "VIDEO"
+
+
 question_tag_links = Table(
     "question_tag_links",
     Base.metadata,
@@ -110,6 +117,7 @@ class Question(Base):
         "QuestionMedia",
         back_populates="question",
         cascade="all, delete-orphan",
+        order_by="QuestionMedia.position",
     )
     tags: Mapped[list["QuestionTag"]] = relationship(
         "QuestionTag",
@@ -146,6 +154,21 @@ class QuestionMedia(Base):
         index=True,
     )
     file_url: Mapped[str] = mapped_column(String(500), nullable=False)
-    media_type: Mapped[str] = mapped_column(String(80), nullable=False)
+    media_type: Mapped[MediaType] = mapped_column(
+        Enum(
+            MediaType,
+            name="question_media_type_enum",
+            values_callable=lambda media_types: [media_type.value for media_type in media_types],
+        ),
+        nullable=False,
+        index=True,
+    )
+    caption: Mapped[str | None] = mapped_column(String(240), nullable=True)
+    position: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
 
     question: Mapped["Question"] = relationship("Question", back_populates="media")

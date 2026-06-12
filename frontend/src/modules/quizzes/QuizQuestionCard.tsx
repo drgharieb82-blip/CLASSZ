@@ -1,4 +1,4 @@
-import { GripVertical, X } from "lucide-react";
+import { GripVertical, Images, X } from "lucide-react";
 
 import type { Question } from "../question-bank/api";
 import { QuestionDifficultyBadge } from "../question-bank/QuestionDifficultyBadge";
@@ -24,7 +24,15 @@ export function QuizQuestionCard({ question, position, onRemove }: QuizQuestionC
             <QuestionDifficultyBadge difficulty={question.difficulty} />
           </div>
           <h3 className="font-[Poppins] text-base font-semibold leading-snug text-[#F8FAFC]">{question.title}</h3>
-          <p className="mt-2 text-sm text-[#94A3B8]">{question.points} points</p>
+          <p className="mt-2 text-sm text-[#94A3B8]">
+            {question.points} points
+            {question.media.length > 0 && (
+              <span className="ml-3 inline-flex items-center gap-1 text-[#10B981]">
+                <Images className="h-3.5 w-3.5" aria-hidden="true" />
+                {question.media.length} media
+              </span>
+            )}
+          </p>
         </div>
         <button
           type="button"

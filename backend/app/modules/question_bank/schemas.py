@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 
-from app.modules.question_bank.models import Difficulty, QuestionType
+from app.modules.question_bank.models import Difficulty, MediaType, QuestionType
 
 
 class QuestionCategoryRead(BaseModel):
@@ -40,7 +40,10 @@ class QuestionMediaRead(BaseModel):
     id: UUID
     question_id: UUID
     file_url: str
-    media_type: str
+    media_type: MediaType
+    caption: str | None = None
+    position: int
+    created_at: datetime
 
 
 class QuestionCreate(BaseModel):
@@ -79,7 +82,9 @@ class QuestionTagAttach(BaseModel):
 
 class QuestionMediaCreate(BaseModel):
     file_url: HttpUrl
-    media_type: str = Field(min_length=1, max_length=80)
+    media_type: MediaType
+    caption: str | None = Field(default=None, max_length=240)
+    position: int = Field(default=0, ge=0)
 
     @field_validator("file_url")
     @classmethod

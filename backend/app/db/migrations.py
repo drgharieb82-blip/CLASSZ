@@ -6,6 +6,7 @@ from app.modules.lessons.models import Lesson
 from app.modules.progress.models import LessonProgress
 from app.modules.question_bank.models import (
     Difficulty,
+    MediaType,
     Question,
     QuestionCategory,
     QuestionChoice,
@@ -25,6 +26,7 @@ __all__ = [
     "LessonBlock",
     "LessonProgress",
     "Difficulty",
+    "MediaType",
     "Question",
     "QuestionCategory",
     "QuestionChoice",

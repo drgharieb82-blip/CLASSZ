@@ -9,6 +9,8 @@ from app.modules.question_bank.schemas import (
     QuestionChoiceCreate,
     QuestionChoiceRead,
     QuestionCreate,
+    QuestionMediaCreate,
+    QuestionMediaRead,
     QuestionRead,
     QuestionTagAttach,
 )
@@ -65,3 +67,38 @@ async def add_question_tag(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Question or tag not found")
 
     return question
+
+
+@router.get("/{question_id}/media", response_model=list[QuestionMediaRead])
+async def list_question_media(
+    question_id: UUID,
+    session: AsyncSession = Depends(get_db_session),
+) -> list[QuestionMediaRead]:
+    media = await service.list_question_media(session, question_id)
+    if media is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Question not found")
+
+    return media
+
+
+@router.post("/{question_id}/media", response_model=QuestionMediaRead, status_code=status.HTTP_201_CREATED)
+async def add_question_media(
+    question_id: UUID,
+    payload: QuestionMediaCreate,
+    session: AsyncSession = Depends(get_db_session),
+) -> QuestionMediaRead:
+    media = await service.add_question_media(session, question_id, payload)
+    if media is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Question not found")
+
+    return media
+
+
+@router.delete("/media/{media_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_question_media(
+    media_id: UUID,
+    session: AsyncSession = Depends(get_db_session),
+) -> None:
+    deleted = await service.delete_question_media(session, media_id)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Question media not found")

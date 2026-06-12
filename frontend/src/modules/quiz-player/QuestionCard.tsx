@@ -1,5 +1,6 @@
 import type { Question } from "../question-bank/api";
 import { QuestionDifficultyBadge } from "../question-bank/QuestionDifficultyBadge";
+import { QuestionMediaGallery } from "../question-bank/QuestionMediaGallery";
 import { QuestionTypeBadge } from "../question-bank/QuestionTypeBadge";
 import { AnswerPanel } from "./AnswerPanel";
 
@@ -21,6 +22,11 @@ export function QuestionCard({ question, answerValue, onAnswerChange }: Question
       </div>
       <h2 className="mt-5 font-[Poppins] text-2xl font-semibold leading-snug text-[#F8FAFC]">{question.title}</h2>
       {question.explanation && <p className="mt-3 text-sm leading-6 text-[#94A3B8]">{question.explanation}</p>}
+      {question.media.length > 0 && (
+        <div className="mt-5">
+          <QuestionMediaGallery media={question.media} compact />
+        </div>
+      )}
       <AnswerPanel question={question} value={answerValue} onChange={onAnswerChange} />
     </section>
   );
