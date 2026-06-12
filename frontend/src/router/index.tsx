@@ -16,6 +16,7 @@ import { QuestionBankPage, QuestionDetailsPage } from "../modules/question-bank"
 import { QuizPlayerPage } from "../modules/quiz-player";
 import { QuizBuilderPage } from "../modules/quizzes";
 import { QuizResultsPage } from "../modules/results";
+import { TeacherDashboardPage } from "../modules/teacher-dashboard";
 import { VideoPlayerPage } from "../modules/videos";
 
 export const router = createBrowserRouter([
@@ -47,7 +48,7 @@ export const router = createBrowserRouter([
   {
     path: "/teacher",
     element: <TeacherLayout />,
-    children: [{ index: true, element: <DashboardPage /> }],
+    children: [{ index: true, element: <TeacherDashboardPage /> }],
   },
   {
     path: "/student",
