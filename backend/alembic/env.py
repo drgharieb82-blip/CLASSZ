@@ -10,6 +10,7 @@ from app.modules.chapters import models as chapter_models  # noqa: F401
 from app.modules.courses import models as course_models  # noqa: F401
 from app.modules.lesson_blocks import models as lesson_block_models  # noqa: F401
 from app.modules.lessons import models as lesson_models  # noqa: F401
+from app.modules.videos import models as video_models  # noqa: F401
 
 config = context.config
 

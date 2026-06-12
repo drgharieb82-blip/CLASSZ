@@ -46,3 +46,9 @@ class LessonBlock(Base):
     )
 
     lesson: Mapped["Lesson"] = relationship("Lesson", back_populates="blocks")
+    video: Mapped["Video | None"] = relationship(
+        "Video",
+        back_populates="lesson_block",
+        cascade="all, delete-orphan",
+        uselist=False,
+    )

@@ -10,6 +10,7 @@ import { DashboardPage } from "../modules/dashboard/DashboardPage";
 import { ModulePlaceholderPage } from "../modules/dashboard/ModulePlaceholderPage";
 import { LessonBuilderPage } from "../modules/lesson-builder";
 import { LessonPage } from "../modules/lessons/LessonPage";
+import { VideoPlayerPage } from "../modules/videos";
 
 export const router = createBrowserRouter([
   {
@@ -22,6 +23,7 @@ export const router = createBrowserRouter([
       { path: "courses/:courseId/lessons/:lessonId", element: <LessonPage /> },
       { path: "courses/:courseId/lessons/:lessonId/builder", element: <LessonBuilderPage /> },
       { path: "lesson-builder", element: <LessonBuilderPage /> },
+      { path: "videos/:videoId", element: <VideoPlayerPage /> },
       { path: "people", element: <ModulePlaceholderPage name="People" /> },
       { path: "learning", element: <ModulePlaceholderPage name="Learning" /> },
     ],

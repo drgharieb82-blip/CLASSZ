@@ -7,6 +7,7 @@ from app.modules.auth.router import router as auth_router
 from app.modules.courses.router import router as courses_router
 from app.modules.lesson_blocks.router import router as lesson_blocks_router
 from app.modules.lessons.router import router as lessons_router
+from app.modules.videos.router import router as videos_router
 
 
 def create_app() -> FastAPI:
@@ -35,6 +36,7 @@ def create_app() -> FastAPI:
     app.include_router(chapters_router, prefix=settings.api_prefix)
     app.include_router(lessons_router, prefix=settings.api_prefix)
     app.include_router(lesson_blocks_router, prefix=settings.api_prefix)
+    app.include_router(videos_router, prefix=settings.api_prefix)
 
     return app
 
