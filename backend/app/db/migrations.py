@@ -13,6 +13,7 @@ from app.modules.question_bank.models import (
     QuestionTag,
     QuestionType,
 )
+from app.modules.quizzes.models import Quiz, QuizQuestion
 from app.modules.videos.models import Video, VideoProvider
 
 __all__ = [
@@ -29,6 +30,8 @@ __all__ = [
     "QuestionMedia",
     "QuestionTag",
     "QuestionType",
+    "Quiz",
+    "QuizQuestion",
     "Role",
     "User",
     "Video",
