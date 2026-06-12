@@ -42,7 +42,7 @@ export function LessonContent({ lesson }: { lesson?: Lesson }) {
         sortedBlocks.map((block) => <BlockRenderer key={block.id} block={block} />)
       ) : (
         <div className="rounded-[20px] border border-dashed border-white/15 bg-white/[0.06] p-8 text-[#94A3B8]">
-          Blocks will appear here as TEXT, PDF, or IMAGE content is added.
+          Blocks will appear here as TEXT, PDF, IMAGE, or ATTACHMENT content is added.
         </div>
       )}
     </section>

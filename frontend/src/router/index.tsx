@@ -8,6 +8,7 @@ import { CourseDetailsPage } from "../modules/courses/CourseDetailsPage";
 import { CourseListPage } from "../modules/courses/CourseListPage";
 import { DashboardPage } from "../modules/dashboard/DashboardPage";
 import { ModulePlaceholderPage } from "../modules/dashboard/ModulePlaceholderPage";
+import { LessonBuilderPage } from "../modules/lesson-builder";
 import { LessonPage } from "../modules/lessons/LessonPage";
 
 export const router = createBrowserRouter([
@@ -19,6 +20,8 @@ export const router = createBrowserRouter([
       { path: "courses", element: <CourseListPage /> },
       { path: "courses/:courseId", element: <CourseDetailsPage /> },
       { path: "courses/:courseId/lessons/:lessonId", element: <LessonPage /> },
+      { path: "courses/:courseId/lessons/:lessonId/builder", element: <LessonBuilderPage /> },
+      { path: "lesson-builder", element: <LessonBuilderPage /> },
       { path: "people", element: <ModulePlaceholderPage name="People" /> },
       { path: "learning", element: <ModulePlaceholderPage name="Learning" /> },
     ],
