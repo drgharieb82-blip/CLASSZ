@@ -14,6 +14,8 @@ class LessonBase(BaseModel):
     is_free_preview: bool = False
     release_at: datetime | None = None
     hide_at: datetime | None = None
+    requires_previous_completion: bool = False
+    is_locked: bool = False
 
 
 class LessonCreate(LessonBase):

@@ -1,13 +1,16 @@
 import { Clock, GraduationCap, Play, Radio } from "lucide-react";
 
 import { formatDuration, type Video } from "./api";
+import { ProgressBar } from "./ProgressBar";
 
 type VideoPlayerCardProps = {
   video: Video;
   teacherName: string;
+  progressPercent: number;
+  isLocked?: boolean;
 };
 
-export function VideoPlayerCard({ video, teacherName }: VideoPlayerCardProps) {
+export function VideoPlayerCard({ video, teacherName, progressPercent, isLocked = false }: VideoPlayerCardProps) {
   return (
     <article className="overflow-hidden rounded-[20px] border border-white/10 bg-[#111827] shadow-[0_24px_70px_rgba(0,0,0,0.30)]">
       <div className="relative aspect-video bg-[#0F172A]">
@@ -19,6 +22,7 @@ export function VideoPlayerCard({ video, teacherName }: VideoPlayerCardProps) {
         <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A]/92 via-[#0F172A]/18 to-transparent" />
         <button
           type="button"
+          disabled={isLocked}
           className="absolute left-1/2 top-1/2 inline-flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/[0.12] text-white shadow-[0_24px_70px_rgba(0,0,0,0.30)] backdrop-blur transition hover:scale-105 hover:bg-white/[0.18] focus:outline-none focus:ring-2 focus:ring-[#A855F7]"
           aria-label="Preview video placeholder"
         >
@@ -44,7 +48,10 @@ export function VideoPlayerCard({ video, teacherName }: VideoPlayerCardProps) {
               {teacherName}
             </p>
           </div>
-          <p className="max-w-sm text-sm leading-6 text-[#CBD5E1]">Streaming integration coming in Phase 2B.2</p>
+          <div className="w-full max-w-sm space-y-3">
+            <p className="text-sm leading-6 text-[#CBD5E1]">Streaming integration coming in Phase 2B.2</p>
+            <ProgressBar value={progressPercent} label="Progress" />
+          </div>
         </div>
       </div>
     </article>

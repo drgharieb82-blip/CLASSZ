@@ -25,6 +25,8 @@ class Lesson(Base):
     is_free_preview: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     release_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     hide_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    requires_previous_completion: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    is_locked: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -37,4 +39,9 @@ class Lesson(Base):
         back_populates="lesson",
         cascade="all, delete-orphan",
         order_by="LessonBlock.position",
+    )
+    progress_records: Mapped[list["LessonProgress"]] = relationship(
+        "LessonProgress",
+        back_populates="lesson",
+        cascade="all, delete-orphan",
     )

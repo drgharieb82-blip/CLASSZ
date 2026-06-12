@@ -18,6 +18,8 @@ export type Lesson = {
   is_free_preview: boolean;
   release_at: string | null;
   hide_at: string | null;
+  requires_previous_completion: boolean;
+  is_locked: boolean;
   created_at: string;
   blocks?: LessonBlock[];
 };

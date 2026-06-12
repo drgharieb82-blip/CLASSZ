@@ -3,6 +3,18 @@ from app.modules.chapters.models import Chapter
 from app.modules.courses.models import Course
 from app.modules.lesson_blocks.models import BlockType, LessonBlock
 from app.modules.lessons.models import Lesson
+from app.modules.progress.models import LessonProgress
 from app.modules.videos.models import Video, VideoProvider
 
-__all__ = ["BlockType", "Chapter", "Course", "Lesson", "LessonBlock", "Role", "User", "Video", "VideoProvider"]
+__all__ = [
+    "BlockType",
+    "Chapter",
+    "Course",
+    "Lesson",
+    "LessonBlock",
+    "LessonProgress",
+    "Role",
+    "User",
+    "Video",
+    "VideoProvider",
+]

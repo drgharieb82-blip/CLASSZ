@@ -1,5 +1,7 @@
-import { Check, ChevronDown, Circle, Lock, Play } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useState } from "react";
+
+import { LessonStatusBadge } from "./LessonStatusBadge";
 
 export type LessonStatus = "completed" | "current" | "locked";
 
@@ -12,24 +14,6 @@ export type ChapterItem = {
     status: LessonStatus;
   }>;
 };
-
-const statusConfig = {
-  completed: {
-    icon: Check,
-    label: "Completed",
-    className: "text-[#10B981]",
-  },
-  current: {
-    icon: Play,
-    label: "Current lesson",
-    className: "text-[#A855F7]",
-  },
-  locked: {
-    icon: Lock,
-    label: "Locked",
-    className: "text-[#94A3B8]",
-  },
-} satisfies Record<LessonStatus, { icon: typeof Circle; label: string; className: string }>;
 
 export function ChapterAccordion({ chapters }: { chapters: ChapterItem[] }) {
   const [openChapterIds, setOpenChapterIds] = useState(() => new Set(chapters.map((chapter) => chapter.id)));
@@ -82,24 +66,18 @@ export function ChapterAccordion({ chapters }: { chapters: ChapterItem[] }) {
 
             {isOpen && (
               <div className="border-t border-white/10 px-3 py-3">
-                {chapter.lessons.map((lesson) => {
-                  const config = statusConfig[lesson.status];
-                  const StatusIcon = config.icon;
-
-                  return (
-                    <div
-                      key={lesson.id}
-                      className={[
-                        "flex items-center gap-3 rounded-2xl px-3 py-3 text-sm",
-                        lesson.status === "current" ? "bg-[#7C3AED]/18 text-[#F8FAFC]" : "text-[#CBD5E1]",
-                      ].join(" ")}
-                    >
-                      <StatusIcon className={["h-4 w-4 shrink-0", config.className].join(" ")} aria-hidden="true" />
-                      <span className="min-w-0 flex-1 truncate">{lesson.title}</span>
-                      <span className="sr-only">{config.label}</span>
-                    </div>
-                  );
-                })}
+                {chapter.lessons.map((lesson) => (
+                  <div
+                    key={lesson.id}
+                    className={[
+                      "flex items-center gap-3 rounded-2xl px-3 py-3 text-sm",
+                      lesson.status === "current" ? "bg-[#7C3AED]/18 text-[#F8FAFC]" : "text-[#CBD5E1]",
+                    ].join(" ")}
+                  >
+                    <span className="min-w-0 flex-1 truncate">{lesson.title}</span>
+                    <LessonStatusBadge status={lesson.status} />
+                  </div>
+                ))}
               </div>
             )}
           </section>

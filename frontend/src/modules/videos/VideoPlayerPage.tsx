@@ -6,6 +6,7 @@ import { Link, useParams } from "react-router-dom";
 import type { LessonBlock } from "../courses/api";
 import { BlockRenderer } from "../lesson-builder";
 import { BottomNavigation } from "./BottomNavigation";
+import { ContinueLearningCard } from "./ContinueLearningCard";
 import { CourseSidebar } from "./CourseSidebar";
 import { getVideo } from "./api";
 import { type ChapterItem } from "./ChapterAccordion";
@@ -15,6 +16,13 @@ import { VideoPlayerCard } from "./VideoPlayerCard";
 const courseTitle = "Modern Learning Systems";
 const teacherName = "Dr. Sarah Morgan";
 const progressPercent = 42;
+const lessonProgressPercent = 58;
+const lastPositionSeconds = 312;
+const currentLessonAccess = {
+  release_at: null as string | null,
+  requires_previous_completion: true,
+  previous_lesson_completed: true,
+};
 
 const chapters: ChapterItem[] = [
   {
@@ -115,6 +123,8 @@ export function VideoPlayerPage() {
     );
   }
 
+  const lockedReason = getLessonLockedReason(currentLessonAccess);
+
   return (
     <div className="min-h-screen bg-[#0F172A] text-[#F8FAFC]">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
@@ -130,7 +140,22 @@ export function VideoPlayerPage() {
         <CourseSidebar courseTitle={courseTitle} progressPercent={progressPercent} chapters={chapters} />
 
         <main className="min-w-0 space-y-6">
-          <VideoPlayerCard video={video} teacherName={teacherName} />
+          {lockedReason ? (
+            <LessonLockedMessage reason={lockedReason} />
+          ) : (
+            <ContinueLearningCard
+              title={video.title}
+              progressPercent={lessonProgressPercent}
+              lastPositionSeconds={lastPositionSeconds}
+            />
+          )}
+
+          <VideoPlayerCard
+            video={video}
+            teacherName={teacherName}
+            progressPercent={lessonProgressPercent}
+            isLocked={Boolean(lockedReason)}
+          />
 
           <section className="rounded-[20px] border border-white/10 bg-[#111827]/88 shadow-[0_16px_40px_rgba(0,0,0,0.20)]">
             <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
@@ -174,6 +199,39 @@ export function VideoPlayerPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+function getLessonLockedReason({
+  release_at,
+  requires_previous_completion,
+  previous_lesson_completed,
+}: {
+  release_at: string | null;
+  requires_previous_completion: boolean;
+  previous_lesson_completed: boolean;
+}): string | null {
+  if (release_at && new Date(release_at).getTime() > Date.now()) {
+    return `This lesson unlocks on ${new Date(release_at).toLocaleDateString()}.`;
+  }
+
+  if (requires_previous_completion && !previous_lesson_completed) {
+    return "Complete the previous lesson to unlock this lesson.";
+  }
+
+  return null;
+}
+
+function LessonLockedMessage({ reason }: { reason: string }) {
+  return (
+    <section className="rounded-[20px] border border-[#F59E0B]/30 bg-[#F59E0B]/10 p-5 text-[#FDE68A] shadow-[0_16px_40px_rgba(0,0,0,0.20)]">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#F59E0B]">Lesson locked</p>
+          <p className="mt-2 text-sm leading-6 text-[#FDE68A]">{reason}</p>
+        </div>
+      </div>
+    </section>
   );
 }
 
