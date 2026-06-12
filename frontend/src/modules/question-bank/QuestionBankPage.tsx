@@ -1,12 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircle, BookOpenCheck } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { listQuestions, type Difficulty, type QuestionType } from "./api";
 import { QuestionCard } from "./QuestionCard";
 import { QuestionFilters } from "./QuestionFilters";
 
 export function QuestionBankPage() {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [difficulty, setDifficulty] = useState<Difficulty | "ALL">("ALL");
   const [questionType, setQuestionType] = useState<QuestionType | "ALL">("ALL");
@@ -39,7 +41,7 @@ export function QuestionBankPage() {
     return (
       <section className="rounded-[20px] border border-[#EF4444]/30 bg-[#EF4444]/10 p-8 text-[#FCA5A5]">
         <AlertCircle className="mb-3 h-6 w-6" aria-hidden="true" />
-        Question bank could not be loaded.
+        {t("questionBank.loadError")}
       </section>
     );
   }
@@ -51,17 +53,17 @@ export function QuestionBankPage() {
           <div>
             <p className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] text-[#A855F7]">
               <BookOpenCheck className="h-4 w-4" aria-hidden="true" />
-              Question bank
+              {t("questionBank.title")}
             </p>
             <h1 className="mt-3 font-[Poppins] text-4xl font-semibold text-[#F8FAFC]">
-              Assessment foundation
+              {t("questionBank.heading")}
             </h1>
             <p className="mt-3 max-w-2xl leading-7 text-[#CBD5E1]">
-              Browse reusable questions by type, difficulty, points, choices, category, and tags.
+              {t("questionBank.description")}
             </p>
           </div>
           <span className="rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-2 text-sm font-semibold text-[#CBD5E1]">
-            {filteredQuestions.length} questions
+            {t("common.questions", { count: filteredQuestions.length })}
           </span>
         </div>
       </section>
@@ -83,7 +85,7 @@ export function QuestionBankPage() {
         </section>
       ) : (
         <section className="rounded-[20px] border border-dashed border-white/15 bg-white/[0.06] p-8 text-center text-[#94A3B8]">
-          No questions match the current filters.
+          {t("questionBank.empty")}
         </section>
       )}
     </div>

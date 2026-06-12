@@ -1,10 +1,13 @@
 import { FileText } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 import type { Assignment } from "./api";
 import { DeadlineBadge } from "./DeadlineBadge";
 
 export function AssignmentCard({ assignment }: { assignment: Assignment }) {
+  const { t } = useTranslation();
+
   return (
     <Link
       to={`/assignments/${assignment.id}`}
@@ -14,17 +17,17 @@ export function AssignmentCard({ assignment }: { assignment: Assignment }) {
         <div>
           <p className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-[#A855F7]">
             <FileText className="h-4 w-4" aria-hidden="true" />
-            Assignment
+            {t("assignments.assignment")}
           </p>
           <h2 className="mt-3 font-[Poppins] text-xl font-semibold text-[#F8FAFC]">{assignment.title}</h2>
           <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#94A3B8]">
-            {assignment.description ?? "Submission instructions will appear here."}
+            {assignment.description ?? t("assignments.instructionsPlaceholder")}
           </p>
         </div>
         <div className="flex flex-wrap gap-2 lg:justify-end">
           <DeadlineBadge deadlineAt={assignment.deadline_at} />
           <span className="rounded-2xl border border-white/10 bg-[#111827]/72 px-3 py-2 text-sm font-semibold text-[#CBD5E1]">
-            {assignment.max_points} pts
+            {t("common.points", { count: assignment.max_points })}
           </span>
         </div>
       </div>

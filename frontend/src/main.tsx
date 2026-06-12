@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
 
 import { AppProviders } from "./app/AppProviders";
+import "./i18n";
 import { router } from "./router";
 import "./styles.css";
 

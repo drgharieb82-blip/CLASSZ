@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircle, MessageCircle, NotebookPen, Paperclip, type LucideIcon } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 
 import type { LessonBlock } from "../courses/api";
@@ -46,6 +47,7 @@ const chapters: ChapterItem[] = [
 
 export function VideoPlayerPage() {
   const { videoId } = useParams();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<PlayerTab>("overview");
 
   const { data: video, isError, isLoading } = useQuery({
@@ -118,21 +120,21 @@ export function VideoPlayerPage() {
     return (
       <section className="rounded-[20px] border border-[#EF4444]/30 bg-[#EF4444]/10 p-8 text-[#FCA5A5]">
         <AlertCircle className="mb-3 h-6 w-6" aria-hidden="true" />
-        Video could not be loaded.
+        {t("video.loadError")}
       </section>
     );
   }
 
-  const lockedReason = getLessonLockedReason(currentLessonAccess);
+  const lockedReason = getLessonLockedReason(currentLessonAccess, t);
 
   return (
     <div className="min-h-screen bg-[#0F172A] text-[#F8FAFC]">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <Link to="/courses" className="text-sm font-semibold text-[#A855F7] transition hover:text-[#C084FC]">
-          Back to courses
+          {t("video.backToCourses")}
         </Link>
         <span className="rounded-2xl border border-white/10 bg-white/[0.06] px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#94A3B8]">
-          Streaming integration coming in Phase 2B.2
+          {t("video.streamingComing")}
         </span>
       </div>
 
@@ -172,24 +174,24 @@ export function VideoPlayerPage() {
               {activeTab === "notes" && (
                 <EmptyTab
                   icon={NotebookPen}
-                  title="Notes"
-                  description="Personal lesson notes will sit here when the notes workflow arrives."
+                  title={t("video.notes")}
+                  description={t("video.notesDescription")}
                 />
               )}
 
               {activeTab === "attachments" && (
                 <EmptyTab
                   icon={Paperclip}
-                  title="Attachments"
-                  description="Downloadable lesson files will collect here without changing the video API."
+                  title={t("video.attachments")}
+                  description={t("video.attachmentsDescription")}
                 />
               )}
 
               {activeTab === "discussion" && (
                 <EmptyTab
                   icon={MessageCircle}
-                  title="Discussion"
-                  description="Class conversation will appear here in a later collaboration phase."
+                  title={t("video.discussion")}
+                  description={t("video.discussionDescription")}
                 />
               )}
             </div>
@@ -210,24 +212,26 @@ function getLessonLockedReason({
   release_at: string | null;
   requires_previous_completion: boolean;
   previous_lesson_completed: boolean;
-}): string | null {
+}, t: (key: string, options?: Record<string, unknown>) => string): string | null {
   if (release_at && new Date(release_at).getTime() > Date.now()) {
-    return `This lesson unlocks on ${new Date(release_at).toLocaleDateString()}.`;
+    return t("video.unlocksOn", { date: new Date(release_at).toLocaleDateString() });
   }
 
   if (requires_previous_completion && !previous_lesson_completed) {
-    return "Complete the previous lesson to unlock this lesson.";
+    return t("video.completePrevious");
   }
 
   return null;
 }
 
 function LessonLockedMessage({ reason }: { reason: string }) {
+  const { t } = useTranslation();
+
   return (
     <section className="rounded-[20px] border border-[#F59E0B]/30 bg-[#F59E0B]/10 p-5 text-[#FDE68A] shadow-[0_16px_40px_rgba(0,0,0,0.20)]">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#F59E0B]">Lesson locked</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#F59E0B]">{t("video.lessonLocked")}</p>
           <p className="mt-2 text-sm leading-6 text-[#FDE68A]">{reason}</p>
         </div>
       </div>

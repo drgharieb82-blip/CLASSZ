@@ -1,4 +1,5 @@
 import { AlertCircle, CheckCircle2, Clock3, XCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { QuestionMediaGallery } from "../question-bank/QuestionMediaGallery";
 import type { QuizAnswer } from "../quiz-player/api";
@@ -10,6 +11,7 @@ type QuestionReviewCardProps = {
 };
 
 export function QuestionReviewCard({ questionResult, answer }: QuestionReviewCardProps) {
+  const { t } = useTranslation();
   const question = questionResult.question;
   if (!question) {
     return null;
@@ -17,17 +19,17 @@ export function QuestionReviewCard({ questionResult, answer }: QuestionReviewCar
 
   const StatusIcon = questionResult.pending_manual_review ? Clock3 : questionResult.is_correct ? CheckCircle2 : XCircle;
   const statusText = questionResult.pending_manual_review
-    ? "Pending essay review"
+    ? t("results.pendingEssay")
     : questionResult.is_correct
-      ? "Correct"
-      : "Wrong";
+      ? t("results.correct")
+      : t("results.wrong");
 
   return (
     <article className="rounded-[20px] border border-white/10 bg-white/[0.06] p-5 shadow-[0_16px_40px_rgba(0,0,0,0.20)]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#94A3B8]">
-            {questionResult.earned_points}/{questionResult.max_points} points
+            {t("results.points", { earned: questionResult.earned_points, max: questionResult.max_points })}
           </p>
           <h2 className="mt-2 font-[Poppins] text-xl font-semibold leading-snug text-[#F8FAFC]">{question.title}</h2>
         </div>
@@ -54,12 +56,12 @@ export function QuestionReviewCard({ questionResult, answer }: QuestionReviewCar
 
       <div className="mt-5 grid gap-4 lg:grid-cols-2">
         <section className="rounded-2xl border border-white/10 bg-[#111827]/72 p-4">
-          <h3 className="text-sm font-semibold text-[#F8FAFC]">Student answer</h3>
-          <p className="mt-2 text-sm leading-6 text-[#CBD5E1]">{formatStudentAnswer(answer)}</p>
+          <h3 className="text-sm font-semibold text-[#F8FAFC]">{t("results.studentAnswer")}</h3>
+          <p className="mt-2 text-sm leading-6 text-[#CBD5E1]">{formatStudentAnswer(answer, t("results.noAnswer"))}</p>
         </section>
         <section className="rounded-2xl border border-white/10 bg-[#111827]/72 p-4">
-          <h3 className="text-sm font-semibold text-[#F8FAFC]">Correct answer</h3>
-          <p className="mt-2 text-sm leading-6 text-[#CBD5E1]">{formatCorrectAnswer(question)}</p>
+          <h3 className="text-sm font-semibold text-[#F8FAFC]">{t("results.correctAnswer")}</h3>
+          <p className="mt-2 text-sm leading-6 text-[#CBD5E1]">{formatCorrectAnswer(question, t("results.manualReviewRequired"), t("results.noCorrectAnswer"))}</p>
         </section>
       </div>
 
@@ -73,13 +75,13 @@ export function QuestionReviewCard({ questionResult, answer }: QuestionReviewCar
   );
 }
 
-function formatStudentAnswer(answer?: QuizAnswer): string {
+function formatStudentAnswer(answer: QuizAnswer | undefined, emptyMessage: string): string {
   if (!answer) {
-    return "No answer submitted.";
+    return emptyMessage;
   }
 
   if (typeof answer.answer_data.text === "string") {
-    return answer.answer_data.text || "No answer submitted.";
+    return answer.answer_data.text || emptyMessage;
   }
 
   if (typeof answer.answer_data.choice_id === "string") {
@@ -93,10 +95,10 @@ function formatStudentAnswer(answer?: QuizAnswer): string {
   return JSON.stringify(answer.answer_data);
 }
 
-function formatCorrectAnswer(question: NonNullable<QuestionResult["question"]>): string {
+function formatCorrectAnswer(question: NonNullable<QuestionResult["question"]>, manualReviewMessage: string, emptyMessage: string): string {
   const correctChoices = question.choices.filter((choice) => choice.is_correct);
   if (question.question_type === "ESSAY") {
-    return "Manual review required.";
+    return manualReviewMessage;
   }
 
   if (correctChoices.length > 0) {
@@ -110,5 +112,5 @@ function formatCorrectAnswer(question: NonNullable<QuestionResult["question"]>):
       .join(", ");
   }
 
-  return "No correct answer configured.";
+  return emptyMessage;
 }

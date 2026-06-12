@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AlertCircle, ArrowLeft, ArrowRight } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 
 import { AttemptSecurityBadge, FocusWarningBanner, QuizTimer, SecurityNoticeCard } from "../anti-cheating";
@@ -16,6 +17,7 @@ const demoStudentId = "00000000-0000-0000-0000-000000000001";
 
 export function QuizPlayerPage() {
   const { quizId } = useParams();
+  const { t } = useTranslation();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, Record<string, unknown>>>({});
   const [isSubmitOpen, setIsSubmitOpen] = useState(false);
@@ -145,7 +147,7 @@ export function QuizPlayerPage() {
     return (
       <section className="rounded-[20px] border border-[#EF4444]/30 bg-[#EF4444]/10 p-8 text-[#FCA5A5]">
         <AlertCircle className="mb-3 h-6 w-6" aria-hidden="true" />
-        Quiz could not be loaded.
+        {t("quizPlayer.loadError")}
       </section>
     );
   }
@@ -153,7 +155,7 @@ export function QuizPlayerPage() {
   if (!currentQuestion) {
     return (
       <section className="rounded-[20px] border border-dashed border-white/15 bg-white/[0.06] p-8 text-center text-[#94A3B8]">
-        This quiz does not have playable questions yet.
+        {t("quizPlayer.noQuestions")}
       </section>
     );
   }
@@ -175,7 +177,7 @@ export function QuizPlayerPage() {
     <div className="space-y-6">
       {isSubmitted && (
         <section className="rounded-[20px] border border-[#10B981]/30 bg-[#10B981]/10 p-5 text-[#6EE7B7]">
-          Quiz submitted. Results and grading are reserved for later phases.
+          {t("quizPlayer.submitted")}
         </section>
       )}
 
@@ -214,7 +216,7 @@ export function QuizPlayerPage() {
               className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-3 text-sm font-semibold text-[#CBD5E1] transition hover:bg-white/[0.10] disabled:cursor-not-allowed disabled:opacity-45"
             >
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-              Previous
+              {t("quizPlayer.previous")}
             </button>
             <button
               type="button"
@@ -222,7 +224,7 @@ export function QuizPlayerPage() {
               disabled={isSubmitted}
               className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-br from-[#7C3AED] via-[#9333EA] to-[#A855F7] px-6 py-3 text-sm font-semibold text-white shadow-[0_16px_40px_rgba(124,58,237,0.28)] transition hover:brightness-110"
             >
-              Submit Quiz
+              {t("quizPlayer.submitQuiz")}
             </button>
             <button
               type="button"
@@ -230,7 +232,7 @@ export function QuizPlayerPage() {
               onClick={() => setCurrentQuestionIndex((index) => Math.min(totalQuestions - 1, index + 1))}
               className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-3 text-sm font-semibold text-[#CBD5E1] transition hover:bg-white/[0.10] disabled:cursor-not-allowed disabled:opacity-45"
             >
-              Next
+              {t("quizPlayer.next")}
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </button>
           </nav>

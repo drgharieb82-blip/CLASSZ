@@ -1,4 +1,5 @@
 import { CheckSquare, Images, ListChecks } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 import type { Question } from "./api";
@@ -6,6 +7,8 @@ import { QuestionDifficultyBadge } from "./QuestionDifficultyBadge";
 import { QuestionTypeBadge } from "./QuestionTypeBadge";
 
 export function QuestionCard({ question }: { question: Question }) {
+  const { t } = useTranslation();
+
   return (
     <Link
       to={`/question-bank/${question.id}`}
@@ -21,13 +24,13 @@ export function QuestionCard({ question }: { question: Question }) {
             {question.title}
           </h2>
           <p className="mt-2 text-sm text-[#94A3B8]">
-            {question.category?.name ?? "Uncategorized"}
+            {question.category?.name ?? t("common.empty")}
           </p>
         </div>
         <div className="grid grid-cols-2 gap-2 text-sm sm:min-w-48">
           <span className="rounded-2xl border border-white/10 bg-[#111827]/72 px-3 py-2 text-[#CBD5E1]">
             <CheckSquare className="mr-1.5 inline h-4 w-4 text-[#3B82F6]" aria-hidden="true" />
-            {question.points} pts
+            {t("common.points", { count: question.points })}
           </span>
           <span className="rounded-2xl border border-white/10 bg-[#111827]/72 px-3 py-2 text-[#CBD5E1]">
             <ListChecks className="mr-1.5 inline h-4 w-4 text-[#A855F7]" aria-hidden="true" />
@@ -36,7 +39,7 @@ export function QuestionCard({ question }: { question: Question }) {
           {question.media.length > 0 && (
             <span className="col-span-2 rounded-2xl border border-white/10 bg-[#111827]/72 px-3 py-2 text-[#CBD5E1]">
               <Images className="mr-1.5 inline h-4 w-4 text-[#10B981]" aria-hidden="true" />
-              {question.media.length} media item(s)
+              {question.media.length}
             </span>
           )}
         </div>

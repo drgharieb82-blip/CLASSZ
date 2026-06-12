@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertCircle, ArrowLeft } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { FeedbackEditor } from "./FeedbackEditor";
@@ -12,6 +13,7 @@ const demoGraderId = "00000000-0000-0000-0000-000000000002";
 
 export function GradeDetailsPage() {
   const { gradeId } = useParams();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -48,7 +50,7 @@ export function GradeDetailsPage() {
     return (
       <section className="rounded-[20px] border border-[#EF4444]/30 bg-[#EF4444]/10 p-8 text-[#FCA5A5]">
         <AlertCircle className="mb-3 h-6 w-6" aria-hidden="true" />
-        Manual grading task could not be loaded.
+        {t("grading.detailsLoadError")}
       </section>
     );
   }
@@ -59,18 +61,18 @@ export function GradeDetailsPage() {
     <div className="space-y-6">
       <Link to="/grading" className="inline-flex items-center gap-2 text-sm font-semibold text-[#A855F7] transition hover:text-[#C084FC]">
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        Back to grading queue
+        {t("grading.backToQueue")}
       </Link>
 
       <section className="rounded-[20px] border border-white/10 bg-[#111827]/88 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.30)]">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#A855F7]">Teacher review</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#A855F7]">{t("grading.teacherReview")}</p>
             <h1 className="mt-3 font-[Poppins] text-3xl font-semibold text-[#F8FAFC]">
-              {grade.assignment_submission ? "Assignment grading" : "Essay grading"}
+              {grade.assignment_submission ? t("grading.assignmentGrading") : t("grading.essayGrading")}
             </h1>
             <p className="mt-3 max-w-2xl leading-7 text-[#CBD5E1]">
-              Review the student work, assign a score, and leave feedback or return it for revision.
+              {t("grading.detailsDescription")}
             </p>
           </div>
           <GradeStatusBadge status={grade.status} />

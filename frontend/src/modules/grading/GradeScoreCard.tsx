@@ -1,15 +1,17 @@
 import { Award, ClipboardCheck } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import type { ManualGrade } from "./api";
 
 export function GradeScoreCard({ grade }: { grade: ManualGrade }) {
+  const { t } = useTranslation();
   const percentage = grade.max_score > 0 ? Math.round((grade.score / grade.max_score) * 100) : 0;
 
   return (
     <section className="rounded-[20px] border border-white/10 bg-[#111827]/88 p-5 shadow-[0_16px_40px_rgba(0,0,0,0.20)]">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#94A3B8]">Score</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#94A3B8]">{t("results.score")}</p>
           <p className="mt-2 font-[Poppins] text-3xl font-semibold text-[#F8FAFC]">
             {grade.score}/{grade.max_score}
           </p>
@@ -25,7 +27,7 @@ export function GradeScoreCard({ grade }: { grade: ManualGrade }) {
 
       <p className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#CBD5E1]">
         <ClipboardCheck className="h-4 w-4 text-[#A855F7]" aria-hidden="true" />
-        {percentage}% recorded
+        {t("grading.recorded", { percentage })}
       </p>
     </section>
   );

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircle } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { listQuestions, type Difficulty, type Question, type QuestionType } from "../question-bank/api";
 import { QuestionBankSidebar } from "./QuestionBankSidebar";
@@ -9,6 +10,7 @@ import { QuizQuestionCard } from "./QuizQuestionCard";
 import { QuizSettingsCard } from "./QuizSettingsCard";
 
 export function QuizBuilderPage() {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [difficulty, setDifficulty] = useState<Difficulty | "ALL">("ALL");
   const [questionType, setQuestionType] = useState<QuestionType | "ALL">("ALL");
@@ -59,7 +61,7 @@ export function QuizBuilderPage() {
     return (
       <section className="rounded-[20px] border border-[#EF4444]/30 bg-[#EF4444]/10 p-8 text-[#FCA5A5]">
         <AlertCircle className="mb-3 h-6 w-6" aria-hidden="true" />
-        Question bank could not be loaded for the quiz builder.
+        {t("questionBank.builderLoadError")}
       </section>
     );
   }
@@ -80,14 +82,14 @@ export function QuizBuilderPage() {
 
       <main className="min-w-0 space-y-6">
         <QuizHeaderCard
-          title="Untitled quiz draft"
-          description="Build a reusable assessment by pulling questions from the question bank. Player, results, and grading workflows are intentionally reserved for later phases."
+          title={t("quizBuilder.draftTitle")}
+          description={t("quizBuilder.draftDescription")}
           questionCount={selectedQuestions.length}
           totalPoints={totalPoints}
         />
 
         <section className="rounded-[20px] border border-white/10 bg-[#111827]/88 p-5 shadow-[0_16px_40px_rgba(0,0,0,0.20)]">
-          <h2 className="font-[Poppins] text-xl font-semibold text-[#F8FAFC]">Selected questions</h2>
+          <h2 className="font-[Poppins] text-xl font-semibold text-[#F8FAFC]">{t("quizBuilder.selectedQuestions")}</h2>
           <div className="mt-5 space-y-3">
             {selectedQuestions.length > 0 ? (
               selectedQuestions.map((question, index) => (
@@ -95,7 +97,7 @@ export function QuizBuilderPage() {
               ))
             ) : (
               <div className="rounded-[20px] border border-dashed border-white/15 bg-white/[0.06] p-8 text-center text-[#94A3B8]">
-                Add questions from the bank to shape this quiz draft.
+                {t("quizBuilder.emptySelected")}
               </div>
             )}
           </div>

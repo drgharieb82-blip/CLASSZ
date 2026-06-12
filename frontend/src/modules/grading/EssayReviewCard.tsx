@@ -1,9 +1,11 @@
 import { FileText, MessageSquareText, Paperclip } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { QuestionMediaGallery } from "../question-bank/QuestionMediaGallery";
 import type { ManualGrade } from "./api";
 
 export function EssayReviewCard({ grade }: { grade: ManualGrade }) {
+  const { t } = useTranslation();
   const question = grade.question_result?.question;
   const assignment = grade.assignment_submission;
 
@@ -12,12 +14,12 @@ export function EssayReviewCard({ grade }: { grade: ManualGrade }) {
       <section className="rounded-[20px] border border-white/10 bg-[#111827]/88 p-5 shadow-[0_16px_40px_rgba(0,0,0,0.20)]">
         <div className="flex items-center gap-3">
           <FileText className="h-5 w-5 text-[#A855F7]" aria-hidden="true" />
-          <h2 className="font-[Poppins] text-xl font-semibold text-[#F8FAFC]">Assignment submission</h2>
+          <h2 className="font-[Poppins] text-xl font-semibold text-[#F8FAFC]">{t("grading.assignmentSubmission")}</h2>
         </div>
         <div className="mt-5 rounded-[20px] border border-white/10 bg-white/[0.06] p-4">
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#94A3B8]">Student answer</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#94A3B8]">{t("assignments.studentAnswer")}</p>
           <p className="mt-3 whitespace-pre-wrap leading-7 text-[#CBD5E1]">
-            {assignment.submission_text || "No written answer was submitted."}
+            {assignment.submission_text || t("grading.noWrittenAnswer")}
           </p>
         </div>
 
@@ -44,9 +46,9 @@ export function EssayReviewCard({ grade }: { grade: ManualGrade }) {
     <section className="rounded-[20px] border border-white/10 bg-[#111827]/88 p-5 shadow-[0_16px_40px_rgba(0,0,0,0.20)]">
       <div className="flex items-center gap-3">
         <MessageSquareText className="h-5 w-5 text-[#A855F7]" aria-hidden="true" />
-        <h2 className="font-[Poppins] text-xl font-semibold text-[#F8FAFC]">Essay review</h2>
+        <h2 className="font-[Poppins] text-xl font-semibold text-[#F8FAFC]">{t("grading.essayReview")}</h2>
       </div>
-      <h3 className="mt-5 font-[Poppins] text-2xl font-semibold text-[#F8FAFC]">{question?.title ?? "Essay question"}</h3>
+      <h3 className="mt-5 font-[Poppins] text-2xl font-semibold text-[#F8FAFC]">{question?.title ?? t("grading.essayQuestion")}</h3>
 
       {question?.media && question.media.length > 0 && (
         <div className="mt-5">
@@ -55,13 +57,13 @@ export function EssayReviewCard({ grade }: { grade: ManualGrade }) {
       )}
 
       <div className="mt-5 rounded-[20px] border border-white/10 bg-white/[0.06] p-4">
-        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#94A3B8]">Student answer</p>
-        <p className="mt-3 whitespace-pre-wrap leading-7 text-[#CBD5E1]">{formatAnswer(grade.student_answer)}</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#94A3B8]">{t("assignments.studentAnswer")}</p>
+        <p className="mt-3 whitespace-pre-wrap leading-7 text-[#CBD5E1]">{formatAnswer(grade.student_answer, t("grading.noSubmittedAnswer"))}</p>
       </div>
 
       {question?.explanation && (
         <div className="mt-4 rounded-[20px] border border-[#3B82F6]/30 bg-[#3B82F6]/10 p-4">
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#93C5FD]">Reference explanation</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#93C5FD]">{t("grading.referenceExplanation")}</p>
           <p className="mt-3 leading-7 text-[#BFDBFE]">{question.explanation}</p>
         </div>
       )}
@@ -69,9 +71,9 @@ export function EssayReviewCard({ grade }: { grade: ManualGrade }) {
   );
 }
 
-function formatAnswer(answer: Record<string, unknown> | null | undefined): string {
+function formatAnswer(answer: Record<string, unknown> | null | undefined, emptyMessage: string): string {
   if (!answer) {
-    return "No answer was submitted.";
+    return emptyMessage;
   }
 
   const essay = answer.essay ?? answer.text ?? answer.answer;

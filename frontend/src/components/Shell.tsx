@@ -1,6 +1,8 @@
 import { BookOpen, GraduationCap, LayoutDashboard, Moon, Search, Sun, Users } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { NavLink, Outlet } from "react-router-dom";
 
+import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useThemeStore } from "../store/themeStore";
 
 type ShellProps = {
@@ -10,16 +12,19 @@ type ShellProps = {
 };
 
 const navItems = [
-  { label: "Dashboard", href: "/", icon: LayoutDashboard },
-  { label: "Courses", href: "/courses", icon: BookOpen },
-  { label: "People", href: "/people", icon: Users },
-  { label: "Learning", href: "/learning", icon: GraduationCap },
+  { labelKey: "nav.dashboard", href: "/", icon: LayoutDashboard },
+  { labelKey: "nav.courses", href: "/courses", icon: BookOpen },
+  { labelKey: "nav.people", href: "/people", icon: Users },
+  { labelKey: "nav.learning", href: "/learning", icon: GraduationCap },
 ];
 
 export function Shell({ title, roleLabel, accent }: ShellProps) {
+  const { t } = useTranslation();
   const theme = useThemeStore((state) => state.theme);
   const toggleTheme = useThemeStore((state) => state.toggleTheme);
   const ThemeIcon = theme === "dark" ? Sun : Moon;
+  const resolvedTitle = title.startsWith("i18n:") ? t(title.slice(5)) : title;
+  const resolvedRoleLabel = roleLabel.startsWith("i18n:") ? t(roleLabel.slice(5)) : roleLabel;
 
   return (
     <div className="min-h-screen bg-ink-50 text-ink-950 transition-colors dark:bg-ink-950 dark:text-ink-50">
@@ -31,9 +36,9 @@ export function Shell({ title, roleLabel, accent }: ShellProps) {
               CZ
             </div>
             <div>
-              <p className="font-display text-2xl leading-none">CLASSZ</p>
+              <p className="font-display text-2xl leading-none">{t("app.brand")}</p>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-600 dark:text-ink-300">
-                Education OS
+                {t("app.subtitle")}
               </p>
             </div>
           </div>
@@ -53,7 +58,7 @@ export function Shell({ title, roleLabel, accent }: ShellProps) {
                 }
               >
                 <item.icon className="h-4 w-4" aria-hidden="true" />
-                {item.label}
+                {t(item.labelKey)}
               </NavLink>
             ))}
           </nav>
@@ -64,21 +69,22 @@ export function Shell({ title, roleLabel, accent }: ShellProps) {
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-ink-600 dark:text-ink-300">
-                  {roleLabel}
+                  {resolvedRoleLabel}
                 </p>
-                <h1 className="font-display text-3xl leading-tight sm:text-4xl">{title}</h1>
+                <h1 className="font-display text-3xl leading-tight sm:text-4xl">{resolvedTitle}</h1>
               </div>
 
               <div className="flex items-center gap-2">
                 <div className="hidden items-center gap-2 rounded-md border border-ink-950/10 bg-white/70 px-3 py-2 dark:border-white/10 dark:bg-white/6 md:flex">
                   <Search className="h-4 w-4 text-ink-600 dark:text-ink-300" aria-hidden="true" />
-                  <span className="text-sm text-ink-600 dark:text-ink-300">Search workspace</span>
+                  <span className="text-sm text-ink-600 dark:text-ink-300">{t("app.searchWorkspace")}</span>
                 </div>
+                <LanguageSwitcher />
                 <button
                   type="button"
                   onClick={toggleTheme}
                   className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-ink-950/10 bg-white/76 text-ink-950 transition hover:bg-white dark:border-white/10 dark:bg-white/8 dark:text-chalk dark:hover:bg-white/12"
-                  aria-label="Toggle theme"
+                  aria-label={t("app.toggleTheme")}
                 >
                   <ThemeIcon className="h-5 w-5" aria-hidden="true" />
                 </button>

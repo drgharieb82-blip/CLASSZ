@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { getTeacherDashboardSummary, getTeacherPendingTasks, getTeacherRecentActivity } from "./api";
 import { GradingWorkloadCard } from "./GradingWorkloadCard";
@@ -10,6 +11,7 @@ import { TeacherQuickActions } from "./TeacherQuickActions";
 import { TeacherStatsGrid } from "./TeacherStatsGrid";
 
 export function TeacherDashboardPage() {
+  const { t } = useTranslation();
   const summaryQuery = useQuery({ queryKey: ["teacher-dashboard", "summary"], queryFn: getTeacherDashboardSummary });
   const tasksQuery = useQuery({ queryKey: ["teacher-dashboard", "pending-tasks"], queryFn: getTeacherPendingTasks });
   const activityQuery = useQuery({ queryKey: ["teacher-dashboard", "recent-activity"], queryFn: getTeacherRecentActivity });
@@ -25,7 +27,7 @@ export function TeacherDashboardPage() {
     return (
       <section className="rounded-[20px] border border-[#EF4444]/30 bg-[#EF4444]/10 p-8 text-[#FCA5A5]">
         <AlertCircle className="mb-3 h-6 w-6" aria-hidden="true" />
-        Teacher dashboard could not be loaded.
+        {t("teacherDashboard.loadError")}
       </section>
     );
   }

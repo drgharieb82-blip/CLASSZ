@@ -1,4 +1,5 @@
 import { AlertTriangle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type FocusWarningBannerProps = {
   focusLossCount: number;
@@ -6,6 +7,8 @@ type FocusWarningBannerProps = {
 };
 
 export function FocusWarningBanner({ focusLossCount, isVisible }: FocusWarningBannerProps) {
+  const { t } = useTranslation();
+
   if (!isVisible && focusLossCount === 0) {
     return null;
   }
@@ -15,12 +18,12 @@ export function FocusWarningBanner({ focusLossCount, isVisible }: FocusWarningBa
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <p className="inline-flex items-center gap-2 font-semibold">
           <AlertTriangle className="h-5 w-5" aria-hidden="true" />
-          {isVisible ? "Quiz focus was lost" : "Focus warnings recorded"}
+          {isVisible ? t("antiCheating.focusLost") : t("antiCheating.focusRecorded")}
         </p>
-        <span className="text-sm font-semibold">{focusLossCount} focus events</span>
+        <span className="text-sm font-semibold">{t("antiCheating.focusCount", { count: focusLossCount })}</span>
       </div>
       <p className="mt-2 text-sm leading-6 text-[#FDE68A]">
-        Return to the quiz window and continue. This foundation records the event for teacher review.
+        {t("antiCheating.focusDescription")}
       </p>
     </section>
   );

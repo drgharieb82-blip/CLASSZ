@@ -1,5 +1,6 @@
 import { Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { SubmissionFileDraft } from "./api";
 
@@ -9,6 +10,7 @@ type FileUploaderProps = {
 };
 
 export function FileUploader({ files, onFilesChange }: FileUploaderProps) {
+  const { t } = useTranslation();
   const [fileUrl, setFileUrl] = useState("");
   const [fileName, setFileName] = useState("");
   const [fileSize, setFileSize] = useState(0);
@@ -26,18 +28,18 @@ export function FileUploader({ files, onFilesChange }: FileUploaderProps) {
 
   return (
     <section className="rounded-[20px] border border-white/10 bg-white/[0.06] p-5 shadow-[0_16px_40px_rgba(0,0,0,0.20)]">
-      <h2 className="font-[Poppins] text-xl font-semibold text-[#F8FAFC]">Files</h2>
+      <h2 className="font-[Poppins] text-xl font-semibold text-[#F8FAFC]">{t("assignments.files")}</h2>
       <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_180px_120px_auto]">
         <input
           value={fileUrl}
           onChange={(event) => setFileUrl(event.target.value)}
-          placeholder="File URL"
+          placeholder={t("assignments.fileUrl")}
           className="rounded-2xl border border-white/10 bg-[#0F172A] px-4 py-3 text-sm text-[#F8FAFC] outline-none focus:ring-2 focus:ring-[#A855F7]"
         />
         <input
           value={fileName}
           onChange={(event) => setFileName(event.target.value)}
-          placeholder="File name"
+          placeholder={t("assignments.fileName")}
           className="rounded-2xl border border-white/10 bg-[#0F172A] px-4 py-3 text-sm text-[#F8FAFC] outline-none focus:ring-2 focus:ring-[#A855F7]"
         />
         <input
@@ -45,7 +47,7 @@ export function FileUploader({ files, onFilesChange }: FileUploaderProps) {
           min={0}
           value={fileSize}
           onChange={(event) => setFileSize(Number(event.target.value))}
-          placeholder="Size"
+          placeholder={t("assignments.size")}
           className="rounded-2xl border border-white/10 bg-[#0F172A] px-4 py-3 text-sm text-[#F8FAFC] outline-none focus:ring-2 focus:ring-[#A855F7]"
         />
         <button
@@ -54,7 +56,7 @@ export function FileUploader({ files, onFilesChange }: FileUploaderProps) {
           className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-[#7C3AED] via-[#9333EA] to-[#A855F7] px-4 py-3 text-sm font-semibold text-white shadow-[0_16px_40px_rgba(124,58,237,0.28)]"
         >
           <Plus className="h-4 w-4" aria-hidden="true" />
-          Add
+          {t("common.add")}
         </button>
       </div>
 
@@ -67,7 +69,7 @@ export function FileUploader({ files, onFilesChange }: FileUploaderProps) {
                 type="button"
                 onClick={() => onFilesChange(files.filter((_, fileIndex) => fileIndex !== index))}
                 className="text-[#FCA5A5]"
-                aria-label="Remove file"
+                aria-label={t("assignments.removeFile")}
               >
                 <Trash2 className="h-4 w-4" aria-hidden="true" />
               </button>

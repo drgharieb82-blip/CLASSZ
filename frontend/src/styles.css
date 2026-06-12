@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700&family=Tajawal:wght@400;500;700;800&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -21,6 +21,15 @@ body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
+}
+
+:root[data-language="ar"] {
+  font-family: "Tajawal", "Cairo", ui-sans-serif, system-ui, sans-serif;
+}
+
+:root[data-language="ar"] .font-\[Poppins\],
+:root[data-language="ar"] .font-display {
+  font-family: "Cairo", "Tajawal", ui-sans-serif, system-ui, sans-serif;
 }
 
 * {
