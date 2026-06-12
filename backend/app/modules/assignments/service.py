@@ -1,0 +1,1 @@
+"""Assignment domain service boundary."""

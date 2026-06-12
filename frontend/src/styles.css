@@ -1,0 +1,37 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,650&family=Manrope:wght@400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  background: #f7f8f3;
+  color: #101613;
+}
+
+:root.dark {
+  color-scheme: dark;
+  background: #101613;
+  color: #f7f8f3;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+@layer utilities {
+  .surface-grid {
+    background-image:
+      linear-gradient(rgba(75, 90, 77, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(75, 90, 77, 0.08) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+}

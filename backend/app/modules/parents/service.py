@@ -1,0 +1,1 @@
+"""Parent domain service boundary."""

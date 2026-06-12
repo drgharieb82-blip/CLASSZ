@@ -1,0 +1,1 @@
+"""Course domain service boundary."""
