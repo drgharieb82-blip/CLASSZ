@@ -8,6 +8,7 @@ from app.modules.courses.router import router as courses_router
 from app.modules.lesson_blocks.router import router as lesson_blocks_router
 from app.modules.lessons.router import router as lessons_router
 from app.modules.progress.router import router as progress_router
+from app.modules.question_bank.router import router as question_bank_router
 from app.modules.videos.router import router as videos_router
 
 
@@ -39,6 +40,7 @@ def create_app() -> FastAPI:
     app.include_router(lesson_blocks_router, prefix=settings.api_prefix)
     app.include_router(videos_router, prefix=settings.api_prefix)
     app.include_router(progress_router, prefix=settings.api_prefix)
+    app.include_router(question_bank_router, prefix=settings.api_prefix)
 
     return app
 
