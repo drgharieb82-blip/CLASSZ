@@ -1,4 +1,5 @@
 from app.models import Role, User
+from app.modules.anti_cheating.models import AntiCheatingEvent, AntiCheatingEventType
 from app.modules.assignments.models import Assignment, AssignmentSubmission, AssignmentSubmissionStatus, SubmissionFile
 from app.modules.chapters.models import Chapter
 from app.modules.courses.models import Course
@@ -26,6 +27,8 @@ __all__ = [
     "Assignment",
     "AssignmentSubmission",
     "AssignmentSubmissionStatus",
+    "AntiCheatingEvent",
+    "AntiCheatingEventType",
     "Chapter",
     "Course",
     "GradeStatus",

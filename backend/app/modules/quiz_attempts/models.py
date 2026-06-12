@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import DateTime, Enum, ForeignKey, JSON, UniqueConstraint, func
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, JSON, String, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -37,6 +37,14 @@ class QuizAttempt(Base):
         nullable=False,
     )
     submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
+    time_limit_minutes: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    attempt_number: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    ip_address: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    user_agent: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    device_fingerprint: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    focus_loss_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    is_auto_submitted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     status: Mapped[QuizAttemptStatus] = mapped_column(
         Enum(
             QuizAttemptStatus,

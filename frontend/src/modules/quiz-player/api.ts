@@ -15,6 +15,14 @@ export type QuizAttempt = {
   student_id: string;
   started_at: string;
   submitted_at: string | null;
+  expires_at: string | null;
+  time_limit_minutes: number | null;
+  attempt_number: number;
+  ip_address: string | null;
+  user_agent: string | null;
+  device_fingerprint: string | null;
+  focus_loss_count: number;
+  is_auto_submitted: boolean;
   status: QuizAttemptStatus;
   quiz?: Quiz | null;
   answers: QuizAnswer[];
@@ -39,7 +47,14 @@ export function getQuizAttempt(attemptId: string): Promise<QuizAttempt> {
   return request<QuizAttempt>(`/api/quiz-attempts/${attemptId}`);
 }
 
-export function startQuizAttempt(payload: { quiz_id: string; student_id: string }): Promise<QuizAttempt> {
+export function startQuizAttempt(payload: {
+  quiz_id: string;
+  student_id: string;
+  time_limit_minutes?: number;
+  ip_address?: string | null;
+  user_agent?: string | null;
+  device_fingerprint?: string | null;
+}): Promise<QuizAttempt> {
   return request<QuizAttempt>("/api/quiz-attempts/start", {
     method: "POST",
     body: JSON.stringify(payload),

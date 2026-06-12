@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
+from app.modules.anti_cheating.router import router as anti_cheating_router
 from app.modules.assignments.router import router as assignments_router
 from app.modules.chapters.router import router as chapters_router
 from app.modules.auth.router import router as auth_router
@@ -39,6 +40,7 @@ def create_app() -> FastAPI:
         return {"status": "ok", "service": settings.project_name}
 
     app.include_router(auth_router, prefix=settings.api_prefix)
+    app.include_router(anti_cheating_router, prefix=settings.api_prefix)
     app.include_router(courses_router, prefix=settings.api_prefix)
     app.include_router(chapters_router, prefix=settings.api_prefix)
     app.include_router(assignments_router, prefix=settings.api_prefix)
