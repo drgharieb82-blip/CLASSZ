@@ -11,6 +11,7 @@ from app.modules.courses import models as course_models  # noqa: F401
 from app.modules.lesson_blocks import models as lesson_block_models  # noqa: F401
 from app.modules.lessons import models as lesson_models  # noqa: F401
 from app.modules.progress import models as progress_models  # noqa: F401
+from app.modules.quiz_attempts import models as quiz_attempt_models  # noqa: F401
 from app.modules.question_bank import models as question_bank_models  # noqa: F401
 from app.modules.quizzes import models as quiz_models  # noqa: F401
 from app.modules.videos import models as video_models  # noqa: F401
