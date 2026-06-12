@@ -9,6 +9,7 @@ from app.models import user  # noqa: F401
 from app.modules.assignments import models as assignment_models  # noqa: F401
 from app.modules.chapters import models as chapter_models  # noqa: F401
 from app.modules.courses import models as course_models  # noqa: F401
+from app.modules.grading import models as grading_models  # noqa: F401
 from app.modules.lesson_blocks import models as lesson_block_models  # noqa: F401
 from app.modules.lessons import models as lesson_models  # noqa: F401
 from app.modules.progress import models as progress_models  # noqa: F401

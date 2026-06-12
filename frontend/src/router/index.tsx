@@ -9,6 +9,7 @@ import { CourseDetailsPage } from "../modules/courses/CourseDetailsPage";
 import { CourseListPage } from "../modules/courses/CourseListPage";
 import { DashboardPage } from "../modules/dashboard/DashboardPage";
 import { ModulePlaceholderPage } from "../modules/dashboard/ModulePlaceholderPage";
+import { GradeDetailsPage, ManualGradingPage } from "../modules/grading";
 import { LessonBuilderPage } from "../modules/lesson-builder";
 import { LessonPage } from "../modules/lessons/LessonPage";
 import { QuestionBankPage, QuestionDetailsPage } from "../modules/question-bank";
@@ -26,6 +27,8 @@ export const router = createBrowserRouter([
       { path: "assignments", element: <AssignmentsPage /> },
       { path: "assignments/:assignmentId", element: <AssignmentDetailsPage /> },
       { path: "assignments/:assignmentId/submit", element: <AssignmentSubmissionPage /> },
+      { path: "grading", element: <ManualGradingPage /> },
+      { path: "grading/:gradeId", element: <GradeDetailsPage /> },
       { path: "courses", element: <CourseListPage /> },
       { path: "courses/:courseId", element: <CourseDetailsPage /> },
       { path: "courses/:courseId/lessons/:lessonId", element: <LessonPage /> },

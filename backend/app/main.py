@@ -6,6 +6,7 @@ from app.modules.assignments.router import router as assignments_router
 from app.modules.chapters.router import router as chapters_router
 from app.modules.auth.router import router as auth_router
 from app.modules.courses.router import router as courses_router
+from app.modules.grading.router import router as grading_router
 from app.modules.lesson_blocks.router import router as lesson_blocks_router
 from app.modules.lessons.router import router as lessons_router
 from app.modules.progress.router import router as progress_router
@@ -49,6 +50,7 @@ def create_app() -> FastAPI:
     app.include_router(quizzes_router, prefix=settings.api_prefix)
     app.include_router(quiz_attempts_router, prefix=settings.api_prefix)
     app.include_router(results_router, prefix=settings.api_prefix)
+    app.include_router(grading_router, prefix=settings.api_prefix)
 
     return app
 

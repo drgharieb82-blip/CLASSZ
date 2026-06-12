@@ -2,6 +2,7 @@ from app.models import Role, User
 from app.modules.assignments.models import Assignment, AssignmentSubmission, AssignmentSubmissionStatus, SubmissionFile
 from app.modules.chapters.models import Chapter
 from app.modules.courses.models import Course
+from app.modules.grading.models import GradeStatus, ManualGrade
 from app.modules.lesson_blocks.models import BlockType, LessonBlock
 from app.modules.lessons.models import Lesson
 from app.modules.progress.models import LessonProgress
@@ -27,6 +28,7 @@ __all__ = [
     "AssignmentSubmissionStatus",
     "Chapter",
     "Course",
+    "GradeStatus",
     "Lesson",
     "LessonBlock",
     "LessonProgress",
@@ -46,6 +48,7 @@ __all__ = [
     "QuizResult",
     "QuestionResult",
     "Role",
+    "ManualGrade",
     "SubmissionFile",
     "User",
     "Video",
