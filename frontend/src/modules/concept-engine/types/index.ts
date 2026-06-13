@@ -92,3 +92,15 @@ export type RevisionStep = {
   difficulty: "easy" | "medium" | "hard";
   actionType: "review_lesson" | "watch_video" | "read_notes" | "solve_questions" | "retake_quiz";
 };
+
+export type LearningPathStep = {
+  id: string;
+  order: number;
+  conceptId: string;
+  conceptName: string;
+  stepType: "learn" | "review" | "watch_video" | "read_notes" | "solve_questions" | "retake_quiz" | "mastery_check";
+  priority: "critical" | "high" | "medium" | "low";
+  estimatedTime: string;
+  reason: string;
+  recommendedAction: string;
+};

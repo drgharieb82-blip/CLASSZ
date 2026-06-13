@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { conceptEngineService } from "../services";
-import type { AffectedConcept, Concept, ConceptDependency, ConceptGraphNode, ConceptWeakness, RevisionStep, StudentConceptState } from "../types";
+import type { AffectedConcept, Concept, ConceptDependency, ConceptGraphNode, ConceptWeakness, LearningPathStep, RevisionStep, StudentConceptState } from "../types";
 
 type ConceptEngineState = {
   concepts: Concept[];
@@ -11,6 +11,7 @@ type ConceptEngineState = {
   weakConcepts: ConceptWeakness[];
   affectedConcepts: AffectedConcept[];
   revisionPlan: RevisionStep[];
+  learningPath: LearningPathStep[];
   loading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
@@ -27,6 +28,7 @@ export function useConceptEngine(): ConceptEngineState {
   const [weakConcepts, setWeakConcepts] = useState<ConceptWeakness[]>([]);
   const [affectedConcepts, setAffectedConcepts] = useState<AffectedConcept[]>([]);
   const [revisionPlan, setRevisionPlan] = useState<RevisionStep[]>([]);
+  const [learningPath, setLearningPath] = useState<LearningPathStep[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,7 +37,7 @@ export function useConceptEngine(): ConceptEngineState {
     setError(null);
 
     try {
-      const [conceptList, dependencyList, conceptStates, weakConceptList, graph, affectedConceptList, revisionSteps] = await Promise.all([
+      const [conceptList, dependencyList, conceptStates, weakConceptList, graph, affectedConceptList, revisionSteps, pathSteps] = await Promise.all([
         conceptEngineService.getConcepts(),
         conceptEngineService.getConceptDependencies(),
         conceptEngineService.getStudentConceptStates(),
@@ -43,6 +45,7 @@ export function useConceptEngine(): ConceptEngineState {
         conceptEngineService.getConceptGraph(),
         conceptEngineService.getAffectedConcepts(),
         conceptEngineService.getRevisionPlan(),
+        conceptEngineService.getLearningPath(),
       ]);
 
       setConcepts(conceptList);
@@ -52,6 +55,7 @@ export function useConceptEngine(): ConceptEngineState {
       setConceptGraph(graph);
       setAffectedConcepts(affectedConceptList);
       setRevisionPlan(revisionSteps);
+      setLearningPath(pathSteps);
     } catch {
       setError(fallbackError);
     } finally {
@@ -71,6 +75,7 @@ export function useConceptEngine(): ConceptEngineState {
     weakConcepts,
     affectedConcepts,
     revisionPlan,
+    learningPath,
     loading,
     error,
     refresh: loadConceptEngine,

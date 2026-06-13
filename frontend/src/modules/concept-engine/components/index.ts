@@ -6,3 +6,4 @@ export { ConceptEngineOverview } from "./ConceptEngineOverview";
 export { ConceptGraphCard } from "./ConceptGraphCard";
 export { ConceptProgressCard } from "./ConceptProgressCard";
 export { ConceptWeaknessCard } from "./ConceptWeaknessCard";
+export { LearningPathCard } from "./LearningPathCard";

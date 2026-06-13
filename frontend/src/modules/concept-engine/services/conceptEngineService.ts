@@ -2,6 +2,7 @@ import type { Concept, ConceptDependency, ConceptGraphNode, StudentConceptState 
 import { adaptiveRevisionService } from "./adaptiveRevisionService";
 import { conceptMasteryService } from "./conceptMasteryService";
 import { dependencyImpactService } from "./dependencyImpactService";
+import { learningPathService } from "./learningPathService";
 import { weakConceptService } from "./weakConceptService";
 
 const concepts: Concept[] = [
@@ -193,5 +194,25 @@ export const conceptEngineService = {
     );
 
     return simulateApi(revisionPlan);
+  },
+
+  getLearningPath() {
+    const weakConcepts = weakConceptService.rankWeakConcepts(
+      weakConceptService.detectWeakConcepts(studentConceptStates, conceptGraph),
+    );
+    const affectedConcepts = dependencyImpactService.calculateDependencyImpact(weakConcepts, conceptGraph);
+    const revisionPlan = adaptiveRevisionService.prioritizeRevisionSteps(
+      adaptiveRevisionService.generateRevisionPlan(weakConcepts, affectedConcepts, studentConceptStates),
+    );
+
+    return simulateApi(
+      learningPathService.generateLearningPath(
+        studentConceptStates,
+        weakConcepts,
+        affectedConcepts,
+        revisionPlan,
+        conceptGraph,
+      ),
+    );
   },
 };

@@ -1,4 +1,4 @@
-import { Activity, AlertCircle, BrainCircuit, GitBranch, ListChecks, RefreshCw, TrendingDown } from "lucide-react";
+import { Activity, AlertCircle, BrainCircuit, GitBranch, ListChecks, RefreshCw, Route, TrendingDown } from "lucide-react";
 
 import { Card } from "../../../components/ui/Card";
 import { EmptyState } from "../../../components/ui/EmptyState";
@@ -13,9 +13,10 @@ import { ConceptDependencyCard } from "./ConceptDependencyCard";
 import { ConceptGraphCard } from "./ConceptGraphCard";
 import { ConceptProgressCard } from "./ConceptProgressCard";
 import { ConceptWeaknessCard } from "./ConceptWeaknessCard";
+import { LearningPathCard } from "./LearningPathCard";
 
 export function ConceptEngineOverview() {
-  const { concepts, dependencies, conceptGraph, studentConceptStates, weakConcepts, affectedConcepts, revisionPlan, loading, error, refresh, retry } = useConceptEngine();
+  const { concepts, dependencies, conceptGraph, studentConceptStates, weakConcepts, affectedConcepts, revisionPlan, learningPath, loading, error, refresh, retry } = useConceptEngine();
 
   const conceptById = new Map(concepts.map((concept) => [concept.id, concept]));
 
@@ -77,6 +78,23 @@ export function ConceptEngineOverview() {
             ) : (
               <div className="grid gap-4 xl:grid-cols-3">
                 {conceptGraph.map((node) => <ConceptGraphCard key={node.conceptId} node={node} />)}
+              </div>
+            )}
+          </section>
+
+          <section className="space-y-4">
+            <Card className="p-5">
+              <SectionHeader
+                title="Learning Path"
+                description="Ordered learning sequence generated from mastery, weak concepts, dependency impact, and revision steps."
+                icon={<Route className="h-5 w-5 text-violet-600 dark:text-violet-300" aria-hidden="true" />}
+              />
+            </Card>
+            {learningPath.length === 0 ? (
+              <EmptyState description="Personalized learning path steps will appear here when concept signals are available." />
+            ) : (
+              <div className="grid gap-4 xl:grid-cols-2">
+                {learningPath.map((step) => <LearningPathCard key={step.id} step={step} />)}
               </div>
             )}
           </section>
