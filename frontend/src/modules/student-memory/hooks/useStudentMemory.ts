@@ -1,7 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { studentMemoryService } from "../services";
-import type { AttentionProfile, LearningPreference, StudentProfile, StudentStrength, StudentWeakness, StudyPattern } from "../types";
+import type {
+  AttentionProfile,
+  LearningPreference,
+  MemoryEvent,
+  MemoryTimeline,
+  StudentProfile,
+  StudentStrength,
+  StudentWeakness,
+  StudyPattern,
+} from "../types";
 
 type StudentMemoryState = {
   studentProfile: StudentProfile | null;
@@ -10,8 +19,10 @@ type StudentMemoryState = {
   learningPreferences: LearningPreference[];
   studyPatterns: StudyPattern[];
   attentionProfile: AttentionProfile | null;
+  memoryTimeline: MemoryTimeline | null;
   loading: boolean;
   error: string | null;
+  addMemoryEvent: (memoryEvent: MemoryEvent) => Promise<void>;
   refresh: () => Promise<void>;
   retry: () => Promise<void>;
 };
@@ -25,6 +36,7 @@ export function useStudentMemory(): StudentMemoryState {
   const [learningPreferences, setLearningPreferences] = useState<LearningPreference[]>([]);
   const [studyPatterns, setStudyPatterns] = useState<StudyPattern[]>([]);
   const [attentionProfile, setAttentionProfile] = useState<AttentionProfile | null>(null);
+  const [memoryTimeline, setMemoryTimeline] = useState<MemoryTimeline | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,13 +45,14 @@ export function useStudentMemory(): StudentMemoryState {
     setError(null);
 
     try {
-      const [profile, strengthList, weaknessList, preferences, patterns, attention] = await Promise.all([
+      const [profile, strengthList, weaknessList, preferences, patterns, attention, timeline] = await Promise.all([
         studentMemoryService.getStudentProfile(),
         studentMemoryService.getStrengths(),
         studentMemoryService.getWeaknesses(),
         studentMemoryService.getLearningPreferences(),
         studentMemoryService.getStudyPatterns(),
         studentMemoryService.getAttentionProfile(),
+        studentMemoryService.getTimeline(),
       ]);
 
       setStudentProfile(profile);
@@ -48,10 +61,22 @@ export function useStudentMemory(): StudentMemoryState {
       setLearningPreferences(preferences);
       setStudyPatterns(patterns);
       setAttentionProfile(attention);
+      setMemoryTimeline(timeline);
     } catch {
       setError(fallbackError);
     } finally {
       setLoading(false);
+    }
+  }, []);
+
+  const addMemoryEvent = useCallback(async (memoryEvent: MemoryEvent) => {
+    setError(null);
+
+    try {
+      const updatedTimeline = await studentMemoryService.addMemoryEvent(memoryEvent);
+      setMemoryTimeline(updatedTimeline);
+    } catch {
+      setError(fallbackError);
     }
   }, []);
 
@@ -66,8 +91,10 @@ export function useStudentMemory(): StudentMemoryState {
     learningPreferences,
     studyPatterns,
     attentionProfile,
+    memoryTimeline,
     loading,
     error,
+    addMemoryEvent,
     refresh: loadStudentMemory,
     retry: loadStudentMemory,
   };

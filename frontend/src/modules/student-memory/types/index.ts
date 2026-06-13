@@ -2,6 +2,31 @@ export type LearningStyle = "visual" | "auditory" | "reading" | "practice" | "mi
 
 export type DifficultyPreference = "easy" | "medium" | "hard" | "adaptive";
 
+export type MemoryEventType =
+  | "LessonCompleted"
+  | "QuizCompleted"
+  | "WeaknessDetected"
+  | "MasteryImproved"
+  | "RevisionCompleted"
+  | "LearningPathUpdated";
+
+export type MemoryImportance = "low" | "medium" | "high";
+
+export type MemoryEvent = {
+  id: string;
+  timestamp: string;
+  eventType: MemoryEventType;
+  title: string;
+  description: string;
+  importance: MemoryImportance;
+};
+
+export type MemoryTimeline = {
+  id: string;
+  studentId: string;
+  events: MemoryEvent[];
+};
+
 export type StudentStrength = {
   id: string;
   conceptId: string;

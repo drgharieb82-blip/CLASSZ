@@ -1,4 +1,5 @@
 export { LearningStyleCard } from "./LearningStyleCard";
+export { MemoryTimelineCard } from "./MemoryTimelineCard";
 export { StrengthCard } from "./StrengthCard";
 export { StudentMemoryOverview } from "./StudentMemoryOverview";
 export { StudentProfileCard } from "./StudentProfileCard";

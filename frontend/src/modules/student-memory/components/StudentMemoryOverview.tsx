@@ -1,4 +1,4 @@
-import { AlertCircle, BrainCircuit, RefreshCw, TrendingDown, Trophy, UserRound } from "lucide-react";
+import { AlertCircle, BrainCircuit, History, RefreshCw, TrendingDown, Trophy, UserRound } from "lucide-react";
 
 import { Card } from "../../../components/ui/Card";
 import { EmptyState } from "../../../components/ui/EmptyState";
@@ -7,6 +7,7 @@ import { PageContainer } from "../../../components/ui/PageContainer";
 import { SectionHeader } from "../../../components/ui/SectionHeader";
 import { useStudentMemory } from "../hooks";
 import { LearningStyleCard } from "./LearningStyleCard";
+import { MemoryTimelineCard } from "./MemoryTimelineCard";
 import { StrengthCard } from "./StrengthCard";
 import { StudentProfileCard } from "./StudentProfileCard";
 import { StudyPatternCard } from "./StudyPatternCard";
@@ -20,6 +21,7 @@ export function StudentMemoryOverview() {
     learningPreferences,
     studyPatterns,
     attentionProfile,
+    memoryTimeline,
     loading,
     error,
     refresh,
@@ -101,6 +103,26 @@ export function StudentMemoryOverview() {
               )}
             </section>
           </div>
+
+          <section className="space-y-4">
+            <Card className="p-5">
+              <SectionHeader
+                eyebrow="Phase 6.3"
+                title="Memory Timeline"
+                description="A chronological view of meaningful learning events collected from the student memory layer."
+                icon={<History className="h-5 w-5 text-teal-600 dark:text-teal-300" aria-hidden="true" />}
+              />
+            </Card>
+            {!memoryTimeline || memoryTimeline.events.length === 0 ? (
+              <EmptyState description="Student memory events will appear here as the student completes lessons, quizzes, revisions, and learning path updates." />
+            ) : (
+              <div className="grid gap-4">
+                {memoryTimeline.events.map((event) => (
+                  <MemoryTimelineCard key={event.id} event={event} />
+                ))}
+              </div>
+            )}
+          </section>
         </>
       )}
     </PageContainer>

@@ -1,4 +1,5 @@
 import type { AttentionProfile, LearningPreference, StudentProfile, StudentStrength, StudentWeakness, StudyPattern } from "../types";
+import { memoryTimelineService } from "./memoryTimelineService";
 
 const strengths: StudentStrength[] = [
   {
@@ -110,4 +111,10 @@ export const studentMemoryService = {
   getAttentionProfile() {
     return simulateApi(attentionProfile);
   },
+
+  getTimeline() {
+    return memoryTimelineService.getTimeline();
+  },
+
+  addMemoryEvent: memoryTimelineService.addMemoryEvent,
 };
