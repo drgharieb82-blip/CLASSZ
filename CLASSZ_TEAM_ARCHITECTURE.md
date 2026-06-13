@@ -6,6 +6,24 @@ CLASSZ is owned and maintained as a long-term education platform with a clear te
 
 The team structure is designed to keep development fast while protecting the architectural integrity of the platform. Each contributor has a clear area of responsibility, clear branch boundaries, and a review path that keeps production, AI Core, and student memory systems under controlled ownership.
 
+## Ownership Model
+
+Dr. Ahmed Gharib is the Founder, Owner, and Full Maintainer of CLASSZ.
+
+Although responsibilities are distributed among team members, Dr. Ahmed may work on any area of the platform when necessary, including:
+
+- Frontend
+- Backend
+- AI Systems
+- Concept Engine
+- Student Memory
+- Content Systems
+- Infrastructure
+
+Team ownership defines primary responsibilities, not limitations.
+
+The Founder has full access and final authority over all components and branches.
+
 ## Team Roles
 
 ### Dr. Ahmed Gharib
