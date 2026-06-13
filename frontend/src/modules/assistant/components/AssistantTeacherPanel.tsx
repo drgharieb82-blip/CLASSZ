@@ -1,9 +1,11 @@
 import { FormEvent, useEffect, useRef } from "react";
-import { AlertCircle, Bot, RefreshCw, SendHorizontal, ShieldCheck, Trash2 } from "lucide-react";
+import { AlertCircle, Bot, RefreshCw, SendHorizontal, ShieldCheck, TrendingDown, Trash2 } from "lucide-react";
 
 import { Card } from "../../../components/ui/Card";
+import { EmptyState } from "../../../components/ui/EmptyState";
 import { LoadingSkeleton } from "../../../components/ui/LoadingSkeleton";
 import { PageContainer } from "../../../components/ui/PageContainer";
+import { SectionHeader } from "../../../components/ui/SectionHeader";
 import { useAssistantConversation } from "../hooks";
 import { ChatBubble } from "./ChatBubble";
 import { EmptyChatState } from "./EmptyChatState";
@@ -135,9 +137,25 @@ export function AssistantTeacherPanel() {
       <aside className="space-y-4">
         <ExplanationCard explanation={questionExplanation} loading={loading} />
 
-        {weaknesses.map((weakness) => (
-          <WeaknessCard key={weakness.id} weakness={weakness} />
-        ))}
+        <Card className="p-5">
+          <SectionHeader
+            title="Weakness Analysis"
+            description="Structured concept-level signals from the assistant mock service."
+            icon={<TrendingDown className="h-5 w-5 text-amber-600 dark:text-amber-300" aria-hidden="true" />}
+          />
+        </Card>
+
+        {loading ? (
+          <LoadingSkeleton lines={5} />
+        ) : weaknesses.length === 0 ? (
+          <EmptyState
+            title="No weaknesses detected"
+            description="Concept weakness analysis will appear here when the assistant service returns student signals."
+            icon={<TrendingDown className="h-5 w-5" aria-hidden="true" />}
+          />
+        ) : (
+          weaknesses.map((weakness) => <WeaknessCard key={weakness.id} weakness={weakness} />)
+        )}
 
         {revisionSuggestions.map((suggestion) => (
           <RevisionCard key={suggestion.id} revision={suggestion} />

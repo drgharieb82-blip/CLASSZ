@@ -20,8 +20,13 @@ export type StudentWeakness = {
   studentId: string;
   conceptId: string;
   conceptName: string;
+  concept: string;
   score: number;
   severity: "low" | "medium" | "high";
+  confidenceLevel: "low" | "medium" | "high";
+  priority: "low" | "medium" | "high";
+  progress: number;
+  recommendation: string;
 };
 
 export type RevisionSuggestion = {
