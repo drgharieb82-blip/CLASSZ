@@ -1,0 +1,1 @@
+export { studentMemoryService } from "./studentMemoryService";
