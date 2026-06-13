@@ -1,0 +1,53 @@
+export type Concept = {
+  id: string;
+  name: string;
+  subject: string;
+  chapter: string;
+  lesson: string;
+  description?: string;
+};
+
+export type ConceptRelation = {
+  parentConceptId: string;
+  childConceptId: string;
+  relationType: "prerequisite" | "supports" | "extends" | "related";
+};
+
+export type StudentConceptState = {
+  conceptId: string;
+  masteryLevel: number;
+  confidenceLevel: "low" | "medium" | "high";
+  attempts: number;
+  correctAnswers: number;
+  wrongAnswers: number;
+};
+
+export type ConceptMastery = {
+  conceptId: string;
+  conceptName: string;
+  masteryLevel: number;
+  confidenceLevel: "low" | "medium" | "high";
+  lastPracticedAt?: string;
+};
+
+export type ConceptDependency = {
+  id: string;
+  conceptId: string;
+  conceptName: string;
+  dependsOnConceptId: string;
+  dependsOnConceptName: string;
+  relationType: ConceptRelation["relationType"];
+  strength: "weak" | "medium" | "strong";
+};
+
+export type ConceptWeakness = {
+  id: string;
+  conceptId: string;
+  conceptName: string;
+  subject: string;
+  chapter: string;
+  masteryLevel: number;
+  confidenceLevel: "low" | "medium" | "high";
+  priority: "low" | "medium" | "high";
+  recommendation: string;
+};
