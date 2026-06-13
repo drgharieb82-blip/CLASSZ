@@ -8,11 +8,12 @@ import { SectionHeader } from "../../../components/ui/SectionHeader";
 import { useConceptEngine } from "../hooks";
 import { ConceptCard } from "./ConceptCard";
 import { ConceptDependencyCard } from "./ConceptDependencyCard";
+import { ConceptGraphCard } from "./ConceptGraphCard";
 import { ConceptProgressCard } from "./ConceptProgressCard";
 import { ConceptWeaknessCard } from "./ConceptWeaknessCard";
 
 export function ConceptEngineOverview() {
-  const { concepts, dependencies, studentConceptStates, weakConcepts, loading, error, refresh, retry } = useConceptEngine();
+  const { concepts, dependencies, conceptGraph, studentConceptStates, weakConcepts, loading, error, refresh, retry } = useConceptEngine();
 
   const conceptById = new Map(concepts.map((concept) => [concept.id, concept]));
 
@@ -59,6 +60,23 @@ export function ConceptEngineOverview() {
               const concept = conceptById.get(state.conceptId);
               return concept ? <ConceptProgressCard key={state.conceptId} concept={concept} state={state} /> : null;
             })}
+          </section>
+
+          <section className="space-y-4">
+            <Card className="p-5">
+              <SectionHeader
+                title="Concept Graph"
+                description="Relationship map for prerequisites, dependencies, related concepts, and strengthening paths."
+                icon={<GitBranch className="h-5 w-5 text-teal-600 dark:text-teal-300" aria-hidden="true" />}
+              />
+            </Card>
+            {conceptGraph.length === 0 ? (
+              <EmptyState description="Concept graph relationships will appear here when available." />
+            ) : (
+              <div className="grid gap-4 xl:grid-cols-3">
+                {conceptGraph.map((node) => <ConceptGraphCard key={node.conceptId} node={node} />)}
+              </div>
+            )}
           </section>
 
           <div className="grid gap-6 xl:grid-cols-2">

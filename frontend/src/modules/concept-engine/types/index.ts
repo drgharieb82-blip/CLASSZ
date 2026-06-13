@@ -10,7 +10,7 @@ export type Concept = {
 export type ConceptRelation = {
   parentConceptId: string;
   childConceptId: string;
-  relationType: "prerequisite" | "supports" | "extends" | "related";
+  relationType: "prerequisite" | "related" | "depends_on" | "strengthens" | "supports" | "extends";
 };
 
 export type StudentConceptState = {
@@ -50,4 +50,16 @@ export type ConceptWeakness = {
   confidenceLevel: "low" | "medium" | "high";
   priority: "low" | "medium" | "high";
   recommendation: string;
+};
+
+export type ConceptGraphNode = {
+  conceptId: string;
+  conceptName: string;
+  parentConcepts: string[];
+  childConcepts: string[];
+  dependencyCount: number;
+  prerequisites: string[];
+  dependsOn: string[];
+  strengthens: string[];
+  relatedConcepts: string[];
 };

@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { conceptEngineService } from "../services";
-import type { Concept, ConceptDependency, ConceptWeakness, StudentConceptState } from "../types";
+import type { Concept, ConceptDependency, ConceptGraphNode, ConceptWeakness, StudentConceptState } from "../types";
 
 type ConceptEngineState = {
   concepts: Concept[];
   dependencies: ConceptDependency[];
+  conceptGraph: ConceptGraphNode[];
   studentConceptStates: StudentConceptState[];
   weakConcepts: ConceptWeakness[];
   loading: boolean;
@@ -19,6 +20,7 @@ const fallbackError = "Concept Engine data could not be loaded. Please try again
 export function useConceptEngine(): ConceptEngineState {
   const [concepts, setConcepts] = useState<Concept[]>([]);
   const [dependencies, setDependencies] = useState<ConceptDependency[]>([]);
+  const [conceptGraph, setConceptGraph] = useState<ConceptGraphNode[]>([]);
   const [studentConceptStates, setStudentConceptStates] = useState<StudentConceptState[]>([]);
   const [weakConcepts, setWeakConcepts] = useState<ConceptWeakness[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,17 +31,19 @@ export function useConceptEngine(): ConceptEngineState {
     setError(null);
 
     try {
-      const [conceptList, dependencyList, conceptStates, weakConceptList] = await Promise.all([
+      const [conceptList, dependencyList, conceptStates, weakConceptList, graph] = await Promise.all([
         conceptEngineService.getConcepts(),
         conceptEngineService.getConceptDependencies(),
         conceptEngineService.getStudentConceptStates(),
         conceptEngineService.getWeakConcepts(),
+        conceptEngineService.getConceptGraph(),
       ]);
 
       setConcepts(conceptList);
       setDependencies(dependencyList);
       setStudentConceptStates(conceptStates);
       setWeakConcepts(weakConceptList);
+      setConceptGraph(graph);
     } catch {
       setError(fallbackError);
     } finally {
@@ -54,6 +58,7 @@ export function useConceptEngine(): ConceptEngineState {
   return {
     concepts,
     dependencies,
+    conceptGraph,
     studentConceptStates,
     weakConcepts,
     loading,

@@ -4,6 +4,7 @@ export { conceptEngineService } from "./services";
 export type {
   Concept,
   ConceptDependency,
+  ConceptGraphNode,
   ConceptMastery,
   ConceptRelation,
   ConceptWeakness,

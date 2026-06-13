@@ -1,4 +1,4 @@
-import type { Concept, ConceptDependency, ConceptWeakness, StudentConceptState } from "../types";
+import type { Concept, ConceptDependency, ConceptGraphNode, ConceptWeakness, StudentConceptState } from "../types";
 
 const concepts: Concept[] = [
   {
@@ -117,6 +117,42 @@ const weakConcepts: ConceptWeakness[] = [
   },
 ];
 
+const conceptGraph: ConceptGraphNode[] = [
+  {
+    conceptId: "electrochemistry",
+    conceptName: "Electrochemistry",
+    parentConcepts: ["Redox Reactions"],
+    childConcepts: ["Galvanic Cell", "Electrolysis"],
+    dependencyCount: 3,
+    prerequisites: ["Oxidation Number"],
+    dependsOn: ["Redox Reactions"],
+    strengthens: ["Galvanic Cell"],
+    relatedConcepts: ["Electrolysis"],
+  },
+  {
+    conceptId: "oxidation-number",
+    conceptName: "Oxidation Number",
+    parentConcepts: ["Redox Reactions"],
+    childConcepts: ["Electrochemistry", "Galvanic Cell"],
+    dependencyCount: 2,
+    prerequisites: [],
+    dependsOn: ["Atomic Charge"],
+    strengthens: ["Electrochemistry", "Balancing Redox Equations"],
+    relatedConcepts: ["Reduction", "Oxidation"],
+  },
+  {
+    conceptId: "galvanic-cell",
+    conceptName: "Galvanic Cell",
+    parentConcepts: ["Electrochemistry"],
+    childConcepts: ["Cell Potential"],
+    dependencyCount: 2,
+    prerequisites: ["Oxidation Number", "Electrochemistry"],
+    dependsOn: ["Electron Flow"],
+    strengthens: ["Cell Potential"],
+    relatedConcepts: ["Salt Bridge", "Anode and Cathode"],
+  },
+];
+
 function simulateApi<T>(data: T): Promise<T> {
   return new Promise((resolve) => {
     window.setTimeout(() => resolve(data), 300);
@@ -138,5 +174,9 @@ export const conceptEngineService = {
 
   getWeakConcepts() {
     return simulateApi(weakConcepts);
+  },
+
+  getConceptGraph() {
+    return simulateApi(conceptGraph);
   },
 };
