@@ -1,1 +1,1 @@
-export {};
+export { useAssistantConversation } from "./useAssistantConversation";

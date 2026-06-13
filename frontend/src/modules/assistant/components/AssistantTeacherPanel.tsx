@@ -1,12 +1,11 @@
-import { FormEvent, useEffect, useRef, useState } from "react";
-import { Bot, SendHorizontal, ShieldCheck, Sparkles } from "lucide-react";
+import { FormEvent, useEffect, useRef } from "react";
+import { AlertCircle, Bot, RefreshCw, SendHorizontal, ShieldCheck, Sparkles, Trash2 } from "lucide-react";
 
 import { Card } from "../../../components/ui/Card";
 import { LoadingSkeleton } from "../../../components/ui/LoadingSkeleton";
 import { PageContainer } from "../../../components/ui/PageContainer";
 import { SectionHeader } from "../../../components/ui/SectionHeader";
-import { assistantService } from "../services";
-import type { ChatMessage, QuestionExplanation, RevisionSuggestion, StudentWeakness } from "../types";
+import { useAssistantConversation } from "../hooks";
 import { ChatBubble } from "./ChatBubble";
 import { EmptyChatState } from "./EmptyChatState";
 import { LoadingMessage } from "./LoadingMessage";
@@ -15,66 +14,29 @@ import { SuggestionCard } from "./SuggestionCard";
 import { WeaknessCard } from "./WeaknessCard";
 
 export function AssistantTeacherPanel() {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [weaknesses, setWeaknesses] = useState<StudentWeakness[]>([]);
-  const [revisionSuggestions, setRevisionSuggestions] = useState<RevisionSuggestion[]>([]);
-  const [questionExplanation, setQuestionExplanation] = useState<QuestionExplanation | null>(null);
-  const [draft, setDraft] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [isTyping, setIsTyping] = useState(false);
+  const {
+    messages,
+    input,
+    loading,
+    error,
+    sending,
+    weaknesses,
+    revisionSuggestions,
+    questionExplanation,
+    setInput,
+    sendMessage,
+    retry,
+    clearConversation,
+  } = useAssistantConversation();
   const scrollAnchorRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    let isMounted = true;
-
-    async function loadAssistantData() {
-      setIsLoading(true);
-      const [conversation, weaknessAnalysis, suggestions, explanation] = await Promise.all([
-        assistantService.getConversation(),
-        assistantService.getWeaknessAnalysis(),
-        assistantService.getRevisionSuggestions(),
-        assistantService.getQuestionExplanation(),
-      ]);
-
-      if (!isMounted) {
-        return;
-      }
-
-      setMessages(conversation.messages);
-      setWeaknesses(weaknessAnalysis);
-      setRevisionSuggestions(suggestions);
-      setQuestionExplanation(explanation);
-      setIsLoading(false);
-    }
-
-    void loadAssistantData();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  useEffect(() => {
     scrollAnchorRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages, isTyping]);
-
-  async function sendMessage(content: string) {
-    const trimmedContent = content.trim();
-    if (!trimmedContent || isTyping) {
-      return;
-    }
-
-    setDraft("");
-    setIsTyping(true);
-
-    const { userMessage, assistantMessage } = await assistantService.sendMessage(trimmedContent);
-    setMessages((currentMessages) => [...currentMessages, userMessage, assistantMessage]);
-    setIsTyping(false);
-  }
+  }, [messages, sending]);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    void sendMessage(draft);
+    void sendMessage();
   }
 
   return (
@@ -95,24 +57,48 @@ export function AssistantTeacherPanel() {
                 </p>
               </div>
             </div>
-            <span className="ui-badge bg-violet-50 text-violet-700 dark:bg-violet-400/10 dark:text-violet-200">
-              <ShieldCheck className="me-1.5 h-3.5 w-3.5" aria-hidden="true" />
-              Mock Mode
-            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="ui-badge bg-violet-50 text-violet-700 dark:bg-violet-400/10 dark:text-violet-200">
+                <ShieldCheck className="me-1.5 h-3.5 w-3.5" aria-hidden="true" />
+                Mock Mode
+              </span>
+              <button type="button" className="ui-button" onClick={() => void retry()} disabled={loading || sending}>
+                <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                Retry
+              </button>
+              <button type="button" className="ui-button" onClick={clearConversation} disabled={loading || sending || messages.length === 0}>
+                <Trash2 className="h-4 w-4" aria-hidden="true" />
+                Clear
+              </button>
+            </div>
           </div>
         </header>
 
         <div className="flex-1 overflow-y-auto bg-slate-50/70 p-4 dark:bg-slate-950/30 sm:p-6">
-          {isLoading ? (
+          {loading ? (
             <LoadingSkeleton className="mx-auto max-w-5xl" lines={8} />
+          ) : error && messages.length === 0 ? (
+            <div className="mx-auto max-w-5xl rounded-xl border border-rose-200 bg-rose-50 p-5 text-rose-700 dark:border-rose-400/30 dark:bg-rose-400/10 dark:text-rose-200">
+              <AlertCircle className="mb-3 h-5 w-5" aria-hidden="true" />
+              <p className="font-semibold">{error}</p>
+              <button type="button" className="ui-button mt-4" onClick={() => void retry()}>
+                <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                Retry
+              </button>
+            </div>
           ) : messages.length === 0 ? (
             <EmptyChatState onPromptSelect={(prompt) => void sendMessage(prompt)} />
           ) : (
             <div className="mx-auto flex max-w-5xl flex-col gap-4">
+              {error ? (
+                <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 dark:border-rose-400/30 dark:bg-rose-400/10 dark:text-rose-200">
+                  {error}
+                </div>
+              ) : null}
               {messages.map((message) => (
                 <ChatBubble key={message.id} message={message} />
               ))}
-              {isTyping ? <LoadingMessage /> : null}
+              {sending ? <LoadingMessage /> : null}
               <div ref={scrollAnchorRef} />
             </div>
           )}
@@ -125,20 +111,20 @@ export function AssistantTeacherPanel() {
             </label>
             <textarea
               id="assistant-message"
-              value={draft}
-              onChange={(event) => setDraft(event.target.value)}
+              value={input}
+              onChange={(event) => setInput(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === "Enter" && !event.shiftKey) {
                   event.preventDefault();
-                  void sendMessage(draft);
+                  void sendMessage();
                 }
               }}
               rows={2}
               placeholder="Ask anything about your lesson..."
               className="ui-input min-h-14 flex-1 resize-none py-3 leading-6"
-              disabled={isLoading}
+              disabled={loading}
             />
-            <button type="submit" className="ui-button ui-button-primary sm:min-h-14" disabled={!draft.trim() || isTyping || isLoading}>
+            <button type="submit" className="ui-button ui-button-primary sm:min-h-14" disabled={!input.trim() || sending || loading}>
               <SendHorizontal className="h-4 w-4" aria-hidden="true" />
               Send
             </button>
