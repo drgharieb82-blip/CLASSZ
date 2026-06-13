@@ -1,1 +1,1 @@
-export {};
+export { useStudentMemory } from "./useStudentMemory";

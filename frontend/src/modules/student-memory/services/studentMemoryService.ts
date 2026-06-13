@@ -1,4 +1,4 @@
-import type { LearningPreference, StudentProfile, StudentStrength, StudentWeakness } from "../types";
+import type { AttentionProfile, LearningPreference, StudentProfile, StudentStrength, StudentWeakness, StudyPattern } from "../types";
 
 const strengths: StudentStrength[] = [
   {
@@ -50,6 +50,23 @@ const learningPreferences: LearningPreference[] = [
   },
 ];
 
+const studyPatterns: StudyPattern[] = [
+  {
+    id: "study-pattern-1",
+    averageSessionMinutes: 28,
+    preferredStudyTime: "evening",
+    weeklyStudyDays: 5,
+    consistencyLevel: "medium",
+  },
+];
+
+const attentionProfile: AttentionProfile = {
+  attentionSpan: 22,
+  bestSessionLength: 28,
+  breakFrequencyMinutes: 25,
+  needsMotivation: true,
+};
+
 const studentProfile: StudentProfile = {
   studentId: "student-1",
   displayName: "Mariam Hassan",
@@ -84,5 +101,13 @@ export const studentMemoryService = {
 
   getLearningPreferences() {
     return simulateApi(learningPreferences);
+  },
+
+  getStudyPatterns() {
+    return simulateApi(studyPatterns);
+  },
+
+  getAttentionProfile() {
+    return simulateApi(attentionProfile);
   },
 };

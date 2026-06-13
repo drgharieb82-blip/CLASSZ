@@ -1,4 +1,5 @@
 export * from "./components";
+export { useStudentMemory } from "./hooks";
 export { studentMemoryService } from "./services";
 export type {
   AttentionProfile,
