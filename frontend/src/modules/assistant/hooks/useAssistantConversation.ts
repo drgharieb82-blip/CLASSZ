@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { assistantService } from "../services";
+import { assistantProvider } from "../services";
 import type { ChatMessage, QuestionExplanation, RevisionSuggestion, StudentWeakness } from "../types";
 
 type AssistantConversationState = {
@@ -36,10 +36,10 @@ export function useAssistantConversation(): AssistantConversationState {
 
     try {
       const [conversation, weaknessAnalysis, suggestions, explanation] = await Promise.all([
-        assistantService.getConversation(),
-        assistantService.getWeaknessAnalysis(),
-        assistantService.getRevisionSuggestions(),
-        assistantService.getQuestionExplanation(),
+        assistantProvider.getConversation(),
+        assistantProvider.getWeaknessAnalysis(),
+        assistantProvider.getRevisionSuggestions(),
+        assistantProvider.getQuestionExplanation(),
       ]);
 
       setMessages(conversation.messages);
@@ -69,7 +69,7 @@ export function useAssistantConversation(): AssistantConversationState {
       setError(null);
 
       try {
-        const { userMessage, assistantMessage } = await assistantService.sendMessage(content);
+        const { userMessage, assistantMessage } = await assistantProvider.sendMessage(content);
         setMessages((currentMessages) => [...currentMessages, userMessage, assistantMessage]);
       } catch {
         setInput(content);
