@@ -1,1 +1,1 @@
-export {};
+export { assistantService } from "./assistantService";

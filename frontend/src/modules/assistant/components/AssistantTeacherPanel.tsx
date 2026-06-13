@@ -1,97 +1,84 @@
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { Bot, SendHorizontal, ShieldCheck } from "lucide-react";
+import { FormEvent, useEffect, useRef, useState } from "react";
+import { Bot, SendHorizontal, ShieldCheck, Sparkles } from "lucide-react";
 
 import { Card } from "../../../components/ui/Card";
+import { LoadingSkeleton } from "../../../components/ui/LoadingSkeleton";
 import { PageContainer } from "../../../components/ui/PageContainer";
-import type { ChatMessage } from "../types";
+import { SectionHeader } from "../../../components/ui/SectionHeader";
+import { assistantService } from "../services";
+import type { ChatMessage, QuestionExplanation, RevisionSuggestion, StudentWeakness } from "../types";
 import { ChatBubble } from "./ChatBubble";
 import { EmptyChatState } from "./EmptyChatState";
 import { LoadingMessage } from "./LoadingMessage";
-
-const conversationId = "mock-assistant-conversation";
-
-const sampleMessages: ChatMessage[] = [
-  {
-    id: "mock-1",
-    conversationId,
-    role: "assistant",
-    content: "Welcome. I can help explain concepts, create practice questions, or review why an answer might be incorrect.",
-    createdAt: new Date(Date.now() - 1000 * 60 * 9).toISOString(),
-    status: "sent",
-  },
-  {
-    id: "mock-2",
-    conversationId,
-    role: "teacher",
-    content: "Give me a short way to explain oxidation numbers to students.",
-    createdAt: new Date(Date.now() - 1000 * 60 * 8).toISOString(),
-    status: "sent",
-  },
-  {
-    id: "mock-3",
-    conversationId,
-    role: "assistant",
-    content:
-      "Start with the idea that oxidation number is a bookkeeping tool. It helps us track how electrons are assigned during reactions, even when electrons are not fully transferred.",
-    createdAt: new Date(Date.now() - 1000 * 60 * 7).toISOString(),
-    status: "sent",
-  },
-];
-
-const mockReplies = [
-  "Good teaching move: connect the concept to a familiar mistake, then ask students to solve one tiny example before a full question.",
-  "Try this structure: define the concept, show one worked example, then ask two quick checks with different difficulty levels.",
-  "For practice, start with three direct questions, then one mixed question that reveals whether the student understands the concept or memorized the pattern.",
-];
-
-function createMessage(role: ChatMessage["role"], content: string): ChatMessage {
-  return {
-    id: `${role}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-    conversationId,
-    role,
-    content,
-    createdAt: new Date().toISOString(),
-    status: "sent",
-  };
-}
+import { RevisionCard } from "./RevisionCard";
+import { SuggestionCard } from "./SuggestionCard";
+import { WeaknessCard } from "./WeaknessCard";
 
 export function AssistantTeacherPanel() {
-  const [messages, setMessages] = useState<ChatMessage[]>(sampleMessages);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [weaknesses, setWeaknesses] = useState<StudentWeakness[]>([]);
+  const [revisionSuggestions, setRevisionSuggestions] = useState<RevisionSuggestion[]>([]);
+  const [questionExplanation, setQuestionExplanation] = useState<QuestionExplanation | null>(null);
   const [draft, setDraft] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const [isTyping, setIsTyping] = useState(false);
   const scrollAnchorRef = useRef<HTMLDivElement | null>(null);
-  const replyIndex = useMemo(() => Math.max(0, messages.length - sampleMessages.length), [messages.length]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadAssistantData() {
+      setIsLoading(true);
+      const [conversation, weaknessAnalysis, suggestions, explanation] = await Promise.all([
+        assistantService.getConversation(),
+        assistantService.getWeaknessAnalysis(),
+        assistantService.getRevisionSuggestions(),
+        assistantService.getQuestionExplanation(),
+      ]);
+
+      if (!isMounted) {
+        return;
+      }
+
+      setMessages(conversation.messages);
+      setWeaknesses(weaknessAnalysis);
+      setRevisionSuggestions(suggestions);
+      setQuestionExplanation(explanation);
+      setIsLoading(false);
+    }
+
+    void loadAssistantData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     scrollAnchorRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, isTyping]);
 
-  function sendMessage(content: string) {
+  async function sendMessage(content: string) {
     const trimmedContent = content.trim();
     if (!trimmedContent || isTyping) {
       return;
     }
 
-    setMessages((currentMessages) => [...currentMessages, createMessage("teacher", trimmedContent)]);
     setDraft("");
     setIsTyping(true);
 
-    window.setTimeout(() => {
-      setMessages((currentMessages) => [
-        ...currentMessages,
-        createMessage("assistant", mockReplies[replyIndex % mockReplies.length]),
-      ]);
-      setIsTyping(false);
-    }, 850);
+    const { userMessage, assistantMessage } = await assistantService.sendMessage(trimmedContent);
+    setMessages((currentMessages) => [...currentMessages, userMessage, assistantMessage]);
+    setIsTyping(false);
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    sendMessage(draft);
+    void sendMessage(draft);
   }
 
   return (
-    <PageContainer>
+    <PageContainer className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
       <Card className="flex min-h-[calc(100vh-13rem)] flex-col overflow-hidden">
         <header className="border-b border-slate-200 bg-white/80 p-5 backdrop-blur dark:border-white/10 dark:bg-slate-950/40 sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -104,7 +91,7 @@ export function AssistantTeacherPanel() {
                   Assistant Teacher
                 </h2>
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
-                  A local mock chat experience for lesson explanations, question practice, and guided revision support.
+                  A local mock service experience for lesson explanations, weakness analysis, and guided revision support.
                 </p>
               </div>
             </div>
@@ -116,8 +103,10 @@ export function AssistantTeacherPanel() {
         </header>
 
         <div className="flex-1 overflow-y-auto bg-slate-50/70 p-4 dark:bg-slate-950/30 sm:p-6">
-          {messages.length === 0 ? (
-            <EmptyChatState onPromptSelect={sendMessage} />
+          {isLoading ? (
+            <LoadingSkeleton className="mx-auto max-w-5xl" lines={8} />
+          ) : messages.length === 0 ? (
+            <EmptyChatState onPromptSelect={(prompt) => void sendMessage(prompt)} />
           ) : (
             <div className="mx-auto flex max-w-5xl flex-col gap-4">
               {messages.map((message) => (
@@ -141,20 +130,41 @@ export function AssistantTeacherPanel() {
               onKeyDown={(event) => {
                 if (event.key === "Enter" && !event.shiftKey) {
                   event.preventDefault();
-                  sendMessage(draft);
+                  void sendMessage(draft);
                 }
               }}
               rows={2}
               placeholder="Ask anything about your lesson..."
               className="ui-input min-h-14 flex-1 resize-none py-3 leading-6"
+              disabled={isLoading}
             />
-            <button type="submit" className="ui-button ui-button-primary sm:min-h-14" disabled={!draft.trim() || isTyping}>
+            <button type="submit" className="ui-button ui-button-primary sm:min-h-14" disabled={!draft.trim() || isTyping || isLoading}>
               <SendHorizontal className="h-4 w-4" aria-hidden="true" />
               Send
             </button>
           </div>
         </form>
       </Card>
+
+      <aside className="space-y-4">
+        <Card className="p-5">
+          <SectionHeader
+            title="Assistant insights"
+            description={questionExplanation?.summary ?? "Mock service insights will appear here after loading."}
+            icon={<Sparkles className="h-5 w-5 text-violet-600 dark:text-violet-300" aria-hidden="true" />}
+          />
+        </Card>
+
+        {weaknesses.map((weakness) => (
+          <WeaknessCard key={weakness.id} weakness={weakness} />
+        ))}
+
+        {revisionSuggestions.map((suggestion) => (
+          <RevisionCard key={suggestion.id} revision={suggestion} />
+        ))}
+
+        {revisionSuggestions[0] ? <SuggestionCard suggestion={revisionSuggestions[0]} /> : null}
+      </aside>
     </PageContainer>
   );
 }
