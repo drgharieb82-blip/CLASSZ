@@ -7,11 +7,15 @@ export {
   calculateMastery,
   calculatePriority,
   calculateWeaknessScore,
+  adaptiveRevisionService,
   conceptEngineService,
   conceptMasteryService,
   dependencyImpactService,
   detectWeakConcepts,
+  estimateRevisionTime,
   getAffectedConcepts,
+  generateRevisionPlan,
+  prioritizeRevisionSteps,
   rankWeakConcepts,
   weakConceptService,
 } from "./services";
@@ -23,5 +27,6 @@ export type {
   ConceptMastery,
   ConceptRelation,
   ConceptWeakness,
+  RevisionStep,
   StudentConceptState,
 } from "./types";

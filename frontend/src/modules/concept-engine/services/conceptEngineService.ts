@@ -1,4 +1,5 @@
 import type { Concept, ConceptDependency, ConceptGraphNode, StudentConceptState } from "../types";
+import { adaptiveRevisionService } from "./adaptiveRevisionService";
 import { conceptMasteryService } from "./conceptMasteryService";
 import { dependencyImpactService } from "./dependencyImpactService";
 import { weakConceptService } from "./weakConceptService";
@@ -180,5 +181,17 @@ export const conceptEngineService = {
     );
 
     return simulateApi(dependencyImpactService.calculateDependencyImpact(weakConcepts, conceptGraph));
+  },
+
+  getRevisionPlan() {
+    const weakConcepts = weakConceptService.rankWeakConcepts(
+      weakConceptService.detectWeakConcepts(studentConceptStates, conceptGraph),
+    );
+    const affectedConcepts = dependencyImpactService.calculateDependencyImpact(weakConcepts, conceptGraph);
+    const revisionPlan = adaptiveRevisionService.prioritizeRevisionSteps(
+      adaptiveRevisionService.generateRevisionPlan(weakConcepts, affectedConcepts, studentConceptStates),
+    );
+
+    return simulateApi(revisionPlan);
   },
 };

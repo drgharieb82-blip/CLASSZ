@@ -1,4 +1,5 @@
 export { AffectedConceptCard } from "./AffectedConceptCard";
+export { AdaptiveRevisionCard } from "./AdaptiveRevisionCard";
 export { ConceptCard } from "./ConceptCard";
 export { ConceptDependencyCard } from "./ConceptDependencyCard";
 export { ConceptEngineOverview } from "./ConceptEngineOverview";

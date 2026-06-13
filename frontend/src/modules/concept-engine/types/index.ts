@@ -80,3 +80,15 @@ export type AffectedConcept = {
   dependencyDepth: number;
   reason: string;
 };
+
+export type RevisionStep = {
+  id: string;
+  conceptId: string;
+  conceptName: string;
+  priority: "critical" | "high" | "medium" | "low";
+  estimatedTime: string;
+  reason: string;
+  recommendedAction: string;
+  difficulty: "easy" | "medium" | "hard";
+  actionType: "review_lesson" | "watch_video" | "read_notes" | "solve_questions" | "retake_quiz";
+};

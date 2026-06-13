@@ -1,4 +1,4 @@
-import { Activity, AlertCircle, BrainCircuit, GitBranch, RefreshCw, TrendingDown } from "lucide-react";
+import { Activity, AlertCircle, BrainCircuit, GitBranch, ListChecks, RefreshCw, TrendingDown } from "lucide-react";
 
 import { Card } from "../../../components/ui/Card";
 import { EmptyState } from "../../../components/ui/EmptyState";
@@ -7,6 +7,7 @@ import { PageContainer } from "../../../components/ui/PageContainer";
 import { SectionHeader } from "../../../components/ui/SectionHeader";
 import { useConceptEngine } from "../hooks";
 import { AffectedConceptCard } from "./AffectedConceptCard";
+import { AdaptiveRevisionCard } from "./AdaptiveRevisionCard";
 import { ConceptCard } from "./ConceptCard";
 import { ConceptDependencyCard } from "./ConceptDependencyCard";
 import { ConceptGraphCard } from "./ConceptGraphCard";
@@ -14,7 +15,7 @@ import { ConceptProgressCard } from "./ConceptProgressCard";
 import { ConceptWeaknessCard } from "./ConceptWeaknessCard";
 
 export function ConceptEngineOverview() {
-  const { concepts, dependencies, conceptGraph, studentConceptStates, weakConcepts, affectedConcepts, loading, error, refresh, retry } = useConceptEngine();
+  const { concepts, dependencies, conceptGraph, studentConceptStates, weakConcepts, affectedConcepts, revisionPlan, loading, error, refresh, retry } = useConceptEngine();
 
   const conceptById = new Map(concepts.map((concept) => [concept.id, concept]));
 
@@ -116,6 +117,23 @@ export function ConceptEngineOverview() {
               )}
             </section>
           </div>
+
+          <section className="space-y-4">
+            <Card className="p-5">
+              <SectionHeader
+                title="Adaptive Revision Plan"
+                description="Personalized revision steps generated from weak concepts and dependency impact."
+                icon={<ListChecks className="h-5 w-5 text-teal-600 dark:text-teal-300" aria-hidden="true" />}
+              />
+            </Card>
+            {revisionPlan.length === 0 ? (
+              <EmptyState description="Adaptive revision steps will appear here when weak concepts are detected." />
+            ) : (
+              <div className="grid gap-4 xl:grid-cols-2">
+                {revisionPlan.map((revisionStep) => <AdaptiveRevisionCard key={revisionStep.id} revisionStep={revisionStep} />)}
+              </div>
+            )}
+          </section>
 
           <div className="grid gap-6 xl:grid-cols-2">
             <section className="space-y-4">
