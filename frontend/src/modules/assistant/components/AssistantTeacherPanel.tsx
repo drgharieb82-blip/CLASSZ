@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useRef } from "react";
-import { AlertCircle, Bot, RefreshCw, SendHorizontal, ShieldCheck, TrendingDown, Trash2 } from "lucide-react";
+import { AlertCircle, Bot, ListChecks, RefreshCw, SendHorizontal, ShieldCheck, TrendingDown, Trash2 } from "lucide-react";
 
 import { Card } from "../../../components/ui/Card";
 import { EmptyState } from "../../../components/ui/EmptyState";
@@ -157,9 +157,25 @@ export function AssistantTeacherPanel() {
           weaknesses.map((weakness) => <WeaknessCard key={weakness.id} weakness={weakness} />)
         )}
 
-        {revisionSuggestions.map((suggestion) => (
-          <RevisionCard key={suggestion.id} revision={suggestion} />
-        ))}
+        <Card className="p-5">
+          <SectionHeader
+            title="Revision Suggestions"
+            description="Actionable next steps generated from concept weaknesses."
+            icon={<ListChecks className="h-5 w-5 text-teal-600 dark:text-teal-300" aria-hidden="true" />}
+          />
+        </Card>
+
+        {loading ? (
+          <LoadingSkeleton lines={5} />
+        ) : revisionSuggestions.length === 0 ? (
+          <EmptyState
+            title="No revision suggestions"
+            description="Recommended revision tasks will appear here after weakness analysis is available."
+            icon={<ListChecks className="h-5 w-5" aria-hidden="true" />}
+          />
+        ) : (
+          revisionSuggestions.map((suggestion) => <RevisionCard key={suggestion.id} revision={suggestion} />)
+        )}
 
         {revisionSuggestions[0] ? <SuggestionCard suggestion={revisionSuggestions[0]} /> : null}
       </aside>

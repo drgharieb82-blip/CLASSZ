@@ -33,8 +33,11 @@ export type RevisionSuggestion = {
   id: string;
   conceptId: string;
   title: string;
+  concept: string;
   description: string;
   priority: "low" | "medium" | "high";
+  estimatedTime: string;
+  actionType: "watch_lesson" | "solve_questions" | "review_notes" | "retake_quiz";
 };
 
 export type QuestionExplanation = {
