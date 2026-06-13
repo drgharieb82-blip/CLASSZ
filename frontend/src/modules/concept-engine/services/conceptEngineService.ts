@@ -3,6 +3,7 @@ import { adaptiveRevisionService } from "./adaptiveRevisionService";
 import { conceptMasteryService } from "./conceptMasteryService";
 import { conceptReasoningService } from "./conceptReasoningService";
 import { dependencyImpactService } from "./dependencyImpactService";
+import { explainableAIService } from "./explainableAIService";
 import { learningPathService } from "./learningPathService";
 import { weakConceptService } from "./weakConceptService";
 
@@ -240,6 +241,39 @@ export const conceptEngineService = {
         revisionPlan,
         learningPath,
         conceptGraph,
+      ),
+    );
+  },
+
+  getExplainableInsights() {
+    const weakConcepts = weakConceptService.rankWeakConcepts(
+      weakConceptService.detectWeakConcepts(studentConceptStates, conceptGraph),
+    );
+    const affectedConcepts = dependencyImpactService.calculateDependencyImpact(weakConcepts, conceptGraph);
+    const revisionPlan = adaptiveRevisionService.prioritizeRevisionSteps(
+      adaptiveRevisionService.generateRevisionPlan(weakConcepts, affectedConcepts, studentConceptStates),
+    );
+    const learningPath = learningPathService.generateLearningPath(
+      studentConceptStates,
+      weakConcepts,
+      affectedConcepts,
+      revisionPlan,
+      conceptGraph,
+    );
+    const conceptReasons = conceptReasoningService.generateReasoning(
+      weakConcepts,
+      affectedConcepts,
+      revisionPlan,
+      learningPath,
+      conceptGraph,
+    );
+
+    return simulateApi(
+      explainableAIService.generateExplanation(
+        conceptReasons,
+        learningPath,
+        revisionPlan,
+        weakConcepts,
       ),
     );
   },

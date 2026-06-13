@@ -7,4 +7,5 @@ export { ConceptGraphCard } from "./ConceptGraphCard";
 export { ConceptProgressCard } from "./ConceptProgressCard";
 export { ConceptReasonCard } from "./ConceptReasonCard";
 export { ConceptWeaknessCard } from "./ConceptWeaknessCard";
+export { ExplainableInsightCard } from "./ExplainableInsightCard";
 export { LearningPathCard } from "./LearningPathCard";

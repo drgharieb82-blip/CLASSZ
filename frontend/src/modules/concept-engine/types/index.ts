@@ -114,3 +114,13 @@ export type ConceptReason = {
   recommendedAction: string;
   priority: "critical" | "high" | "medium" | "low";
 };
+
+export type ExplainableInsight = {
+  id: string;
+  targetAudience: "student" | "teacher" | "parent";
+  title: string;
+  summary: string;
+  details: string;
+  recommendedAction: string;
+  priority: "critical" | "high" | "medium" | "low";
+};

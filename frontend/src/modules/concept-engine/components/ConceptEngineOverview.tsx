@@ -1,4 +1,4 @@
-import { Activity, AlertCircle, BrainCircuit, GitBranch, ListChecks, RefreshCw, Route, TrendingDown } from "lucide-react";
+import { Activity, AlertCircle, BrainCircuit, GitBranch, ListChecks, RefreshCw, Route, Sparkles, TrendingDown } from "lucide-react";
 
 import { Card } from "../../../components/ui/Card";
 import { EmptyState } from "../../../components/ui/EmptyState";
@@ -14,10 +14,11 @@ import { ConceptGraphCard } from "./ConceptGraphCard";
 import { ConceptProgressCard } from "./ConceptProgressCard";
 import { ConceptReasonCard } from "./ConceptReasonCard";
 import { ConceptWeaknessCard } from "./ConceptWeaknessCard";
+import { ExplainableInsightCard } from "./ExplainableInsightCard";
 import { LearningPathCard } from "./LearningPathCard";
 
 export function ConceptEngineOverview() {
-  const { concepts, dependencies, conceptGraph, studentConceptStates, weakConcepts, affectedConcepts, revisionPlan, learningPath, conceptReasons, loading, error, refresh, retry } = useConceptEngine();
+  const { concepts, dependencies, conceptGraph, studentConceptStates, weakConcepts, affectedConcepts, revisionPlan, learningPath, conceptReasons, explainableInsights, loading, error, refresh, retry } = useConceptEngine();
 
   const conceptById = new Map(concepts.map((concept) => [concept.id, concept]));
 
@@ -113,6 +114,23 @@ export function ConceptEngineOverview() {
             ) : (
               <div className="grid gap-4 xl:grid-cols-2">
                 {conceptReasons.map((reason) => <ConceptReasonCard key={reason.id} reason={reason} />)}
+              </div>
+            )}
+          </section>
+
+          <section className="space-y-4">
+            <Card className="p-5">
+              <SectionHeader
+                title="Explainable AI"
+                description="Transparent recommendation explanations tailored for students, teachers, and parents."
+                icon={<Sparkles className="h-5 w-5 text-teal-600 dark:text-teal-300" aria-hidden="true" />}
+              />
+            </Card>
+            {explainableInsights.length === 0 ? (
+              <EmptyState description="Explainable insights will appear here when recommendations are available." />
+            ) : (
+              <div className="grid gap-4 xl:grid-cols-3">
+                {explainableInsights.map((insight) => <ExplainableInsightCard key={insight.id} insight={insight} />)}
               </div>
             )}
           </section>
