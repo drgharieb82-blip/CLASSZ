@@ -70,3 +70,13 @@ export type ConceptGraphNode = {
   strengthens: string[];
   relatedConcepts: string[];
 };
+
+export type AffectedConcept = {
+  conceptId: string;
+  conceptName: string;
+  sourceWeakConceptId: string;
+  sourceWeakConceptName: string;
+  impactScore: number;
+  dependencyDepth: number;
+  reason: string;
+};

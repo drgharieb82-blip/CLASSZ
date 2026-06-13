@@ -1,5 +1,6 @@
 import type { Concept, ConceptDependency, ConceptGraphNode, StudentConceptState } from "../types";
 import { conceptMasteryService } from "./conceptMasteryService";
+import { dependencyImpactService } from "./dependencyImpactService";
 import { weakConceptService } from "./weakConceptService";
 
 const concepts: Concept[] = [
@@ -97,6 +98,17 @@ const studentConceptStates: StudentConceptState[] = [
 
 const conceptGraph: ConceptGraphNode[] = [
   {
+    conceptId: "redox-reactions",
+    conceptName: "Redox Reactions",
+    parentConcepts: [],
+    childConcepts: ["Electrochemistry", "Oxidation Number"],
+    dependencyCount: 2,
+    prerequisites: [],
+    dependsOn: [],
+    strengthens: ["Electrochemistry"],
+    relatedConcepts: ["Oxidation", "Reduction"],
+  },
+  {
     conceptId: "electrochemistry",
     conceptName: "Electrochemistry",
     parentConcepts: ["Redox Reactions"],
@@ -160,5 +172,13 @@ export const conceptEngineService = {
 
   getConceptGraph() {
     return simulateApi(conceptGraph);
+  },
+
+  getAffectedConcepts() {
+    const weakConcepts = weakConceptService.rankWeakConcepts(
+      weakConceptService.detectWeakConcepts(studentConceptStates, conceptGraph),
+    );
+
+    return simulateApi(dependencyImpactService.calculateDependencyImpact(weakConcepts, conceptGraph));
   },
 };

@@ -1,4 +1,4 @@
-import { AlertCircle, BrainCircuit, GitBranch, RefreshCw, TrendingDown } from "lucide-react";
+import { Activity, AlertCircle, BrainCircuit, GitBranch, RefreshCw, TrendingDown } from "lucide-react";
 
 import { Card } from "../../../components/ui/Card";
 import { EmptyState } from "../../../components/ui/EmptyState";
@@ -6,6 +6,7 @@ import { LoadingSkeleton } from "../../../components/ui/LoadingSkeleton";
 import { PageContainer } from "../../../components/ui/PageContainer";
 import { SectionHeader } from "../../../components/ui/SectionHeader";
 import { useConceptEngine } from "../hooks";
+import { AffectedConceptCard } from "./AffectedConceptCard";
 import { ConceptCard } from "./ConceptCard";
 import { ConceptDependencyCard } from "./ConceptDependencyCard";
 import { ConceptGraphCard } from "./ConceptGraphCard";
@@ -13,7 +14,7 @@ import { ConceptProgressCard } from "./ConceptProgressCard";
 import { ConceptWeaknessCard } from "./ConceptWeaknessCard";
 
 export function ConceptEngineOverview() {
-  const { concepts, dependencies, conceptGraph, studentConceptStates, weakConcepts, loading, error, refresh, retry } = useConceptEngine();
+  const { concepts, dependencies, conceptGraph, studentConceptStates, weakConcepts, affectedConcepts, loading, error, refresh, retry } = useConceptEngine();
 
   const conceptById = new Map(concepts.map((concept) => [concept.id, concept]));
 
@@ -95,6 +96,28 @@ export function ConceptEngineOverview() {
               )}
             </section>
 
+            <section className="space-y-4">
+              <Card className="p-5">
+                <SectionHeader
+                  title="Dependency Impact"
+                  description="Downstream concepts affected by current weaknesses."
+                  icon={<Activity className="h-5 w-5 text-rose-600 dark:text-rose-300" aria-hidden="true" />}
+                />
+              </Card>
+              {affectedConcepts.length === 0 ? (
+                <EmptyState description="Dependency impact will appear here when weak concepts affect downstream learning." />
+              ) : (
+                affectedConcepts.map((affectedConcept) => (
+                  <AffectedConceptCard
+                    key={`${affectedConcept.sourceWeakConceptId}-${affectedConcept.conceptId}`}
+                    affectedConcept={affectedConcept}
+                  />
+                ))
+              )}
+            </section>
+          </div>
+
+          <div className="grid gap-6 xl:grid-cols-2">
             <section className="space-y-4">
               <Card className="p-5">
                 <SectionHeader

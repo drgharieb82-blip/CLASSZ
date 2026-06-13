@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { conceptEngineService } from "../services";
-import type { Concept, ConceptDependency, ConceptGraphNode, ConceptWeakness, StudentConceptState } from "../types";
+import type { AffectedConcept, Concept, ConceptDependency, ConceptGraphNode, ConceptWeakness, StudentConceptState } from "../types";
 
 type ConceptEngineState = {
   concepts: Concept[];
@@ -9,6 +9,7 @@ type ConceptEngineState = {
   conceptGraph: ConceptGraphNode[];
   studentConceptStates: StudentConceptState[];
   weakConcepts: ConceptWeakness[];
+  affectedConcepts: AffectedConcept[];
   loading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
@@ -23,6 +24,7 @@ export function useConceptEngine(): ConceptEngineState {
   const [conceptGraph, setConceptGraph] = useState<ConceptGraphNode[]>([]);
   const [studentConceptStates, setStudentConceptStates] = useState<StudentConceptState[]>([]);
   const [weakConcepts, setWeakConcepts] = useState<ConceptWeakness[]>([]);
+  const [affectedConcepts, setAffectedConcepts] = useState<AffectedConcept[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,12 +33,13 @@ export function useConceptEngine(): ConceptEngineState {
     setError(null);
 
     try {
-      const [conceptList, dependencyList, conceptStates, weakConceptList, graph] = await Promise.all([
+      const [conceptList, dependencyList, conceptStates, weakConceptList, graph, affectedConceptList] = await Promise.all([
         conceptEngineService.getConcepts(),
         conceptEngineService.getConceptDependencies(),
         conceptEngineService.getStudentConceptStates(),
         conceptEngineService.getWeakConcepts(),
         conceptEngineService.getConceptGraph(),
+        conceptEngineService.getAffectedConcepts(),
       ]);
 
       setConcepts(conceptList);
@@ -44,6 +47,7 @@ export function useConceptEngine(): ConceptEngineState {
       setStudentConceptStates(conceptStates);
       setWeakConcepts(weakConceptList);
       setConceptGraph(graph);
+      setAffectedConcepts(affectedConceptList);
     } catch {
       setError(fallbackError);
     } finally {
@@ -61,6 +65,7 @@ export function useConceptEngine(): ConceptEngineState {
     conceptGraph,
     studentConceptStates,
     weakConcepts,
+    affectedConcepts,
     loading,
     error,
     refresh: loadConceptEngine,
