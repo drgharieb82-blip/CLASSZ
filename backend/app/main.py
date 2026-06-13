@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.modules.ai_core.router import router as ai_router
+from app.modules.ai_teacher.router import router as ai_teacher_router
 from app.modules.anti_cheating.router import router as anti_cheating_router
 from app.modules.assignments.router import router as assignments_router
 from app.modules.chapters.router import router as chapters_router
@@ -44,6 +45,7 @@ def create_app() -> FastAPI:
 
     app.include_router(auth_router, prefix=settings.api_prefix)
     app.include_router(ai_router, prefix=settings.api_prefix)
+    app.include_router(ai_teacher_router, prefix=settings.api_prefix)
     app.include_router(anti_cheating_router, prefix=settings.api_prefix)
     app.include_router(courses_router, prefix=settings.api_prefix)
     app.include_router(chapters_router, prefix=settings.api_prefix)
