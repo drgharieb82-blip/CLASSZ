@@ -1,0 +1,259 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MemoryImportance {
+  low
+  medium
+  high
+}
+
+enum MemoryPriority {
+  low
+  medium
+  high
+}
+
+enum MemoryEventType {
+  LessonCompleted
+  QuizCompleted
+  WeaknessDetected
+  MasteryImproved
+  RevisionCompleted
+  LearningPathUpdated
+}
+
+enum LearningStyle {
+  visual
+  auditory
+  reading
+  practice
+  mixed
+}
+
+enum DifficultyPreference {
+  easy
+  medium
+  hard
+  adaptive
+}
+
+enum PreferredLanguage {
+  ar
+  en
+}
+
+enum ContentType {
+  video
+  notes
+  questions
+  mixed
+}
+
+enum StudyTime {
+  morning
+  afternoon
+  evening
+  night
+}
+
+enum ConsistencyLevel {
+  low
+  medium
+  high
+}
+
+model StudentMemoryProfile {
+  id                     String   @id @default(uuid()) @db.Uuid
+  studentId              String   @unique @map("student_id") @db.Uuid
+  displayName            String   @map("display_name") @db.VarChar(160)
+  grade                  String   @db.VarChar(80)
+  preferredLanguage      PreferredLanguage @map("preferred_language")
+  learningStyle          LearningStyle @map("learning_style")
+  averageSessionMinutes  Int      @map("average_session_minutes")
+  preferredDifficulty    DifficultyPreference @map("preferred_difficulty")
+  attentionSpan          Int      @map("attention_span")
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @updatedAt @map("updated_at")
+
+  strengths              StudentMemoryStrength[]
+  weaknesses             StudentMemoryWeakness[]
+  learningPreferences    StudentMemoryLearningPreference[]
+  studyPatterns          StudentMemoryStudyPattern[]
+  attentionProfiles      StudentMemoryAttentionProfile[]
+  timelineEvents         StudentMemoryTimelineEvent[]
+  forgettingCurve        StudentMemoryForgettingCurve[]
+  recommendations        StudentMemoryRecommendation[]
+  summaries              StudentMemorySummary[]
+  longTermInsights       StudentMemoryLongTermInsight[]
+
+  @@map("student_memory_profiles")
+}
+
+model StudentMemoryStrength {
+  id            String @id @default(uuid()) @db.Uuid
+  profileId     String @map("profile_id") @db.Uuid
+  conceptId     String @map("concept_id") @db.VarChar(120)
+  conceptName   String @map("concept_name") @db.VarChar(180)
+  subject       String @db.VarChar(120)
+  masteryLevel  Int    @map("mastery_level")
+  confidence    Int
+  evidence      Json
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  profile       StudentMemoryProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("student_memory_strengths")
+}
+
+model StudentMemoryWeakness {
+  id                String @id @default(uuid()) @db.Uuid
+  profileId         String @map("profile_id") @db.Uuid
+  conceptId         String @map("concept_id") @db.VarChar(120)
+  conceptName       String @map("concept_name") @db.VarChar(180)
+  subject           String @db.VarChar(120)
+  masteryLevel      Int @map("mastery_level")
+  priority          MemoryPriority
+  confidence        Int
+  recommendedAction String @map("recommended_action") @db.Text
+  evidence          Json
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  profile           StudentMemoryProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("student_memory_weaknesses")
+}
+
+model StudentMemoryLearningPreference {
+  id                  String @id @default(uuid()) @db.Uuid
+  profileId           String @map("profile_id") @db.Uuid
+  learningStyle       LearningStyle @map("learning_style")
+  preferredLanguage   PreferredLanguage @map("preferred_language")
+  preferredDifficulty DifficultyPreference @map("preferred_difficulty")
+  bestContentType     ContentType @map("best_content_type")
+
+  profile             StudentMemoryProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("student_memory_learning_preferences")
+}
+
+model StudentMemoryStudyPattern {
+  id                    String @id @default(uuid()) @db.Uuid
+  profileId             String @map("profile_id") @db.Uuid
+  averageSessionMinutes Int @map("average_session_minutes")
+  preferredStudyTime    StudyTime @map("preferred_study_time")
+  weeklyStudyDays       Int @map("weekly_study_days")
+  consistencyLevel      ConsistencyLevel @map("consistency_level")
+
+  profile               StudentMemoryProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("student_memory_study_patterns")
+}
+
+model StudentMemoryAttentionProfile {
+  id                    String @id @default(uuid()) @db.Uuid
+  profileId             String @map("profile_id") @db.Uuid
+  attentionSpan         Int @map("attention_span")
+  bestSessionLength     Int @map("best_session_length")
+  breakFrequencyMinutes Int @map("break_frequency_minutes")
+  needsMotivation       Boolean @map("needs_motivation")
+
+  profile               StudentMemoryProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("student_memory_attention_profiles")
+}
+
+model StudentMemoryTimelineEvent {
+  id          String @id @default(uuid()) @db.Uuid
+  profileId   String @map("profile_id") @db.Uuid
+  timestamp   DateTime
+  eventType   MemoryEventType @map("event_type")
+  title       String @db.VarChar(200)
+  description String @db.Text
+  importance  MemoryImportance
+
+  profile     StudentMemoryProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@index([timestamp])
+  @@map("student_memory_timeline_events")
+}
+
+model StudentMemoryForgettingCurve {
+  id             String @id @default(uuid()) @db.Uuid
+  profileId      String @map("profile_id") @db.Uuid
+  conceptId      String @map("concept_id") @db.VarChar(120)
+  conceptName    String @map("concept_name") @db.VarChar(180)
+  lastReviewedAt DateTime @map("last_reviewed_at")
+  retentionScore Int @map("retention_score")
+  riskLevel      MemoryPriority @map("risk_level")
+  nextReviewAt   DateTime @map("next_review_at")
+  recommendation String @db.Text
+
+  profile        StudentMemoryProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@index([riskLevel])
+  @@map("student_memory_forgetting_curve")
+}
+
+model StudentMemoryRecommendation {
+  id             String @id @default(uuid()) @db.Uuid
+  profileId      String @map("profile_id") @db.Uuid
+  title          String @db.VarChar(200)
+  description    String @db.Text
+  priority       MemoryPriority
+  actionType     String @map("action_type") @db.VarChar(80)
+  relatedConcept String @map("related_concept") @db.VarChar(180)
+
+  profile        StudentMemoryProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@index([priority])
+  @@map("student_memory_recommendations")
+}
+
+model StudentMemorySummary {
+  id              String @id @default(uuid()) @db.Uuid
+  profileId       String @map("profile_id") @db.Uuid
+  generatedAt     DateTime @map("generated_at")
+  headline        String @db.VarChar(255)
+  overview        String @db.Text
+  nextBestAction  String @map("next_best_action") @db.Text
+  confidence      Int
+  strengthsCount  Int @map("strengths_count")
+  weaknessesCount Int @map("weaknesses_count")
+
+  profile         StudentMemoryProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("student_memory_summaries")
+}
+
+model StudentMemoryLongTermInsight {
+  id          String @id @default(uuid()) @db.Uuid
+  profileId   String @map("profile_id") @db.Uuid
+  title       String @db.VarChar(200)
+  description String @db.Text
+  signalType  String @map("signal_type") @db.VarChar(80)
+  confidence  Int
+  importance  MemoryImportance
+
+  profile     StudentMemoryProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@index([importance])
+  @@map("student_memory_long_term_insights")
+}
