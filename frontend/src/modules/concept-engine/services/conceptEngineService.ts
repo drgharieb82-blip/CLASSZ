@@ -1,5 +1,6 @@
-import type { Concept, ConceptDependency, ConceptGraphNode, ConceptWeakness, StudentConceptState } from "../types";
+import type { Concept, ConceptDependency, ConceptGraphNode, StudentConceptState } from "../types";
 import { conceptMasteryService } from "./conceptMasteryService";
+import { weakConceptService } from "./weakConceptService";
 
 const concepts: Concept[] = [
   {
@@ -94,40 +95,6 @@ const studentConceptStates: StudentConceptState[] = [
   }),
 ];
 
-function buildConceptWeakness(input: Omit<ConceptWeakness, "masteryLevel" | "confidenceLevel" | "weaknessScore">): ConceptWeakness {
-  return {
-    ...input,
-    ...conceptMasteryService.calculateMastery(input),
-  };
-}
-
-const weakConcepts: ConceptWeakness[] = [
-  buildConceptWeakness({
-    id: "weak-concept-1",
-    conceptId: "oxidation-number",
-    conceptName: "Oxidation Number",
-    subject: "Chemistry",
-    chapter: "Redox Reactions",
-    attempts: 20,
-    correctAnswers: 7,
-    wrongAnswers: 13,
-    priority: "high",
-    recommendation: "Review oxidation number rules and solve 10 focused practice questions.",
-  }),
-  buildConceptWeakness({
-    id: "weak-concept-2",
-    conceptId: "electrochemistry",
-    conceptName: "Electrochemistry",
-    subject: "Chemistry",
-    chapter: "Electrochemistry",
-    attempts: 18,
-    correctAnswers: 12,
-    wrongAnswers: 6,
-    priority: "medium",
-    recommendation: "Review electron flow examples before attempting galvanic cell questions.",
-  }),
-];
-
 const conceptGraph: ConceptGraphNode[] = [
   {
     conceptId: "electrochemistry",
@@ -184,6 +151,10 @@ export const conceptEngineService = {
   },
 
   getWeakConcepts() {
+    const weakConcepts = weakConceptService.rankWeakConcepts(
+      weakConceptService.detectWeakConcepts(studentConceptStates, conceptGraph),
+    );
+
     return simulateApi(weakConcepts);
   },
 

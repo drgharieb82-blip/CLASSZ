@@ -1,4 +1,4 @@
-import { AlertTriangle, Target } from "lucide-react";
+import { AlertTriangle, Info, Target } from "lucide-react";
 import { clsx } from "clsx";
 
 import { Card } from "../../../components/ui/Card";
@@ -53,8 +53,19 @@ export function ConceptWeaknessCard({ weakness }: ConceptWeaknessCardProps) {
       </div>
 
       <div className="mt-5 flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-white/10 dark:bg-white/[0.04]">
+        <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-300" aria-hidden="true" />
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">Reason</p>
+          <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{weakness.reason}</p>
+        </div>
+      </div>
+
+      <div className="mt-3 flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-white/10 dark:bg-white/[0.04]">
         <Target className="mt-0.5 h-4 w-4 shrink-0 text-teal-600 dark:text-teal-300" aria-hidden="true" />
-        <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">{weakness.recommendation}</p>
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">Recommended action</p>
+          <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{weakness.recommendedAction}</p>
+        </div>
       </div>
     </Card>
   );

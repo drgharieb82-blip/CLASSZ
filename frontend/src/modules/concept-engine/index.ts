@@ -1,6 +1,16 @@
 export * from "./components";
 export { useConceptEngine } from "./hooks";
-export { calculateConfidence, calculateMastery, calculateWeaknessScore, conceptEngineService, conceptMasteryService } from "./services";
+export {
+  calculateConfidence,
+  calculateMastery,
+  calculatePriority,
+  calculateWeaknessScore,
+  conceptEngineService,
+  conceptMasteryService,
+  detectWeakConcepts,
+  rankWeakConcepts,
+  weakConceptService,
+} from "./services";
 export type {
   Concept,
   ConceptDependency,

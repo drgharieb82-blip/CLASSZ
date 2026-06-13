@@ -45,8 +45,8 @@ export type ConceptWeakness = {
   id: string;
   conceptId: string;
   conceptName: string;
-  subject: string;
-  chapter: string;
+  subject?: string;
+  chapter?: string;
   attempts: number;
   correctAnswers: number;
   wrongAnswers: number;
@@ -54,7 +54,9 @@ export type ConceptWeakness = {
   confidenceLevel: "low" | "medium" | "high";
   weaknessScore: number;
   priority: "low" | "medium" | "high";
-  recommendation: string;
+  reason: string;
+  recommendedAction: string;
+  recommendation?: string;
 };
 
 export type ConceptGraphNode = {
