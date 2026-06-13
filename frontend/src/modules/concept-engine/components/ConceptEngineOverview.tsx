@@ -12,11 +12,12 @@ import { ConceptCard } from "./ConceptCard";
 import { ConceptDependencyCard } from "./ConceptDependencyCard";
 import { ConceptGraphCard } from "./ConceptGraphCard";
 import { ConceptProgressCard } from "./ConceptProgressCard";
+import { ConceptReasonCard } from "./ConceptReasonCard";
 import { ConceptWeaknessCard } from "./ConceptWeaknessCard";
 import { LearningPathCard } from "./LearningPathCard";
 
 export function ConceptEngineOverview() {
-  const { concepts, dependencies, conceptGraph, studentConceptStates, weakConcepts, affectedConcepts, revisionPlan, learningPath, loading, error, refresh, retry } = useConceptEngine();
+  const { concepts, dependencies, conceptGraph, studentConceptStates, weakConcepts, affectedConcepts, revisionPlan, learningPath, conceptReasons, loading, error, refresh, retry } = useConceptEngine();
 
   const conceptById = new Map(concepts.map((concept) => [concept.id, concept]));
 
@@ -95,6 +96,23 @@ export function ConceptEngineOverview() {
             ) : (
               <div className="grid gap-4 xl:grid-cols-2">
                 {learningPath.map((step) => <LearningPathCard key={step.id} step={step} />)}
+              </div>
+            )}
+          </section>
+
+          <section className="space-y-4">
+            <Card className="p-5">
+              <SectionHeader
+                title="Concept Reasoning"
+                description="Human-readable explanations for why recommendations and learning paths were generated."
+                icon={<BrainCircuit className="h-5 w-5 text-violet-600 dark:text-violet-300" aria-hidden="true" />}
+              />
+            </Card>
+            {conceptReasons.length === 0 ? (
+              <EmptyState description="Reasoning chains will appear here when recommendations are generated." />
+            ) : (
+              <div className="grid gap-4 xl:grid-cols-2">
+                {conceptReasons.map((reason) => <ConceptReasonCard key={reason.id} reason={reason} />)}
               </div>
             )}
           </section>

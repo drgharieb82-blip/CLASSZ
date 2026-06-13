@@ -1,6 +1,7 @@
 import type { Concept, ConceptDependency, ConceptGraphNode, StudentConceptState } from "../types";
 import { adaptiveRevisionService } from "./adaptiveRevisionService";
 import { conceptMasteryService } from "./conceptMasteryService";
+import { conceptReasoningService } from "./conceptReasoningService";
 import { dependencyImpactService } from "./dependencyImpactService";
 import { learningPathService } from "./learningPathService";
 import { weakConceptService } from "./weakConceptService";
@@ -211,6 +212,33 @@ export const conceptEngineService = {
         weakConcepts,
         affectedConcepts,
         revisionPlan,
+        conceptGraph,
+      ),
+    );
+  },
+
+  getConceptReasons() {
+    const weakConcepts = weakConceptService.rankWeakConcepts(
+      weakConceptService.detectWeakConcepts(studentConceptStates, conceptGraph),
+    );
+    const affectedConcepts = dependencyImpactService.calculateDependencyImpact(weakConcepts, conceptGraph);
+    const revisionPlan = adaptiveRevisionService.prioritizeRevisionSteps(
+      adaptiveRevisionService.generateRevisionPlan(weakConcepts, affectedConcepts, studentConceptStates),
+    );
+    const learningPath = learningPathService.generateLearningPath(
+      studentConceptStates,
+      weakConcepts,
+      affectedConcepts,
+      revisionPlan,
+      conceptGraph,
+    );
+
+    return simulateApi(
+      conceptReasoningService.generateReasoning(
+        weakConcepts,
+        affectedConcepts,
+        revisionPlan,
+        learningPath,
         conceptGraph,
       ),
     );

@@ -104,3 +104,13 @@ export type LearningPathStep = {
   reason: string;
   recommendedAction: string;
 };
+
+export type ConceptReason = {
+  id: string;
+  conceptId: string;
+  conceptName: string;
+  reason: string;
+  chain: string[];
+  recommendedAction: string;
+  priority: "critical" | "high" | "medium" | "low";
+};
