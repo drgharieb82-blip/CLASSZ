@@ -1,7 +1,14 @@
+export { DetectedStrengthCard } from "./DetectedStrengthCard";
+export { DetectedWeaknessCard } from "./DetectedWeaknessCard";
+export { ForgettingRiskCard } from "./ForgettingRiskCard";
 export { LearningStyleCard } from "./LearningStyleCard";
+export { LearningPatternInsightCard } from "./LearningPatternInsightCard";
+export { LongTermMemoryInsightCard } from "./LongTermMemoryInsightCard";
 export { MemoryTimelineCard } from "./MemoryTimelineCard";
+export { RecommendationCard } from "./RecommendationCard";
 export { StrengthCard } from "./StrengthCard";
 export { StudentMemoryOverview } from "./StudentMemoryOverview";
 export { StudentProfileCard } from "./StudentProfileCard";
+export { StudentSummaryCard } from "./StudentSummaryCard";
 export { StudyPatternCard } from "./StudyPatternCard";
 export { WeaknessCard } from "./WeaknessCard";

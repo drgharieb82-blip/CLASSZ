@@ -12,6 +12,8 @@ export type MemoryEventType =
 
 export type MemoryImportance = "low" | "medium" | "high";
 
+export type MemoryPriority = "low" | "medium" | "high";
+
 export type MemoryEvent = {
   id: string;
   timestamp: string;
@@ -25,6 +27,76 @@ export type MemoryTimeline = {
   id: string;
   studentId: string;
   events: MemoryEvent[];
+};
+
+export type DetectedWeakness = {
+  id: string;
+  conceptId: string;
+  conceptName: string;
+  subject: string;
+  severity: MemoryPriority;
+  confidence: number;
+  evidence: string[];
+  recommendedAction: string;
+};
+
+export type DetectedStrength = {
+  id: string;
+  conceptId: string;
+  conceptName: string;
+  subject: string;
+  confidence: number;
+  evidence: string[];
+  reinforcementAction: string;
+};
+
+export type LearningPatternInsight = {
+  id: string;
+  patternType: "consistency" | "sessionLength" | "preferredTime" | "motivation";
+  title: string;
+  description: string;
+  confidence: number;
+  recommendation: string;
+};
+
+export type ForgettingCurveItem = {
+  id: string;
+  conceptId: string;
+  conceptName: string;
+  lastReviewedAt: string;
+  retentionScore: number;
+  riskLevel: MemoryPriority;
+  nextReviewAt: string;
+  recommendation: string;
+};
+
+export type PersonalizedRecommendation = {
+  id: string;
+  title: string;
+  description: string;
+  priority: MemoryPriority;
+  actionType: "review" | "practice" | "quiz" | "lesson" | "learningPath";
+  relatedConcept: string;
+};
+
+export type StudentSummary = {
+  id: string;
+  generatedAt: string;
+  headline: string;
+  overview: string;
+  nextBestAction: string;
+  confidence: number;
+  strengthsCount: number;
+  weaknessesCount: number;
+};
+
+export type LongTermMemoryInsight = {
+  id: string;
+  title: string;
+  description: string;
+  signalType: "strength" | "weakness" | "pattern" | "forgetting" | "recommendation";
+  confidence: number;
+  importance: MemoryImportance;
 };
 
 export type StudentStrength = {

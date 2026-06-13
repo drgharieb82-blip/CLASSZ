@@ -3,10 +3,17 @@ import { useCallback, useEffect, useState } from "react";
 import { studentMemoryService } from "../services";
 import type {
   AttentionProfile,
+  DetectedStrength,
+  DetectedWeakness,
+  ForgettingCurveItem,
   LearningPreference,
+  LearningPatternInsight,
+  LongTermMemoryInsight,
   MemoryEvent,
   MemoryTimeline,
+  PersonalizedRecommendation,
   StudentProfile,
+  StudentSummary,
   StudentStrength,
   StudentWeakness,
   StudyPattern,
@@ -20,6 +27,13 @@ type StudentMemoryState = {
   studyPatterns: StudyPattern[];
   attentionProfile: AttentionProfile | null;
   memoryTimeline: MemoryTimeline | null;
+  detectedWeaknesses: DetectedWeakness[];
+  detectedStrengths: DetectedStrength[];
+  learningPatternInsights: LearningPatternInsight[];
+  forgettingCurve: ForgettingCurveItem[];
+  personalizedRecommendations: PersonalizedRecommendation[];
+  studentSummary: StudentSummary | null;
+  longTermMemoryInsights: LongTermMemoryInsight[];
   loading: boolean;
   error: string | null;
   addMemoryEvent: (memoryEvent: MemoryEvent) => Promise<void>;
@@ -37,6 +51,13 @@ export function useStudentMemory(): StudentMemoryState {
   const [studyPatterns, setStudyPatterns] = useState<StudyPattern[]>([]);
   const [attentionProfile, setAttentionProfile] = useState<AttentionProfile | null>(null);
   const [memoryTimeline, setMemoryTimeline] = useState<MemoryTimeline | null>(null);
+  const [detectedWeaknesses, setDetectedWeaknesses] = useState<DetectedWeakness[]>([]);
+  const [detectedStrengths, setDetectedStrengths] = useState<DetectedStrength[]>([]);
+  const [learningPatternInsights, setLearningPatternInsights] = useState<LearningPatternInsight[]>([]);
+  const [forgettingCurve, setForgettingCurve] = useState<ForgettingCurveItem[]>([]);
+  const [personalizedRecommendations, setPersonalizedRecommendations] = useState<PersonalizedRecommendation[]>([]);
+  const [studentSummary, setStudentSummary] = useState<StudentSummary | null>(null);
+  const [longTermMemoryInsights, setLongTermMemoryInsights] = useState<LongTermMemoryInsight[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,7 +66,22 @@ export function useStudentMemory(): StudentMemoryState {
     setError(null);
 
     try {
-      const [profile, strengthList, weaknessList, preferences, patterns, attention, timeline] = await Promise.all([
+      const [
+        profile,
+        strengthList,
+        weaknessList,
+        preferences,
+        patterns,
+        attention,
+        timeline,
+        detectedWeaknessList,
+        detectedStrengthList,
+        patternInsights,
+        forgettingRisks,
+        recommendations,
+        summary,
+        longTermInsights,
+      ] = await Promise.all([
         studentMemoryService.getStudentProfile(),
         studentMemoryService.getStrengths(),
         studentMemoryService.getWeaknesses(),
@@ -53,6 +89,13 @@ export function useStudentMemory(): StudentMemoryState {
         studentMemoryService.getStudyPatterns(),
         studentMemoryService.getAttentionProfile(),
         studentMemoryService.getTimeline(),
+        studentMemoryService.getDetectedWeaknesses(),
+        studentMemoryService.getDetectedStrengths(),
+        studentMemoryService.getLearningPatternInsights(),
+        studentMemoryService.getForgettingCurve(),
+        studentMemoryService.getPersonalizedRecommendations(),
+        studentMemoryService.getStudentSummary(),
+        studentMemoryService.getLongTermMemoryInsights(),
       ]);
 
       setStudentProfile(profile);
@@ -62,6 +105,13 @@ export function useStudentMemory(): StudentMemoryState {
       setStudyPatterns(patterns);
       setAttentionProfile(attention);
       setMemoryTimeline(timeline);
+      setDetectedWeaknesses(detectedWeaknessList);
+      setDetectedStrengths(detectedStrengthList);
+      setLearningPatternInsights(patternInsights);
+      setForgettingCurve(forgettingRisks);
+      setPersonalizedRecommendations(recommendations);
+      setStudentSummary(summary);
+      setLongTermMemoryInsights(longTermInsights);
     } catch {
       setError(fallbackError);
     } finally {
@@ -73,12 +123,12 @@ export function useStudentMemory(): StudentMemoryState {
     setError(null);
 
     try {
-      const updatedTimeline = await studentMemoryService.addMemoryEvent(memoryEvent);
-      setMemoryTimeline(updatedTimeline);
+      await studentMemoryService.addMemoryEvent(memoryEvent);
+      await loadStudentMemory();
     } catch {
       setError(fallbackError);
     }
-  }, []);
+  }, [loadStudentMemory]);
 
   useEffect(() => {
     void loadStudentMemory();
@@ -92,6 +142,13 @@ export function useStudentMemory(): StudentMemoryState {
     studyPatterns,
     attentionProfile,
     memoryTimeline,
+    detectedWeaknesses,
+    detectedStrengths,
+    learningPatternInsights,
+    forgettingCurve,
+    personalizedRecommendations,
+    studentSummary,
+    longTermMemoryInsights,
     loading,
     error,
     addMemoryEvent,

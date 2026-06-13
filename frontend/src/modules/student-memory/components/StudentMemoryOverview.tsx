@@ -1,4 +1,4 @@
-import { AlertCircle, BrainCircuit, History, RefreshCw, TrendingDown, Trophy, UserRound } from "lucide-react";
+import { AlertCircle, BrainCircuit, History, Lightbulb, RefreshCw, Target, TrendingDown, Trophy, UserRound } from "lucide-react";
 
 import { Card } from "../../../components/ui/Card";
 import { EmptyState } from "../../../components/ui/EmptyState";
@@ -6,10 +6,17 @@ import { LoadingSkeleton } from "../../../components/ui/LoadingSkeleton";
 import { PageContainer } from "../../../components/ui/PageContainer";
 import { SectionHeader } from "../../../components/ui/SectionHeader";
 import { useStudentMemory } from "../hooks";
+import { DetectedStrengthCard } from "./DetectedStrengthCard";
+import { DetectedWeaknessCard } from "./DetectedWeaknessCard";
+import { ForgettingRiskCard } from "./ForgettingRiskCard";
 import { LearningStyleCard } from "./LearningStyleCard";
+import { LearningPatternInsightCard } from "./LearningPatternInsightCard";
+import { LongTermMemoryInsightCard } from "./LongTermMemoryInsightCard";
 import { MemoryTimelineCard } from "./MemoryTimelineCard";
+import { RecommendationCard } from "./RecommendationCard";
 import { StrengthCard } from "./StrengthCard";
 import { StudentProfileCard } from "./StudentProfileCard";
+import { StudentSummaryCard } from "./StudentSummaryCard";
 import { StudyPatternCard } from "./StudyPatternCard";
 import { WeaknessCard } from "./WeaknessCard";
 
@@ -22,6 +29,13 @@ export function StudentMemoryOverview() {
     studyPatterns,
     attentionProfile,
     memoryTimeline,
+    detectedWeaknesses,
+    detectedStrengths,
+    learningPatternInsights,
+    forgettingCurve,
+    personalizedRecommendations,
+    studentSummary,
+    longTermMemoryInsights,
     loading,
     error,
     refresh,
@@ -103,6 +117,88 @@ export function StudentMemoryOverview() {
               )}
             </section>
           </div>
+
+          <section className="space-y-4">
+            <Card className="p-5">
+              <SectionHeader
+                eyebrow="Phase 6.4 - 6.5"
+                title="Detected Learning Signals"
+                description="Local memory analysis for current weakness and strength signals."
+                icon={<Target className="h-5 w-5 text-rose-600 dark:text-rose-300" aria-hidden="true" />}
+              />
+            </Card>
+            <div className="grid gap-6 xl:grid-cols-2">
+              <div className="space-y-4">
+                {detectedWeaknesses.length === 0 ? (
+                  <EmptyState description="Detected weaknesses will appear here when memory has enough signals." />
+                ) : (
+                  detectedWeaknesses.map((weakness) => <DetectedWeaknessCard key={weakness.id} weakness={weakness} />)
+                )}
+              </div>
+              <div className="space-y-4">
+                {detectedStrengths.length === 0 ? (
+                  <EmptyState description="Detected strengths will appear here when mastery evidence is available." />
+                ) : (
+                  detectedStrengths.map((strength) => <DetectedStrengthCard key={strength.id} strength={strength} />)
+                )}
+              </div>
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <Card className="p-5">
+              <SectionHeader
+                eyebrow="Phase 6.6 - 6.8"
+                title="Patterns, Forgetting Risk, and Recommendations"
+                description="Local analysis of study rhythm, retention risk, and personalized next actions."
+                icon={<Lightbulb className="h-5 w-5 text-violet-600 dark:text-violet-300" aria-hidden="true" />}
+              />
+            </Card>
+            <div className="grid gap-6 xl:grid-cols-3">
+              <div className="space-y-4">
+                {learningPatternInsights.length === 0 ? (
+                  <EmptyState description="Learning pattern insights will appear here." />
+                ) : (
+                  learningPatternInsights.map((pattern) => <LearningPatternInsightCard key={pattern.id} pattern={pattern} />)
+                )}
+              </div>
+              <div className="space-y-4">
+                {forgettingCurve.length === 0 ? (
+                  <EmptyState description="Forgetting curve risks will appear here." />
+                ) : (
+                  forgettingCurve.map((risk) => <ForgettingRiskCard key={risk.id} risk={risk} />)
+                )}
+              </div>
+              <div className="space-y-4">
+                {personalizedRecommendations.length === 0 ? (
+                  <EmptyState description="Personalized recommendations will appear here." />
+                ) : (
+                  personalizedRecommendations.map((recommendation) => (
+                    <RecommendationCard key={recommendation.id} recommendation={recommendation} />
+                  ))
+                )}
+              </div>
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <Card className="p-5">
+              <SectionHeader
+                eyebrow="Phase 6.9 - 6.10"
+                title="Summary and Long-Term Memory"
+                description="Generated student summary and aggregated long-term memory insights."
+                icon={<BrainCircuit className="h-5 w-5 text-teal-600 dark:text-teal-300" aria-hidden="true" />}
+              />
+            </Card>
+            {studentSummary ? <StudentSummaryCard summary={studentSummary} /> : <EmptyState description="Student summary will appear here." />}
+            <div className="grid gap-4 xl:grid-cols-2">
+              {longTermMemoryInsights.length === 0 ? (
+                <EmptyState description="Long-term memory insights will appear here." />
+              ) : (
+                longTermMemoryInsights.map((insight) => <LongTermMemoryInsightCard key={insight.id} insight={insight} />)
+              )}
+            </div>
+          </section>
 
           <section className="space-y-4">
             <Card className="p-5">

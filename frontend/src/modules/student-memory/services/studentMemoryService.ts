@@ -1,5 +1,12 @@
 import type { AttentionProfile, LearningPreference, StudentProfile, StudentStrength, StudentWeakness, StudyPattern } from "../types";
+import { forgettingCurveService } from "./forgettingCurveService";
+import { learningPatternService } from "./learningPatternService";
+import { longTermMemoryEngineService } from "./longTermMemoryEngineService";
 import { memoryTimelineService } from "./memoryTimelineService";
+import { recommendationService } from "./recommendationService";
+import { strengthDetectionService } from "./strengthDetectionService";
+import { studentSummaryService } from "./studentSummaryService";
+import { weaknessDetectionService } from "./weaknessDetectionService";
 
 const strengths: StudentStrength[] = [
   {
@@ -117,4 +124,63 @@ export const studentMemoryService = {
   },
 
   addMemoryEvent: memoryTimelineService.addMemoryEvent,
+
+  async getDetectedWeaknesses() {
+    const timeline = await memoryTimelineService.getTimeline();
+    return weaknessDetectionService.detectWeaknesses(weaknesses, timeline);
+  },
+
+  async getDetectedStrengths() {
+    const timeline = await memoryTimelineService.getTimeline();
+    return strengthDetectionService.detectStrengths(strengths, timeline);
+  },
+
+  async getLearningPatternInsights() {
+    const timeline = await memoryTimelineService.getTimeline();
+    return learningPatternService.analyzeLearningPatterns(studyPatterns, attentionProfile, timeline);
+  },
+
+  async getForgettingCurve() {
+    const timeline = await memoryTimelineService.getTimeline();
+    return forgettingCurveService.calculateForgettingRisk(strengths, weaknesses, timeline);
+  },
+
+  async getPersonalizedRecommendations() {
+    const timeline = await memoryTimelineService.getTimeline();
+    const detectedWeaknesses = weaknessDetectionService.detectWeaknesses(weaknesses, timeline);
+    const learningPatternInsights = learningPatternService.analyzeLearningPatterns(studyPatterns, attentionProfile, timeline);
+    const forgettingCurve = forgettingCurveService.calculateForgettingRisk(strengths, weaknesses, timeline);
+
+    return recommendationService.generateRecommendations(detectedWeaknesses, forgettingCurve, learningPatternInsights);
+  },
+
+  async getStudentSummary() {
+    const timeline = await memoryTimelineService.getTimeline();
+    const detectedWeaknesses = weaknessDetectionService.detectWeaknesses(weaknesses, timeline);
+    const detectedStrengths = strengthDetectionService.detectStrengths(strengths, timeline);
+    const learningPatternInsights = learningPatternService.analyzeLearningPatterns(studyPatterns, attentionProfile, timeline);
+    const forgettingCurve = forgettingCurveService.calculateForgettingRisk(strengths, weaknesses, timeline);
+    const recommendations = recommendationService.generateRecommendations(detectedWeaknesses, forgettingCurve, learningPatternInsights);
+
+    return studentSummaryService.generateStudentSummary(studentProfile, detectedStrengths, detectedWeaknesses, recommendations);
+  },
+
+  async getLongTermMemoryInsights() {
+    const timeline = await memoryTimelineService.getTimeline();
+    const detectedWeaknesses = weaknessDetectionService.detectWeaknesses(weaknesses, timeline);
+    const detectedStrengths = strengthDetectionService.detectStrengths(strengths, timeline);
+    const learningPatternInsights = learningPatternService.analyzeLearningPatterns(studyPatterns, attentionProfile, timeline);
+    const forgettingCurve = forgettingCurveService.calculateForgettingRisk(strengths, weaknesses, timeline);
+    const recommendations = recommendationService.generateRecommendations(detectedWeaknesses, forgettingCurve, learningPatternInsights);
+
+    return longTermMemoryEngineService.aggregateLongTermMemoryInsights(
+      studentProfile,
+      timeline,
+      detectedStrengths,
+      detectedWeaknesses,
+      learningPatternInsights,
+      forgettingCurve,
+      recommendations,
+    );
+  },
 };
