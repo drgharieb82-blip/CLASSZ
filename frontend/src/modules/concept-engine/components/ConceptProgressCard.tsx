@@ -2,6 +2,7 @@ import { BarChart3 } from "lucide-react";
 import { clsx } from "clsx";
 
 import { Card } from "../../../components/ui/Card";
+import { conceptMasteryService } from "../services";
 import type { Concept, StudentConceptState } from "../types";
 
 type ConceptProgressCardProps = {
@@ -16,7 +17,10 @@ const confidenceClass = {
 };
 
 export function ConceptProgressCard({ concept, state }: ConceptProgressCardProps) {
-  const accuracy = state.attempts > 0 ? Math.round((state.correctAnswers / state.attempts) * 100) : 0;
+  const calculated = conceptMasteryService.calculateMastery(state);
+  const masteryLevel = calculated.masteryLevel;
+  const confidenceLevel = calculated.confidenceLevel;
+  const weaknessScore = calculated.weaknessScore;
 
   return (
     <Card interactive className="p-5">
@@ -30,23 +34,23 @@ export function ConceptProgressCard({ concept, state }: ConceptProgressCardProps
             <h3 className="mt-1 font-display text-lg font-semibold text-slate-950 dark:text-white">{concept.name}</h3>
           </div>
         </div>
-        <span className={clsx("ui-badge capitalize", confidenceClass[state.confidenceLevel])}>{state.confidenceLevel}</span>
+        <span className={clsx("ui-badge capitalize", confidenceClass[confidenceLevel])}>{confidenceLevel}</span>
       </div>
 
       <div className="mt-5">
         <div className="flex items-center justify-between text-xs font-bold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
           <span>Mastery level</span>
-          <span>{state.masteryLevel}%</span>
+          <span>{masteryLevel}%</span>
         </div>
         <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
-          <div className="h-full rounded-full bg-sky-500 transition-all duration-500 dark:bg-sky-300" style={{ width: `${state.masteryLevel}%` }} />
+          <div className="h-full rounded-full bg-sky-500 transition-all duration-500 dark:bg-sky-300" style={{ width: `${masteryLevel}%` }} />
         </div>
       </div>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
         <Metric label="Attempts" value={state.attempts} />
         <Metric label="Correct" value={state.correctAnswers} />
-        <Metric label="Accuracy" value={`${accuracy}%`} />
+        <Metric label="Weakness" value={`${weaknessScore}%`} />
       </div>
     </Card>
   );

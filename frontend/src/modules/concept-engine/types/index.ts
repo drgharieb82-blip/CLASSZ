@@ -17,6 +17,7 @@ export type StudentConceptState = {
   conceptId: string;
   masteryLevel: number;
   confidenceLevel: "low" | "medium" | "high";
+  weaknessScore: number;
   attempts: number;
   correctAnswers: number;
   wrongAnswers: number;
@@ -46,8 +47,12 @@ export type ConceptWeakness = {
   conceptName: string;
   subject: string;
   chapter: string;
+  attempts: number;
+  correctAnswers: number;
+  wrongAnswers: number;
   masteryLevel: number;
   confidenceLevel: "low" | "medium" | "high";
+  weaknessScore: number;
   priority: "low" | "medium" | "high";
   recommendation: string;
 };

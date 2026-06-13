@@ -2,6 +2,7 @@ import { AlertTriangle, Target } from "lucide-react";
 import { clsx } from "clsx";
 
 import { Card } from "../../../components/ui/Card";
+import { conceptMasteryService } from "../services";
 import type { ConceptWeakness } from "../types";
 
 type ConceptWeaknessCardProps = {
@@ -15,6 +16,10 @@ const priorityClass = {
 };
 
 export function ConceptWeaknessCard({ weakness }: ConceptWeaknessCardProps) {
+  const calculated = conceptMasteryService.calculateMastery(weakness);
+  const masteryLevel = calculated.masteryLevel;
+  const weaknessScore = calculated.weaknessScore;
+
   return (
     <Card interactive className="p-5">
       <div className="flex items-start justify-between gap-4">
@@ -33,10 +38,17 @@ export function ConceptWeaknessCard({ weakness }: ConceptWeaknessCardProps) {
       <div className="mt-5">
         <div className="flex items-center justify-between text-xs font-bold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
           <span>Mastery</span>
-          <span>{weakness.masteryLevel}%</span>
+          <span>{masteryLevel}%</span>
         </div>
         <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
-          <div className="h-full rounded-full bg-amber-500 transition-all duration-500 dark:bg-amber-300" style={{ width: `${weakness.masteryLevel}%` }} />
+          <div className="h-full rounded-full bg-amber-500 transition-all duration-500 dark:bg-amber-300" style={{ width: `${masteryLevel}%` }} />
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50/80 p-3 dark:border-white/10 dark:bg-white/[0.04]">
+        <div className="flex items-center justify-between text-xs font-bold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+          <span>Weakness score</span>
+          <span>{weaknessScore}%</span>
         </div>
       </div>
 

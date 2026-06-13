@@ -1,4 +1,5 @@
 import type { Concept, ConceptDependency, ConceptGraphNode, ConceptWeakness, StudentConceptState } from "../types";
+import { conceptMasteryService } from "./conceptMasteryService";
 
 const concepts: Concept[] = [
   {
@@ -65,56 +66,66 @@ const dependencies: ConceptDependency[] = [
   },
 ];
 
+function buildStudentConceptState(input: Omit<StudentConceptState, "masteryLevel" | "confidenceLevel" | "weaknessScore">): StudentConceptState {
+  return {
+    ...input,
+    ...conceptMasteryService.calculateMastery(input),
+  };
+}
+
 const studentConceptStates: StudentConceptState[] = [
-  {
+  buildStudentConceptState({
     conceptId: "electrochemistry",
-    masteryLevel: 64,
-    confidenceLevel: "medium",
     attempts: 18,
     correctAnswers: 12,
     wrongAnswers: 6,
-  },
-  {
+  }),
+  buildStudentConceptState({
     conceptId: "oxidation-number",
-    masteryLevel: 35,
-    confidenceLevel: "low",
     attempts: 20,
     correctAnswers: 7,
     wrongAnswers: 13,
-  },
-  {
+  }),
+  buildStudentConceptState({
     conceptId: "galvanic-cell",
-    masteryLevel: 72,
-    confidenceLevel: "high",
-    attempts: 14,
-    correctAnswers: 10,
-    wrongAnswers: 4,
-  },
+    attempts: 20,
+    correctAnswers: 15,
+    wrongAnswers: 5,
+  }),
 ];
 
+function buildConceptWeakness(input: Omit<ConceptWeakness, "masteryLevel" | "confidenceLevel" | "weaknessScore">): ConceptWeakness {
+  return {
+    ...input,
+    ...conceptMasteryService.calculateMastery(input),
+  };
+}
+
 const weakConcepts: ConceptWeakness[] = [
-  {
+  buildConceptWeakness({
     id: "weak-concept-1",
     conceptId: "oxidation-number",
     conceptName: "Oxidation Number",
     subject: "Chemistry",
     chapter: "Redox Reactions",
-    masteryLevel: 35,
-    confidenceLevel: "low",
+    attempts: 20,
+    correctAnswers: 7,
+    wrongAnswers: 13,
     priority: "high",
     recommendation: "Review oxidation number rules and solve 10 focused practice questions.",
-  },
-  {
+  }),
+  buildConceptWeakness({
     id: "weak-concept-2",
     conceptId: "electrochemistry",
     conceptName: "Electrochemistry",
     subject: "Chemistry",
     chapter: "Electrochemistry",
-    masteryLevel: 64,
-    confidenceLevel: "medium",
+    attempts: 18,
+    correctAnswers: 12,
+    wrongAnswers: 6,
     priority: "medium",
     recommendation: "Review electron flow examples before attempting galvanic cell questions.",
-  },
+  }),
 ];
 
 const conceptGraph: ConceptGraphNode[] = [
