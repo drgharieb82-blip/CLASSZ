@@ -18,6 +18,7 @@ export type {
   MemoryTimeline,
   PersonalizedRecommendation,
   StudentProfile,
+  StudentMemorySnapshot,
   StudentStrength,
   StudentSummary,
   StudentWeakness,

@@ -66,52 +66,22 @@ export function useStudentMemory(): StudentMemoryState {
     setError(null);
 
     try {
-      const [
-        profile,
-        strengthList,
-        weaknessList,
-        preferences,
-        patterns,
-        attention,
-        timeline,
-        detectedWeaknessList,
-        detectedStrengthList,
-        patternInsights,
-        forgettingRisks,
-        recommendations,
-        summary,
-        longTermInsights,
-      ] = await Promise.all([
-        studentMemoryService.getStudentProfile(),
-        studentMemoryService.getStrengths(),
-        studentMemoryService.getWeaknesses(),
-        studentMemoryService.getLearningPreferences(),
-        studentMemoryService.getStudyPatterns(),
-        studentMemoryService.getAttentionProfile(),
-        studentMemoryService.getTimeline(),
-        studentMemoryService.getDetectedWeaknesses(),
-        studentMemoryService.getDetectedStrengths(),
-        studentMemoryService.getLearningPatternInsights(),
-        studentMemoryService.getForgettingCurve(),
-        studentMemoryService.getPersonalizedRecommendations(),
-        studentMemoryService.getStudentSummary(),
-        studentMemoryService.getLongTermMemoryInsights(),
-      ]);
+      const memory = await studentMemoryService.getStudentMemory();
 
-      setStudentProfile(profile);
-      setStrengths(strengthList);
-      setWeaknesses(weaknessList);
-      setLearningPreferences(preferences);
-      setStudyPatterns(patterns);
-      setAttentionProfile(attention);
-      setMemoryTimeline(timeline);
-      setDetectedWeaknesses(detectedWeaknessList);
-      setDetectedStrengths(detectedStrengthList);
-      setLearningPatternInsights(patternInsights);
-      setForgettingCurve(forgettingRisks);
-      setPersonalizedRecommendations(recommendations);
-      setStudentSummary(summary);
-      setLongTermMemoryInsights(longTermInsights);
+      setStudentProfile(memory.studentProfile);
+      setStrengths(memory.strengths);
+      setWeaknesses(memory.weaknesses);
+      setLearningPreferences(memory.learningPreferences);
+      setStudyPatterns(memory.studyPatterns);
+      setAttentionProfile(memory.attentionProfile);
+      setMemoryTimeline(memory.memoryTimeline);
+      setDetectedWeaknesses(memory.detectedWeaknesses);
+      setDetectedStrengths(memory.detectedStrengths);
+      setLearningPatternInsights(memory.learningPatternInsights);
+      setForgettingCurve(memory.forgettingCurve);
+      setPersonalizedRecommendations(memory.personalizedRecommendations);
+      setStudentSummary(memory.studentSummary);
+      setLongTermMemoryInsights(memory.longTermMemoryInsights);
     } catch {
       setError(fallbackError);
     } finally {

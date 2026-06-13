@@ -99,6 +99,23 @@ export type LongTermMemoryInsight = {
   importance: MemoryImportance;
 };
 
+export type StudentMemorySnapshot = {
+  studentProfile: StudentProfile;
+  strengths: StudentStrength[];
+  weaknesses: StudentWeakness[];
+  learningPreferences: LearningPreference[];
+  studyPatterns: StudyPattern[];
+  attentionProfile: AttentionProfile | null;
+  memoryTimeline: MemoryTimeline;
+  detectedWeaknesses: DetectedWeakness[];
+  detectedStrengths: DetectedStrength[];
+  learningPatternInsights: LearningPatternInsight[];
+  forgettingCurve: ForgettingCurveItem[];
+  personalizedRecommendations: PersonalizedRecommendation[];
+  studentSummary: StudentSummary | null;
+  longTermMemoryInsights: LongTermMemoryInsight[];
+};
+
 export type StudentStrength = {
   id: string;
   conceptId: string;
