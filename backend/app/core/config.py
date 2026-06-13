@@ -28,6 +28,14 @@ class Settings(BaseSettings):
     )
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
+    ai_provider: str = "mock"
+    openai_api_key: str | None = None
+    openai_base_url: str = "https://api.openai.com/v1"
+    openai_model: str = "gpt-4.1-mini"
+    ai_request_timeout_seconds: int = 30
+    ai_max_retries: int = 1
+    ai_cost_per_1k_input_tokens: float = 0.0
+    ai_cost_per_1k_output_tokens: float = 0.0
 
     cors_origins_raw: str = Field(
         default="http://localhost:5173,http://127.0.0.1:5173",

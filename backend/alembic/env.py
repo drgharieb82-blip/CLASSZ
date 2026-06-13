@@ -6,6 +6,7 @@ from sqlalchemy import engine_from_config, pool
 from app.core.config import settings
 from app.db.base import Base
 from app.models import user  # noqa: F401
+from app.modules.ai_core import models as ai_core_models  # noqa: F401
 from app.modules.anti_cheating import models as anti_cheating_models  # noqa: F401
 from app.modules.assignments import models as assignment_models  # noqa: F401
 from app.modules.chapters import models as chapter_models  # noqa: F401

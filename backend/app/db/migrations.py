@@ -1,3 +1,4 @@
+from app.modules.ai_core.models import AIRequestLog, AIRequestStatus
 from app.models import Role, User
 from app.modules.anti_cheating.models import AntiCheatingEvent, AntiCheatingEventType
 from app.modules.assignments.models import Assignment, AssignmentSubmission, AssignmentSubmissionStatus, SubmissionFile
@@ -46,6 +47,8 @@ from app.modules.videos.models import Video, VideoProvider
 
 __all__ = [
     "BlockType",
+    "AIRequestLog",
+    "AIRequestStatus",
     "Assignment",
     "AssignmentSubmission",
     "AssignmentSubmissionStatus",
