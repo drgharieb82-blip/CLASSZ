@@ -1,4 +1,5 @@
 from typing import Literal
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
@@ -15,6 +16,7 @@ class AITeacherRequest(BaseModel):
     question: str | None = None
     student_answer: str | None = None
     concept_context: str | None = None
+    student_id: UUID | None = Field(default=None, alias="studentId")
 
 
 class AITeacherResponse(BaseModel):

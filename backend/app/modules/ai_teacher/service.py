@@ -4,6 +4,7 @@ from app.modules.ai_core.prompting import prompt_templates
 from app.modules.ai_core.schemas import AICompletionRequest, AIMessage
 from app.modules.ai_core.service import complete_with_ai
 from app.modules.ai_core.structured_output import StructuredOutputError, require_keys
+from app.modules.ai_teacher.memory_context import get_memory_context
 from app.modules.ai_teacher.schemas import AITeacherRequest, AITeacherResponse
 
 
@@ -61,6 +62,9 @@ def validate_teacher_payload(payload: dict[str, object], request: AITeacherReque
 
 
 async def teach(payload: AITeacherRequest, session: AsyncSession | None = None, memory_context: str | None = None) -> AITeacherResponse:
+    if memory_context is None:
+        memory_context = await get_memory_context(session, payload.student_id)
+
     prompt = build_teacher_prompt(payload, memory_context)
     response = await complete_with_ai(
         AICompletionRequest(
