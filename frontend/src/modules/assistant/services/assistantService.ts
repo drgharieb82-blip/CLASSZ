@@ -117,6 +117,15 @@ const questionExplanation: QuestionExplanation = {
   id: "explanation-1",
   questionId: "redox-question-12",
   conceptId: "oxidation-number",
+  questionTitle: "Which element is reduced in the redox reaction Fe2+ + MnO4- -> Fe3+ + Mn2+?",
+  selectedAnswer: "Iron is reduced because Fe2+ becomes Fe3+.",
+  correctAnswer: "Manganese is reduced because Mn changes from +7 in MnO4- to +2 in Mn2+.",
+  wrongExplanation:
+    "The selected answer is wrong because Fe2+ loses an electron and becomes Fe3+. Losing electrons means oxidation, not reduction.",
+  correctExplanation:
+    "The correct answer is manganese because its oxidation number decreases from +7 to +2. A decrease in oxidation number means the atom gained electrons and was reduced.",
+  relatedConcept: "Oxidation Number",
+  difficulty: "medium",
   summary:
     "The selected answer is wrong because it treats oxygen as changing oxidation number, but oxygen remains -2 in this reaction. The correct answer focuses on manganese, which decreases from +7 to +2, so it is reduced.",
   steps: [

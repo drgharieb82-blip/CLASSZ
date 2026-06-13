@@ -1,13 +1,13 @@
 import { FormEvent, useEffect, useRef } from "react";
-import { AlertCircle, Bot, RefreshCw, SendHorizontal, ShieldCheck, Sparkles, Trash2 } from "lucide-react";
+import { AlertCircle, Bot, RefreshCw, SendHorizontal, ShieldCheck, Trash2 } from "lucide-react";
 
 import { Card } from "../../../components/ui/Card";
 import { LoadingSkeleton } from "../../../components/ui/LoadingSkeleton";
 import { PageContainer } from "../../../components/ui/PageContainer";
-import { SectionHeader } from "../../../components/ui/SectionHeader";
 import { useAssistantConversation } from "../hooks";
 import { ChatBubble } from "./ChatBubble";
 import { EmptyChatState } from "./EmptyChatState";
+import { ExplanationCard } from "./ExplanationCard";
 import { LoadingMessage } from "./LoadingMessage";
 import { RevisionCard } from "./RevisionCard";
 import { SuggestionCard } from "./SuggestionCard";
@@ -133,13 +133,7 @@ export function AssistantTeacherPanel() {
       </Card>
 
       <aside className="space-y-4">
-        <Card className="p-5">
-          <SectionHeader
-            title="Assistant insights"
-            description={questionExplanation?.summary ?? "Mock service insights will appear here after loading."}
-            icon={<Sparkles className="h-5 w-5 text-violet-600 dark:text-violet-300" aria-hidden="true" />}
-          />
-        </Card>
+        <ExplanationCard explanation={questionExplanation} loading={loading} />
 
         {weaknesses.map((weakness) => (
           <WeaknessCard key={weakness.id} weakness={weakness} />

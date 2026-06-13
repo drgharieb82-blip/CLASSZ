@@ -36,6 +36,13 @@ export type QuestionExplanation = {
   id: string;
   questionId: string;
   conceptId: string;
+  questionTitle: string;
+  selectedAnswer: string;
+  correctAnswer: string;
+  wrongExplanation: string;
+  correctExplanation: string;
+  relatedConcept: string;
+  difficulty: "easy" | "medium" | "hard";
   summary: string;
   steps: string[];
 };
