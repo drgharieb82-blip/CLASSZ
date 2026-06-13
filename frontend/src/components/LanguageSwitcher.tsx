@@ -6,8 +6,8 @@ export function LanguageSwitcher() {
   const currentLanguage = i18n.language === "ar" ? "ar" : "en";
 
   return (
-    <label className="inline-flex items-center gap-2 rounded-md border border-ink-950/10 bg-white/76 px-3 py-2 text-sm font-semibold text-ink-950 dark:border-white/10 dark:bg-white/8 dark:text-chalk">
-      <Languages className="h-4 w-4 text-ink-600 dark:text-ink-300" aria-hidden="true" />
+    <label className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm font-semibold text-slate-950 shadow-sm transition duration-200 hover:border-teal-500/35 dark:border-white/10 dark:bg-white/8 dark:text-white">
+      <Languages className="h-4 w-4 text-slate-500 dark:text-slate-400" aria-hidden="true" />
       <span className="sr-only">{t("language.label")}</span>
       <select
         value={currentLanguage}

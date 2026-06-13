@@ -1,6 +1,8 @@
 import { Gauge } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { Card } from "../../components/ui/Card";
+import { SectionHeader } from "../../components/ui/SectionHeader";
 import type { TeacherPendingTask } from "./api";
 
 export function GradingWorkloadCard({ tasks }: { tasks: TeacherPendingTask[] }) {
@@ -10,28 +12,26 @@ export function GradingWorkloadCard({ tasks }: { tasks: TeacherPendingTask[] }) 
   const totalPoints = tasks.reduce((sum, task) => sum + task.max_score, 0);
 
   return (
-    <section className="rounded-[20px] border border-white/10 bg-[#111827]/88 p-5 shadow-[0_16px_40px_rgba(0,0,0,0.20)]">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#A855F7]">{t("teacherDashboard.workload")}</p>
-          <h2 className="mt-2 font-[Poppins] text-2xl font-semibold text-[#F8FAFC]">{t("teacherDashboard.gradingWorkload")}</h2>
-        </div>
-        <Gauge className="h-6 w-6 text-[#3B82F6]" aria-hidden="true" />
-      </div>
+    <Card className="p-5 sm:p-6">
+      <SectionHeader
+        eyebrow={t("teacherDashboard.workload")}
+        title={t("teacherDashboard.gradingWorkload")}
+        icon={<Gauge className="h-6 w-6 text-teal-600 dark:text-teal-300" aria-hidden="true" />}
+      />
       <div className="mt-5 grid gap-3 sm:grid-cols-3">
         <Metric label={t("teacherDashboard.essays")} value={essayCount} />
         <Metric label={t("teacherDashboard.stats.assignments")} value={assignmentCount} />
         <Metric label={t("teacherDashboard.pointsWaiting")} value={totalPoints} />
       </div>
-    </section>
+    </Card>
   );
 }
 
 function Metric({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-[20px] border border-white/10 bg-white/[0.06] p-4">
-      <p className="text-sm text-[#94A3B8]">{label}</p>
-      <p className="mt-2 font-[Poppins] text-2xl font-semibold text-[#F8FAFC]">{value}</p>
+    <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 dark:border-white/10 dark:bg-white/[0.04]">
+      <p className="text-sm text-slate-500 dark:text-slate-400">{label}</p>
+      <p className="mt-2 font-display text-2xl font-semibold text-slate-950 dark:text-white">{value}</p>
     </div>
   );
 }

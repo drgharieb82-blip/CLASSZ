@@ -1,6 +1,9 @@
 import { Clock3 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { Card } from "../../components/ui/Card";
+import { EmptyState } from "../../components/ui/EmptyState";
+import { SectionHeader } from "../../components/ui/SectionHeader";
 import type { TeacherActivityItem } from "./api";
 
 type RecentActivityPanelProps = {
@@ -15,30 +18,31 @@ export function RecentActivityPanel({ quizzes, assignments }: RecentActivityPane
     .slice(0, 8);
 
   return (
-    <section className="rounded-[20px] border border-white/10 bg-[#111827]/88 p-5 shadow-[0_16px_40px_rgba(0,0,0,0.20)]">
-      <div className="flex items-center gap-3">
-        <Clock3 className="h-5 w-5 text-[#A855F7]" aria-hidden="true" />
-        <h2 className="font-[Poppins] text-2xl font-semibold text-[#F8FAFC]">{t("teacherDashboard.recentActivity")}</h2>
-      </div>
+    <Card className="p-5 sm:p-6">
+      <SectionHeader
+        title={t("teacherDashboard.recentActivity")}
+        icon={<Clock3 className="h-5 w-5 text-violet-600 dark:text-violet-300" aria-hidden="true" />}
+      />
       <div className="mt-5 space-y-3">
         {items.length === 0 ? (
-          <p className="rounded-[20px] border border-dashed border-white/15 bg-white/[0.06] p-5 text-sm text-[#94A3B8]">
-            {t("teacherDashboard.recentEmpty")}
-          </p>
+          <EmptyState description={t("teacherDashboard.recentEmpty")} />
         ) : (
           items.map((item) => (
-            <article key={`${item.activity_type}-${item.id}`} className="flex flex-col gap-2 rounded-[20px] border border-white/10 bg-white/[0.06] p-4 sm:flex-row sm:items-center sm:justify-between">
+            <article
+              key={`${item.activity_type}-${item.id}`}
+              className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50/70 p-4 transition duration-200 hover:border-violet-500/35 hover:bg-white dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-violet-300/35 dark:hover:bg-white/[0.07] sm:flex-row sm:items-center sm:justify-between"
+            >
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#94A3B8]">{item.activity_type}</p>
-                <h3 className="mt-1 font-semibold text-[#F8FAFC]">{item.title}</h3>
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">{item.activity_type}</p>
+                <h3 className="mt-1 font-semibold text-slate-950 dark:text-white">{item.title}</h3>
               </div>
-              <time className="text-sm text-[#94A3B8]" dateTime={item.created_at}>
+              <time className="text-sm text-slate-500 dark:text-slate-400" dateTime={item.created_at}>
                 {new Date(item.created_at).toLocaleDateString()}
               </time>
             </article>
           ))
         )}
       </div>
-    </section>
+    </Card>
   );
 }

@@ -7,14 +7,14 @@
 :root {
   color-scheme: light;
   font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
-  background: #f7f8f3;
-  color: #101613;
+  background: #f8fafc;
+  color: #0f172a;
 }
 
 :root.dark {
   color-scheme: dark;
-  background: #0f172a;
-  color: #f7f8f3;
+  background: #020617;
+  color: #f8fafc;
 }
 
 body {
@@ -39,8 +39,55 @@ body {
 @layer utilities {
   .surface-grid {
     background-image:
-      linear-gradient(rgba(75, 90, 77, 0.08) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(75, 90, 77, 0.08) 1px, transparent 1px);
+      linear-gradient(rgba(100, 116, 139, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(100, 116, 139, 0.08) 1px, transparent 1px);
     background-size: 28px 28px;
+  }
+}
+
+@layer components {
+  .ui-button {
+    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-teal-500/40 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-teal-500/15 disabled:pointer-events-none disabled:opacity-50 dark:border-white/10 dark:bg-white/8 dark:text-white dark:hover:border-teal-300/40 dark:hover:bg-white/12;
+  }
+
+  .ui-button-primary {
+    @apply border-teal-600 bg-teal-600 text-white shadow-[0_10px_24px_rgba(13,148,136,0.22)] hover:border-teal-700 hover:bg-teal-700 dark:border-teal-400 dark:bg-teal-400 dark:text-slate-950 dark:hover:border-teal-300 dark:hover:bg-teal-300;
+  }
+
+  .ui-input,
+  .ui-select {
+    @apply min-h-10 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 shadow-sm outline-none transition duration-200 placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15 dark:border-white/10 dark:bg-white/8 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-teal-300;
+  }
+
+  .ui-table {
+    @apply w-full border-separate border-spacing-0 overflow-hidden rounded-xl border border-slate-200 bg-white text-sm shadow-sm dark:border-white/10 dark:bg-slate-900/72;
+  }
+
+  .ui-table th {
+    @apply bg-slate-50 px-4 py-3 text-start text-xs font-bold uppercase tracking-[0.08em] text-slate-500 dark:bg-white/[0.04] dark:text-slate-400;
+  }
+
+  .ui-table td {
+    @apply border-t border-slate-200 px-4 py-3 text-slate-700 dark:border-white/10 dark:text-slate-300;
+  }
+
+  .ui-badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold;
+  }
+
+  .ui-badge-success {
+    @apply bg-emerald-50 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-200;
+  }
+
+  .ui-badge-warning {
+    @apply bg-amber-50 text-amber-700 dark:bg-amber-400/10 dark:text-amber-200;
+  }
+
+  .ui-badge-error {
+    @apply bg-rose-50 text-rose-700 dark:bg-rose-400/10 dark:text-rose-200;
+  }
+
+  .ui-badge-neutral {
+    @apply bg-slate-100 text-slate-700 dark:bg-white/10 dark:text-slate-200;
   }
 }

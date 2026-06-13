@@ -27,17 +27,17 @@ export function Shell({ title, roleLabel, accent }: ShellProps) {
   const resolvedRoleLabel = roleLabel.startsWith("i18n:") ? t(roleLabel.slice(5)) : roleLabel;
 
   return (
-    <div className="min-h-screen bg-ink-50 text-ink-950 transition-colors dark:bg-ink-950 dark:text-ink-50">
-      <div className="surface-grid fixed inset-0 opacity-80" aria-hidden="true" />
+    <div className="min-h-screen bg-slate-50 text-slate-950 transition-colors dark:bg-slate-950 dark:text-slate-50">
+      <div className="surface-grid fixed inset-0 opacity-70" aria-hidden="true" />
       <div className="relative flex min-h-screen">
-        <aside className="hidden w-72 border-r border-ink-950/10 bg-chalk/86 px-5 py-6 backdrop-blur-xl dark:border-white/10 dark:bg-ink-950/82 lg:block">
+        <aside className="hidden w-72 border-r border-slate-200/80 bg-white/82 px-5 py-6 shadow-[8px_0_40px_rgba(15,23,42,0.04)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/82 lg:block">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-md bg-ink-950 text-chalk dark:bg-chalk dark:text-ink-950">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-950 text-white shadow-sm dark:bg-white dark:text-slate-950">
               CZ
             </div>
             <div>
               <p className="font-display text-2xl leading-none">{t("app.brand")}</p>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-600 dark:text-ink-300">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
                 {t("app.subtitle")}
               </p>
             </div>
@@ -50,10 +50,10 @@ export function Shell({ title, roleLabel, accent }: ShellProps) {
                 to={item.href}
                 className={({ isActive }) =>
                   [
-                    "flex items-center gap-3 rounded-md px-3 py-3 text-sm font-bold transition",
+                    "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition duration-200",
                     isActive
-                      ? "bg-ink-950 text-chalk dark:bg-chalk dark:text-ink-950"
-                      : "text-ink-700 hover:bg-ink-950/6 dark:text-ink-100 dark:hover:bg-white/8",
+                      ? "bg-slate-950 text-white shadow-sm dark:bg-white dark:text-slate-950"
+                      : "text-slate-600 hover:bg-slate-900/5 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/8 dark:hover:text-white",
                   ].join(" ")
                 }
               >
@@ -65,25 +65,25 @@ export function Shell({ title, roleLabel, accent }: ShellProps) {
         </aside>
 
         <main className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-10 border-b border-ink-950/10 bg-chalk/80 px-4 py-4 backdrop-blur-xl dark:border-white/10 dark:bg-ink-950/78 sm:px-6 lg:px-8">
+          <header className="sticky top-0 z-10 border-b border-slate-200/80 bg-white/78 px-4 py-4 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/78 sm:px-6 lg:px-8">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-ink-600 dark:text-ink-300">
+                <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
                   {resolvedRoleLabel}
                 </p>
                 <h1 className="font-display text-3xl leading-tight sm:text-4xl">{resolvedTitle}</h1>
               </div>
 
               <div className="flex items-center gap-2">
-                <div className="hidden items-center gap-2 rounded-md border border-ink-950/10 bg-white/70 px-3 py-2 dark:border-white/10 dark:bg-white/6 md:flex">
-                  <Search className="h-4 w-4 text-ink-600 dark:text-ink-300" aria-hidden="true" />
-                  <span className="text-sm text-ink-600 dark:text-ink-300">{t("app.searchWorkspace")}</span>
+                <div className="hidden min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white/80 px-3 py-2 shadow-sm dark:border-white/10 dark:bg-white/8 md:flex">
+                  <Search className="h-4 w-4 text-slate-500 dark:text-slate-400" aria-hidden="true" />
+                  <span className="text-sm text-slate-500 dark:text-slate-400">{t("app.searchWorkspace")}</span>
                 </div>
                 <LanguageSwitcher />
                 <button
                   type="button"
                   onClick={toggleTheme}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-ink-950/10 bg-white/76 text-ink-950 transition hover:bg-white dark:border-white/10 dark:bg-white/8 dark:text-chalk dark:hover:bg-white/12"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white/80 text-slate-950 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-teal-500/35 hover:bg-white dark:border-white/10 dark:bg-white/8 dark:text-white dark:hover:border-teal-300/35 dark:hover:bg-white/12"
                   aria-label={t("app.toggleTheme")}
                 >
                   <ThemeIcon className="h-5 w-5" aria-hidden="true" />
@@ -94,7 +94,7 @@ export function Shell({ title, roleLabel, accent }: ShellProps) {
 
           <section className="px-4 py-6 sm:px-6 lg:px-8">
             <div
-              className="mb-6 h-1.5 w-full rounded-full"
+              className="mx-auto mb-6 h-1.5 w-full max-w-[1440px] rounded-full"
               style={{ background: accent }}
               aria-hidden="true"
             />
