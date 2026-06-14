@@ -1,8 +1,9 @@
-import { BookOpen, GraduationCap, LayoutDashboard, Moon, Search, Sun, Users } from "lucide-react";
+import { BookOpen, GraduationCap, LayoutDashboard, LogOut, Moon, Search, Sun, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { authService } from "../modules/auth";
 import { useThemeStore } from "../store/themeStore";
 
 type ShellProps = {
@@ -20,11 +21,17 @@ const navItems = [
 
 export function Shell({ title, roleLabel, accent }: ShellProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const theme = useThemeStore((state) => state.theme);
   const toggleTheme = useThemeStore((state) => state.toggleTheme);
+  const currentUser = authService.getCurrentUser();
   const ThemeIcon = theme === "dark" ? Sun : Moon;
   const resolvedTitle = title.startsWith("i18n:") ? t(title.slice(5)) : title;
   const resolvedRoleLabel = roleLabel.startsWith("i18n:") ? t(roleLabel.slice(5)) : roleLabel;
+  const handleLogout = () => {
+    authService.logout();
+    navigate("/login", { replace: true });
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-950 transition-colors dark:bg-slate-950 dark:text-slate-50">
@@ -75,6 +82,11 @@ export function Shell({ title, roleLabel, accent }: ShellProps) {
               </div>
 
               <div className="flex items-center gap-2">
+                {currentUser ? (
+                  <div className="hidden min-h-10 items-center rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm dark:border-white/10 dark:bg-white/8 dark:text-slate-200 sm:flex">
+                    {currentUser.name}
+                  </div>
+                ) : null}
                 <div className="hidden min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white/80 px-3 py-2 shadow-sm dark:border-white/10 dark:bg-white/8 md:flex">
                   <Search className="h-4 w-4 text-slate-500 dark:text-slate-400" aria-hidden="true" />
                   <span className="text-sm text-slate-500 dark:text-slate-400">{t("app.searchWorkspace")}</span>
@@ -87,6 +99,14 @@ export function Shell({ title, roleLabel, accent }: ShellProps) {
                   aria-label={t("app.toggleTheme")}
                 >
                   <ThemeIcon className="h-5 w-5" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white/80 text-slate-950 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-rose-500/35 hover:bg-white dark:border-white/10 dark:bg-white/8 dark:text-white dark:hover:border-rose-300/35 dark:hover:bg-white/12"
+                  aria-label="Log out"
+                >
+                  <LogOut className="h-5 w-5" aria-hidden="true" />
                 </button>
               </div>
             </div>
