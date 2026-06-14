@@ -108,6 +108,46 @@ export function QuestionDetailsPage() {
                 <dt className="text-[#94A3B8]">{t("questionBank.status")}</dt>
                 <dd className="mt-1 font-semibold text-[#CBD5E1]">{question.is_active ? t("questionBank.active") : t("questionBank.inactive")}</dd>
               </div>
+              <div>
+                <dt className="text-[#94A3B8]">Bloom level</dt>
+                <dd className="mt-1 font-semibold text-[#CBD5E1]">{question.bloom_level ?? t("common.empty")}</dd>
+              </div>
+              <div>
+                <dt className="text-[#94A3B8]">Thinking skill</dt>
+                <dd className="mt-1 font-semibold text-[#CBD5E1]">{question.thinking_skill ?? t("common.empty")}</dd>
+              </div>
+              <div>
+                <dt className="text-[#94A3B8]">Estimated time</dt>
+                <dd className="mt-1 font-semibold text-[#CBD5E1]">
+                  {question.estimated_time_seconds ? `${question.estimated_time_seconds}s` : t("common.empty")}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-[#94A3B8]">Version</dt>
+                <dd className="mt-1 font-semibold text-[#CBD5E1]">v{question.version_number}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section className="rounded-[20px] border border-white/10 bg-white/[0.06] p-5 shadow-[0_16px_40px_rgba(0,0,0,0.20)]">
+            <h2 className="font-[Poppins] text-lg font-semibold text-[#F8FAFC]">Statistics</h2>
+            <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <dt className="text-[#94A3B8]">Used</dt>
+                <dd className="mt-1 font-semibold text-[#CBD5E1]">{question.stats?.times_used ?? 0}</dd>
+              </div>
+              <div>
+                <dt className="text-[#94A3B8]">Correct</dt>
+                <dd className="mt-1 font-semibold text-[#CBD5E1]">{question.stats?.correct_percentage ?? 0}%</dd>
+              </div>
+              <div>
+                <dt className="text-[#94A3B8]">Difficulty</dt>
+                <dd className="mt-1 font-semibold text-[#CBD5E1]">{question.stats?.difficulty_index ?? 0}</dd>
+              </div>
+              <div>
+                <dt className="text-[#94A3B8]">Avg time</dt>
+                <dd className="mt-1 font-semibold text-[#CBD5E1]">{question.stats?.average_time_seconds ?? 0}s</dd>
+              </div>
             </dl>
           </section>
 

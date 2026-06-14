@@ -20,7 +20,7 @@ import {
 import { GradeDetailsPage, ManualGradingPage } from "../modules/grading";
 import { LessonBuilderPage } from "../modules/lesson-builder";
 import { LessonPage } from "../modules/lessons/LessonPage";
-import { QuestionBankPage, QuestionDetailsPage } from "../modules/question-bank";
+import { BulkImportPage, QuestionBankPage, QuestionDetailsPage, QuestionEditorPage } from "../modules/question-bank";
 import { QuizPlayerPage } from "../modules/quiz-player";
 import { QuizBuilderPage } from "../modules/quizzes";
 import { QuizResultsPage } from "../modules/results";
@@ -41,6 +41,8 @@ const adminChildren = [
   { path: "lesson-builder", element: <LessonBuilderPage /> },
   { path: "videos/:videoId", element: <VideoPlayerPage /> },
   { path: "question-bank", element: <QuestionBankPage /> },
+  { path: "question-bank/new", element: <QuestionEditorPage /> },
+  { path: "question-bank/import", element: <BulkImportPage /> },
   { path: "question-bank/:questionId", element: <QuestionDetailsPage /> },
   { path: "quizzes/builder", element: <QuizBuilderPage /> },
   { path: "quizzes/:quizId/player", element: <QuizPlayerPage /> },

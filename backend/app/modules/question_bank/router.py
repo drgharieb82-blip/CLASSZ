@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db_session
@@ -12,7 +13,11 @@ from app.modules.question_bank.schemas import (
     QuestionMediaCreate,
     QuestionMediaRead,
     QuestionRead,
+    QuestionRevisionRead,
+    QuestionSearchParams,
+    QuestionStatsRead,
     QuestionTagAttach,
+    QuestionUpdate,
 )
 
 router = APIRouter(prefix="/questions", tags=["question_bank"])
@@ -21,6 +26,35 @@ router = APIRouter(prefix="/questions", tags=["question_bank"])
 @router.get("", response_model=list[QuestionRead])
 async def list_questions(session: AsyncSession = Depends(get_db_session)) -> list[QuestionRead]:
     return await service.list_questions(session)
+
+
+@router.get("/search", response_model=list[QuestionRead])
+async def search_questions(
+    q: str | None = None,
+    subject: str | None = None,
+    chapter_id: UUID | None = None,
+    lesson_id: UUID | None = None,
+    concept_id: UUID | None = None,
+    difficulty: str | None = None,
+    question_type: str | None = None,
+    tags: list[str] = Query(default_factory=list),
+    limit: int = Query(default=25, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    session: AsyncSession = Depends(get_db_session),
+) -> list[QuestionRead]:
+    params = QuestionSearchParams(
+        q=q,
+        subject=subject,
+        chapter_id=chapter_id,
+        lesson_id=lesson_id,
+        concept_id=concept_id,
+        difficulty=difficulty,
+        question_type=question_type,
+        tags=tags,
+        limit=limit,
+        offset=offset,
+    )
+    return await service.search_questions(session, params)
 
 
 @router.get("/{question_id}", response_model=QuestionRead)
@@ -41,6 +75,53 @@ async def create_question(
     session: AsyncSession = Depends(get_db_session),
 ) -> QuestionRead:
     return await service.create_question(session, payload)
+
+
+@router.put("/{question_id}", response_model=QuestionRead)
+async def update_question(
+    question_id: UUID,
+    payload: QuestionUpdate,
+    session: AsyncSession = Depends(get_db_session),
+) -> QuestionRead:
+    question = await service.update_question(session, question_id, payload)
+    if question is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Question not found")
+
+    return question
+
+
+@router.delete("/{question_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_question(
+    question_id: UUID,
+    session: AsyncSession = Depends(get_db_session),
+) -> None:
+    deleted = await service.soft_delete_question(session, question_id)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Question not found")
+
+
+@router.get("/{question_id}/stats", response_model=QuestionStatsRead)
+async def get_question_stats(
+    question_id: UUID,
+    session: AsyncSession = Depends(get_db_session),
+) -> QuestionStatsRead:
+    stats = await service.get_question_stats(session, question_id)
+    if stats is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Question not found")
+
+    return stats
+
+
+@router.get("/{question_id}/revisions", response_model=list[QuestionRevisionRead])
+async def list_question_revisions(
+    question_id: UUID,
+    session: AsyncSession = Depends(get_db_session),
+) -> list[QuestionRevisionRead]:
+    revisions = await service.list_question_revisions(session, question_id)
+    if revisions is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Question not found")
+
+    return revisions
 
 
 @router.post("/{question_id}/choices", response_model=QuestionChoiceRead, status_code=status.HTTP_201_CREATED)

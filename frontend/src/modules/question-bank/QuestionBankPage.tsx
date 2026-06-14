@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, BookOpenCheck } from "lucide-react";
+import { AlertCircle, BookOpenCheck, FileUp, PlusCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { listQuestions, type Difficulty, type QuestionType } from "./api";
+import { searchQuestions, type Difficulty, type QuestionType } from "./api";
 import { QuestionCard } from "./QuestionCard";
 import { QuestionFilters } from "./QuestionFilters";
 
@@ -14,22 +14,16 @@ export function QuestionBankPage() {
   const [questionType, setQuestionType] = useState<QuestionType | "ALL">("ALL");
 
   const { data: questions = [], isError, isLoading } = useQuery({
-    queryKey: ["questions"],
-    queryFn: listQuestions,
+    queryKey: ["questions", search, difficulty, questionType],
+    queryFn: () => searchQuestions({ q: search, difficulty, question_type: questionType }),
   });
 
   const filteredQuestions = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase();
-
     return questions.filter((question) => {
-      const matchesSearch =
-        normalizedSearch.length === 0 ||
-        question.title.toLowerCase().includes(normalizedSearch) ||
-        question.category?.name.toLowerCase().includes(normalizedSearch);
       const matchesDifficulty = difficulty === "ALL" || question.difficulty === difficulty;
       const matchesType = questionType === "ALL" || question.question_type === questionType;
 
-      return matchesSearch && matchesDifficulty && matchesType;
+      return matchesDifficulty && matchesType;
     });
   }, [difficulty, questionType, questions, search]);
 
@@ -62,9 +56,25 @@ export function QuestionBankPage() {
               {t("questionBank.description")}
             </p>
           </div>
-          <span className="rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-2 text-sm font-semibold text-[#CBD5E1]">
-            {t("common.questions", { count: filteredQuestions.length })}
-          </span>
+          <div className="flex flex-wrap gap-2">
+            <a
+              href="/question-bank/new"
+              className="inline-flex items-center gap-2 rounded-2xl bg-[#10B981] px-4 py-2 text-sm font-semibold text-[#052E25] transition hover:bg-[#34D399]"
+            >
+              <PlusCircle className="h-4 w-4" aria-hidden="true" />
+              New question
+            </a>
+            <a
+              href="/question-bank/import"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-2 text-sm font-semibold text-[#CBD5E1] transition hover:bg-white/[0.1]"
+            >
+              <FileUp className="h-4 w-4" aria-hidden="true" />
+              Bulk import
+            </a>
+            <span className="rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-2 text-sm font-semibold text-[#CBD5E1]">
+              {t("common.questions", { count: filteredQuestions.length })}
+            </span>
+          </div>
         </div>
       </section>
 

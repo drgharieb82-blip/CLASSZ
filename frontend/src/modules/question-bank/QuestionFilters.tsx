@@ -17,6 +17,7 @@ const questionTypes: Array<QuestionType | "ALL"> = [
   "MCQ",
   "TRUE_FALSE",
   "MULTIPLE_SELECT",
+  "SHORT_ANSWER",
   "FILL_BLANK",
   "MATCHING",
   "ORDERING",

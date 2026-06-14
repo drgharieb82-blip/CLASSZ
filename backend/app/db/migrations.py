@@ -16,10 +16,15 @@ from app.modules.question_bank.models import (
     Question,
     QuestionCategory,
     QuestionChoice,
+    QuestionConceptMap,
     QuestionMedia,
+    QuestionMediaPurpose,
+    QuestionRevision,
+    QuestionStats,
     QuestionTag,
     QuestionType,
 )
+from app.modules.question_import.models import ImportError, ImportJob, ImportJobStatus, ImportSourceType, ImportSummary
 from app.modules.quiz_attempts.models import QuizAnswer, QuizAttempt, QuizAttemptStatus
 from app.modules.quizzes.models import Quiz, QuizQuestion
 from app.modules.results.models import QuestionResult, QuizResult
@@ -71,9 +76,18 @@ __all__ = [
     "Question",
     "QuestionCategory",
     "QuestionChoice",
+    "QuestionConceptMap",
+    "QuestionMediaPurpose",
+    "QuestionRevision",
+    "QuestionStats",
     "QuestionMedia",
     "QuestionTag",
     "QuestionType",
+    "ImportError",
+    "ImportJob",
+    "ImportJobStatus",
+    "ImportSourceType",
+    "ImportSummary",
     "Quiz",
     "QuizAnswer",
     "QuizAttempt",
