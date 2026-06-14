@@ -6,12 +6,17 @@ import { ParentLayout } from "../layouts/ParentLayout";
 import { StudentLayout } from "../layouts/StudentLayout";
 import { TeacherLayout } from "../layouts/TeacherLayout";
 import { AssignmentDetailsPage, AssignmentSubmissionPage, AssignmentsPage } from "../modules/assignments";
-import { AssistantPlaceholder } from "../modules/assistant/AssistantPlaceholder";
 import { LoginPage, LoginRedirect, ProtectedRoute } from "../modules/auth";
 import { CourseDetailsPage } from "../modules/courses/CourseDetailsPage";
 import { CourseListPage } from "../modules/courses/CourseListPage";
-import { DashboardPage } from "../modules/dashboard/DashboardPage";
-import { ModulePlaceholderPage } from "../modules/dashboard/ModulePlaceholderPage";
+import {
+  AdminDashboardPage,
+  AssistantTeacherDashboardPage,
+  DashboardPage,
+  ModulePlaceholderPage,
+  ParentDashboardPage,
+  StudentDashboardPage,
+} from "../modules/dashboard";
 import { GradeDetailsPage, ManualGradingPage } from "../modules/grading";
 import { LessonBuilderPage } from "../modules/lesson-builder";
 import { LessonPage } from "../modules/lessons/LessonPage";
@@ -69,7 +74,7 @@ export const router = createBrowserRouter([
         <AdminLayout />
       </ProtectedRoute>
     ),
-    children: [{ index: true, element: <DashboardPage /> }],
+    children: [{ index: true, element: <AdminDashboardPage /> }],
   },
   {
     path: "/teacher",
@@ -87,7 +92,7 @@ export const router = createBrowserRouter([
         <AssistantLayout />
       </ProtectedRoute>
     ),
-    children: [{ index: true, element: <AssistantPlaceholder /> }],
+    children: [{ index: true, element: <AssistantTeacherDashboardPage /> }],
   },
   {
     path: "/student",
@@ -96,7 +101,7 @@ export const router = createBrowserRouter([
         <StudentLayout />
       </ProtectedRoute>
     ),
-    children: [{ index: true, element: <DashboardPage /> }],
+    children: [{ index: true, element: <StudentDashboardPage /> }],
   },
   {
     path: "/parent",
@@ -105,7 +110,7 @@ export const router = createBrowserRouter([
         <ParentLayout />
       </ProtectedRoute>
     ),
-    children: [{ index: true, element: <DashboardPage /> }],
+    children: [{ index: true, element: <ParentDashboardPage /> }],
   },
   { path: "*", element: <Navigate to="/login" replace /> },
 ]);
