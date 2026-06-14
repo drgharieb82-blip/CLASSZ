@@ -4,6 +4,7 @@ import type {
   LearningPreference,
   LearningPattern,
   MemoryEvent,
+  ReviewSession,
   StudyHabit,
   StudentMemorySnapshot,
   StudentProfile,
@@ -16,6 +17,7 @@ import { learningPatternService } from "./learningPatternService";
 import { longTermMemoryEngineService } from "./longTermMemoryEngineService";
 import { memoryTimelineService } from "./memoryTimelineService";
 import { recommendationService } from "./recommendationService";
+import { reviewSchedulerService } from "./reviewSchedulerService";
 import { strengthDetectionService } from "./strengthDetectionService";
 import { studentSummaryService } from "./studentSummaryService";
 import { weaknessDetectionService } from "./weaknessDetectionService";
@@ -117,6 +119,13 @@ async function buildLocalStudentMemorySnapshot(): Promise<StudentMemorySnapshot>
   const learningPatternInsights = learningPatternService.analyzeLearningPatterns(studyPatterns, attentionProfile, timeline);
   const forgettingCurve = forgettingCurveService.calculateForgettingRisk(strengths, weaknesses, timeline);
   const reviewNeeds: ConceptReviewNeed[] = forgettingCurveService.getReviewNeeds(strengths, weaknesses, timeline);
+  const reviewSessions: ReviewSession[] = reviewSchedulerService.generateReviewSchedule(
+    forgettingCurve,
+    reviewNeeds,
+    weaknesses,
+    learningPatterns,
+    timeline,
+  );
   const personalizedRecommendations = recommendationService.generateRecommendations(
     detectedWeaknesses,
     forgettingCurve,
@@ -153,6 +162,7 @@ async function buildLocalStudentMemorySnapshot(): Promise<StudentMemorySnapshot>
     learningPatternInsights,
     forgettingCurve,
     reviewNeeds,
+    reviewSessions,
     personalizedRecommendations,
     studentSummary,
     longTermMemoryInsights,

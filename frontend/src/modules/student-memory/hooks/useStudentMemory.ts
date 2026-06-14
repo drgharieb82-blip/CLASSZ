@@ -14,6 +14,7 @@ import type {
   MemoryEvent,
   MemoryTimeline,
   PersonalizedRecommendation,
+  ReviewSession,
   StudyHabit,
   StudentProfile,
   StudentSummary,
@@ -37,6 +38,7 @@ type StudentMemoryState = {
   learningPatternInsights: LearningPatternInsight[];
   forgettingCurve: ForgettingCurveItem[];
   reviewNeeds: ConceptReviewNeed[];
+  reviewSessions: ReviewSession[];
   personalizedRecommendations: PersonalizedRecommendation[];
   studentSummary: StudentSummary | null;
   longTermMemoryInsights: LongTermMemoryInsight[];
@@ -64,6 +66,7 @@ export function useStudentMemory(): StudentMemoryState {
   const [learningPatternInsights, setLearningPatternInsights] = useState<LearningPatternInsight[]>([]);
   const [forgettingCurve, setForgettingCurve] = useState<ForgettingCurveItem[]>([]);
   const [reviewNeeds, setReviewNeeds] = useState<ConceptReviewNeed[]>([]);
+  const [reviewSessions, setReviewSessions] = useState<ReviewSession[]>([]);
   const [personalizedRecommendations, setPersonalizedRecommendations] = useState<PersonalizedRecommendation[]>([]);
   const [studentSummary, setStudentSummary] = useState<StudentSummary | null>(null);
   const [longTermMemoryInsights, setLongTermMemoryInsights] = useState<LongTermMemoryInsight[]>([]);
@@ -91,6 +94,7 @@ export function useStudentMemory(): StudentMemoryState {
       setLearningPatternInsights(memory.learningPatternInsights);
       setForgettingCurve(memory.forgettingCurve);
       setReviewNeeds(memory.reviewNeeds);
+      setReviewSessions(memory.reviewSessions);
       setPersonalizedRecommendations(memory.personalizedRecommendations);
       setStudentSummary(memory.studentSummary);
       setLongTermMemoryInsights(memory.longTermMemoryInsights);
@@ -131,6 +135,7 @@ export function useStudentMemory(): StudentMemoryState {
     learningPatternInsights,
     forgettingCurve,
     reviewNeeds,
+    reviewSessions,
     personalizedRecommendations,
     studentSummary,
     longTermMemoryInsights,

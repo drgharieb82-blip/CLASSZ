@@ -8,6 +8,7 @@ export { LearningPatternInsightCard } from "./LearningPatternInsightCard";
 export { LongTermMemoryInsightCard } from "./LongTermMemoryInsightCard";
 export { MemoryTimelineCard } from "./MemoryTimelineCard";
 export { RecommendationCard } from "./RecommendationCard";
+export { ReviewSchedulerCard } from "./ReviewSchedulerCard";
 export { StrengthCard } from "./StrengthCard";
 export { StudentMemoryOverview } from "./StudentMemoryOverview";
 export { StudentProfileCard } from "./StudentProfileCard";

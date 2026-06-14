@@ -16,6 +16,8 @@ export type MemoryPriority = "low" | "medium" | "high";
 
 export type ForgettingUrgency = "Low" | "Medium" | "High" | "Critical";
 
+export type ReviewPriority = "Low" | "Medium" | "High" | "Critical";
+
 export type MemoryEvent = {
   id: string;
   timestamp: string;
@@ -86,6 +88,22 @@ export type ConceptReviewNeed = {
   reason: string;
 };
 
+export type ReviewTask = {
+  conceptId: string;
+  conceptName: string;
+  reason: string;
+  durationMinutes: number;
+  urgency: ReviewPriority;
+};
+
+export type ReviewSession = {
+  id: string;
+  scheduledAt: string;
+  estimatedMinutes: number;
+  priority: ReviewPriority;
+  tasks: ReviewTask[];
+};
+
 export type ForgettingCurveItem = ForgettingCurvePoint & {
   id: string;
   riskLevel: MemoryPriority;
@@ -137,6 +155,7 @@ export type StudentMemorySnapshot = {
   learningPatternInsights: LearningPatternInsight[];
   forgettingCurve: ForgettingCurveItem[];
   reviewNeeds: ConceptReviewNeed[];
+  reviewSessions: ReviewSession[];
   personalizedRecommendations: PersonalizedRecommendation[];
   studentSummary: StudentSummary | null;
   longTermMemoryInsights: LongTermMemoryInsight[];

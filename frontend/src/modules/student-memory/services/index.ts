@@ -9,6 +9,7 @@ export { learningPatternService, analyzeLearningPatterns, calculateConsistencySc
 export { longTermMemoryEngineService, aggregateLongTermMemoryInsights } from "./longTermMemoryEngineService";
 export { addMemoryEvent, getTimeline, memoryTimelineService, sortTimeline } from "./memoryTimelineService";
 export { recommendationService, generateRecommendations } from "./recommendationService";
+export { reviewSchedulerService, estimateSessionDuration, generateReviewSchedule, prioritizeTasks } from "./reviewSchedulerService";
 export { strengthDetectionService, detectStrengths } from "./strengthDetectionService";
 export { studentMemoryService } from "./studentMemoryService";
 export { studentSummaryService, generateStudentSummary } from "./studentSummaryService";

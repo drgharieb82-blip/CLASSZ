@@ -15,6 +15,7 @@ import { LearningPatternInsightCard } from "./LearningPatternInsightCard";
 import { LongTermMemoryInsightCard } from "./LongTermMemoryInsightCard";
 import { MemoryTimelineCard } from "./MemoryTimelineCard";
 import { RecommendationCard } from "./RecommendationCard";
+import { ReviewSchedulerCard } from "./ReviewSchedulerCard";
 import { StrengthCard } from "./StrengthCard";
 import { StudentProfileCard } from "./StudentProfileCard";
 import { StudentSummaryCard } from "./StudentSummaryCard";
@@ -37,6 +38,7 @@ export function StudentMemoryOverview() {
     learningPatternInsights,
     forgettingCurve,
     reviewNeeds,
+    reviewSessions,
     personalizedRecommendations,
     studentSummary,
     longTermMemoryInsights,
@@ -194,7 +196,14 @@ export function StudentMemoryOverview() {
                 icon={<Lightbulb className="h-5 w-5 text-violet-600 dark:text-violet-300" aria-hidden="true" />}
               />
             </Card>
-            <div className="grid gap-6 xl:grid-cols-3">
+            <div className="grid gap-6 xl:grid-cols-2">
+              <div className="space-y-4">
+                {reviewSessions.length === 0 ? (
+                  <EmptyState description="Review sessions will appear here when concepts need scheduled practice." />
+                ) : (
+                  reviewSessions.map((session) => <ReviewSchedulerCard key={session.id} session={session} />)
+                )}
+              </div>
               <div className="space-y-4">
                 {learningPatternInsights.length === 0 ? (
                   <EmptyState description="Learning pattern insights will appear here." />
@@ -202,6 +211,8 @@ export function StudentMemoryOverview() {
                   learningPatternInsights.map((pattern) => <LearningPatternInsightCard key={pattern.id} pattern={pattern} />)
                 )}
               </div>
+            </div>
+            <div className="grid gap-6 xl:grid-cols-2">
               <div className="space-y-4">
                 {forgettingCurve.length === 0 ? (
                   <EmptyState description="Forgetting curve risks will appear here." />
