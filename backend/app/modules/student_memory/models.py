@@ -243,6 +243,25 @@ class StudentMemoryTimelineEvent(Base):
     )
 
 
+class MemoryEvent(Base):
+    __tablename__ = "memory_events"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    student_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("students.id", ondelete="CASCADE"), nullable=False, index=True)
+    concept_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("concepts.id", ondelete="SET NULL"), nullable=True, index=True)
+    event_type: Mapped[MemoryEventType] = mapped_column(
+        Enum(MemoryEventType, name="student_memory_event_type_enum", create_type=False),
+        nullable=False,
+        index=True,
+    )
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    importance: Mapped[MemoryImportance] = mapped_column(Enum(MemoryImportance, name="student_memory_importance_enum", create_type=False), nullable=False)
+    metadata_json: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
+    occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
 class StudentMemoryForgettingCurve(Base):
     __tablename__ = "student_memory_forgetting_curve"
 

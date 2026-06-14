@@ -201,6 +201,59 @@ def build_seed_student_memory(student_id: UUID = DEFAULT_STUDENT_ID) -> dict[str
 def build_student_memory_response(profile: StudentMemoryProfile) -> StudentMemoryRead:
     attention_profile = profile.attention_profiles[0] if profile.attention_profiles else None
     latest_summary = sorted(profile.summaries, key=lambda summary: summary.generated_at, reverse=True)[0] if profile.summaries else None
+    graph_nodes = [
+        {
+            "id": f"pkg-node-{item.concept_id}",
+            "conceptId": item.concept_id,
+            "conceptName": item.concept_name,
+            "subject": item.subject,
+            "mastery": item.mastery_level,
+            "confidence": item.confidence,
+            "weaknessScore": max(0, 100 - item.mastery_level),
+            "importance": min(100, item.confidence + max(0, 100 - item.mastery_level) // 3),
+            "connectedConceptsCount": 1,
+            "relationSummary": item.reinforcement_action,
+        }
+        for item in profile.strengths
+    ] + [
+        {
+            "id": f"pkg-node-{item.concept_id}",
+            "conceptId": item.concept_id,
+            "conceptName": item.concept_name,
+            "subject": item.subject,
+            "mastery": item.mastery_level,
+            "confidence": item.confidence,
+            "weaknessScore": max(0, 100 - item.mastery_level),
+            "importance": min(100, item.confidence + max(0, 100 - item.mastery_level) // 2),
+            "connectedConceptsCount": 1,
+            "relationSummary": item.recommended_action,
+        }
+        for item in profile.weaknesses
+    ]
+    graph_edges = [
+        {
+            "id": "pkg-edge-persisted-anchor",
+            "sourceConceptId": profile.strengths[0].concept_id,
+            "targetConceptId": profile.weaknesses[0].concept_id,
+            "relationType": "supports",
+            "strength": 76,
+            "summary": f"{profile.strengths[0].concept_name} can anchor practice for {profile.weaknesses[0].concept_name}.",
+        }
+    ] if profile.strengths and profile.weaknesses else []
+    long_term_memory = [
+        {
+            "id": f"ltm-item-{insight.id}",
+            "title": insight.title,
+            "type": insight.signal_type,
+            "importance": insight.importance.value,
+            "relatedConcept": profile.weaknesses[0].concept_name if profile.weaknesses else "General memory",
+            "insightSummary": insight.description,
+            "createdAt": datetime.now(UTC).isoformat(),
+        }
+        for insight in profile.long_term_insights
+    ]
+    primary_weakness = profile.weaknesses[0] if profile.weaknesses else None
+    primary_strength = profile.strengths[0] if profile.strengths else None
 
     return StudentMemoryRead(
         student_profile=StudentProfileRead.model_validate(profile),
@@ -230,6 +283,74 @@ def build_student_memory_response(profile: StudentMemoryProfile) -> StudentMemor
         personalized_recommendations=profile.recommendations,
         student_summary=latest_summary,
         long_term_memory_insights=profile.long_term_insights,
+        personal_knowledge_graph={
+            "id": f"personal-knowledge-graph-{profile.id}",
+            "studentId": profile.student_id,
+            "generatedAt": datetime.now(UTC).isoformat(),
+            "nodes": graph_nodes,
+            "edges": graph_edges,
+        },
+        long_term_memory=long_term_memory,
+        memory_insights=[
+            {
+                "id": "memory-insight-persisted-profile",
+                "title": "Persisted memory profile",
+                "summary": f"{len(profile.long_term_insights)} long-term insights are stored.",
+                "importance": "medium",
+                "relatedConcept": primary_weakness.concept_name if primary_weakness else "General memory",
+                "confidence": 82,
+            }
+        ],
+        memory_trends=[
+            {
+                "id": "memory-trend-persisted-risk",
+                "title": "Weakness pressure",
+                "direction": "declining" if primary_weakness else "stable",
+                "conceptName": primary_weakness.concept_name if primary_weakness else "General memory",
+                "summary": primary_weakness.recommended_action if primary_weakness else "No active weakness trend.",
+                "confidence": primary_weakness.confidence if primary_weakness else 70,
+            }
+        ],
+        student_persona={
+            "id": f"student-persona-{profile.id}",
+            "studentId": profile.student_id,
+            "personaName": "Guided Concept Builder" if primary_weakness else "Independent Momentum Learner",
+            "learningStyle": profile.learning_style.value,
+            "strengthTraits": [
+                {
+                    "id": "persona-trait-strength",
+                    "name": "Concept anchor",
+                    "category": "strength",
+                    "confidence": primary_strength.confidence,
+                    "summary": primary_strength.reinforcement_action,
+                }
+            ] if primary_strength else [],
+            "riskTraits": [
+                {
+                    "id": "persona-trait-risk",
+                    "name": "Repair loop needed",
+                    "category": "risk",
+                    "confidence": primary_weakness.confidence,
+                    "summary": primary_weakness.recommended_action,
+                }
+            ] if primary_weakness else [],
+            "learningBehaviors": [],
+            "behaviorSummary": "Use short guided repair loops and connect new work to known strengths.",
+            "recommendedTeachingApproach": "Start with a known strength, repair one weak concept, then check understanding.",
+        },
+        personal_tutor_context={
+            "id": f"personal-tutor-context-{profile.id}",
+            "studentId": profile.student_id,
+            "generatedAt": datetime.now(UTC).isoformat(),
+            "studentSummary": latest_summary.overview if latest_summary else "Persistent student memory is available.",
+            "keyWeaknesses": [weakness.concept_name for weakness in profile.weaknesses[:3]],
+            "keyStrengths": [strength.concept_name for strength in profile.strengths[:3]],
+            "preferredLearningStyle": profile.learning_style.value,
+            "nextRecommendedAction": latest_summary.next_best_action if latest_summary else "Continue collecting learning signals.",
+            "tutorInstructions": "Use concise guidance, connect to strengths, and check understanding before adding difficulty.",
+            "sections": [],
+            "recommendations": [],
+        },
     )
 
 

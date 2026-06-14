@@ -4,10 +4,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.modules.ai_core.router import router as ai_router
 from app.modules.ai_teacher.router import router as ai_teacher_router
+from app.modules.assistant.router import router as assistant_router
 from app.modules.anti_cheating.router import router as anti_cheating_router
 from app.modules.assignments.router import router as assignments_router
 from app.modules.chapters.router import router as chapters_router
 from app.modules.auth.router import router as auth_router
+from app.modules.concepts.router import router as concepts_router
 from app.modules.courses.router import router as courses_router
 from app.modules.grading.router import router as grading_router
 from app.modules.lesson_blocks.router import router as lesson_blocks_router
@@ -17,8 +19,11 @@ from app.modules.quiz_attempts.router import router as quiz_attempts_router
 from app.modules.question_bank.router import router as question_bank_router
 from app.modules.quizzes.router import router as quizzes_router
 from app.modules.results.router import router as results_router
+from app.modules.revision_plans.router import router as revision_plans_router
+from app.modules.students.router import router as students_router
 from app.modules.student_memory.router import router as student_memory_router
 from app.modules.teacher_dashboard.router import router as teacher_dashboard_router
+from app.modules.teachers.router import router as teachers_router
 from app.modules.videos.router import router as videos_router
 
 
@@ -46,7 +51,10 @@ def create_app() -> FastAPI:
     app.include_router(auth_router, prefix=settings.api_prefix)
     app.include_router(ai_router, prefix=settings.api_prefix)
     app.include_router(ai_teacher_router, prefix=settings.api_prefix)
+    app.include_router(assistant_router, prefix=settings.api_prefix)
     app.include_router(anti_cheating_router, prefix=settings.api_prefix)
+    app.include_router(students_router, prefix=settings.api_prefix)
+    app.include_router(teachers_router, prefix=settings.api_prefix)
     app.include_router(courses_router, prefix=settings.api_prefix)
     app.include_router(chapters_router, prefix=settings.api_prefix)
     app.include_router(assignments_router, prefix=settings.api_prefix)
@@ -54,10 +62,12 @@ def create_app() -> FastAPI:
     app.include_router(lesson_blocks_router, prefix=settings.api_prefix)
     app.include_router(videos_router, prefix=settings.api_prefix)
     app.include_router(progress_router, prefix=settings.api_prefix)
+    app.include_router(concepts_router, prefix=settings.api_prefix)
     app.include_router(question_bank_router, prefix=settings.api_prefix)
     app.include_router(quizzes_router, prefix=settings.api_prefix)
     app.include_router(quiz_attempts_router, prefix=settings.api_prefix)
     app.include_router(results_router, prefix=settings.api_prefix)
+    app.include_router(revision_plans_router, prefix=settings.api_prefix)
     app.include_router(student_memory_router, prefix=settings.api_prefix)
     app.include_router(grading_router, prefix=settings.api_prefix)
     app.include_router(teacher_dashboard_router, prefix=settings.api_prefix)

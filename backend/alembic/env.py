@@ -7,9 +7,11 @@ from app.core.config import settings
 from app.db.base import Base
 from app.models import user  # noqa: F401
 from app.modules.ai_core import models as ai_core_models  # noqa: F401
+from app.modules.assistant import models as assistant_models  # noqa: F401
 from app.modules.anti_cheating import models as anti_cheating_models  # noqa: F401
 from app.modules.assignments import models as assignment_models  # noqa: F401
 from app.modules.chapters import models as chapter_models  # noqa: F401
+from app.modules.concepts import models as concept_models  # noqa: F401
 from app.modules.courses import models as course_models  # noqa: F401
 from app.modules.grading import models as grading_models  # noqa: F401
 from app.modules.lesson_blocks import models as lesson_block_models  # noqa: F401
@@ -19,7 +21,10 @@ from app.modules.quiz_attempts import models as quiz_attempt_models  # noqa: F40
 from app.modules.question_bank import models as question_bank_models  # noqa: F401
 from app.modules.quizzes import models as quiz_models  # noqa: F401
 from app.modules.results import models as result_models  # noqa: F401
+from app.modules.revision_plans import models as revision_plan_models  # noqa: F401
+from app.modules.students import models as student_models  # noqa: F401
 from app.modules.student_memory import models as student_memory_models  # noqa: F401
+from app.modules.teachers import models as teacher_models  # noqa: F401
 from app.modules.videos import models as video_models  # noqa: F401
 
 config = context.config
