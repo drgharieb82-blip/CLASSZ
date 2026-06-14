@@ -8,7 +8,7 @@ import { SectionHeader } from "../../../components/ui/SectionHeader";
 import { useStudentMemory } from "../hooks";
 import { DetectedStrengthCard } from "./DetectedStrengthCard";
 import { DetectedWeaknessCard } from "./DetectedWeaknessCard";
-import { ForgettingRiskCard } from "./ForgettingRiskCard";
+import { ForgettingCurveCard } from "./ForgettingCurveCard";
 import { LearningStyleCard } from "./LearningStyleCard";
 import { LearningPatternCard } from "./LearningPatternCard";
 import { LearningPatternInsightCard } from "./LearningPatternInsightCard";
@@ -36,6 +36,7 @@ export function StudentMemoryOverview() {
     detectedStrengths,
     learningPatternInsights,
     forgettingCurve,
+    reviewNeeds,
     personalizedRecommendations,
     studentSummary,
     longTermMemoryInsights,
@@ -205,7 +206,13 @@ export function StudentMemoryOverview() {
                 {forgettingCurve.length === 0 ? (
                   <EmptyState description="Forgetting curve risks will appear here." />
                 ) : (
-                  forgettingCurve.map((risk) => <ForgettingRiskCard key={risk.id} risk={risk} />)
+                  forgettingCurve.map((point) => (
+                    <ForgettingCurveCard
+                      key={point.id}
+                      point={point}
+                      reviewNeed={reviewNeeds.find((reviewNeed) => reviewNeed.conceptId === point.conceptId)}
+                    />
+                  ))
                 )}
               </div>
               <div className="space-y-4">

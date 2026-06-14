@@ -3,10 +3,13 @@ export { useStudentMemory } from "./hooks";
 export { studentMemoryService } from "./services";
 export type {
   AttentionProfile,
+  ConceptReviewNeed,
   DetectedStrength,
   DetectedWeakness,
   DifficultyPreference,
+  ForgettingCurvePoint,
   ForgettingCurveItem,
+  ForgettingUrgency,
   LearningPreference,
   LearningPattern,
   LearningPatternInsight,

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { studentMemoryService } from "../services";
 import type {
   AttentionProfile,
+  ConceptReviewNeed,
   DetectedStrength,
   DetectedWeakness,
   ForgettingCurveItem,
@@ -35,6 +36,7 @@ type StudentMemoryState = {
   detectedStrengths: DetectedStrength[];
   learningPatternInsights: LearningPatternInsight[];
   forgettingCurve: ForgettingCurveItem[];
+  reviewNeeds: ConceptReviewNeed[];
   personalizedRecommendations: PersonalizedRecommendation[];
   studentSummary: StudentSummary | null;
   longTermMemoryInsights: LongTermMemoryInsight[];
@@ -61,6 +63,7 @@ export function useStudentMemory(): StudentMemoryState {
   const [detectedStrengths, setDetectedStrengths] = useState<DetectedStrength[]>([]);
   const [learningPatternInsights, setLearningPatternInsights] = useState<LearningPatternInsight[]>([]);
   const [forgettingCurve, setForgettingCurve] = useState<ForgettingCurveItem[]>([]);
+  const [reviewNeeds, setReviewNeeds] = useState<ConceptReviewNeed[]>([]);
   const [personalizedRecommendations, setPersonalizedRecommendations] = useState<PersonalizedRecommendation[]>([]);
   const [studentSummary, setStudentSummary] = useState<StudentSummary | null>(null);
   const [longTermMemoryInsights, setLongTermMemoryInsights] = useState<LongTermMemoryInsight[]>([]);
@@ -87,6 +90,7 @@ export function useStudentMemory(): StudentMemoryState {
       setDetectedStrengths(memory.detectedStrengths);
       setLearningPatternInsights(memory.learningPatternInsights);
       setForgettingCurve(memory.forgettingCurve);
+      setReviewNeeds(memory.reviewNeeds);
       setPersonalizedRecommendations(memory.personalizedRecommendations);
       setStudentSummary(memory.studentSummary);
       setLongTermMemoryInsights(memory.longTermMemoryInsights);
@@ -126,6 +130,7 @@ export function useStudentMemory(): StudentMemoryState {
     detectedStrengths,
     learningPatternInsights,
     forgettingCurve,
+    reviewNeeds,
     personalizedRecommendations,
     studentSummary,
     longTermMemoryInsights,

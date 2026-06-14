@@ -1,5 +1,6 @@
 export { DetectedStrengthCard } from "./DetectedStrengthCard";
 export { DetectedWeaknessCard } from "./DetectedWeaknessCard";
+export { ForgettingCurveCard } from "./ForgettingCurveCard";
 export { ForgettingRiskCard } from "./ForgettingRiskCard";
 export { LearningStyleCard } from "./LearningStyleCard";
 export { LearningPatternCard } from "./LearningPatternCard";

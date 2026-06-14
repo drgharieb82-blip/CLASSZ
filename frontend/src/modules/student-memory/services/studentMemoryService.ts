@@ -1,5 +1,6 @@
 import type {
   AttentionProfile,
+  ConceptReviewNeed,
   LearningPreference,
   LearningPattern,
   MemoryEvent,
@@ -115,6 +116,7 @@ async function buildLocalStudentMemorySnapshot(): Promise<StudentMemorySnapshot>
   const learningPatterns: LearningPattern[] = await learningPatternService.getLearningPatterns(timeline);
   const learningPatternInsights = learningPatternService.analyzeLearningPatterns(studyPatterns, attentionProfile, timeline);
   const forgettingCurve = forgettingCurveService.calculateForgettingRisk(strengths, weaknesses, timeline);
+  const reviewNeeds: ConceptReviewNeed[] = forgettingCurveService.getReviewNeeds(strengths, weaknesses, timeline);
   const personalizedRecommendations = recommendationService.generateRecommendations(
     detectedWeaknesses,
     forgettingCurve,
@@ -150,6 +152,7 @@ async function buildLocalStudentMemorySnapshot(): Promise<StudentMemorySnapshot>
     detectedStrengths,
     learningPatternInsights,
     forgettingCurve,
+    reviewNeeds,
     personalizedRecommendations,
     studentSummary,
     longTermMemoryInsights,

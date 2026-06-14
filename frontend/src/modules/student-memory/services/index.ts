@@ -1,4 +1,10 @@
-export { forgettingCurveService, calculateForgettingRisk } from "./forgettingCurveService";
+export {
+  forgettingCurveService,
+  calculateForgettingRisk,
+  calculateRetentionScore,
+  getReviewNeeds,
+  predictForgettingDate,
+} from "./forgettingCurveService";
 export { learningPatternService, analyzeLearningPatterns, calculateConsistencyScore, detectPatterns, getLearningPatterns } from "./learningPatternService";
 export { longTermMemoryEngineService, aggregateLongTermMemoryInsights } from "./longTermMemoryEngineService";
 export { addMemoryEvent, getTimeline, memoryTimelineService, sortTimeline } from "./memoryTimelineService";
