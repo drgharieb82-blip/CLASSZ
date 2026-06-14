@@ -80,23 +80,40 @@ Seed script:
 
 ```bash
 cd backend
-python scripts/seed_phase7.py
+python -m scripts.seed_phase7
 ```
 
-It creates sample users, a student, a teacher, concepts, dependencies, concept state, memory event, revision plan, and explainable insight.
+It creates sample users, a student, a teacher, concepts, dependencies, concept state, memory event, revision plan, and explainable insight. The script is idempotent and can be run multiple times.
 
-## Validation Commands
+## Live PostgreSQL Validation
+
+Validation status: passed against a clean Docker PostgreSQL volume.
+
+Docker Desktop must be running before starting PostgreSQL. When running Alembic or the seed script from the Windows host, set `POSTGRES_SERVER=localhost` in `backend/.env`; inside Docker Compose services, use `POSTGRES_SERVER=postgres`.
+
+Exact commands used:
 
 ```bash
+cd D:\CLASSZ
+docker compose down -v
 docker compose up -d postgres
+
 cd backend
 alembic upgrade head
-python scripts/seed_phase7.py
-python -m py_compile app/main.py
+python -m scripts.seed_phase7
+python -m scripts.seed_phase7
 python -m unittest discover tests
+
 cd ../frontend
 npm run build
 ```
+
+Results:
+
+- `alembic upgrade head`: passed on a fresh PostgreSQL volume.
+- `python -m scripts.seed_phase7`: passed twice, confirming idempotency.
+- `python -m unittest discover tests`: passed, 16 tests.
+- `npm run build`: passed; Vite reported the existing large-chunk warning.
 
 ## Known Limitations
 

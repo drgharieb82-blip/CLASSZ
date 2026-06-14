@@ -5,6 +5,7 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import select
 
 from app.core.security import hash_password
+from app.db import migrations as _models  # noqa: F401
 from app.db.session import AsyncSessionLocal
 from app.models.user import Role, User
 from app.modules.assistant.models import ExplainableInsight, InsightType
@@ -13,22 +14,6 @@ from app.modules.revision_plans.models import RevisionPlan, RevisionPlanStatus
 from app.modules.students.models import Student
 from app.modules.student_memory.models import MemoryEvent, MemoryEventType, MemoryImportance
 from app.modules.teachers.models import Teacher
-from app.modules.courses import models as course_models  # noqa: F401
-from app.modules.chapters import models as chapter_models  # noqa: F401
-from app.modules.lessons import models as lesson_models  # noqa: F401
-from app.modules.lesson_blocks import models as lesson_block_models  # noqa: F401
-from app.models import user  # noqa: F401
-from app.modules.ai_core import models as ai_core_models  # noqa: F401
-from app.modules.assistant import models as assistant_models  # noqa: F401
-from app.modules.anti_cheating import models as anti_cheating_models  # noqa: F401
-from app.modules.assignments import models as assignment_models  # noqa: F401
-from app.modules.grading import models as grading_models  # noqa: F401
-from app.modules.progress import models as progress_models  # noqa: F401
-from app.modules.quiz_attempts import models as quiz_attempt_models  # noqa: F401
-from app.modules.question_bank import models as question_bank_models  # noqa: F401
-from app.modules.quizzes import models as quiz_models  # noqa: F401
-from app.modules.results import models as result_models  # noqa: F401
-from app.modules.videos import models as video_models  # noqa: F401
 
 SAMPLE_STUDENT_USER_ID = uuid.UUID("11111111-1111-1111-1111-111111111111")
 SAMPLE_TEACHER_USER_ID = uuid.UUID("22222222-2222-2222-2222-222222222222")
@@ -151,13 +136,18 @@ async def seed() -> None:
                 )
             )
 
-        event_result = await session.execute(select(MemoryEvent).where(MemoryEvent.student_id == SAMPLE_STUDENT_ID))
+        event_result = await session.execute(
+            select(MemoryEvent).where(
+                MemoryEvent.student_id == SAMPLE_STUDENT_ID,
+                MemoryEvent.title == "Weakness detected in oxidation numbers",
+            )
+        )
         if event_result.first() is None:
             session.add(
                 MemoryEvent(
                     student_id=SAMPLE_STUDENT_ID,
                     concept_id=concepts["oxidation-number"].id,
-                    event_type=MemoryEventType.WEAKNESS_DETECTED.value,
+                    event_type=MemoryEventType.WEAKNESS_DETECTED,
                     title="Weakness detected in oxidation numbers",
                     description="Repeated mistakes while assigning oxidation numbers in redox equations.",
                     importance=MemoryImportance.HIGH,
@@ -165,7 +155,12 @@ async def seed() -> None:
                 )
             )
 
-        plan_result = await session.execute(select(RevisionPlan).where(RevisionPlan.student_id == SAMPLE_STUDENT_ID))
+        plan_result = await session.execute(
+            select(RevisionPlan).where(
+                RevisionPlan.student_id == SAMPLE_STUDENT_ID,
+                RevisionPlan.title == "Oxidation repair plan",
+            )
+        )
         if plan_result.first() is None:
             session.add(
                 RevisionPlan(
@@ -183,7 +178,12 @@ async def seed() -> None:
                 )
             )
 
-        insight_result = await session.execute(select(ExplainableInsight).where(ExplainableInsight.student_id == SAMPLE_STUDENT_ID))
+        insight_result = await session.execute(
+            select(ExplainableInsight).where(
+                ExplainableInsight.student_id == SAMPLE_STUDENT_ID,
+                ExplainableInsight.title == "Repair oxidation number first",
+            )
+        )
         if insight_result.first() is None:
             session.add(
                 ExplainableInsight(
