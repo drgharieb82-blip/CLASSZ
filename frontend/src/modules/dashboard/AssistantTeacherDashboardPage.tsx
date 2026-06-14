@@ -1,5 +1,9 @@
 import { ClipboardCheck, HelpCircle, ListChecks, MessageSquareText, Target, Users } from "lucide-react";
 
+import { Card } from "../../components/ui/Card";
+import { PageContainer } from "../../components/ui/PageContainer";
+import { SectionHeader } from "../../components/ui/SectionHeader";
+import { AssistantTeacherPanel } from "../assistant/components";
 import { RoleDashboard, type DashboardPlaceholder, type DashboardStat } from "./RoleDashboard";
 
 const stats: DashboardStat[] = [
@@ -34,14 +38,25 @@ const placeholders: DashboardPlaceholder[] = [
 
 export function AssistantTeacherDashboardPage() {
   return (
-    <RoleDashboard
-      eyebrow="Assistant teacher dashboard"
-      title="Welcome to your support workspace."
-      description="Coordinate student support, review weaknesses, prepare explanations, and keep teacher-assigned work visible."
-      stats={stats}
-      sectionsTitle="Assistant teacher modules"
-      sectionsDescription="This local dashboard gives the assistant route real structure without adding APIs or model dependencies."
-      placeholders={placeholders}
-    />
+    <PageContainer>
+      <RoleDashboard
+        eyebrow="Assistant teacher dashboard"
+        title="Welcome to your support workspace."
+        description="Coordinate student support, review weaknesses, prepare explanations, and keep teacher-assigned work visible."
+        stats={stats}
+        sectionsTitle="Assistant teacher modules"
+        sectionsDescription="This local dashboard gives the assistant route real structure without adding APIs or model dependencies."
+        placeholders={placeholders}
+      />
+
+      <Card className="p-6 sm:p-8">
+        <SectionHeader
+          eyebrow="Weakness Analysis"
+          title="Student support and revision queue"
+          description="Use the assistant panel to review weakness signals, question explanations, revision suggestions, and support tasks."
+        />
+      </Card>
+      <AssistantTeacherPanel />
+    </PageContainer>
   );
 }
