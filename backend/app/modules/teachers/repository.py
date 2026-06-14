@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.teachers.models import Teacher
-from app.modules.teachers.schemas import TeacherCreate
+from app.modules.teachers.schemas import TeacherCreate, TeacherUpdate
 
 
 async def list_teachers(session: AsyncSession) -> list[Teacher]:
@@ -20,6 +20,15 @@ async def get_teacher(session: AsyncSession, teacher_id: UUID) -> Teacher | None
 async def create_teacher(session: AsyncSession, payload: TeacherCreate) -> Teacher:
     teacher = Teacher(**payload.model_dump())
     session.add(teacher)
+    await session.commit()
+    await session.refresh(teacher)
+    return teacher
+
+
+async def update_teacher(session: AsyncSession, teacher: Teacher, payload: TeacherUpdate) -> Teacher:
+    for key, value in payload.model_dump(exclude_unset=True).items():
+        setattr(teacher, key, value)
+
     await session.commit()
     await session.refresh(teacher)
     return teacher

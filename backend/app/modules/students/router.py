@@ -36,3 +36,12 @@ async def update_student(student_id: UUID, payload: StudentUpdate, session: Asyn
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student not found")
 
     return student
+
+
+@router.put("/{student_id}", response_model=StudentRead)
+async def replace_student(student_id: UUID, payload: StudentUpdate, session: AsyncSession = Depends(get_db_session)) -> StudentRead:
+    student = await service.update_student(session, student_id, payload)
+    if student is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student not found")
+
+    return student

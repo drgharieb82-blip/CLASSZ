@@ -1,5 +1,5 @@
 from datetime import UTC, datetime, timedelta
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -25,6 +25,27 @@ from app.modules.student_memory.schemas import (
 )
 
 DEFAULT_STUDENT_ID = UUID("11111111-1111-1111-1111-111111111111")
+
+
+def build_fallback_student_memory(student_id: UUID) -> StudentMemoryRead:
+    profile = repository.build_profile_with_children(build_seed_student_memory(student_id))
+    profile.id = uuid4()
+    for collection in (
+        profile.strengths,
+        profile.weaknesses,
+        profile.learning_preferences,
+        profile.study_patterns,
+        profile.attention_profiles,
+        profile.timeline_events,
+        profile.forgetting_curve,
+        profile.recommendations,
+        profile.summaries,
+        profile.long_term_insights,
+    ):
+        for item in collection:
+            item.id = uuid4()
+
+    return build_student_memory_response(profile)
 
 
 def build_seed_student_memory(student_id: UUID = DEFAULT_STUDENT_ID) -> dict[str, object]:
@@ -360,6 +381,14 @@ async def get_student_memory(session: AsyncSession, student_id: UUID) -> Student
         return None
 
     return build_student_memory_response(profile)
+
+
+async def get_student_memory_or_fallback(session: AsyncSession, student_id: UUID) -> StudentMemoryRead:
+    memory = await get_student_memory(session, student_id)
+    if memory is not None:
+        return memory
+
+    return build_fallback_student_memory(student_id)
 
 
 async def add_memory_event(

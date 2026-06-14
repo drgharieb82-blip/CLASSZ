@@ -59,9 +59,27 @@ async def update_concept(concept_id: UUID, payload: ConceptUpdate, session: Asyn
     return concept
 
 
+@router.put("/{concept_id}", response_model=ConceptRead)
+async def replace_concept(concept_id: UUID, payload: ConceptUpdate, session: AsyncSession = Depends(get_db_session)) -> ConceptRead:
+    concept = await service.update_concept(session, concept_id, payload)
+    if concept is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Concept not found")
+
+    return concept
+
+
 @router.get("/{concept_id}/dependencies", response_model=list[ConceptDependencyRead])
 async def list_dependencies(concept_id: UUID, session: AsyncSession = Depends(get_db_session)) -> list[ConceptDependencyRead]:
     return await service.list_dependencies(session, concept_id)
+
+
+@router.post("/{concept_id}/dependencies", response_model=ConceptDependencyRead, status_code=status.HTTP_201_CREATED)
+async def create_concept_dependency(
+    concept_id: UUID,
+    payload: ConceptDependencyCreate,
+    session: AsyncSession = Depends(get_db_session),
+) -> ConceptDependencyRead:
+    return await service.create_dependency(session, payload.model_copy(update={"source_concept_id": concept_id}))
 
 
 @router.post("/dependencies", response_model=ConceptDependencyRead, status_code=status.HTTP_201_CREATED)
