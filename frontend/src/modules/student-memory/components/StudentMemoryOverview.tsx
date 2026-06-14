@@ -10,6 +10,7 @@ import { DetectedStrengthCard } from "./DetectedStrengthCard";
 import { DetectedWeaknessCard } from "./DetectedWeaknessCard";
 import { ForgettingRiskCard } from "./ForgettingRiskCard";
 import { LearningStyleCard } from "./LearningStyleCard";
+import { LearningPatternCard } from "./LearningPatternCard";
 import { LearningPatternInsightCard } from "./LearningPatternInsightCard";
 import { LongTermMemoryInsightCard } from "./LongTermMemoryInsightCard";
 import { MemoryTimelineCard } from "./MemoryTimelineCard";
@@ -26,6 +27,8 @@ export function StudentMemoryOverview() {
     strengths,
     weaknesses,
     learningPreferences,
+    learningPatterns,
+    studyHabit,
     studyPatterns,
     attentionProfile,
     memoryTimeline,
@@ -143,6 +146,42 @@ export function StudentMemoryOverview() {
                 )}
               </div>
             </div>
+          </section>
+
+          <section className="space-y-4">
+            <Card className="p-5">
+              <SectionHeader
+                eyebrow="Phase 6.4"
+                title="Persistent Learning Patterns"
+                description="Long-term habits and recurring behaviors detected from study history and timeline events."
+                icon={<Lightbulb className="h-5 w-5 text-violet-600 dark:text-violet-300" aria-hidden="true" />}
+              />
+            </Card>
+            <div className="grid gap-4 xl:grid-cols-3">
+              {learningPatterns.length === 0 ? (
+                <EmptyState description="Persistent learning patterns will appear here as the student builds more history." />
+              ) : (
+                learningPatterns.map((pattern) => <LearningPatternCard key={pattern.id} pattern={pattern} />)
+              )}
+            </div>
+            {studyHabit ? (
+              <Card className="p-5">
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">Preferred time</p>
+                    <p className="mt-2 font-display text-xl font-semibold capitalize text-slate-950 dark:text-white">{studyHabit.preferredStudyTime}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">Average session</p>
+                    <p className="mt-2 font-display text-xl font-semibold text-slate-950 dark:text-white">{studyHabit.averageSessionMinutes} min</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">Consistency score</p>
+                    <p className="mt-2 font-display text-xl font-semibold text-slate-950 dark:text-white">{studyHabit.consistencyScore}%</p>
+                  </div>
+                </div>
+              </Card>
+            ) : null}
           </section>
 
           <section className="space-y-4">

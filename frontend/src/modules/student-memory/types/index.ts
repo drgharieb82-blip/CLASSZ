@@ -59,6 +59,14 @@ export type LearningPatternInsight = {
   recommendation: string;
 };
 
+export type LearningPattern = {
+  id: string;
+  patternName: string;
+  description: string;
+  frequency: string;
+  confidence: number;
+};
+
 export type ForgettingCurveItem = {
   id: string;
   conceptId: string;
@@ -104,6 +112,8 @@ export type StudentMemorySnapshot = {
   strengths: StudentStrength[];
   weaknesses: StudentWeakness[];
   learningPreferences: LearningPreference[];
+  learningPatterns: LearningPattern[];
+  studyHabit: StudyHabit;
   studyPatterns: StudyPattern[];
   attentionProfile: AttentionProfile | null;
   memoryTimeline: MemoryTimeline;
@@ -143,7 +153,16 @@ export type LearningPreference = {
   bestContentType: "video" | "notes" | "questions" | "mixed";
 };
 
+export type StudyHabit = {
+  preferredStudyTime: "morning" | "afternoon" | "evening" | "night";
+  averageSessionMinutes: number;
+  consistencyScore: number;
+};
+
 export type AttentionProfile = {
+  focusLevel: number;
+  distractionLevel: number;
+  preferredSessionLength: number;
   attentionSpan: number;
   bestSessionLength: number;
   breakFrequencyMinutes: number;

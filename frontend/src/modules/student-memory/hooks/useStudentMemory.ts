@@ -7,11 +7,13 @@ import type {
   DetectedWeakness,
   ForgettingCurveItem,
   LearningPreference,
+  LearningPattern,
   LearningPatternInsight,
   LongTermMemoryInsight,
   MemoryEvent,
   MemoryTimeline,
   PersonalizedRecommendation,
+  StudyHabit,
   StudentProfile,
   StudentSummary,
   StudentStrength,
@@ -24,6 +26,8 @@ type StudentMemoryState = {
   strengths: StudentStrength[];
   weaknesses: StudentWeakness[];
   learningPreferences: LearningPreference[];
+  learningPatterns: LearningPattern[];
+  studyHabit: StudyHabit | null;
   studyPatterns: StudyPattern[];
   attentionProfile: AttentionProfile | null;
   memoryTimeline: MemoryTimeline | null;
@@ -48,6 +52,8 @@ export function useStudentMemory(): StudentMemoryState {
   const [strengths, setStrengths] = useState<StudentStrength[]>([]);
   const [weaknesses, setWeaknesses] = useState<StudentWeakness[]>([]);
   const [learningPreferences, setLearningPreferences] = useState<LearningPreference[]>([]);
+  const [learningPatterns, setLearningPatterns] = useState<LearningPattern[]>([]);
+  const [studyHabit, setStudyHabit] = useState<StudyHabit | null>(null);
   const [studyPatterns, setStudyPatterns] = useState<StudyPattern[]>([]);
   const [attentionProfile, setAttentionProfile] = useState<AttentionProfile | null>(null);
   const [memoryTimeline, setMemoryTimeline] = useState<MemoryTimeline | null>(null);
@@ -72,6 +78,8 @@ export function useStudentMemory(): StudentMemoryState {
       setStrengths(memory.strengths);
       setWeaknesses(memory.weaknesses);
       setLearningPreferences(memory.learningPreferences);
+      setLearningPatterns(memory.learningPatterns);
+      setStudyHabit(memory.studyHabit);
       setStudyPatterns(memory.studyPatterns);
       setAttentionProfile(memory.attentionProfile);
       setMemoryTimeline(memory.memoryTimeline);
@@ -109,6 +117,8 @@ export function useStudentMemory(): StudentMemoryState {
     strengths,
     weaknesses,
     learningPreferences,
+    learningPatterns,
+    studyHabit,
     studyPatterns,
     attentionProfile,
     memoryTimeline,

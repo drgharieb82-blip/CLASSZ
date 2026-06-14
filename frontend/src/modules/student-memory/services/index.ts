@@ -1,5 +1,5 @@
 export { forgettingCurveService, calculateForgettingRisk } from "./forgettingCurveService";
-export { learningPatternService, analyzeLearningPatterns } from "./learningPatternService";
+export { learningPatternService, analyzeLearningPatterns, calculateConsistencyScore, detectPatterns, getLearningPatterns } from "./learningPatternService";
 export { longTermMemoryEngineService, aggregateLongTermMemoryInsights } from "./longTermMemoryEngineService";
 export { addMemoryEvent, getTimeline, memoryTimelineService, sortTimeline } from "./memoryTimelineService";
 export { recommendationService, generateRecommendations } from "./recommendationService";

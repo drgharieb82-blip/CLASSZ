@@ -1,7 +1,9 @@
 import type {
   AttentionProfile,
   LearningPreference,
+  LearningPattern,
   MemoryEvent,
+  StudyHabit,
   StudentMemorySnapshot,
   StudentProfile,
   StudentStrength,
@@ -77,7 +79,16 @@ const studyPatterns: StudyPattern[] = [
   },
 ];
 
+const studyHabit: StudyHabit = {
+  preferredStudyTime: "evening",
+  averageSessionMinutes: 28,
+  consistencyScore: 78,
+};
+
 const attentionProfile: AttentionProfile = {
+  focusLevel: 74,
+  distractionLevel: 32,
+  preferredSessionLength: 28,
   attentionSpan: 22,
   bestSessionLength: 28,
   breakFrequencyMinutes: 25,
@@ -101,6 +112,7 @@ async function buildLocalStudentMemorySnapshot(): Promise<StudentMemorySnapshot>
   const timeline = await memoryTimelineService.getTimeline();
   const detectedWeaknesses = weaknessDetectionService.detectWeaknesses(weaknesses, timeline);
   const detectedStrengths = strengthDetectionService.detectStrengths(strengths, timeline);
+  const learningPatterns: LearningPattern[] = await learningPatternService.getLearningPatterns(timeline);
   const learningPatternInsights = learningPatternService.analyzeLearningPatterns(studyPatterns, attentionProfile, timeline);
   const forgettingCurve = forgettingCurveService.calculateForgettingRisk(strengths, weaknesses, timeline);
   const personalizedRecommendations = recommendationService.generateRecommendations(
@@ -129,6 +141,8 @@ async function buildLocalStudentMemorySnapshot(): Promise<StudentMemorySnapshot>
     strengths,
     weaknesses,
     learningPreferences,
+    learningPatterns,
+    studyHabit,
     studyPatterns,
     attentionProfile,
     memoryTimeline: timeline,
@@ -163,6 +177,14 @@ export const studentMemoryService = {
 
   getLearningPreferences() {
     return getStudentMemory().then((memory) => memory.learningPreferences);
+  },
+
+  getLearningPatterns() {
+    return getStudentMemory().then((memory) => memory.learningPatterns);
+  },
+
+  getStudyHabit() {
+    return getStudentMemory().then((memory) => memory.studyHabit);
   },
 
   getStudyPatterns() {

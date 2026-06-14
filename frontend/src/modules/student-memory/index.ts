@@ -8,6 +8,7 @@ export type {
   DifficultyPreference,
   ForgettingCurveItem,
   LearningPreference,
+  LearningPattern,
   LearningPatternInsight,
   LearningStyle,
   LongTermMemoryInsight,
@@ -22,5 +23,6 @@ export type {
   StudentStrength,
   StudentSummary,
   StudentWeakness,
+  StudyHabit,
   StudyPattern,
 } from "./types";

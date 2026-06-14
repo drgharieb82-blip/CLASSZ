@@ -2,6 +2,7 @@ export { DetectedStrengthCard } from "./DetectedStrengthCard";
 export { DetectedWeaknessCard } from "./DetectedWeaknessCard";
 export { ForgettingRiskCard } from "./ForgettingRiskCard";
 export { LearningStyleCard } from "./LearningStyleCard";
+export { LearningPatternCard } from "./LearningPatternCard";
 export { LearningPatternInsightCard } from "./LearningPatternInsightCard";
 export { LongTermMemoryInsightCard } from "./LongTermMemoryInsightCard";
 export { MemoryTimelineCard } from "./MemoryTimelineCard";
