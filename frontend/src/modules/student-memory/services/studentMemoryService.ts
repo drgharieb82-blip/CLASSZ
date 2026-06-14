@@ -14,7 +14,6 @@ import { longTermMemoryEngineService } from "./longTermMemoryEngineService";
 import { memoryTimelineService } from "./memoryTimelineService";
 import { recommendationService } from "./recommendationService";
 import { strengthDetectionService } from "./strengthDetectionService";
-import { addStudentMemoryEvent, getStudentMemorySnapshot } from "./studentMemoryApi";
 import { studentSummaryService } from "./studentSummaryService";
 import { weaknessDetectionService } from "./weaknessDetectionService";
 
@@ -98,12 +97,6 @@ const studentProfile: StudentProfile = {
   weaknesses,
 };
 
-function simulateApi<T>(data: T): Promise<T> {
-  return new Promise((resolve) => {
-    window.setTimeout(() => resolve(data), 300);
-  });
-}
-
 async function buildLocalStudentMemorySnapshot(): Promise<StudentMemorySnapshot> {
   const timeline = await memoryTimelineService.getTimeline();
   const detectedWeaknesses = weaknessDetectionService.detectWeaknesses(weaknesses, timeline);
@@ -149,37 +142,8 @@ async function buildLocalStudentMemorySnapshot(): Promise<StudentMemorySnapshot>
   };
 }
 
-function normalizeSnapshot(snapshot: StudentMemorySnapshot): StudentMemorySnapshot {
-  return {
-    ...snapshot,
-    detectedWeaknesses: snapshot.detectedWeaknesses.map((weakness) => {
-      const weaknessRecord = weakness as typeof weakness & { priority?: typeof weakness.severity };
-
-      return {
-        ...weakness,
-        severity: weakness.severity ?? weaknessRecord.priority ?? "medium",
-        evidence: weakness.evidence ?? [weakness.recommendedAction],
-      };
-    }),
-    detectedStrengths: snapshot.detectedStrengths.map((strength) => {
-      const strengthRecord = strength as typeof strength & { masteryLevel?: number; reinforcementAction?: string };
-
-      return {
-        ...strength,
-        reinforcementAction: strength.reinforcementAction ?? strengthRecord.reinforcementAction ?? "Keep using this concept as a confidence anchor.",
-        evidence: Array.isArray(strength.evidence) ? strength.evidence : [String(strength.evidence)],
-        confidence: strength.confidence ?? strengthRecord.masteryLevel ?? 70,
-      };
-    }),
-  };
-}
-
-async function getStudentMemory() {
-  try {
-    return normalizeSnapshot(await getStudentMemorySnapshot());
-  } catch {
-    return buildLocalStudentMemorySnapshot();
-  }
+function getStudentMemory() {
+  return buildLocalStudentMemorySnapshot();
 }
 
 export const studentMemoryService = {
@@ -213,12 +177,8 @@ export const studentMemoryService = {
     return getStudentMemory().then((memory) => memory.memoryTimeline);
   },
 
-  async addMemoryEvent(memoryEvent: MemoryEvent) {
-    try {
-      return normalizeSnapshot(await addStudentMemoryEvent(memoryEvent)).memoryTimeline;
-    } catch {
-      return memoryTimelineService.addMemoryEvent(memoryEvent);
-    }
+  addMemoryEvent(memoryEvent: MemoryEvent) {
+    return memoryTimelineService.addMemoryEvent(memoryEvent);
   },
 
   getDetectedWeaknesses() {

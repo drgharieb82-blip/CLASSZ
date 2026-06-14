@@ -1,10 +1,9 @@
 export { forgettingCurveService, calculateForgettingRisk } from "./forgettingCurveService";
 export { learningPatternService, analyzeLearningPatterns } from "./learningPatternService";
 export { longTermMemoryEngineService, aggregateLongTermMemoryInsights } from "./longTermMemoryEngineService";
-export { memoryTimelineService, sortTimeline } from "./memoryTimelineService";
+export { addMemoryEvent, getTimeline, memoryTimelineService, sortTimeline } from "./memoryTimelineService";
 export { recommendationService, generateRecommendations } from "./recommendationService";
 export { strengthDetectionService, detectStrengths } from "./strengthDetectionService";
-export { DEFAULT_STUDENT_MEMORY_STUDENT_ID, addStudentMemoryEvent, getStudentMemorySnapshot } from "./studentMemoryApi";
 export { studentMemoryService } from "./studentMemoryService";
 export { studentSummaryService, generateStudentSummary } from "./studentSummaryService";
 export { weaknessDetectionService, detectWeaknesses } from "./weaknessDetectionService";

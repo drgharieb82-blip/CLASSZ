@@ -42,7 +42,9 @@ export function MemoryTimelineCard({ event }: MemoryTimelineCardProps) {
               <time dateTime={event.timestamp}>{formatTimelineDate(event.timestamp)}</time>
             </p>
             <h3 className="mt-2 font-display text-lg font-semibold text-slate-950 dark:text-white">{event.title}</h3>
-            <p className="mt-1 text-sm font-semibold text-teal-700 dark:text-teal-200">{formatEventType(event.eventType)}</p>
+            <span className="ui-badge mt-2 bg-teal-50 text-teal-700 dark:bg-teal-400/10 dark:text-teal-200">
+              {formatEventType(event.eventType)}
+            </span>
           </div>
         </div>
         <span className={clsx("ui-badge w-fit capitalize", importanceClass[event.importance])}>{event.importance}</span>

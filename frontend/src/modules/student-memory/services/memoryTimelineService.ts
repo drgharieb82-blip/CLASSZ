@@ -72,19 +72,21 @@ export function sortTimeline(memoryTimeline: MemoryTimeline): MemoryTimeline {
   };
 }
 
+export function getTimeline(): Promise<MemoryTimeline> {
+  return simulateApi(sortTimeline(timeline));
+}
+
+export function addMemoryEvent(memoryEvent: MemoryEvent): Promise<MemoryTimeline> {
+  timeline = sortTimeline({
+    ...timeline,
+    events: [memoryEvent, ...timeline.events],
+  });
+
+  return simulateApi(timeline);
+}
+
 export const memoryTimelineService = {
-  getTimeline() {
-    return simulateApi(sortTimeline(timeline));
-  },
-
-  addMemoryEvent(memoryEvent: MemoryEvent) {
-    timeline = sortTimeline({
-      ...timeline,
-      events: [memoryEvent, ...timeline.events],
-    });
-
-    return simulateApi(timeline);
-  },
-
+  getTimeline,
+  addMemoryEvent,
   sortTimeline,
 };
