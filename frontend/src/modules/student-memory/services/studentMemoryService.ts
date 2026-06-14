@@ -4,9 +4,15 @@ import type {
   LearningPreference,
   LearningPattern,
   MemoryEvent,
+  MemoryInsight,
+  MemoryTrend,
+  LongTermMemoryItem,
+  PersonalKnowledgeGraph,
+  PersonalTutorContext,
   ReviewSession,
   StudyHabit,
   StudentMemorySnapshot,
+  StudentPersona,
   StudentProfile,
   StudentStrength,
   StudentWeakness,
@@ -15,10 +21,14 @@ import type {
 import { forgettingCurveService } from "./forgettingCurveService";
 import { learningPatternService } from "./learningPatternService";
 import { longTermMemoryEngineService } from "./longTermMemoryEngineService";
+import { longTermMemoryService } from "./longTermMemoryService";
 import { memoryTimelineService } from "./memoryTimelineService";
+import { personalKnowledgeGraphService } from "./personalKnowledgeGraphService";
+import { personalTutorContextService } from "./personalTutorContextService";
 import { recommendationService } from "./recommendationService";
 import { reviewSchedulerService } from "./reviewSchedulerService";
 import { strengthDetectionService } from "./strengthDetectionService";
+import { studentPersonaService } from "./studentPersonaService";
 import { studentSummaryService } from "./studentSummaryService";
 import { weaknessDetectionService } from "./weaknessDetectionService";
 
@@ -146,6 +156,38 @@ async function buildLocalStudentMemorySnapshot(): Promise<StudentMemorySnapshot>
     forgettingCurve,
     personalizedRecommendations,
   );
+  const personalKnowledgeGraph: PersonalKnowledgeGraph = personalKnowledgeGraphService.generatePersonalKnowledgeGraph(
+    studentProfile,
+    strengths,
+    weaknesses,
+    detectedStrengths,
+    detectedWeaknesses,
+  );
+  const longTermMemory: LongTermMemoryItem[] = longTermMemoryService.getLongTermMemory(
+    studentProfile,
+    timeline,
+    detectedStrengths,
+    detectedWeaknesses,
+    personalizedRecommendations,
+  );
+  const memoryInsights: MemoryInsight[] = longTermMemoryService.generateMemoryInsights(longTermMemory);
+  const memoryTrends: MemoryTrend[] = longTermMemoryService.detectMemoryTrends(longTermMemory, timeline);
+  const studentPersona: StudentPersona = studentPersonaService.generateStudentPersona(
+    studentProfile,
+    strengths,
+    weaknesses,
+    studyHabit,
+    attentionProfile,
+    learningPatterns,
+    learningPatternInsights,
+  );
+  const personalTutorContext: PersonalTutorContext = personalTutorContextService.buildPersonalTutorContext(
+    studentProfile,
+    studentPersona,
+    studentSummary,
+    weaknesses,
+    personalizedRecommendations,
+  );
 
   return {
     studentProfile,
@@ -166,6 +208,12 @@ async function buildLocalStudentMemorySnapshot(): Promise<StudentMemorySnapshot>
     personalizedRecommendations,
     studentSummary,
     longTermMemoryInsights,
+    personalKnowledgeGraph,
+    longTermMemory,
+    memoryInsights,
+    memoryTrends,
+    studentPersona,
+    personalTutorContext,
   };
 }
 
@@ -242,5 +290,29 @@ export const studentMemoryService = {
 
   getLongTermMemoryInsights() {
     return getStudentMemory().then((memory) => memory.longTermMemoryInsights);
+  },
+
+  getPersonalKnowledgeGraph() {
+    return getStudentMemory().then((memory) => memory.personalKnowledgeGraph);
+  },
+
+  getLongTermMemory() {
+    return getStudentMemory().then((memory) => memory.longTermMemory);
+  },
+
+  getMemoryInsights() {
+    return getStudentMemory().then((memory) => memory.memoryInsights);
+  },
+
+  getMemoryTrends() {
+    return getStudentMemory().then((memory) => memory.memoryTrends);
+  },
+
+  getStudentPersona() {
+    return getStudentMemory().then((memory) => memory.studentPersona);
+  },
+
+  getPersonalTutorContext() {
+    return getStudentMemory().then((memory) => memory.personalTutorContext);
   },
 };

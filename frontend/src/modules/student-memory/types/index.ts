@@ -140,6 +140,121 @@ export type LongTermMemoryInsight = {
   importance: MemoryImportance;
 };
 
+export type PersonalKnowledgeNode = {
+  id: string;
+  conceptId: string;
+  conceptName: string;
+  subject: string;
+  mastery: number;
+  confidence: number;
+  weaknessScore: number;
+  importance: number;
+  connectedConceptsCount: number;
+  relationSummary: string;
+};
+
+export type PersonalKnowledgeEdge = {
+  id: string;
+  sourceConceptId: string;
+  targetConceptId: string;
+  relationType: "supports" | "dependsOn" | "conflictsWith" | "reinforces";
+  strength: number;
+  summary: string;
+};
+
+export type PersonalKnowledgeGraph = {
+  id: string;
+  studentId: string;
+  generatedAt: string;
+  nodes: PersonalKnowledgeNode[];
+  edges: PersonalKnowledgeEdge[];
+};
+
+export type LongTermMemoryItem = {
+  id: string;
+  title: string;
+  type: "concept" | "behavior" | "preference" | "risk" | "recommendation";
+  importance: MemoryImportance;
+  relatedConcept: string;
+  insightSummary: string;
+  createdAt: string;
+};
+
+export type MemoryInsight = {
+  id: string;
+  title: string;
+  summary: string;
+  importance: MemoryImportance;
+  relatedConcept: string;
+  confidence: number;
+};
+
+export type MemoryTrend = {
+  id: string;
+  title: string;
+  direction: "improving" | "stable" | "declining";
+  conceptName: string;
+  summary: string;
+  confidence: number;
+};
+
+export type PersonaTrait = {
+  id: string;
+  name: string;
+  category: "strength" | "risk" | "neutral";
+  confidence: number;
+  summary: string;
+};
+
+export type LearningBehavior = {
+  id: string;
+  behaviorType: "consistency" | "attention" | "motivation" | "difficulty" | "review";
+  title: string;
+  summary: string;
+  confidence: number;
+};
+
+export type StudentPersona = {
+  id: string;
+  studentId: string;
+  personaName: string;
+  learningStyle: LearningStyle;
+  strengthTraits: PersonaTrait[];
+  riskTraits: PersonaTrait[];
+  learningBehaviors: LearningBehavior[];
+  behaviorSummary: string;
+  recommendedTeachingApproach: string;
+};
+
+export type TutorContextSection = {
+  id: string;
+  title: string;
+  summary: string;
+  priority: MemoryPriority;
+};
+
+export type TutorRecommendation = {
+  id: string;
+  title: string;
+  action: string;
+  rationale: string;
+  priority: MemoryPriority;
+};
+
+export type PersonalTutorContext = {
+  id: string;
+  studentId: string;
+  generatedAt: string;
+  studentSummary: string;
+  keyWeaknesses: string[];
+  keyStrengths: string[];
+  preferredLearningStyle: LearningStyle;
+  nextRecommendedAction: string;
+  tutorInstructions: string;
+  sections: TutorContextSection[];
+  recommendations: TutorRecommendation[];
+};
+
 export type StudentMemorySnapshot = {
   studentProfile: StudentProfile;
   strengths: StudentStrength[];
@@ -159,6 +274,12 @@ export type StudentMemorySnapshot = {
   personalizedRecommendations: PersonalizedRecommendation[];
   studentSummary: StudentSummary | null;
   longTermMemoryInsights: LongTermMemoryInsight[];
+  personalKnowledgeGraph: PersonalKnowledgeGraph;
+  longTermMemory: LongTermMemoryItem[];
+  memoryInsights: MemoryInsight[];
+  memoryTrends: MemoryTrend[];
+  studentPersona: StudentPersona;
+  personalTutorContext: PersonalTutorContext;
 };
 
 export type StudentStrength = {

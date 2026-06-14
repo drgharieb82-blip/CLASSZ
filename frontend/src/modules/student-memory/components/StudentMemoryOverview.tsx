@@ -1,4 +1,18 @@
-import { AlertCircle, BrainCircuit, History, Lightbulb, RefreshCw, Target, TrendingDown, Trophy, UserRound } from "lucide-react";
+import {
+  AlertCircle,
+  Archive,
+  BrainCircuit,
+  History,
+  Lightbulb,
+  MessagesSquare,
+  Network,
+  RefreshCw,
+  Target,
+  TrendingDown,
+  Trophy,
+  UserRound,
+  UserRoundCog,
+} from "lucide-react";
 
 import { Card } from "../../../components/ui/Card";
 import { EmptyState } from "../../../components/ui/EmptyState";
@@ -13,10 +27,14 @@ import { LearningStyleCard } from "./LearningStyleCard";
 import { LearningPatternCard } from "./LearningPatternCard";
 import { LearningPatternInsightCard } from "./LearningPatternInsightCard";
 import { LongTermMemoryInsightCard } from "./LongTermMemoryInsightCard";
+import { LongTermMemoryCard } from "./LongTermMemoryCard";
 import { MemoryTimelineCard } from "./MemoryTimelineCard";
+import { PersonalKnowledgeGraphCard } from "./PersonalKnowledgeGraphCard";
+import { PersonalTutorContextCard } from "./PersonalTutorContextCard";
 import { RecommendationCard } from "./RecommendationCard";
 import { ReviewSchedulerCard } from "./ReviewSchedulerCard";
 import { StrengthCard } from "./StrengthCard";
+import { StudentPersonaCard } from "./StudentPersonaCard";
 import { StudentProfileCard } from "./StudentProfileCard";
 import { StudentSummaryCard } from "./StudentSummaryCard";
 import { StudyPatternCard } from "./StudyPatternCard";
@@ -42,6 +60,12 @@ export function StudentMemoryOverview() {
     personalizedRecommendations,
     studentSummary,
     longTermMemoryInsights,
+    personalKnowledgeGraph,
+    longTermMemory,
+    memoryInsights,
+    memoryTrends,
+    studentPersona,
+    personalTutorContext,
     loading,
     error,
     refresh,
@@ -241,9 +265,87 @@ export function StudentMemoryOverview() {
           <section className="space-y-4">
             <Card className="p-5">
               <SectionHeader
-                eyebrow="Phase 6.9 - 6.10"
-                title="Summary and Long-Term Memory"
-                description="Generated student summary and aggregated long-term memory insights."
+                eyebrow="Phase 6.7"
+                title="Personal Knowledge Graph"
+                description="Concept-level memory nodes with mastery, confidence, weakness pressure, and local concept relations."
+                icon={<Network className="h-5 w-5 text-cyan-600 dark:text-cyan-300" aria-hidden="true" />}
+              />
+            </Card>
+            <div className="grid gap-4 xl:grid-cols-2">
+              {!personalKnowledgeGraph || personalKnowledgeGraph.nodes.length === 0 ? (
+                <EmptyState description="Personal knowledge graph nodes will appear here." />
+              ) : (
+                personalKnowledgeGraph.nodes.map((node) => <PersonalKnowledgeGraphCard key={node.id} node={node} />)
+              )}
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <Card className="p-5">
+              <SectionHeader
+                eyebrow="Phase 6.8"
+                title="Long-Term Memory"
+                description="Durable student memories, generated insights, and trend signals kept local to the frontend."
+                icon={<Archive className="h-5 w-5 text-indigo-600 dark:text-indigo-300" aria-hidden="true" />}
+              />
+            </Card>
+            <div className="grid gap-4 xl:grid-cols-2">
+              {longTermMemory.length === 0 ? (
+                <EmptyState description="Long-term memory items will appear here." />
+              ) : (
+                longTermMemory.slice(0, 6).map((memoryItem) => <LongTermMemoryCard key={memoryItem.id} memoryItem={memoryItem} />)
+              )}
+            </div>
+            <Card className="p-5">
+              <div className="flex flex-wrap gap-2">
+                {memoryInsights.map((insight) => (
+                  <span key={insight.id} className="ui-badge ui-badge-neutral">
+                    {insight.title}: {insight.confidence}% confidence
+                  </span>
+                ))}
+                {memoryTrends.map((trend) => (
+                  <span key={trend.id} className="ui-badge ui-badge-neutral">
+                    {trend.title}: {trend.direction}
+                  </span>
+                ))}
+              </div>
+            </Card>
+          </section>
+
+          <section className="space-y-4">
+            <Card className="p-5">
+              <SectionHeader
+                eyebrow="Phase 6.9"
+                title="Student Persona"
+                description="A local learner persona generated from strengths, risks, behaviors, and pacing signals."
+                icon={<UserRoundCog className="h-5 w-5 text-emerald-600 dark:text-emerald-300" aria-hidden="true" />}
+              />
+            </Card>
+            {studentPersona ? <StudentPersonaCard persona={studentPersona} /> : <EmptyState description="Student persona will appear here." />}
+          </section>
+
+          <section className="space-y-4">
+            <Card className="p-5">
+              <SectionHeader
+                eyebrow="Phase 6.10"
+                title="Personal AI Tutor Context"
+                description="A compact tutor-ready context package built from student memory without backend or AI calls."
+                icon={<MessagesSquare className="h-5 w-5 text-teal-600 dark:text-teal-300" aria-hidden="true" />}
+              />
+            </Card>
+            {personalTutorContext ? (
+              <PersonalTutorContextCard context={personalTutorContext} />
+            ) : (
+              <EmptyState description="Personal tutor context will appear here." />
+            )}
+          </section>
+
+          <section className="space-y-4">
+            <Card className="p-5">
+              <SectionHeader
+                eyebrow="Phase 6.6"
+                title="Student Summary and Memory Insights"
+                description="Generated student summary and aggregated long-term memory signals."
                 icon={<BrainCircuit className="h-5 w-5 text-teal-600 dark:text-teal-300" aria-hidden="true" />}
               />
             </Card>

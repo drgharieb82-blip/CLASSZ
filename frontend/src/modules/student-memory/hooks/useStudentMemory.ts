@@ -10,12 +10,18 @@ import type {
   LearningPreference,
   LearningPattern,
   LearningPatternInsight,
+  LongTermMemoryItem,
   LongTermMemoryInsight,
+  MemoryInsight,
   MemoryEvent,
+  MemoryTrend,
   MemoryTimeline,
+  PersonalKnowledgeGraph,
+  PersonalTutorContext,
   PersonalizedRecommendation,
   ReviewSession,
   StudyHabit,
+  StudentPersona,
   StudentProfile,
   StudentSummary,
   StudentStrength,
@@ -42,6 +48,12 @@ type StudentMemoryState = {
   personalizedRecommendations: PersonalizedRecommendation[];
   studentSummary: StudentSummary | null;
   longTermMemoryInsights: LongTermMemoryInsight[];
+  personalKnowledgeGraph: PersonalKnowledgeGraph | null;
+  longTermMemory: LongTermMemoryItem[];
+  memoryInsights: MemoryInsight[];
+  memoryTrends: MemoryTrend[];
+  studentPersona: StudentPersona | null;
+  personalTutorContext: PersonalTutorContext | null;
   loading: boolean;
   error: string | null;
   addMemoryEvent: (memoryEvent: MemoryEvent) => Promise<void>;
@@ -70,6 +82,12 @@ export function useStudentMemory(): StudentMemoryState {
   const [personalizedRecommendations, setPersonalizedRecommendations] = useState<PersonalizedRecommendation[]>([]);
   const [studentSummary, setStudentSummary] = useState<StudentSummary | null>(null);
   const [longTermMemoryInsights, setLongTermMemoryInsights] = useState<LongTermMemoryInsight[]>([]);
+  const [personalKnowledgeGraph, setPersonalKnowledgeGraph] = useState<PersonalKnowledgeGraph | null>(null);
+  const [longTermMemory, setLongTermMemory] = useState<LongTermMemoryItem[]>([]);
+  const [memoryInsights, setMemoryInsights] = useState<MemoryInsight[]>([]);
+  const [memoryTrends, setMemoryTrends] = useState<MemoryTrend[]>([]);
+  const [studentPersona, setStudentPersona] = useState<StudentPersona | null>(null);
+  const [personalTutorContext, setPersonalTutorContext] = useState<PersonalTutorContext | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -98,6 +116,12 @@ export function useStudentMemory(): StudentMemoryState {
       setPersonalizedRecommendations(memory.personalizedRecommendations);
       setStudentSummary(memory.studentSummary);
       setLongTermMemoryInsights(memory.longTermMemoryInsights);
+      setPersonalKnowledgeGraph(memory.personalKnowledgeGraph);
+      setLongTermMemory(memory.longTermMemory);
+      setMemoryInsights(memory.memoryInsights);
+      setMemoryTrends(memory.memoryTrends);
+      setStudentPersona(memory.studentPersona);
+      setPersonalTutorContext(memory.personalTutorContext);
     } catch {
       setError(fallbackError);
     } finally {
@@ -139,6 +163,12 @@ export function useStudentMemory(): StudentMemoryState {
     personalizedRecommendations,
     studentSummary,
     longTermMemoryInsights,
+    personalKnowledgeGraph,
+    longTermMemory,
+    memoryInsights,
+    memoryTrends,
+    studentPersona,
+    personalTutorContext,
     loading,
     error,
     addMemoryEvent,
