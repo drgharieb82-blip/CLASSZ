@@ -79,10 +79,10 @@ Maps backend API endpoints to frontend pages. Shows what's wired, what exists bu
 
 | Feature | Backend Endpoint | Frontend Page | Status |
 |---------|-----------------|---------------|--------|
-| Login | — | `/login` | Page Only |
-| Register | — | `/register` | Page Only |
-| Get current user | — | (UserMenu, DashboardLayout) | Page Only |
-| Logout | — | (UserMenu) | Page Only |
+| Login | `POST /api/auth/login` | `/login` | Ready |
+| Register | `POST /api/auth/register` | `/register` | Ready |
+| Get current user | `GET /api/auth/me` | (UserMenu, DashboardLayout) | Ready |
+| Logout | — (frontend-only) | (UserMenu) | Page Only |
 
 ## Student Features
 

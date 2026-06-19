@@ -53,3 +53,41 @@ These files are no longer referenced by the SPA entry point but are kept intact 
 3. Restore `__root.tsx` (re-add `shellComponent`, `head()`, `Scripts`, `HeadContent`)
 4. Remove `index.html` and `src/main.tsx`
 5. Archived SSR files are still in place
+
+---
+
+## Milestone 1A — Backend Auth Endpoints (2026-06-19)
+
+**Branch:** `lovable-ui-import`
+
+**Commit 1 of 3** for Milestone 1 (Authentication).
+
+### What Changed
+
+| File | Action | Details |
+|------|--------|---------|
+| `backend/app/modules/auth/dependencies.py` | Created | `get_current_user` dependency — extracts JWT from `Authorization: Bearer` header, decodes via python-jose, loads User from DB, rejects inactive accounts |
+| `backend/app/modules/auth/schemas.py` | Expanded | Added `LoginRequest`, `RegisterRequest` (with role validator limiting self-registration to student/parent), `AuthResponse` (token + user). Kept existing `Token`. |
+| `backend/app/modules/auth/service.py` | Expanded | Added `authenticate_user(email, password, session)` and `register_user(data, session)`. Kept existing `issue_access_token`. |
+| `backend/app/modules/auth/router.py` | Expanded | Added `POST /login` (401 invalid creds, 403 inactive), `POST /register` (201 success, 409 duplicate email), `GET /me` (returns authenticated user). Kept existing `GET /jwt-config`. |
+| `backend/app/core/permissions.py` | Fixed | `require_roles()` now uses `Depends(get_current_user)` instead of broken `current_user: User | None = None` default. Removed redundant 401 check (handled by dependency). |
+
+### New Endpoints
+
+| Method | Path | Auth | Success | Errors |
+|--------|------|------|---------|--------|
+| POST | `/api/auth/login` | None | 200 + token + user | 401 bad creds, 403 inactive |
+| POST | `/api/auth/register` | None | 201 + token + user | 409 duplicate, 422 validation |
+| GET | `/api/auth/me` | Bearer JWT | 200 + user | 401 missing/invalid/expired token |
+
+### Design Decisions
+
+- **`HTTPBearer` over `OAuth2PasswordBearer`**: The frontend sends `Authorization: Bearer <token>` from the Zustand store. `HTTPBearer` matches this pattern directly.
+- **Self-registration restricted**: Only `student` and `parent` roles can self-register. Teacher/admin accounts will be admin-created in a future milestone.
+- **No migration needed**: The `users` table already has all required columns (`email`, `hashed_password`, `full_name`, `role`, `is_active`).
+- **Existing endpoints unchanged**: All 60 existing endpoints remain unauthenticated. Auth will be progressively added in later milestones.
+
+### Validation
+
+- All 5 modified/created files pass `py_compile`
+- FastAPI app starts and registers 4 auth routes: `/api/auth/jwt-config`, `/api/auth/login`, `/api/auth/register`, `/api/auth/me`
