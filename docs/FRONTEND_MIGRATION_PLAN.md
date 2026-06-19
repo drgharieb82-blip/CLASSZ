@@ -20,17 +20,17 @@ The `classz-frontend-prototype/` has 83 routes across 9 roles, all rendering wit
 - [x] Archive SSR files (kept, not deleted)
 - [x] TypeScript passes, Vite build passes
 
-### Milestone 1: Authentication (Not Started)
+### Milestone 1: Authentication ✅ (2026-06-19)
 
-- [ ] Backend: implement `POST /api/auth/login`
-- [ ] Backend: implement `POST /api/auth/register`
-- [ ] Backend: implement `GET /api/auth/me`
-- [ ] Backend: implement `get_current_user` dependency (JWT decode → user load)
-- [ ] Frontend: wire `/login` page to `POST /api/auth/login`
-- [ ] Frontend: wire `/register` page to `POST /api/auth/register`
-- [ ] Frontend: replace hardcoded "Alex Rivera" with real user data
-- [ ] Frontend: add 401 interceptor → redirect to `/login`
-- [ ] Frontend: wire route guards to protected routes
+- [x] Backend: implement `POST /api/auth/login`
+- [x] Backend: implement `POST /api/auth/register`
+- [x] Backend: implement `GET /api/auth/me`
+- [x] Backend: implement `get_current_user` dependency (JWT decode → user load)
+- [x] Frontend: wire `/login` page to `POST /api/auth/login`
+- [x] Frontend: wire `/register` page to `POST /api/auth/register`
+- [x] Frontend: replace hardcoded "Alex Rivera" with real user data
+- [x] Frontend: add 401 interceptor → redirect to `/login` (existed from M0 in `client.ts`)
+- [ ] Frontend: wire route guards to protected routes (deferred — guards exist but not applied, to keep demo browsing alive)
 
 ### Milestone 2: Academic Core Wiring (Not Started)
 

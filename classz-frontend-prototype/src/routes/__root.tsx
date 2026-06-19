@@ -8,6 +8,7 @@ import {
 import { useEffect } from "react";
 
 import { AppProvider } from "../lib/app-context";
+import { useAuthStore } from "../lib/stores/auth-store";
 import { Toaster } from "../components/ui/sonner";
 import { AnimatedBackground } from "../components/premium/AnimatedBackground";
 
@@ -78,6 +79,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    const { token, logout, setUser } = useAuthStore.getState();
+    if (!token) return;
+
+    import("../lib/api/auth").then(({ getMeApi }) =>
+      getMeApi()
+        .then((user) => setUser(user))
+        .catch(() => logout()),
+    );
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

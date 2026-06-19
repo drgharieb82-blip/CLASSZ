@@ -13,6 +13,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
+import { registerApi } from "@/lib/api/auth";
+import { useAuthStore } from "@/lib/stores/auth-store";
+import { ApiError } from "@/lib/api/client";
 
 export const Route = createFileRoute("/register")({
   head: () => ({ meta: [{ title: "Create student account — CLASSZ" }] }),
@@ -103,10 +106,13 @@ function Field({
 
 function RegisterPage() {
   const navigate = useNavigate();
+  const login = useAuthStore((s) => s.login);
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<FormState>(initial);
   const [done, setDone] = useState(false);
   const [touched, setTouched] = useState(false);
+  const [apiError, setApiError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const set = (k: keyof FormState, v: string | boolean) => setForm((f) => ({ ...f, [k]: v }));
   const pwScore = useMemo(() => strength(form.password), [form.password]);
@@ -145,10 +151,35 @@ function RegisterPage() {
   };
   const back = () => { setTouched(false); setStep((s) => Math.max(1, s - 1)); };
 
-  const submit = () => {
+  const submit = async () => {
     if (!form.agree) { setTouched(true); return; }
-    setDone(true);
-    setTimeout(() => navigate({ to: "/student" }), 2600);
+    setApiError("");
+    setSubmitting(true);
+
+    try {
+      const res = await registerApi({
+        email: form.email,
+        password: form.password,
+        full_name: form.fullName,
+      });
+      login(res.access_token, res.user);
+      setDone(true);
+      setTimeout(() => navigate({ to: "/student" }), 2600);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        const detail =
+          typeof err.body === "object" &&
+          err.body !== null &&
+          "detail" in err.body
+            ? (err.body as { detail: string }).detail
+            : "Registration failed. Please try again.";
+        setApiError(detail);
+      } else {
+        setApiError("Something went wrong. Please try again.");
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -291,6 +322,7 @@ function RegisterPage() {
                           <span className="text-sm text-muted-foreground">I agree to the <span className="font-medium text-primary">Terms of Service</span> and <span className="font-medium text-primary">Privacy Policy</span>.</span>
                         </label>
                         {touched && !form.agree && <p className="text-xs text-destructive">Please accept the terms to continue</p>}
+                        {apiError && <p className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">{apiError}</p>}
                       </div>
                     )}
                   </motion.div>
@@ -305,7 +337,7 @@ function RegisterPage() {
                   {step < 5 ? (
                     <GradientButton onClick={next}>Continue <ChevronRight className="h-4 w-4" /></GradientButton>
                   ) : (
-                    <GradientButton onClick={submit}>Create account <Check className="h-4 w-4" /></GradientButton>
+                    <GradientButton onClick={submit} disabled={submitting}>{submitting ? "Creating…" : "Create account"} <Check className="h-4 w-4" /></GradientButton>
                   )}
                 </div>
               </motion.div>

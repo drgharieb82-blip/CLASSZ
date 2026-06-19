@@ -146,3 +146,34 @@ These files are no longer referenced by the SPA entry point but are kept intact 
 ```
 15 passed, 3 warnings in 14.42s
 ```
+
+---
+
+## Milestone 1C — Frontend Auth Wiring (2026-06-19)
+
+**Branch:** `lovable-ui-import`
+
+**Commit 3 of 3** for Milestone 1 (Authentication).
+
+### What Changed
+
+| File | Action | Details |
+|------|--------|---------|
+| `classz-frontend-prototype/src/lib/api/auth.ts` | Created | `loginApi()`, `registerApi()`, `getMeApi()` — typed wrappers around API client |
+| `classz-frontend-prototype/src/routes/login.tsx` | Rewritten | Removed demo role selector. Real API call with loading state and error display. On success: saves token+user to Zustand store, redirects by backend role via `ROLES[role].home`. |
+| `classz-frontend-prototype/src/routes/register.tsx` | Modified | Final submit calls `registerApi()`. Shows API errors on step 5. Auto-logs-in on success (saves token+user), then shows success animation and redirects to `/student`. |
+| `classz-frontend-prototype/src/components/layout/UserMenu.tsx` | Rewritten | Reads `user` from `useAuthStore`. Shows real name, email, and computed initials. Falls back to "Guest" when not authenticated. Logout clears Zustand store + localStorage, navigates to `/login`. |
+| `classz-frontend-prototype/src/routes/__root.tsx` | Modified | Added startup token validation: if a token exists in store, calls `GET /api/auth/me` in a try/catch. On success: refreshes user data. On failure (401/network): silently clears auth state. No redirect — user stays on current page. |
+
+### Design Decisions
+
+- **No route guards applied yet**: `requireAuth()` and `requireRole()` exist from M0 but are not wired to any route's `beforeLoad`. All dashboards remain browsable for demo purposes.
+- **No redirect on startup**: `__root.tsx` validates the token silently. If it fails, auth state is cleared but the user is not redirected. This prevents redirect loops and keeps demo browsing working.
+- **Login clears demo defaults**: Removed `defaultValue="student@classz.io"` and `defaultValue="password"` from inputs. Email and password fields start empty.
+- **Register restricted to student**: The wizard only creates student accounts (backend enforces `student`/`parent` only). The role field is not sent, defaulting to `student`.
+- **UserMenu "Switch dashboard" kept**: Authenticated or not, users can still browse all 9 role dashboards via the menu. Guards will be tightened in a future milestone.
+
+### Validation
+
+- `tsc -b --noEmit`: passes (0 errors)
+- `vite build`: passes (3.13s, 3085 modules)

@@ -66,23 +66,26 @@ D:\CLASSZ\
 
 ## Frontend State
 
-All 83 route pages render UI with mock data from `src/lib/mock.ts`. No route connects to the backend API yet.
+Authentication is wired end-to-end. Login and register pages call the real backend API. UserMenu shows the authenticated user's name and email. Token is validated on app startup via `GET /api/auth/me`.
 
-Infrastructure ready for backend wiring:
+All other 83 route pages still render UI with mock data from `src/lib/mock.ts`. No route guards are enforced yet — dashboards are freely browsable for demo purposes.
+
+Infrastructure:
 - `src/lib/api/client.ts` — fetch wrapper with JWT and 401 handling
-- `src/lib/stores/auth-store.ts` — Zustand store for auth state
-- `src/lib/auth-guard.ts` — `requireAuth()` and `requireRole()` route guards
+- `src/lib/api/auth.ts` — `loginApi()`, `registerApi()`, `getMeApi()`
+- `src/lib/stores/auth-store.ts` — Zustand store for auth state (token + user persisted in localStorage)
+- `src/lib/auth-guard.ts` — `requireAuth()` and `requireRole()` route guards (exist but not applied to routes)
 - TanStack Query client is initialized in the router context
 
 ## What to Build Next
 
 Priority order:
-1. **Auth endpoints** — `POST /api/auth/login`, `POST /api/auth/register`, `GET /api/auth/me`
-2. **Wire login/register pages** to real auth endpoints
-3. **Wire course catalog** to `GET /api/courses`
-4. **Wire academic core** — lessons, blocks, videos, progress
-5. **Wire assessments** — question bank, quizzes, assignments, grading
-6. **Wire teacher dashboard** to `GET /api/teacher-dashboard/*`
+1. **Wire course catalog** to `GET /api/courses`
+2. **Wire academic core** — lessons, blocks, videos, progress
+3. **Wire assessments** — question bank, quizzes, assignments, grading
+4. **Wire teacher dashboard** to `GET /api/teacher-dashboard/*`
+5. **Tighten route guards** — apply `requireAuth`/`requireRole` to protected routes
+6. **Admin user management** — create teacher/admin accounts via admin panel
 
 ## Related Documents
 
