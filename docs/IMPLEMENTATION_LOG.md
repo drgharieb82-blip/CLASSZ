@@ -91,3 +91,58 @@ These files are no longer referenced by the SPA entry point but are kept intact 
 
 - All 5 modified/created files pass `py_compile`
 - FastAPI app starts and registers 4 auth routes: `/api/auth/jwt-config`, `/api/auth/login`, `/api/auth/register`, `/api/auth/me`
+
+---
+
+## Milestone 1B — Auth Tests (2026-06-19)
+
+**Branch:** `lovable-ui-import`
+
+**Commit 2 of 3** for Milestone 1 (Authentication).
+
+### What Changed
+
+| File | Action | Details |
+|------|--------|---------|
+| `backend/tests/test_auth.py` | Created | 15 async tests covering login, register, GET /me, and register→login→me round-trip. Uses in-memory SQLite + httpx ASGI transport — no Docker or PostgreSQL required. |
+| `backend/app/modules/auth/dependencies.py` | Fixed | `get_current_user` now converts JWT `sub` string to `uuid.UUID` before querying. Without this, SQLAlchemy's PostgreSQL UUID type crashes when comparing with a plain string. |
+| `backend/requirements.txt` | Modified | Added `bcrypt<5` pin — passlib 1.7.4's wrap-bug detection is incompatible with bcrypt 5.x. |
+
+### Tests
+
+| Test | Verifies |
+|------|----------|
+| `test_login_success` | 200, token + user returned, correct role |
+| `test_login_wrong_password` | 401, "Invalid email or password" |
+| `test_login_nonexistent_email` | 401 |
+| `test_login_inactive_user` | 403, "Account deactivated" |
+| `test_register_student` | 201, default role is student |
+| `test_register_parent` | 201, explicit parent role accepted |
+| `test_register_duplicate_email` | 409, "Email already registered" |
+| `test_register_restricted_role_teacher` | 422, teacher can't self-register |
+| `test_register_restricted_role_admin` | 422, admin can't self-register |
+| `test_register_weak_password` | 422, password < 8 chars rejected |
+| `test_me_authenticated` | 200, returns user data from valid token |
+| `test_me_no_token` | 401, no Authorization header |
+| `test_me_invalid_token` | 401, garbage token |
+| `test_me_expired_token` | 401, token with past expiry |
+| `test_register_then_login` | Full round-trip: register → login → me |
+
+### Bugs Found and Fixed
+
+1. **UUID string mismatch in `get_current_user`**: The JWT `sub` claim is a string (e.g. `"5b3f013b-c478-47de-..."`) but `User.id` is a PostgreSQL UUID column. SQLAlchemy's UUID type requires a `uuid.UUID` object for comparison, not a raw string. Fixed by parsing `user_id` through `uuid.UUID()` before the query.
+
+2. **bcrypt 5.x incompatibility**: passlib 1.7.4's internal wrap-bug detection sends a >72-byte test password. bcrypt 5.x raises `ValueError` for this. Pinned `bcrypt<5` in requirements.txt. This was a pre-existing issue that would also affect production.
+
+### Test Infrastructure
+
+- **No shared fixtures or conftest.py** — all test helpers are local to `test_auth.py`
+- **In-memory SQLite** via `aiosqlite` — tables created/dropped per test
+- **httpx ASGI transport** — tests call the real FastAPI app without a running server
+- **Dev dependencies** (not in requirements.txt): `pytest`, `pytest-asyncio`, `httpx`, `aiosqlite`, `greenlet`
+
+### Validation
+
+```
+15 passed, 3 warnings in 14.42s
+```

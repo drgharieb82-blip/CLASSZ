@@ -47,7 +47,7 @@ D:\CLASSZ\
 2. **SPA mode** — SSR was stripped. TanStack Start removed, TanStack Router kept. SSR files archived in place.
 3. **Prototype flattened** — The prototype's `.git` was removed and its files added directly to this repo. Original Lovable history (75 commits, final `b53f92c`) is preserved at `https://github.com/drgharieb82-blip/classz-frontend-prototype.git`.
 4. **API proxy** — Vite dev server proxies `/api` to `http://127.0.0.1:8000`.
-5. **Auth not implemented yet** — Auth store and route guards exist but no backend auth endpoints. Login page uses demo role selector.
+5. **Auth backend implemented** — `POST /api/auth/login`, `POST /api/auth/register`, `GET /api/auth/me` are live. `get_current_user` JWT dependency and `require_roles()` work. Frontend login page still uses demo role selector (wiring is next). 15 tests cover all auth paths.
 
 ## Backend API Summary
 
@@ -62,7 +62,7 @@ D:\CLASSZ\
 - **Teacher Dashboard** — Aggregated stats
 - **AI Content** — 7 content type generators (depends on unimplemented `ai_core`)
 
-8 stub modules with empty routers: auth, users, payments, wallets, reports, notifications, parents, admin.
+7 stub modules with empty routers: users, payments, wallets, reports, notifications, parents, admin.
 
 ## Frontend State
 
