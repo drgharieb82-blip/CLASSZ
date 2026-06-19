@@ -5,13 +5,17 @@ import { GradientButton } from "@/components/premium/GradientButton";
 export function AICoachCard() {
   return (
     <div className="relative overflow-hidden rounded-2xl border bg-card/70 p-6">
-      <div className="absolute -end-12 -top-12 h-40 w-40 rounded-full bg-primary/5 blur-3xl" />
+      <div className="absolute -end-16 -top-16 h-48 w-48 rounded-full bg-primary/5 blur-3xl" />
+      <div className="absolute -end-8 bottom-0 h-32 w-32 rounded-full bg-brand-2/5 blur-2xl" />
       <div className="relative">
-        <div className="mb-4 flex items-center gap-2.5">
-          <span className="grid h-9 w-9 place-items-center rounded-xl gradient-brand text-white shadow glow">
-            <Bot className="h-5 w-5" />
+        <div className="mb-5 flex items-center gap-3">
+          <span className="grid h-12 w-12 place-items-center rounded-2xl gradient-brand text-white shadow-lg glow">
+            <Bot className="h-6 w-6" />
           </span>
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">AI Coach</h3>
+          <div>
+            <h3 className="text-base font-bold tracking-tight">AI Coach</h3>
+            <p className="text-xs text-muted-foreground">Your personal study assistant</p>
+          </div>
         </div>
 
         <div className="mb-5 rounded-xl border border-primary/20 bg-primary/5 p-4">
@@ -28,7 +32,7 @@ export function AICoachCard() {
             <Link to="/assistant/study-plan"><CalendarDays className="h-3.5 w-3.5" /> Study Plan</Link>
           </GradientButton>
           <GradientButton variant="outline" size="sm" asChild>
-            <Link to="/assistant"><ClipboardList className="h-3.5 w-3.5" /> Generate Quiz</Link>
+            <Link to="/assistant"><ClipboardList className="h-3.5 w-3.5" /> Gen. Quiz</Link>
           </GradientButton>
           <GradientButton variant="outline" size="sm" asChild>
             <Link to="/assistant/analyze"><Brain className="h-3.5 w-3.5" /> Weak Points</Link>

@@ -24,8 +24,8 @@ export function RevisionDueCard({ items }: RevisionDueCardProps) {
   const overdueCount = items.filter((i) => i.urgency === "overdue").length;
 
   return (
-    <div className="rounded-2xl border bg-card/70 p-5">
-      <div className="mb-4 flex items-center justify-between">
+    <div className="rounded-2xl border bg-card/70 p-6">
+      <div className="mb-5 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <RotateCcw className="h-4 w-4 text-primary" />
           <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Revision Due</h3>

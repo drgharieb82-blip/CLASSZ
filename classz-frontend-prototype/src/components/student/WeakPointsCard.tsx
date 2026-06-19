@@ -21,8 +21,8 @@ const priorityConfig: Record<number, { label: string; color: string; bar: string
 
 export function WeakPointsCard({ weakPoints }: WeakPointsCardProps) {
   return (
-    <div className="rounded-2xl border bg-card/70 p-5">
-      <div className="mb-4 flex items-center gap-2">
+    <div className="rounded-2xl border bg-card/70 p-6">
+      <div className="mb-5 flex items-center gap-2">
         <AlertTriangle className="h-4 w-4 text-warning" />
         <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Weak Points</h3>
       </div>
