@@ -429,3 +429,25 @@ Incremental refinement of the existing `/student` dashboard to align more tightl
 - Added horizontal arrow navigation to `Today's Mission` so extra mission frames remain reachable instead of clipping.
 - Tightened responsive widths in `AI Coach`, `Achievements`, and `Favorite Course` to prevent header/content overflow.
 - Rebalanced `Wall of Honor` header and column relationships using `min-w-0`, flexible course selector sizing, and safer large-screen breakpoints.
+
+---
+
+## Wall of Honor Competitive Hierarchy Refinement (2026-06-19)
+
+Refined only the existing `WallOfHonorCard` layout without changing routing, backend, auth, or the rest of the student dashboard.
+
+### What Changed
+
+- Rebuilt the internal Wall of Honor composition into **two balanced rows** on desktop:
+  - Row 1: Podium card (`2fr`) + Your Rank card (`1fr`)
+  - Row 2: Around Me card (`2fr`) + Top Performers card (`1fr`)
+- Kept the existing **course arrows**, **course selector**, and **tabs** (`Top XP`, `Top Quiz Scores`, `Top Streak`).
+- Made the **podium card** more compact and cinematic by reducing dead vertical space, scaling the platforms up, preserving centered dominance for `#1`, and adding title badges (`Immortal`, `Titan`, `Hero`) plus crown/glow/confetti accents.
+- Made **Your Rank** denser by surfacing the rank number, XP, streak, progress bars, rival target, CTA, and motivational message without the previous empty filler space.
+- Expanded **Around Me** into a wider rivalry list with a glowing current-user row plus relative XP difference and directional movement cues.
+- Strengthened **Top Performers** from plain text into achievement-style highlights with stronger icon treatments and a more prestigious percentile badge.
+
+### Validation
+
+- `npx tsc -b --noEmit`: passes
+- `npx vite build`: passes

@@ -71,6 +71,7 @@ Authentication is wired end-to-end. Login and register pages call the real backe
 Two key student pages have been fully redesigned:
 - **Student dashboard** (`/student`) — screenshot-aligned action-first study coach experience. Desktop flow is now: full-width Today's Mission hero with dedicated `Start Today` rail, 4-card action row (Weak Points, Revision Due, Attention Needed, Upcoming Events), 3-card coach row (AI Coach, Achievements, Favorite Course), then a prestige Wall of Honor. The Wall of Honor is no longer the compact list version from the prior milestone: it now uses a podium left, glowing rank card center, around-me rivalry list plus top performers right, course switching arrows, and tab transitions. The old course-progress and message components are preserved in the codebase but are no longer rendered on `/student`. Mock data lives in `studentDashboardPrestige`, while the previous `studentDashboard` dataset remains intact for reference.
 - **Student dashboard responsive polish** (same route) — Today's Mission now supports horizontal arrow navigation for overflowed mission frames, the AI/Achievements/Favorite row uses safer width constraints to stop text and inner panels from spilling outside their cards, and Wall of Honor uses more flexible frame sizing so its header and three-panel composition hold together better on narrower desktop widths.
+- **Wall of Honor competitive hierarchy refinement** (same route) — the Wall of Honor internals now use a 2-row competitive layout instead of the older 3-column balance: podium (`2fr`) + rank (`1fr`) on row 1, around-me (`2fr`) + top-performers (`1fr`) on row 2. The podium is denser and more cinematic, Your Rank carries clearer progress/rival context, Around Me is wider and easier to scan, and Top Performers now reads like achievement highlights instead of detached plain text.
 - **Lesson player** (`/student/lesson`) — 3-column learning experience (course sidebar, content player, info panel) with 12 custom components.
 
 All other 81 route pages still render UI with mock data. No route guards are enforced yet — dashboards are freely browsable for demo purposes.
@@ -100,3 +101,4 @@ Priority order:
 - `docs/COMPONENTS_LIBRARY.md` — UI component specifications
 - `docs/IMPLEMENTATION_LOG.md` — What was built, when, and why
 - `docs/API_FRONTEND_MAPPING.md` — Backend endpoint to frontend page mapping
+
