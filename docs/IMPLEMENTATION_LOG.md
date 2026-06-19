@@ -394,3 +394,32 @@ These changes require backend support (ranking endpoints, tier system, weekly re
 
 - `tsc -b --noEmit`: passes (0 errors)
 - `vite build`: passes (1.39s, 3114 modules)
+
+---
+
+## Student Dashboard v4 - Screenshot Alignment & Prestige Wall (2026-06-19)
+
+**Branch:** `lovable-ui-import`
+
+Incremental refinement of the existing `/student` dashboard to align more tightly with the supplied screenshot and JSON without changing routing, auth, or page architecture.
+
+### What Changed
+
+| Component | Change |
+|-----------|--------|
+| `src/routes/student.index.tsx` | Rebalanced the page to the screenshot structure: Today's Mission hero, 4-card decision row, 3-card coach/achievement/favorite row, then Wall of Honor. Removed the in-route Progress by Course and messages sections from this page without deleting their components. |
+| `TodayMissionCard` | Reworked into a denser hero with three action columns plus a dedicated `Start Today` rail and compact continue-learning footer. |
+| `WeakPointsCard` | Restyled to match the new premium card language and switched to explicit High/Medium/Low urgency badges. |
+| `RevisionDueCard` | Updated to screenshot-style due chips (`Due today`, `In 1 day`) and richer icon treatments. |
+| `AttentionCard` | Simplified into direct status rows (`Overdue`, `Due today`, `Due tomorrow`, `New`) rather than grouped analytics-like sections. |
+| `UpcomingEventsCard` | Added as a new fourth card in row 2 because the screenshot includes a dedicated upcoming-events card and none existed previously. |
+| `AICoachCard` | Now accepts structured summary/plan data and mirrors the screenshot's recommendation panel plus five CTA buttons. |
+| `AchievementsCard` | Rebuilt into larger stat tiles to match the screenshot's emotional achievement treatment. |
+| `FavoriteCourseCard` | Expanded to include weekly hours, lessons completed, progress bar, and CTA instead of the prior compact summary. |
+| `WallOfHonorCard` | Rebuilt from the compact leaderboard into a prestige layout: podium left, glowing rank card center, around-me plus top-performers panel right, course switching arrows, tab switching, and motion transitions. |
+| `src/lib/mock.ts` | Preserved the old `studentDashboard` mock and added a new `studentDashboardPrestige` dataset used only by the updated route. |
+
+### Validation
+
+- `npx tsc -b --noEmit`: passes (0 errors) when rerun outside the sandbox
+- `npx vite build`: passes (1.52s) when rerun outside the sandbox

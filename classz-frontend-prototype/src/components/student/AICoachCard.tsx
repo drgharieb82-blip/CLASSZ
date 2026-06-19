@@ -1,47 +1,55 @@
 import { Link } from "@tanstack/react-router";
-import { Bot, Brain, CalendarDays, Sparkles, ClipboardList, RotateCcw } from "lucide-react";
+import { Bot, Brain, CalendarDays, ClipboardList, MessageSquareText, RotateCcw } from "lucide-react";
 import { GradientButton } from "@/components/premium/GradientButton";
 
-export function AICoachCard() {
+interface AICoachCardProps {
+  summary: string;
+  plan: string[];
+}
+
+export function AICoachCard({ summary, plan }: AICoachCardProps) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border bg-card/70 p-6">
-      <div className="absolute -end-16 -top-16 h-48 w-48 rounded-full bg-primary/5 blur-3xl" />
-      <div className="absolute -end-8 bottom-0 h-32 w-32 rounded-full bg-brand-2/5 blur-2xl" />
+    <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,24,42,0.96),rgba(10,14,28,0.92))] p-6 shadow-[0_18px_50px_rgba(0,0,0,0.26)] backdrop-blur-xl">
+      <div className="absolute -left-8 top-8 h-28 w-28 rounded-full bg-cyan-400/10 blur-3xl" />
+      <div className="absolute right-0 top-0 h-36 w-36 rounded-full bg-violet-500/10 blur-3xl" />
       <div className="relative">
-        <div className="mb-5 flex items-center gap-3">
-          <span className="grid h-12 w-12 place-items-center rounded-2xl gradient-brand text-white shadow-lg glow">
-            <Bot className="h-6 w-6" />
+        <div className="mb-5 flex items-start gap-4">
+          <span className="grid h-14 w-14 shrink-0 place-items-center rounded-[22px] bg-[linear-gradient(135deg,#60a5fa,#8b5cf6,#c026d3)] text-white shadow-[0_14px_35px_rgba(99,102,241,0.35)]">
+            <Bot className="h-7 w-7" />
           </span>
           <div>
-            <h3 className="text-base font-bold tracking-tight">AI Coach</h3>
-            <p className="text-xs text-muted-foreground">Your personal study assistant</p>
+            <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-200">AI Coach</h3>
+            <p className="mt-1 text-sm text-slate-400">Your personal study coach</p>
           </div>
         </div>
 
-        <div className="mb-5 rounded-xl border border-primary/20 bg-primary/5 p-4">
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            "Focus on <span className="font-semibold text-foreground">Chemical Equilibrium</span> and{" "}
-            <span className="font-semibold text-foreground">Newton's Third Law</span> today.
-            You've been weak on these for several days. I recommend 30 minutes of targeted practice
-            followed by a quick quiz to check retention."
-          </p>
+        <div className="rounded-[22px] border border-white/8 bg-white/[0.03] px-5 py-4">
+          <p className="text-sm leading-7 text-slate-200">{summary}</p>
+          <div className="mt-4 space-y-2">
+            {plan.map((item) => (
+              <div key={item} className="flex items-center gap-2.5 text-sm text-slate-300">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                {item}
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="mt-4 grid gap-2 md:grid-cols-2 xl:grid-cols-5">
           <GradientButton variant="outline" size="sm" asChild>
-            <Link to="/assistant/study-plan"><CalendarDays className="h-3.5 w-3.5" /> Study Plan</Link>
+            <Link to="/assistant/study-plan"><CalendarDays className="h-3.5 w-3.5" /> Build Study Plan</Link>
           </GradientButton>
           <GradientButton variant="outline" size="sm" asChild>
-            <Link to="/assistant"><ClipboardList className="h-3.5 w-3.5" /> Gen. Quiz</Link>
+            <Link to="/assistant"><ClipboardList className="h-3.5 w-3.5" /> Generate Quiz</Link>
           </GradientButton>
           <GradientButton variant="outline" size="sm" asChild>
-            <Link to="/assistant/analyze"><Brain className="h-3.5 w-3.5" /> Weak Points</Link>
+            <Link to="/assistant/analyze"><Brain className="h-3.5 w-3.5" /> Explain Weak Points</Link>
           </GradientButton>
           <GradientButton variant="outline" size="sm" asChild>
-            <Link to="/assistant"><RotateCcw className="h-3.5 w-3.5" /> Review Due</Link>
+            <Link to="/assistant"><RotateCcw className="h-3.5 w-3.5" /> Review Due Lessons</Link>
           </GradientButton>
-          <GradientButton variant="outline" size="sm" asChild className="col-span-2 sm:col-span-1">
-            <Link to="/assistant"><Sparkles className="h-3.5 w-3.5" /> Ask Anything</Link>
+          <GradientButton variant="outline" size="sm" asChild>
+            <Link to="/assistant"><MessageSquareText className="h-3.5 w-3.5" /> Ask Anything</Link>
           </GradientButton>
         </div>
       </div>

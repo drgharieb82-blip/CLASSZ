@@ -1,52 +1,76 @@
-import { AlertTriangle, ArrowRight } from "lucide-react";
+import { AlertTriangle, Flame, Gauge, ShieldAlert, TriangleAlert } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { GradientButton } from "@/components/premium/GradientButton";
 
 interface WeakPoint {
   concept: string;
   course: string;
-  priority: number;
-  lastPracticed: string;
+  priority: "high" | "medium" | "low";
 }
 
 interface WeakPointsCardProps {
   weakPoints: WeakPoint[];
 }
 
-const priorityConfig: Record<number, { label: string; color: string; bar: string }> = {
-  3: { label: "Critical", color: "text-destructive", bar: "bg-destructive" },
-  2: { label: "Needs work", color: "text-warning", bar: "bg-warning" },
-  1: { label: "Review", color: "text-muted-foreground", bar: "bg-muted-foreground" },
-};
+const priorityConfig = {
+  high: {
+    icon: ShieldAlert,
+    badge: "High",
+    badgeClass: "bg-rose-500/12 text-rose-300 border-rose-500/20",
+    iconClass: "text-rose-300 bg-rose-500/12",
+  },
+  medium: {
+    icon: Gauge,
+    badge: "Medium",
+    badgeClass: "bg-amber-500/12 text-amber-300 border-amber-500/20",
+    iconClass: "text-amber-300 bg-amber-500/12",
+  },
+  low: {
+    icon: Flame,
+    badge: "Low",
+    badgeClass: "bg-yellow-500/12 text-yellow-200 border-yellow-500/20",
+    iconClass: "text-yellow-200 bg-yellow-500/12",
+  },
+} as const;
 
 export function WeakPointsCard({ weakPoints }: WeakPointsCardProps) {
   return (
-    <div className="rounded-2xl border bg-card/70 p-6">
-      <div className="mb-5 flex items-center gap-2">
-        <AlertTriangle className="h-4 w-4 text-warning" />
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Weak Points</h3>
+    <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,24,42,0.96),rgba(10,14,28,0.92))] p-6 shadow-[0_18px_50px_rgba(0,0,0,0.26)] backdrop-blur-xl">
+      <div className="mb-5 flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className="grid h-10 w-10 place-items-center rounded-2xl bg-fuchsia-500/15 text-fuchsia-300">
+            <TriangleAlert className="h-4 w-4" />
+          </span>
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-fuchsia-300">Weak Points</h3>
+            <p className="mt-1 text-xs text-slate-400">Focus on what matters</p>
+          </div>
+        </div>
+        <button className="text-xs font-medium text-violet-300 transition-colors hover:text-white">View all</button>
       </div>
-      <p className="mb-4 text-xs text-muted-foreground">Concepts you struggle with across all courses. Practice these first.</p>
+
       <div className="space-y-2.5">
-        {weakPoints.map((wp, i) => {
-          const cfg = priorityConfig[wp.priority] ?? priorityConfig[1];
+        {weakPoints.map((item) => {
+          const cfg = priorityConfig[item.priority];
+          const Icon = cfg.icon;
           return (
-            <div key={i} className="flex items-center gap-3 rounded-xl border bg-background/30 p-3">
-              <div className={cn("h-8 w-1 shrink-0 rounded-full", cfg.bar)} />
+            <div
+              key={`${item.course}-${item.concept}`}
+              className="flex items-center gap-3 rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-3.5"
+            >
+              <span className={cn("grid h-10 w-10 shrink-0 place-items-center rounded-2xl", cfg.iconClass)}>
+                <Icon className="h-4 w-4" />
+              </span>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium">{wp.concept}</p>
-                <p className="text-xs text-muted-foreground">{wp.course} · {wp.lastPracticed}</p>
+                <p className="text-sm font-semibold text-white">{item.concept}</p>
+                <p className="text-sm text-slate-400">{item.course}</p>
               </div>
-              <span className={cn("shrink-0 text-[10px] font-semibold uppercase", cfg.color)}>
-                {cfg.label}
+              <span className={cn("rounded-xl border px-2.5 py-1 text-xs font-semibold", cfg.badgeClass)}>
+                {cfg.badge}
               </span>
             </div>
           );
         })}
       </div>
-      <GradientButton variant="outline" size="sm" className="mt-4 w-full">
-        Practice weak points <ArrowRight className="h-4 w-4" />
-      </GradientButton>
     </div>
   );
 }
