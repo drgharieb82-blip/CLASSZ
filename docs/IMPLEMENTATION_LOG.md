@@ -177,3 +177,48 @@ These files are no longer referenced by the SPA entry point but are kept intact 
 
 - `tsc -b --noEmit`: passes (0 errors)
 - `vite build`: passes (3.13s, 3085 modules)
+
+---
+
+## Lesson Player Redesign (2026-06-19)
+
+**Branch:** `lovable-ui-import`
+
+Full redesign of the student lesson player from a generic dashboard stub to a premium 3-column learning experience inspired by Coursera/Udemy/Notion, using the existing CLASSZ dark design system.
+
+### What Changed
+
+| File | Action | Details |
+|------|--------|---------|
+| `src/components/lesson/LessonPlayerLayout.tsx` | Created | 3-column responsive layout: left course sidebar (260px), center content area (flex), right info panel (280px). Mobile: both sidebars collapse into animated sheet overlays. Includes its own header with logo, theme/lang toggles, and user menu. |
+| `src/components/lesson/CourseSidebar.tsx` | Created | Course card with emoji/progress, chapter accordion with lesson list, certificate card. Uses ScrollArea for overflow. |
+| `src/components/lesson/ChapterAccordion.tsx` | Created | Expandable chapters using Radix Accordion. Shows completion count per chapter. |
+| `src/components/lesson/LessonItem.tsx` | Created | Lesson row: status icon (check/play/circle/lock), title, duration. Active lesson gets gradient-brand highlight. |
+| `src/components/lesson/LessonHeader.tsx` | Created | Breadcrumb nav, lesson number, title, description, progress bar. |
+| `src/components/lesson/ContentPlayer.tsx` | Created | Mock video player with 16:9 aspect ratio, play/pause button, progress scrubber, volume/settings/fullscreen controls. Supports video/text/pdf/youtube type placeholders. |
+| `src/components/lesson/LessonNavigation.tsx` | Created | Previous/Mark Complete/Next button bar using GradientButton. |
+| `src/components/lesson/LessonContent.tsx` | Created | Rich content blocks: text, equations (monospace), notes (primary callout with lightbulb), warnings (warning callout), images (placeholder). |
+| `src/components/lesson/LessonTabs.tsx` | Created | 6-tab panel (Overview, Notes, Attachments, Q&A, Discussion, AI). Overview renders LessonOverviewCard + LessonProgressCard + TeacherCard. Other tabs show placeholder states. |
+| `src/components/lesson/LessonOverviewCard.tsx` | Created | Objectives list, key concepts tags, duration and content type stat cards. |
+| `src/components/lesson/LessonProgressCard.tsx` | Created | Circular SVG progress ring with gradient stroke, watched/remaining time. |
+| `src/components/lesson/TeacherCard.tsx` | Created | Teacher avatar, name, subject, profile link. |
+| `src/routes/student.lesson.tsx` | Rewritten | Replaced GenericDashboard with full LessonPlayerLayout. No longer wraps in DashboardLayout — uses its own full-screen layout. |
+| `src/lib/mock.ts` | Expanded | Added `lessonPlayerData` with course info, 4 chapters / 14 lessons (with completed/active/available/locked states), and current lesson with objectives, key concepts, and 8 content blocks (text, equations, notes, warnings). |
+
+### Components Removed From This Page
+
+- `GenericDashboard` (area chart, donut chart, stat cards, student table) — none of this was lesson-related
+- `DashPage` wrapper — the lesson player uses its own `LessonPlayerLayout`
+
+### Responsive Behavior
+
+| Breakpoint | Left Sidebar | Right Panel |
+|-----------|-------------|-------------|
+| `xl` (1280px+) | Visible 260px | Visible 280px |
+| `lg` (1024–1279px) | Visible 260px | Sheet overlay |
+| `<lg` | Sheet overlay | Sheet overlay |
+
+### Validation
+
+- `tsc -b --noEmit`: passes (0 errors)
+- `vite build`: passes (3.42s, 3103 modules, lesson chunk 44KB)

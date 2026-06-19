@@ -68,7 +68,7 @@ D:\CLASSZ\
 
 Authentication is wired end-to-end. Login and register pages call the real backend API. UserMenu shows the authenticated user's name and email. Token is validated on app startup via `GET /api/auth/me`.
 
-All other 83 route pages still render UI with mock data from `src/lib/mock.ts`. No route guards are enforced yet — dashboards are freely browsable for demo purposes.
+The student lesson player (`/student/lesson`) has been fully redesigned as a 3-column learning experience (course sidebar, content player, info panel) with 12 custom components. All other 82 route pages still render UI with mock data. No route guards are enforced yet — dashboards are freely browsable for demo purposes.
 
 Infrastructure:
 - `src/lib/api/client.ts` — fetch wrapper with JWT and 401 handling

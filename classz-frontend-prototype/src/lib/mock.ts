@@ -206,6 +206,86 @@ export const coupons = [
   { code: "BACK2SCHOOL", desc: "30% off bundles", used: 200, limit: 200, status: "Expired" },
 ];
 
+export const lessonPlayerData = {
+  course: {
+    name: "Advanced Mathematics",
+    emoji: "📐",
+    color: "from-violet-500 to-blue-500",
+    progress: 68,
+    teacher: { name: "Dr. Layla Hassan", subject: "Mathematics", initials: "LH" },
+  },
+  chapters: [
+    {
+      id: "ch1",
+      title: "Chapter 1: Limits & Continuity",
+      lessons: [
+        { id: "l1", title: "Introduction to Limits", duration: "12:40", status: "completed" as const },
+        { id: "l2", title: "Continuity of Functions", duration: "18:05", status: "completed" as const },
+        { id: "l3", title: "L'Hôpital's Rule", duration: "15:30", status: "completed" as const },
+      ],
+    },
+    {
+      id: "ch2",
+      title: "Chapter 2: Differential Calculus",
+      lessons: [
+        { id: "l4", title: "Derivatives from First Principles", duration: "22:30", status: "completed" as const },
+        { id: "l5", title: "Power Rule & Constant Rule", duration: "14:20", status: "completed" as const },
+        { id: "l6", title: "The Product Rule", duration: "18:30", status: "active" as const },
+        { id: "l7", title: "The Quotient Rule", duration: "16:12", status: "available" as const },
+        { id: "l8", title: "Chain Rule Deep Dive", duration: "20:48", status: "available" as const },
+      ],
+    },
+    {
+      id: "ch3",
+      title: "Chapter 3: Applications",
+      lessons: [
+        { id: "l9", title: "Tangent Lines & Normals", duration: "19:10", status: "locked" as const },
+        { id: "l10", title: "Optimization Problems", duration: "24:10", status: "locked" as const },
+        { id: "l11", title: "Related Rates", duration: "21:30", status: "locked" as const },
+      ],
+    },
+    {
+      id: "ch4",
+      title: "Chapter 4: Integration",
+      lessons: [
+        { id: "l12", title: "Introduction to Integration", duration: "19:55", status: "locked" as const },
+        { id: "l13", title: "Definite Integrals", duration: "21:30", status: "locked" as const },
+        { id: "l14", title: "Area Under Curves", duration: "23:15", status: "locked" as const },
+      ],
+    },
+  ],
+  currentLesson: {
+    id: "l6",
+    title: "The Product Rule",
+    description: "Learn how to differentiate the product of two functions using the product rule.",
+    number: 6,
+    totalLessons: 14,
+    chapterName: "Chapter 2: Differential Calculus",
+    progress: 65,
+    contentType: "Video + Notes",
+    duration: "18:30",
+    objectives: [
+      "Understand when and why the product rule is needed",
+      "Derive the product rule from first principles",
+      "Apply the product rule to polynomial and trigonometric products",
+      "Combine the product rule with other differentiation rules",
+    ],
+    keyConcepts: ["Product Rule", "Leibniz Notation", "Composite Functions", "Chain Rule"],
+    watchedTime: "12:06",
+    remainingTime: "6:24",
+    contentBlocks: [
+      { type: "text" as const, content: "The product rule is a fundamental technique in calculus for finding the derivative of a product of two functions. If you have two functions u(x) and v(x), their product's derivative is not simply the product of their individual derivatives." },
+      { type: "equation" as const, label: "The Product Rule", content: "d/dx [u(x) · v(x)] = u'(x) · v(x) + u(x) · v'(x)" },
+      { type: "text" as const, content: "In words: the derivative of the first times the second, plus the first times the derivative of the second. This is sometimes remembered as \"first d-second plus second d-first\"." },
+      { type: "note" as const, content: "A common mistake is to think that the derivative of a product equals the product of the derivatives. This is NOT true: d/dx[f·g] ≠ f'·g'." },
+      { type: "equation" as const, label: "Example", content: "If y = x² · sin(x), then y' = 2x · sin(x) + x² · cos(x)" },
+      { type: "text" as const, content: "Let's verify: u = x², so u' = 2x. And v = sin(x), so v' = cos(x). Applying the product rule: u'v + uv' = 2x·sin(x) + x²·cos(x)." },
+      { type: "warning" as const, content: "When applying the product rule in chain, always identify your u and v clearly before differentiating. Mixing them up is the most common source of errors on exams." },
+      { type: "equation" as const, label: "General Leibniz form", content: "(fg)' = f'g + fg'" },
+    ],
+  },
+};
+
 export const testimonials = [
   { name: "Aya M.", role: "Grade 12 Student", text: "CLASSZ made calculus actually fun. The AI assistant explains everything until it clicks.", avatar: "AM" },
   { name: "Mr. Omar", role: "Physics Teacher", text: "Managing my courses and question bank has never been easier. The analytics are gold.", avatar: "OK" },
