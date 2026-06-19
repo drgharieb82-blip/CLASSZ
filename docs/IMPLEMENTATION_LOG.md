@@ -351,3 +351,46 @@ Visual rework to match reference screenshot style. Same card structure, upgraded
 
 - `tsc -b --noEmit`: passes (0 errors)
 - `vite build`: passes (1.43s, 3114 modules, student dashboard chunk 27.9KB)
+
+---
+
+## Wall of Honor — Compact & Finalize (2026-06-19)
+
+**Branch:** `lovable-ui-import`
+
+### Final State
+
+The Wall of Honor is a single compact card with:
+- **Header**: Trophy icon, course name, 3 tabs (Top XP / Quiz Scores / Top Streak), prev/next course arrows — all in one row
+- **Podium**: Top 3 as circular avatars with colored rings (gold/silver/bronze) and medal emojis. 1st place slightly elevated and larger (14×14 vs 10×10).
+- **Remaining ranks**: Rows 4–10 in tight list format. "You" row highlighted with `gradient-brand` if present in top 10.
+- **Your Rank badge**: Small square card beside the list showing rank number + XP. No "Around Me" section.
+- **Dot navigation**: Course carousel dots at the bottom.
+
+### Removed in this iteration
+- "Around Me" section (2 students above, 2 below) — removed for compactness
+- Large "Your position #14 out of 34 students" frame — replaced with small inline badge
+
+### Known Visual Limitations
+
+1. **Podium is flat** — top 3 avatars are displayed inline. No elevated podium blocks or trophy stands. Works but lacks the dramatic visual impact of gaming leaderboards.
+2. **No animation** — course carousel switches instantly. No slide or fade transition between courses.
+3. **Quiz Scores and Top Streak tabs** show the same XP data — they're visual placeholders until the backend provides distinct ranking metrics.
+4. **No student avatars** — uses initials fallback. Real avatar support requires a user profile image field.
+5. **Static mock data** — leaderboard data is hardcoded. Needs backend endpoints for real rankings.
+
+### Desired Future Direction
+
+The Wall of Honor should evolve from a simple leaderboard into a **prestige and rivalry system** that drives daily engagement. Design references:
+
+- **Duolingo Leagues**: Weekly promotion/demotion between tiers (Bronze → Silver → Gold → Diamond). Students compete within their tier, top 10 promote, bottom 5 demote. Creates weekly reset urgency.
+- **Clash Royale Ladder**: Trophy-based progression with arenas. Each course could have its own arena (Beginner → Scholar → Master → Legend). Visual arena backdrop changes with rank.
+- **FIFA Champions Podium**: Cinematic top-3 reveal with trophy animation, confetti, and spotlight effects. The podium should feel like an award ceremony, not a data table.
+- **Stronger rivalry**: Show the student directly above them ("Beat Sara Hassan to reach #13 — you need 100 more XP"). Nudge notifications when someone passes them.
+
+These changes require backend support (ranking endpoints, tier system, weekly reset cron) and are outside the scope of the current frontend milestone.
+
+### Validation
+
+- `tsc -b --noEmit`: passes (0 errors)
+- `vite build`: passes (1.39s, 3114 modules)
