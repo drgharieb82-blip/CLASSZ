@@ -454,6 +454,27 @@ Refined only the existing `WallOfHonorCard` layout without changing routing, bac
 
 ---
 
+## Student Dashboard Ratio Tuning (2026-06-19)
+
+Refined only the `/student` page fit across desktop widths without changing backend, auth, routing, card internals, content order, or the visual design language.
+
+### What Changed
+
+- Added a page-local `max-width` wrapper for the student dashboard content to keep the composition visually proportional on large desktop widths.
+- Tuned row spacing slightly through the route-level layout only.
+- Adjusted the coach/achievements/favorite row so it behaves more safely across desktop widths:
+  - On narrower desktop widths, `AI Coach` spans the full row
+  - `Achievements` and `Favorite Course` sit beneath it in two balanced columns
+  - On larger desktop widths, the original 3-card hierarchy returns with tuned column proportions
+- Left all existing card components intact and avoided `transform: scale(...)` to preserve text sharpness and scrolling behavior.
+
+### Validation
+
+- `npx tsc -b --noEmit`: passes
+- `npx vite build`: passes
+
+---
+
 ## Student Card Overflow Fixes (2026-06-19)
 
 Refined only `AICoachCard`, `AchievementsCard`, and `FavoriteCourseCard` to eliminate overflow and improve responsiveness without changing routing, backend, auth, or mock data structure.
