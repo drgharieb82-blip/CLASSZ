@@ -22,12 +22,12 @@ export function FavoriteCourseCard({
   progressPercent,
 }: FavoriteCourseCardProps) {
   return (
-    <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,24,42,0.96),rgba(10,14,28,0.92))] p-6 shadow-[0_18px_50px_rgba(0,0,0,0.26)] backdrop-blur-xl">
+    <div className="min-w-0 rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,24,42,0.96),rgba(10,14,28,0.92))] p-6 shadow-[0_18px_50px_rgba(0,0,0,0.26)] backdrop-blur-xl">
       <div className="mb-5 flex items-start gap-3">
         <span className="grid h-10 w-10 place-items-center rounded-2xl bg-rose-500/15 text-rose-300">
           <Heart className="h-4 w-4" />
         </span>
-        <div>
+        <div className="min-w-0">
           <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-fuchsia-300">Favorite Course</h3>
           <p className="mt-1 text-xs text-slate-400">Your most studied this week</p>
         </div>
@@ -45,7 +45,7 @@ export function FavoriteCourseCard({
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-3 gap-3">
+      <div className="mt-4 grid gap-3 sm:grid-cols-3">
         <div className="rounded-[20px] border border-white/8 bg-white/[0.03] p-3">
           <p className="text-2xl font-bold text-white">{hoursThisWeek}</p>
           <p className="mt-1 text-xs text-slate-400">Hours this week</p>

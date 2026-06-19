@@ -159,9 +159,9 @@ export function WallOfHonorCard({ courses }: WallOfHonorCardProps) {
 
   return (
     <div className="overflow-hidden rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.14),transparent_28%),linear-gradient(180deg,rgba(14,18,34,0.98),rgba(9,12,24,0.95))] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.38)] backdrop-blur-2xl">
-      <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-        <div className="flex items-center gap-4">
-          <div>
+      <div className="mb-6 flex flex-col gap-4 2xl:flex-row 2xl:items-center 2xl:justify-between">
+        <div className="flex min-w-0 flex-col gap-4 xl:flex-row xl:items-center">
+          <div className="min-w-0">
             <div className="flex items-center gap-2 text-amber-300">
               <Trophy className="h-5 w-5" />
               <span className="text-2xl font-bold tracking-tight text-white">Wall of Honor</span>
@@ -169,16 +169,16 @@ export function WallOfHonorCard({ courses }: WallOfHonorCardProps) {
             <p className="mt-1 text-sm text-slate-400">Compete, improve, and reach the top!</p>
           </div>
 
-          <div className="flex items-center gap-2 xl:ml-6">
+          <div className="flex min-w-0 items-center gap-2 xl:ml-6">
             <button onClick={prevCourse} className="grid h-11 w-11 place-items-center rounded-full border border-white/10 bg-white/[0.04] text-slate-200 transition-colors hover:bg-white/[0.08]">
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <div className="flex min-w-[280px] items-center justify-between rounded-full border border-violet-500/20 bg-white/[0.04] px-5 py-3">
-              <div>
-                <p className="text-lg font-semibold text-white">{course.courseName}</p>
-                <p className="text-sm text-slate-400">{course.teacher}</p>
+            <div className="flex min-w-0 flex-1 items-center justify-between rounded-full border border-violet-500/20 bg-white/[0.04] px-5 py-3 xl:min-w-[280px]">
+              <div className="min-w-0">
+                <p className="truncate text-lg font-semibold text-white">{course.courseName}</p>
+                <p className="truncate text-sm text-slate-400">{course.teacher}</p>
               </div>
-              <ChevronDown className="h-4 w-4 text-slate-400" />
+              <ChevronDown className="ml-3 h-4 w-4 shrink-0 text-slate-400" />
             </div>
             <button onClick={nextCourse} className="grid h-11 w-11 place-items-center rounded-full border border-white/10 bg-white/[0.04] text-slate-200 transition-colors hover:bg-white/[0.08]">
               <ChevronRight className="h-4 w-4" />
@@ -186,7 +186,7 @@ export function WallOfHonorCard({ courses }: WallOfHonorCardProps) {
           </div>
         </div>
 
-        <div className="inline-flex rounded-full border border-violet-500/20 bg-white/[0.04] p-1">
+        <div className="inline-flex flex-wrap rounded-full border border-violet-500/20 bg-white/[0.04] p-1">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -211,9 +211,9 @@ export function WallOfHonorCard({ courses }: WallOfHonorCardProps) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -12 }}
           transition={{ duration: 0.28, ease: "easeOut" }}
-          className="grid gap-6 xl:grid-cols-[1.45fr_1fr_1.2fr]"
+          className="grid gap-6 2xl:grid-cols-[minmax(0,1.38fr)_minmax(320px,0.92fr)_minmax(0,1.06fr)]"
         >
-          <div className="relative overflow-hidden rounded-[28px] border border-white/8 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_50%),linear-gradient(180deg,rgba(18,24,42,0.9),rgba(10,14,28,0.92))] p-6">
+          <div className="relative min-w-0 overflow-hidden rounded-[28px] border border-white/8 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_50%),linear-gradient(180deg,rgba(18,24,42,0.9),rgba(10,14,28,0.92))] p-6">
             <div className="pointer-events-none absolute inset-0">
               <span className="absolute left-[14%] top-[18%] h-2 w-8 rotate-[35deg] rounded-full bg-amber-300/70" />
               <span className="absolute left-[22%] top-[30%] h-2 w-6 -rotate-[24deg] rounded-full bg-violet-300/60" />
@@ -221,21 +221,21 @@ export function WallOfHonorCard({ courses }: WallOfHonorCardProps) {
               <span className="absolute right-[12%] top-[36%] h-2 w-5 -rotate-[36deg] rounded-full bg-orange-300/70" />
             </div>
 
-            <div className="relative flex min-h-[360px] items-end justify-center gap-6">
+            <div className="relative flex min-h-[360px] items-end justify-center gap-4 xl:gap-6">
               {podium[1] ? <PodiumCard entry={podium[1]} tab={activeTab} /> : null}
               {podium[0] ? <PodiumCard entry={podium[0]} tab={activeTab} /> : null}
               {podium[2] ? <PodiumCard entry={podium[2]} tab={activeTab} /> : null}
             </div>
           </div>
 
-          <div className="rounded-[28px] border border-violet-400/30 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.18),transparent_45%),linear-gradient(180deg,rgba(16,20,38,0.95),rgba(11,15,28,0.94))] p-5 shadow-[0_0_40px_rgba(124,58,237,0.16)]">
+          <div className="min-w-0 rounded-[28px] border border-violet-400/30 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.18),transparent_45%),linear-gradient(180deg,rgba(16,20,38,0.95),rgba(11,15,28,0.94))] p-5 shadow-[0_0_40px_rgba(124,58,237,0.16)]">
             <div className="mb-5 flex items-start justify-between gap-3">
-              <div>
+              <div className="min-w-0">
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-300">Your Rank</p>
                 <p className="mt-2 text-6xl font-black leading-none text-amber-200">#{course.myRank.rank}</p>
                 <p className="mt-3 text-3xl font-semibold text-white">{course.myRank.xp.toLocaleString()} XP</p>
               </div>
-              <Avatar className="h-18 w-18 ring-4 ring-amber-300/60 ring-offset-4 ring-offset-[#11162a]">
+              <Avatar className="h-[72px] w-[72px] shrink-0 ring-4 ring-amber-300/60 ring-offset-4 ring-offset-[#11162a]">
                 <AvatarFallback className="bg-[linear-gradient(135deg,#fb7185,#8b5cf6)] text-xl font-bold text-white">
                   Y
                 </AvatarFallback>
@@ -271,7 +271,7 @@ export function WallOfHonorCard({ courses }: WallOfHonorCardProps) {
             <p className="mt-4 text-center text-lg font-medium text-slate-200">{course.myRank.message}</p>
           </div>
 
-          <div className="space-y-4">
+          <div className="min-w-0 space-y-4">
             <div className="rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(18,24,42,0.96),rgba(10,14,28,0.92))] p-5">
               <h4 className="mb-4 text-sm font-semibold uppercase tracking-[0.22em] text-rose-300">Around Me</h4>
               <div className="space-y-2.5">

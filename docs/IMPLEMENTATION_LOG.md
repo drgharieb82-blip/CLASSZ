@@ -423,3 +423,9 @@ Incremental refinement of the existing `/student` dashboard to align more tightl
 
 - `npx tsc -b --noEmit`: passes (0 errors) when rerun outside the sandbox
 - `npx vite build`: passes (1.52s) when rerun outside the sandbox
+
+### Follow-up Polish
+
+- Added horizontal arrow navigation to `Today's Mission` so extra mission frames remain reachable instead of clipping.
+- Tightened responsive widths in `AI Coach`, `Achievements`, and `Favorite Course` to prevent header/content overflow.
+- Rebalanced `Wall of Honor` header and column relationships using `min-w-0`, flexible course selector sizing, and safer large-screen breakpoints.

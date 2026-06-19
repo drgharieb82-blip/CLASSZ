@@ -9,7 +9,7 @@ interface AICoachCardProps {
 
 export function AICoachCard({ summary, plan }: AICoachCardProps) {
   return (
-    <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,24,42,0.96),rgba(10,14,28,0.92))] p-6 shadow-[0_18px_50px_rgba(0,0,0,0.26)] backdrop-blur-xl">
+    <div className="relative min-w-0 overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,24,42,0.96),rgba(10,14,28,0.92))] p-6 shadow-[0_18px_50px_rgba(0,0,0,0.26)] backdrop-blur-xl">
       <div className="absolute -left-8 top-8 h-28 w-28 rounded-full bg-cyan-400/10 blur-3xl" />
       <div className="absolute right-0 top-0 h-36 w-36 rounded-full bg-violet-500/10 blur-3xl" />
       <div className="relative">
@@ -17,7 +17,7 @@ export function AICoachCard({ summary, plan }: AICoachCardProps) {
           <span className="grid h-14 w-14 shrink-0 place-items-center rounded-[22px] bg-[linear-gradient(135deg,#60a5fa,#8b5cf6,#c026d3)] text-white shadow-[0_14px_35px_rgba(99,102,241,0.35)]">
             <Bot className="h-7 w-7" />
           </span>
-          <div>
+          <div className="min-w-0">
             <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-200">AI Coach</h3>
             <p className="mt-1 text-sm text-slate-400">Your personal study coach</p>
           </div>
@@ -35,7 +35,7 @@ export function AICoachCard({ summary, plan }: AICoachCardProps) {
           </div>
         </div>
 
-        <div className="mt-4 grid gap-2 md:grid-cols-2 xl:grid-cols-5">
+        <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
           <GradientButton variant="outline" size="sm" asChild>
             <Link to="/assistant/study-plan"><CalendarDays className="h-3.5 w-3.5" /> Build Study Plan</Link>
           </GradientButton>

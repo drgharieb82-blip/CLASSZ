@@ -39,7 +39,7 @@ function StudentHome() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.08, duration: 0.45 }}
-        className="grid gap-6 xl:grid-cols-4"
+        className="grid gap-6 lg:grid-cols-2 2xl:grid-cols-4"
       >
         <WeakPointsCard weakPoints={d.weakPoints} />
         <RevisionDueCard items={d.revisionDue} />
@@ -51,7 +51,7 @@ function StudentHome() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.14, duration: 0.45 }}
-        className="grid gap-6 xl:grid-cols-[1.7fr_1.3fr_1.2fr]"
+        className="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)_minmax(0,1fr)]"
       >
         <AICoachCard summary={d.aiCoach.summary} plan={d.aiCoach.plan} />
         <AchievementsCard
