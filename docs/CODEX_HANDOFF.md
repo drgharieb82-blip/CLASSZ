@@ -69,7 +69,7 @@ D:\CLASSZ\
 Authentication is wired end-to-end. Login and register pages call the real backend API. UserMenu shows the authenticated user's name and email. Token is validated on app startup via `GET /api/auth/me`.
 
 Two key student pages have been fully redesigned:
-- **Student dashboard** (`/student`) — action-first experience with 10 custom cards: continue learning hero, today's mission, attention needed, weak points (concept-level), revision due, achievements, AI coach with action buttons, per-course progress grid, announcements, parent messages. No analytics charts.
+- **Student dashboard** (`/student`) — personal study coach experience. 6-row desktop grid: full-width Today's Mission hero (3 tiers: Must Do/Recommended/Optional + continue-learning strip), 3-col row (weak points + revision due + attention needed with priority tiers), AI coach with 5 action buttons + achievements/favorite course stacked, per-course progress with resume buttons, Wall of Honor leaderboard carousel (3 tabs, top 10 + around me, course navigation), announcements + family messages. 11 custom components. No analytics charts, no overall progress.
 - **Lesson player** (`/student/lesson`) — 3-column learning experience (course sidebar, content player, info panel) with 12 custom components.
 
 All other 81 route pages still render UI with mock data. No route guards are enforced yet — dashboards are freely browsable for demo purposes.

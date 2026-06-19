@@ -217,12 +217,18 @@ export const studentDashboard = {
     totalLessons: 48,
     progress: 65,
   },
-  todayMission: [
-    { emoji: "🧪", course: "Organic Chemistry", action: "Finish Alcohols & Phenols lesson", type: "lesson" as const, priority: "high" as const },
-    { emoji: "⚛️", course: "Physics", action: "Solve 10 weak questions on Mechanics", type: "practice" as const, priority: "high" as const },
-    { emoji: "📐", course: "Advanced Mathematics", action: "Review derivatives — due for revision", type: "revision" as const, priority: "medium" as const },
-    { emoji: "📚", course: "English Literature", action: "Read Chapter 8 summary notes", type: "lesson" as const, priority: "low" as const },
-  ],
+  todayMission: {
+    mustDo: [
+      { emoji: "🧪", course: "Organic Chemistry", action: "Finish Alcohols & Phenols lesson", type: "lesson" as const },
+      { emoji: "⚛️", course: "Physics", action: "Solve 10 weak questions on Mechanics", type: "practice" as const },
+    ],
+    recommended: [
+      { emoji: "📐", course: "Advanced Mathematics", action: "Review derivatives — due for revision", type: "revision" as const },
+    ],
+    optional: [
+      { emoji: "📚", course: "English Literature", action: "Read Chapter 8 summary notes", type: "lesson" as const },
+    ],
+  },
   weakPoints: [
     { concept: "Chemical Equilibrium", course: "Organic Chemistry", priority: 3, lastPracticed: "5 days ago" },
     { concept: "Aromatic Substitution", course: "Organic Chemistry", priority: 3, lastPracticed: "1 week ago" },
@@ -238,28 +244,85 @@ export const studentDashboard = {
     { lesson: "Newton's Laws of Motion", course: "Physics", emoji: "⚛️", lastStudied: "6 days ago", urgency: "due" as const },
   ],
   attention: [
-    { type: "quiz" as const, title: "Calculus Mid-term Quiz", course: "Advanced Mathematics", emoji: "📐", dueDate: "Jun 22", daysLeft: 3 },
-    { type: "assignment" as const, title: "Newton's Laws Lab Report", course: "Physics", emoji: "⚛️", dueDate: "Jun 24", daysLeft: 5 },
-    { type: "announcement" as const, title: "New chapter unlocked: Organic Reactions", course: "Organic Chemistry", emoji: "🧪", dueDate: "", daysLeft: 0 },
-    { type: "quiz" as const, title: "Organic Chemistry Weekly Quiz", course: "Organic Chemistry", emoji: "🧪", dueDate: "Jun 28", daysLeft: 9 },
-    { type: "lesson" as const, title: "Chain Rule Deep Dive now available", course: "Advanced Mathematics", emoji: "📐", dueDate: "", daysLeft: 0 },
+    { type: "quiz" as const, title: "Calculus Mid-term Quiz", course: "Advanced Mathematics", emoji: "📐", dueDate: "Jun 22", daysLeft: 3, tier: "upcoming" as const },
+    { type: "assignment" as const, title: "Newton's Laws Lab Report", course: "Physics", emoji: "⚛️", dueDate: "Jun 24", daysLeft: 5, tier: "upcoming" as const },
+    { type: "announcement" as const, title: "New chapter unlocked: Organic Reactions", course: "Organic Chemistry", emoji: "🧪", dueDate: "", daysLeft: 0, tier: "upcoming" as const },
+    { type: "quiz" as const, title: "Organic Chemistry Weekly Quiz", course: "Organic Chemistry", emoji: "🧪", dueDate: "Jun 28", daysLeft: 9, tier: "upcoming" as const },
+    { type: "lesson" as const, title: "Chain Rule Deep Dive now available", course: "Advanced Mathematics", emoji: "📐", dueDate: "", daysLeft: 0, tier: "upcoming" as const },
   ],
   achievements: {
     streak: 23,
     xp: 10870,
-    badges: [
-      { name: "Problem Solver", emoji: "🏅", date: "Yesterday" },
-      { name: "Week Warrior", emoji: "⚔️", date: "3 days ago" },
-      { name: "Quiz Master", emoji: "🎯", date: "1 week ago" },
+    weeklyRank: 4,
+    totalBadges: 12,
+    bestSubject: "English",
+    recentBadges: [
+      { name: "Problem Solver", emoji: "🏅" },
+      { name: "Week Warrior", emoji: "⚔️" },
+      { name: "Quiz Master", emoji: "🎯" },
     ],
   },
+  favoriteCourse: {
+    name: "Advanced Mathematics",
+    emoji: "📐",
+    color: "from-violet-500 to-blue-500",
+    teacher: "Dr. Layla Hassan",
+    hoursThisWeek: 4.2,
+  },
   courseProgress: [
-    { id: "c1", name: "Advanced Mathematics", emoji: "📐", color: "from-violet-500 to-blue-500", teacher: "Dr. Layla Hassan", completedLessons: 33, totalLessons: 48, progress: 68 },
-    { id: "c2", name: "Physics: Mechanics & Waves", emoji: "⚛️", color: "from-blue-500 to-cyan-500", teacher: "Mr. Omar Khalil", completedLessons: 15, totalLessons: 36, progress: 42 },
-    { id: "c3", name: "Organic Chemistry", emoji: "🧪", color: "from-emerald-500 to-teal-500", teacher: "Dr. Sara Nour", completedLessons: 6, totalLessons: 40, progress: 15 },
-    { id: "c4", name: "English Literature", emoji: "📚", color: "from-pink-500 to-rose-500", teacher: "Ms. Hana Adel", completedLessons: 27, totalLessons: 30, progress: 90 },
-    { id: "c5", name: "Computer Science 101", emoji: "💻", color: "from-slate-500 to-blue-500", teacher: "Mr. Karim Saad", completedLessons: 17, totalLessons: 52, progress: 33 },
-    { id: "c6", name: "Arabic Grammar Mastery", emoji: "🕌", color: "from-amber-500 to-orange-500", teacher: "Ustaz Fadi Aziz", completedLessons: 15, totalLessons: 28, progress: 55 },
+    { id: "c1", name: "Advanced Mathematics", emoji: "📐", color: "from-violet-500 to-blue-500", teacher: "Dr. Layla Hassan", completedLessons: 33, totalLessons: 48, progress: 68, lastLesson: "The Product Rule" },
+    { id: "c2", name: "Physics: Mechanics & Waves", emoji: "⚛️", color: "from-blue-500 to-cyan-500", teacher: "Mr. Omar Khalil", completedLessons: 15, totalLessons: 36, progress: 42, lastLesson: "Wave Motion" },
+    { id: "c3", name: "Organic Chemistry", emoji: "🧪", color: "from-emerald-500 to-teal-500", teacher: "Dr. Sara Nour", completedLessons: 6, totalLessons: 40, progress: 15, lastLesson: "Alkenes" },
+    { id: "c4", name: "English Literature", emoji: "📚", color: "from-pink-500 to-rose-500", teacher: "Ms. Hana Adel", completedLessons: 27, totalLessons: 30, progress: 90, lastLesson: "The Great Gatsby" },
+    { id: "c5", name: "Computer Science 101", emoji: "💻", color: "from-slate-500 to-blue-500", teacher: "Mr. Karim Saad", completedLessons: 17, totalLessons: 52, progress: 33, lastLesson: "Loops & Iteration" },
+    { id: "c6", name: "Arabic Grammar Mastery", emoji: "🕌", color: "from-amber-500 to-orange-500", teacher: "Ustaz Fadi Aziz", completedLessons: 15, totalLessons: 28, progress: 55, lastLesson: "الإعراب والبناء" },
+  ],
+  wallOfHonor: [
+    {
+      courseId: "c3", courseName: "Organic Chemistry", teacher: "Dr. Ahmed Gharib",
+      myRank: 14, myXp: 2840,
+      top10: [
+        { rank: 1, name: "Mohamed Ali", xp: 4820 }, { rank: 2, name: "Salma Hassan", xp: 4510 },
+        { rank: 3, name: "Youssef Adel", xp: 4280 }, { rank: 4, name: "Mariam Nabil", xp: 3990 },
+        { rank: 5, name: "Ahmed Khalil", xp: 3870 }, { rank: 6, name: "Lina Samir", xp: 3640 },
+        { rank: 7, name: "Hana Tarek", xp: 3520 }, { rank: 8, name: "Karim Nasser", xp: 3380 },
+        { rank: 9, name: "Dina Youssef", xp: 3250 }, { rank: 10, name: "Nada Mahmoud", xp: 3120 },
+      ],
+      aroundMe: [
+        { rank: 12, name: "Sara Hassan", xp: 2940 }, { rank: 13, name: "Omar Adel", xp: 2880 },
+        { rank: 15, name: "Mohamed Khaled", xp: 2790 }, { rank: 16, name: "Nour Ahmed", xp: 2710 },
+      ],
+    },
+    {
+      courseId: "c2", courseName: "Physics: Mechanics & Waves", teacher: "Mr. Omar Khalil",
+      myRank: 8, myXp: 3410,
+      top10: [
+        { rank: 1, name: "Lina Fares", xp: 5120 }, { rank: 2, name: "Omar Tarek", xp: 4890 },
+        { rank: 3, name: "Aya Mansour", xp: 4650 }, { rank: 4, name: "Karim Adel", xp: 4210 },
+        { rank: 5, name: "Nour Sami", xp: 3980 }, { rank: 6, name: "Hadi Wael", xp: 3770 },
+        { rank: 7, name: "Sara Nabil", xp: 3550 }, { rank: 8, name: "You", xp: 3410 },
+        { rank: 9, name: "Ahmed Fathy", xp: 3280 }, { rank: 10, name: "Dina Salem", xp: 3100 },
+      ],
+      aroundMe: [
+        { rank: 6, name: "Hadi Wael", xp: 3770 }, { rank: 7, name: "Sara Nabil", xp: 3550 },
+        { rank: 9, name: "Ahmed Fathy", xp: 3280 }, { rank: 10, name: "Dina Salem", xp: 3100 },
+      ],
+    },
+    {
+      courseId: "c1", courseName: "Advanced Mathematics", teacher: "Dr. Layla Hassan",
+      myRank: 5, myXp: 3980,
+      top10: [
+        { rank: 1, name: "Aya Mansour", xp: 5340 }, { rank: 2, name: "Omar Tarek", xp: 5010 },
+        { rank: 3, name: "Lina Fares", xp: 4720 }, { rank: 4, name: "Karim Adel", xp: 4150 },
+        { rank: 5, name: "You", xp: 3980 }, { rank: 6, name: "Hana Tarek", xp: 3810 },
+        { rank: 7, name: "Nour Sami", xp: 3640 }, { rank: 8, name: "Hadi Wael", xp: 3490 },
+        { rank: 9, name: "Sara Hassan", xp: 3310 }, { rank: 10, name: "Mohamed Ali", xp: 3180 },
+      ],
+      aroundMe: [
+        { rank: 3, name: "Lina Fares", xp: 4720 }, { rank: 4, name: "Karim Adel", xp: 4150 },
+        { rank: 6, name: "Hana Tarek", xp: 3810 }, { rank: 7, name: "Nour Sami", xp: 3640 },
+      ],
+    },
   ],
   announcements: [
     { from: "Dr. Layla Hassan", course: "Advanced Mathematics", message: "New lesson published: Chain Rule Deep Dive", time: "2h ago", unread: true },

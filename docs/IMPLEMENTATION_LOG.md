@@ -277,3 +277,54 @@ Full redesign of the student dashboard from an analytics view to an action-first
 
 - `tsc -b --noEmit`: passes (0 errors)
 - `vite build`: passes (2.18s, 3113 modules, student dashboard chunk 17.8KB)
+
+---
+
+## Student Dashboard v2 — Desktop Layout & Wall of Honor (2026-06-19)
+
+**Branch:** `lovable-ui-import`
+
+Replaces the previous student dashboard commit with a wider desktop layout, new components, and richer card content. This is not a separate page — it amends the same `/student` route with an improved grid and additional features.
+
+### Layout Changes
+
+| Row | Old Layout | New Layout |
+|-----|-----------|------------|
+| 1 | Separate ContinueLearningCard + 2-col grid | Full-width TodayMissionCard hero with 3 tiers + embedded continue-learning strip |
+| 2 | 2-col (mission + attention) | 3-col (weak points + revision + attention) |
+| 3 | Stacked (achievements, AI coach) | `2fr 1fr` (AI coach + achievements/favorite stacked) |
+| 4 | 3-col course grid | Same, but cards now include last lesson + resume button |
+| 5 | (none) | Full-width Wall of Honor carousel (NEW) |
+| 6 | 2-col (announcements + parent) | Same |
+
+### Components Changed
+
+| Component | Change |
+|-----------|--------|
+| `TodayMissionCard` | Rewritten: 3 tiers (Must Do Today / Recommended / Optional) with colored dots. Gradient border. Embedded continue-learning footer strip. Horizontal mission items on desktop. |
+| `AttentionCard` | Rewritten: grouped by priority tier (Overdue / Today / Tomorrow / Upcoming) with colored section headers. |
+| `AICoachCard` | Rewritten: 5 action buttons (Build Study Plan, Generate Quiz, Explain Weak Points, Review Due Lessons, Ask Anything). Longer personalized recommendation text. |
+| `AchievementsCard` | Rewritten: vertical stat rows (streak, XP, weekly rank, total badges, best subject) + recent badge emojis. |
+| `CourseProgressCard` | Rewritten: added last lesson name, added Resume button. |
+| `ContinueLearningCard` | **Deleted** — merged into TodayMissionCard footer. |
+
+### New Components
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| `WallOfHonorCard` | `components/student/WallOfHonorCard.tsx` | Course leaderboard carousel with prev/next arrows + dot navigation. 3 tabs (Top XP, Quiz Scores, Top Streak). Two-panel layout: Top 10 with medals (gold/silver/bronze) + "Around Me" (2 above, 2 below). Current student highlighted with gradient-brand. |
+| `FavoriteCourseCard` | `components/student/FavoriteCourseCard.tsx` | Most-studied course this week: emoji, teacher, study hours. Stacked below Achievements in 1/3 column. |
+
+### Mock Data Expanded
+
+- `todayMission` restructured into `{ mustDo, recommended, optional }` tiers
+- `attention` items now include `tier` field for priority grouping
+- `achievements` expanded with `weeklyRank`, `totalBadges`, `bestSubject`, `recentBadges`
+- `courseProgress` items now include `lastLesson` field
+- `favoriteCourse` object added
+- `wallOfHonor` array: 3 courses, each with `top10`, `aroundMe`, `myRank`, `myXp`
+
+### Validation
+
+- `tsc -b --noEmit`: passes (0 errors)
+- `vite build`: passes (1.49s, 3114 modules, student dashboard chunk 24.9KB)
