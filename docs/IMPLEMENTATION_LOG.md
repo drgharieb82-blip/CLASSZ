@@ -451,3 +451,41 @@ Refined only the existing `WallOfHonorCard` layout without changing routing, bac
 
 - `npx tsc -b --noEmit`: passes
 - `npx vite build`: passes
+
+---
+
+## Student Card Overflow Fixes (2026-06-19)
+
+Refined only `AICoachCard`, `AchievementsCard`, and `FavoriteCourseCard` to eliminate overflow and improve responsiveness without changing routing, backend, auth, or mock data structure.
+
+### What Changed
+
+- `AICoachCard`
+  - Wrapped the recommendation block in a roomier rounded container with `p-5`
+  - Forced safer text wrapping for summary and task items
+  - Switched CTA actions to a wrap-friendly layout: stacked full-width on mobile, wrapped inline on larger screens
+- `AchievementsCard`
+  - Rebuilt the stats area into a responsive equal-height tile grid
+  - Prevented number/label collisions through centered layout, text wrapping, and safer tile sizing
+  - Split "Best Subject" and "Awards" into distinct tiles to match the intended 2x3 structure
+- `FavoriteCourseCard`
+  - Added safer title clamping and text wrapping for course and teacher
+  - Rebalanced the middle stats into equal-width responsive tiles
+  - Kept the CTA full-width while improving spacing around the stats block
+
+### Dashboard Card Rules
+
+For future dashboard cards, apply these layout safety rules by default:
+
+- Always use `min-w-0` on containers that can shrink inside grids/flex rows
+- Prefer `overflow-hidden` on card roots and dense content blocks
+- Use `break-words` for descriptive copy and labels
+- Use `line-clamp-2` for long titles when truncation is visually preferable
+- Prefer responsive grids/flex-wrap over fixed-width action rows
+- Prefer `min-h` over fixed heights
+- Keep card padding at `p-5` minimum
+
+### Validation
+
+- `npx tsc -b --noEmit`: passes
+- `npx vite build`: passes
