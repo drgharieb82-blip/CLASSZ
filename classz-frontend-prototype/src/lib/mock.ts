@@ -206,6 +206,72 @@ export const coupons = [
   { code: "BACK2SCHOOL", desc: "30% off bundles", used: 200, limit: 200, status: "Expired" },
 ];
 
+export const studentDashboard = {
+  continueLearning: {
+    courseEmoji: "📐",
+    courseName: "Advanced Mathematics",
+    courseColor: "from-violet-500 to-blue-500",
+    chapterName: "Differential Calculus",
+    lessonTitle: "The Product Rule",
+    lessonNumber: 6,
+    totalLessons: 48,
+    progress: 65,
+  },
+  todayMission: [
+    { emoji: "🧪", course: "Organic Chemistry", action: "Finish Alcohols & Phenols lesson", type: "lesson" as const, priority: "high" as const },
+    { emoji: "⚛️", course: "Physics", action: "Solve 10 weak questions on Mechanics", type: "practice" as const, priority: "high" as const },
+    { emoji: "📐", course: "Advanced Mathematics", action: "Review derivatives — due for revision", type: "revision" as const, priority: "medium" as const },
+    { emoji: "📚", course: "English Literature", action: "Read Chapter 8 summary notes", type: "lesson" as const, priority: "low" as const },
+  ],
+  weakPoints: [
+    { concept: "Chemical Equilibrium", course: "Organic Chemistry", priority: 3, lastPracticed: "5 days ago" },
+    { concept: "Aromatic Substitution", course: "Organic Chemistry", priority: 3, lastPracticed: "1 week ago" },
+    { concept: "Newton's Third Law", course: "Physics", priority: 2, lastPracticed: "3 days ago" },
+    { concept: "Integration by Parts", course: "Advanced Mathematics", priority: 2, lastPracticed: "4 days ago" },
+    { concept: "Electromagnetic Induction", course: "Physics", priority: 1, lastPracticed: "2 days ago" },
+    { concept: "Trigonometric Identities", course: "Advanced Mathematics", priority: 1, lastPracticed: "6 days ago" },
+  ],
+  revisionDue: [
+    { lesson: "Introduction to Limits", course: "Advanced Mathematics", emoji: "📐", lastStudied: "5 days ago", urgency: "overdue" as const },
+    { lesson: "Continuity of Functions", course: "Advanced Mathematics", emoji: "📐", lastStudied: "7 days ago", urgency: "overdue" as const },
+    { lesson: "L'Hôpital's Rule", course: "Advanced Mathematics", emoji: "📐", lastStudied: "4 days ago", urgency: "due" as const },
+    { lesson: "Newton's Laws of Motion", course: "Physics", emoji: "⚛️", lastStudied: "6 days ago", urgency: "due" as const },
+  ],
+  attention: [
+    { type: "quiz" as const, title: "Calculus Mid-term Quiz", course: "Advanced Mathematics", emoji: "📐", dueDate: "Jun 22", daysLeft: 3 },
+    { type: "assignment" as const, title: "Newton's Laws Lab Report", course: "Physics", emoji: "⚛️", dueDate: "Jun 24", daysLeft: 5 },
+    { type: "announcement" as const, title: "New chapter unlocked: Organic Reactions", course: "Organic Chemistry", emoji: "🧪", dueDate: "", daysLeft: 0 },
+    { type: "quiz" as const, title: "Organic Chemistry Weekly Quiz", course: "Organic Chemistry", emoji: "🧪", dueDate: "Jun 28", daysLeft: 9 },
+    { type: "lesson" as const, title: "Chain Rule Deep Dive now available", course: "Advanced Mathematics", emoji: "📐", dueDate: "", daysLeft: 0 },
+  ],
+  achievements: {
+    streak: 23,
+    xp: 10870,
+    badges: [
+      { name: "Problem Solver", emoji: "🏅", date: "Yesterday" },
+      { name: "Week Warrior", emoji: "⚔️", date: "3 days ago" },
+      { name: "Quiz Master", emoji: "🎯", date: "1 week ago" },
+    ],
+  },
+  courseProgress: [
+    { id: "c1", name: "Advanced Mathematics", emoji: "📐", color: "from-violet-500 to-blue-500", teacher: "Dr. Layla Hassan", completedLessons: 33, totalLessons: 48, progress: 68 },
+    { id: "c2", name: "Physics: Mechanics & Waves", emoji: "⚛️", color: "from-blue-500 to-cyan-500", teacher: "Mr. Omar Khalil", completedLessons: 15, totalLessons: 36, progress: 42 },
+    { id: "c3", name: "Organic Chemistry", emoji: "🧪", color: "from-emerald-500 to-teal-500", teacher: "Dr. Sara Nour", completedLessons: 6, totalLessons: 40, progress: 15 },
+    { id: "c4", name: "English Literature", emoji: "📚", color: "from-pink-500 to-rose-500", teacher: "Ms. Hana Adel", completedLessons: 27, totalLessons: 30, progress: 90 },
+    { id: "c5", name: "Computer Science 101", emoji: "💻", color: "from-slate-500 to-blue-500", teacher: "Mr. Karim Saad", completedLessons: 17, totalLessons: 52, progress: 33 },
+    { id: "c6", name: "Arabic Grammar Mastery", emoji: "🕌", color: "from-amber-500 to-orange-500", teacher: "Ustaz Fadi Aziz", completedLessons: 15, totalLessons: 28, progress: 55 },
+  ],
+  announcements: [
+    { from: "Dr. Layla Hassan", course: "Advanced Mathematics", message: "New lesson published: Chain Rule Deep Dive", time: "2h ago", unread: true },
+    { from: "Dr. Sara Nour", course: "Organic Chemistry", message: "Chapter 4 is now unlocked. Start with Aromatic Compounds.", time: "5h ago", unread: true },
+    { from: "Mr. Omar Khalil", course: "Physics", message: "Lab report deadline extended to Jun 24.", time: "1d ago", unread: false },
+  ],
+  parentMessages: [
+    { from: "Mom", message: "Great quiz results! Keep going 💪", time: "Today", unread: true },
+    { from: "Dad", message: "How is the physics project coming along?", time: "Yesterday", unread: false },
+  ],
+};
+
 export const lessonPlayerData = {
   course: {
     name: "Advanced Mathematics",

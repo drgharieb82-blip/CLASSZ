@@ -1,88 +1,108 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BookOpen, Flame, Trophy, Target, PlayCircle, ArrowRight, Bot } from "lucide-react";
+import { Bot } from "lucide-react";
+import { motion } from "framer-motion";
 import { DashPage } from "@/components/common/DashPage";
-import { AnimatedStats } from "@/components/premium/AnimatedStats";
-import { ProgressRing } from "@/components/premium/AnimatedStats";
-import { PremiumChartCard } from "@/components/premium/PremiumChartCard";
-import { GlowCard } from "@/components/premium/GlowCard";
 import { GradientButton } from "@/components/premium/GradientButton";
-import { AreaTrend, RadarScores } from "@/components/common/charts";
-import { CourseCard } from "@/components/common/CourseCard";
 import { ROLES } from "@/lib/roles";
-import { courses, weeklyProgress, subjectScores } from "@/lib/mock";
+import { studentDashboard } from "@/lib/mock";
+
+import { ContinueLearningCard } from "@/components/student/ContinueLearningCard";
+import { TodayMissionCard } from "@/components/student/TodayMissionCard";
+import { WeakPointsCard } from "@/components/student/WeakPointsCard";
+import { RevisionDueCard } from "@/components/student/RevisionDueCard";
+import { AttentionCard } from "@/components/student/AttentionCard";
+import { AchievementsCard } from "@/components/student/AchievementsCard";
+import { AICoachCard } from "@/components/student/AICoachCard";
+import { CourseProgressCard } from "@/components/student/CourseProgressCard";
+import { AnnouncementsCard } from "@/components/student/AnnouncementsCard";
+import { ParentMessagesCard } from "@/components/student/ParentMessagesCard";
 
 export const Route = createFileRoute("/student/")({
   component: StudentHome,
 });
 
+const d = studentDashboard;
+
 function StudentHome() {
-  const inProgress = courses.filter((c) => c.progress > 0 && c.progress < 100).slice(0, 3);
   return (
     <DashPage
       role="student"
-      title="Welcome back, Aya 👋"
+      title="Welcome back, Aya"
       subtitle="You're on a 23-day streak — keep it going!"
       icon={ROLES.student.icon}
       actions={
-        <GradientButton asChild>
+        <GradientButton asChild size="sm">
           <Link to="/assistant"><Bot className="h-4 w-4" /> Ask AI</Link>
         </GradientButton>
       }
     >
-      <AnimatedStats
-        stats={[
-          { label: "Courses enrolled", value: 6, icon: BookOpen, gradient: "from-violet-500 to-blue-500", delta: "+1 this week" },
-          { label: "Day streak", value: 23, icon: Flame, gradient: "from-amber-500 to-orange-500", delta: "Personal best!" },
-          { label: "XP earned", value: 10870, icon: Trophy, gradient: "from-fuchsia-500 to-violet-500", delta: "+1,150 this week" },
-          { label: "Goals met", value: 87, suffix: "%", icon: Target, gradient: "from-emerald-500 to-teal-500", delta: "+5%" },
-        ]}
-      />
+      <ContinueLearningCard {...d.continueLearning} />
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <PremiumChartCard className="lg:col-span-2" title="Weekly study activity" subtitle="XP earned per day" icon={Trophy}>
-          <AreaTrend data={weeklyProgress} x="day" y="xp" />
-        </PremiumChartCard>
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.08, duration: 0.45 }}
+        className="grid gap-5 lg:grid-cols-2"
+      >
+        <TodayMissionCard missions={d.todayMission} />
+        <AttentionCard items={d.attention} />
+      </motion.div>
 
-        <GlowCard>
-          <div className="flex flex-col items-center justify-center p-6 text-center">
-            <h3 className="mb-4 font-semibold">Overall progress</h3>
-            <ProgressRing value={68} label="completed" />
-            <p className="mt-4 text-sm text-muted-foreground">You've completed 68% of your active courses. Almost there!</p>
-          </div>
-        </GlowCard>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.14, duration: 0.45 }}
+        className="grid gap-5 lg:grid-cols-2"
+      >
+        <WeakPointsCard weakPoints={d.weakPoints} />
+        <RevisionDueCard items={d.revisionDue} />
+      </motion.div>
 
-      <div>
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Continue learning</h2>
-          <Link to="/student/courses" className="flex items-center gap-1 text-sm font-medium text-primary">
-            View all <ArrowRight className="h-4 w-4" />
-          </Link>
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.45 }}
+      >
+        <AchievementsCard
+          streak={d.achievements.streak}
+          xp={d.achievements.xp}
+          badges={d.achievements.badges}
+        />
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.24, duration: 0.45 }}
+      >
+        <AICoachCard />
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.28, duration: 0.45 }}
+      >
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Progress by Course</h2>
+          <Link to="/student/courses" className="text-xs font-medium text-primary">View all</Link>
         </div>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {inProgress.map((c) => (
-            <CourseCard key={c.id} course={c} showProgress />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {d.courseProgress.map((cp) => (
+            <CourseProgressCard key={cp.id} {...cp} />
           ))}
         </div>
-      </div>
+      </motion.div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <PremiumChartCard title="Subject mastery" subtitle="Your strengths across subjects" icon={Target}>
-          <RadarScores data={subjectScores} />
-        </PremiumChartCard>
-        <GlowCard glow>
-          <div className="flex h-full flex-col justify-center gap-3 p-6">
-            <span className="grid h-12 w-12 place-items-center rounded-2xl gradient-brand text-white shadow-lg">
-              <PlayCircle className="h-6 w-6" />
-            </span>
-            <h3 className="text-lg font-bold">Up next: Chain Rule Deep Dive</h3>
-            <p className="text-sm text-muted-foreground">Advanced Mathematics · 20:48 · Lesson 5 of 8</p>
-            <GradientButton asChild className="mt-2 w-fit">
-              <Link to="/student/lesson">Resume lesson <ArrowRight className="h-4 w-4" /></Link>
-            </GradientButton>
-          </div>
-        </GlowCard>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.32, duration: 0.45 }}
+        className="grid gap-5 lg:grid-cols-2"
+      >
+        <AnnouncementsCard announcements={d.announcements} />
+        <ParentMessagesCard messages={d.parentMessages} />
+      </motion.div>
     </DashPage>
   );
 }

@@ -222,3 +222,58 @@ Full redesign of the student lesson player from a generic dashboard stub to a pr
 
 - `tsc -b --noEmit`: passes (0 errors)
 - `vite build`: passes (3.42s, 3103 modules, lesson chunk 44KB)
+
+---
+
+## Student Dashboard Redesign (2026-06-19)
+
+**Branch:** `lovable-ui-import`
+
+Full redesign of the student dashboard from an analytics view to an action-first, decision-first experience. Inspired by Duolingo's "what to do next" pattern, not admin analytics.
+
+### What Was Removed From This Page
+
+- `AnimatedStats` — 4 stat cards (courses enrolled, streak, XP, goals met)
+- `PremiumChartCard` with `AreaTrend` — weekly XP area chart
+- `ProgressRing` — "Overall progress 68%" aggregate ring
+- `PremiumChartCard` with `RadarScores` — subject mastery radar chart
+- `CourseCard` grid with old "Continue learning" section
+- Hardcoded "Up next: Chain Rule" card
+
+### What Was Added
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| `ContinueLearningCard` | `components/student/ContinueLearningCard.tsx` | Hero card: resume last lesson with course/chapter/lesson/progress context and resume button |
+| `TodayMissionCard` | `components/student/TodayMissionCard.tsx` | Daily action plan: AI-curated recommendations with priority dots and action types (lesson/practice/revision) |
+| `AttentionCard` | `components/student/AttentionCard.tsx` | High-priority items: upcoming quizzes, assignments, announcements, newly unlocked lessons with countdown badges |
+| `WeakPointsCard` | `components/student/WeakPointsCard.tsx` | Concept-level weak points across all courses with priority bars (Critical/Needs work/Review) |
+| `RevisionDueCard` | `components/student/RevisionDueCard.tsx` | Spaced-repetition: lessons due for review with overdue/due urgency indicators |
+| `AchievementsCard` | `components/student/AchievementsCard.tsx` | Compact: streak, XP, badge stack — no charts, just numbers |
+| `AICoachCard` | `components/student/AICoachCard.tsx` | Personalized AI suggestion with action buttons (weak spots, study plan, ask anything) |
+| `CourseProgressCard` | `components/student/CourseProgressCard.tsx` | Per-course progress card: emoji, progress bar, lessons count, teacher. No aggregate. |
+| `AnnouncementsCard` | `components/student/AnnouncementsCard.tsx` | Teacher announcements across all enrolled courses with unread indicators |
+| `ParentMessagesCard` | `components/student/ParentMessagesCard.tsx` | Family messages (bottom, low priority) |
+
+### Card Order (Top to Bottom)
+
+1. Continue Learning (hero, full-width)
+2. Today's Mission + Attention Needed (2-col)
+3. Weak Points + Revision Due (2-col)
+4. Achievements (full-width, compact)
+5. AI Coach (full-width)
+6. Progress by Course (3-col grid, per-course)
+7. Announcements + Parent Messages (2-col)
+
+### Design Decisions
+
+- **No overall progress** — progress is per-course only. A 68% aggregate across different courses is meaningless.
+- **Weak points are concept-level** — "Chemical Equilibrium" not "Chemistry". Atomic concepts the student can actually practice.
+- **Attention Needed is high-priority** — quizzes with 3-day countdown get destructive red badges. New unlocks get green "New" badges.
+- **AI Coach gives specific advice** — "focus on Chemical Equilibrium and Newton's Third Law today" with action buttons, not a generic "Ask AI" button.
+- **Parent Messages at bottom** — low priority, only shown if messages exist.
+
+### Validation
+
+- `tsc -b --noEmit`: passes (0 errors)
+- `vite build`: passes (2.18s, 3113 modules, student dashboard chunk 17.8KB)
