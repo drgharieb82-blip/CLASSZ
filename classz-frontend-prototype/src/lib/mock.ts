@@ -759,3 +759,101 @@ export const systemServices = [
   { id: "svc5", name: "Media CDN", status: "Operational", uptime: "99.98%", latency: "30ms" },
   { id: "svc6", name: "Notifications", status: "Maintenance", uptime: "98.40%", latency: "—" },
 ];
+
+export interface EnrolledCourse {
+  id: string;
+  name: string;
+  emoji: string;
+  color: string;
+  teacher: string;
+  status: "active" | "completed" | "locked";
+  progress: number;
+  completedLessons: number;
+  totalLessons: number;
+  completedQuizzes: number;
+  totalQuizzes: number;
+  averageScore: number;
+  lastWatchedLesson: string;
+  nextLesson: string;
+  weakestConcept: string;
+  strongestConcept: string;
+}
+
+export const enrolledCourses: EnrolledCourse[] = [
+  {
+    id: "ec1",
+    name: "Chemistry Grade 12",
+    emoji: "🧪",
+    color: "from-emerald-500 to-teal-500",
+    teacher: "Dr. Ahmed Gharib",
+    status: "active",
+    progress: 64,
+    completedLessons: 22,
+    totalLessons: 34,
+    completedQuizzes: 5,
+    totalQuizzes: 8,
+    averageScore: 82,
+    lastWatchedLesson: "Alcohols in Organic Chemistry",
+    nextLesson: "Aromatic Compounds",
+    weakestConcept: "Chemical Equilibrium",
+    strongestConcept: "Stoichiometry",
+  },
+  {
+    id: "ec2",
+    name: "Physics Grade 12",
+    emoji: "⚛️",
+    color: "from-blue-500 to-cyan-500",
+    teacher: "Mr. Omar Khalil",
+    status: "active",
+    progress: 42,
+    completedLessons: 15,
+    totalLessons: 36,
+    completedQuizzes: 3,
+    totalQuizzes: 6,
+    averageScore: 76,
+    lastWatchedLesson: "Wave Motion",
+    nextLesson: "Sound Waves",
+    weakestConcept: "Projectile Motion",
+    strongestConcept: "Newton's Laws",
+  },
+  {
+    id: "ec3",
+    name: "Biology Grade 12",
+    emoji: "🧬",
+    color: "from-green-500 to-emerald-500",
+    teacher: "Dr. Yusuf Amin",
+    status: "locked",
+    progress: 0,
+    completedLessons: 0,
+    totalLessons: 30,
+    completedQuizzes: 0,
+    totalQuizzes: 5,
+    averageScore: 0,
+    lastWatchedLesson: "—",
+    nextLesson: "Cell Structure & Function",
+    weakestConcept: "—",
+    strongestConcept: "—",
+  },
+  {
+    id: "ec4",
+    name: "English Grade 12",
+    emoji: "📚",
+    color: "from-pink-500 to-rose-500",
+    teacher: "Ms. Hana Adel",
+    status: "completed",
+    progress: 100,
+    completedLessons: 30,
+    totalLessons: 30,
+    completedQuizzes: 6,
+    totalQuizzes: 6,
+    averageScore: 94,
+    lastWatchedLesson: "Final Review & Summary",
+    nextLesson: "—",
+    weakestConcept: "Essay Structure",
+    strongestConcept: "Reading Comprehension",
+  },
+];
+
+export function getEnrolledCourseById(id: string): EnrolledCourse | undefined {
+  return enrolledCourses.find((c) => c.id === id);
+}

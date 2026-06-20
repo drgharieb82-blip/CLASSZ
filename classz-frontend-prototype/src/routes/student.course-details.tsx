@@ -1,16 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { DashPage } from "@/components/common/DashPage";
-import { GenericDashboard } from "@/components/common/GenericDashboard";
-import { ROLES } from "@/lib/roles";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/student/course-details")({
-  component: Page,
+  beforeLoad: () => {
+    throw redirect({ to: "/student/courses" });
+  },
 });
-
-function Page() {
-  return (
-    <DashPage role="student" title="Course Details" subtitle="Everything inside this course" icon={ROLES.student.icon}>
-      <GenericDashboard chartA="area" chartB="donut" />
-    </DashPage>
-  );
-}

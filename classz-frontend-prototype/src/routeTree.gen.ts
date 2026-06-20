@@ -43,7 +43,6 @@ import { Route as StudentNotificationsRouteImport } from './routes/student.notif
 import { Route as StudentNotesRouteImport } from './routes/student.notes'
 import { Route as StudentLessonRouteImport } from './routes/student.lesson'
 import { Route as StudentLeaderboardRouteImport } from './routes/student.leaderboard'
-import { Route as StudentCoursesRouteImport } from './routes/student.courses'
 import { Route as StudentCourseDetailsRouteImport } from './routes/student.course-details'
 import { Route as StudentCertificatesRouteImport } from './routes/student.certificates'
 import { Route as QuizStartRouteImport } from './routes/quiz.start'
@@ -81,8 +80,14 @@ import { Route as AdminRolesRouteImport } from './routes/admin.roles'
 import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
 import { Route as AdminCoursesRouteImport } from './routes/admin.courses'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
+import { Route as StudentCoursesIndexRouteImport } from './routes/student.courses.index'
 import { Route as TeacherQuestionsCreateRouteImport } from './routes/teacher.questions.create'
+import { Route as StudentCoursesCourseIdRouteImport } from './routes/student.courses.$courseId'
 import { Route as StudentCertificatesCertificateIdRouteImport } from './routes/student.certificates.$certificateId'
+import { Route as StudentCoursesCourseIdIndexRouteImport } from './routes/student.courses.$courseId.index'
+import { Route as StudentCoursesCourseIdSessionRouteImport } from './routes/student.courses.$courseId.session'
+import { Route as StudentCoursesCourseIdResourcesRouteImport } from './routes/student.courses.$courseId.resources'
+import { Route as StudentCoursesCourseIdContinueRouteImport } from './routes/student.courses.$courseId.continue'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -252,11 +257,6 @@ const StudentLessonRoute = StudentLessonRouteImport.update({
 const StudentLeaderboardRoute = StudentLeaderboardRouteImport.update({
   id: '/student/leaderboard',
   path: '/student/leaderboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StudentCoursesRoute = StudentCoursesRouteImport.update({
-  id: '/student/courses',
-  path: '/student/courses',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StudentCourseDetailsRoute = StudentCourseDetailsRouteImport.update({
@@ -444,16 +444,50 @@ const AdminBannersRoute = AdminBannersRouteImport.update({
   path: '/admin/banners',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudentCoursesIndexRoute = StudentCoursesIndexRouteImport.update({
+  id: '/student/courses/',
+  path: '/student/courses/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TeacherQuestionsCreateRoute = TeacherQuestionsCreateRouteImport.update({
   id: '/create',
   path: '/create',
   getParentRoute: () => TeacherQuestionsRoute,
+} as any)
+const StudentCoursesCourseIdRoute = StudentCoursesCourseIdRouteImport.update({
+  id: '/student/courses/$courseId',
+  path: '/student/courses/$courseId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const StudentCertificatesCertificateIdRoute =
   StudentCertificatesCertificateIdRouteImport.update({
     id: '/$certificateId',
     path: '/$certificateId',
     getParentRoute: () => StudentCertificatesRoute,
+  } as any)
+const StudentCoursesCourseIdIndexRoute =
+  StudentCoursesCourseIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => StudentCoursesCourseIdRoute,
+  } as any)
+const StudentCoursesCourseIdSessionRoute =
+  StudentCoursesCourseIdSessionRouteImport.update({
+    id: '/session',
+    path: '/session',
+    getParentRoute: () => StudentCoursesCourseIdRoute,
+  } as any)
+const StudentCoursesCourseIdResourcesRoute =
+  StudentCoursesCourseIdResourcesRouteImport.update({
+    id: '/resources',
+    path: '/resources',
+    getParentRoute: () => StudentCoursesCourseIdRoute,
+  } as any)
+const StudentCoursesCourseIdContinueRoute =
+  StudentCoursesCourseIdContinueRouteImport.update({
+    id: '/continue',
+    path: '/continue',
+    getParentRoute: () => StudentCoursesCourseIdRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -501,7 +535,6 @@ export interface FileRoutesByFullPath {
   '/quiz/start': typeof QuizStartRoute
   '/student/certificates': typeof StudentCertificatesRouteWithChildren
   '/student/course-details': typeof StudentCourseDetailsRoute
-  '/student/courses': typeof StudentCoursesRoute
   '/student/leaderboard': typeof StudentLeaderboardRoute
   '/student/lesson': typeof StudentLessonRoute
   '/student/notes': typeof StudentNotesRoute
@@ -530,7 +563,13 @@ export interface FileRoutesByFullPath {
   '/super/': typeof SuperIndexRoute
   '/teacher/': typeof TeacherIndexRoute
   '/student/certificates/$certificateId': typeof StudentCertificatesCertificateIdRoute
+  '/student/courses/$courseId': typeof StudentCoursesCourseIdRouteWithChildren
   '/teacher/questions/create': typeof TeacherQuestionsCreateRoute
+  '/student/courses/': typeof StudentCoursesIndexRoute
+  '/student/courses/$courseId/continue': typeof StudentCoursesCourseIdContinueRoute
+  '/student/courses/$courseId/resources': typeof StudentCoursesCourseIdResourcesRoute
+  '/student/courses/$courseId/session': typeof StudentCoursesCourseIdSessionRoute
+  '/student/courses/$courseId/': typeof StudentCoursesCourseIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -577,7 +616,6 @@ export interface FileRoutesByTo {
   '/quiz/start': typeof QuizStartRoute
   '/student/certificates': typeof StudentCertificatesRouteWithChildren
   '/student/course-details': typeof StudentCourseDetailsRoute
-  '/student/courses': typeof StudentCoursesRoute
   '/student/leaderboard': typeof StudentLeaderboardRoute
   '/student/lesson': typeof StudentLessonRoute
   '/student/notes': typeof StudentNotesRoute
@@ -607,6 +645,11 @@ export interface FileRoutesByTo {
   '/teacher': typeof TeacherIndexRoute
   '/student/certificates/$certificateId': typeof StudentCertificatesCertificateIdRoute
   '/teacher/questions/create': typeof TeacherQuestionsCreateRoute
+  '/student/courses': typeof StudentCoursesIndexRoute
+  '/student/courses/$courseId/continue': typeof StudentCoursesCourseIdContinueRoute
+  '/student/courses/$courseId/resources': typeof StudentCoursesCourseIdResourcesRoute
+  '/student/courses/$courseId/session': typeof StudentCoursesCourseIdSessionRoute
+  '/student/courses/$courseId': typeof StudentCoursesCourseIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -654,7 +697,6 @@ export interface FileRoutesById {
   '/quiz/start': typeof QuizStartRoute
   '/student/certificates': typeof StudentCertificatesRouteWithChildren
   '/student/course-details': typeof StudentCourseDetailsRoute
-  '/student/courses': typeof StudentCoursesRoute
   '/student/leaderboard': typeof StudentLeaderboardRoute
   '/student/lesson': typeof StudentLessonRoute
   '/student/notes': typeof StudentNotesRoute
@@ -683,7 +725,13 @@ export interface FileRoutesById {
   '/super/': typeof SuperIndexRoute
   '/teacher/': typeof TeacherIndexRoute
   '/student/certificates/$certificateId': typeof StudentCertificatesCertificateIdRoute
+  '/student/courses/$courseId': typeof StudentCoursesCourseIdRouteWithChildren
   '/teacher/questions/create': typeof TeacherQuestionsCreateRoute
+  '/student/courses/': typeof StudentCoursesIndexRoute
+  '/student/courses/$courseId/continue': typeof StudentCoursesCourseIdContinueRoute
+  '/student/courses/$courseId/resources': typeof StudentCoursesCourseIdResourcesRoute
+  '/student/courses/$courseId/session': typeof StudentCoursesCourseIdSessionRoute
+  '/student/courses/$courseId/': typeof StudentCoursesCourseIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -732,7 +780,6 @@ export interface FileRouteTypes {
     | '/quiz/start'
     | '/student/certificates'
     | '/student/course-details'
-    | '/student/courses'
     | '/student/leaderboard'
     | '/student/lesson'
     | '/student/notes'
@@ -761,7 +808,13 @@ export interface FileRouteTypes {
     | '/super/'
     | '/teacher/'
     | '/student/certificates/$certificateId'
+    | '/student/courses/$courseId'
     | '/teacher/questions/create'
+    | '/student/courses/'
+    | '/student/courses/$courseId/continue'
+    | '/student/courses/$courseId/resources'
+    | '/student/courses/$courseId/session'
+    | '/student/courses/$courseId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -808,7 +861,6 @@ export interface FileRouteTypes {
     | '/quiz/start'
     | '/student/certificates'
     | '/student/course-details'
-    | '/student/courses'
     | '/student/leaderboard'
     | '/student/lesson'
     | '/student/notes'
@@ -838,6 +890,11 @@ export interface FileRouteTypes {
     | '/teacher'
     | '/student/certificates/$certificateId'
     | '/teacher/questions/create'
+    | '/student/courses'
+    | '/student/courses/$courseId/continue'
+    | '/student/courses/$courseId/resources'
+    | '/student/courses/$courseId/session'
+    | '/student/courses/$courseId'
   id:
     | '__root__'
     | '/'
@@ -884,7 +941,6 @@ export interface FileRouteTypes {
     | '/quiz/start'
     | '/student/certificates'
     | '/student/course-details'
-    | '/student/courses'
     | '/student/leaderboard'
     | '/student/lesson'
     | '/student/notes'
@@ -913,7 +969,13 @@ export interface FileRouteTypes {
     | '/super/'
     | '/teacher/'
     | '/student/certificates/$certificateId'
+    | '/student/courses/$courseId'
     | '/teacher/questions/create'
+    | '/student/courses/'
+    | '/student/courses/$courseId/continue'
+    | '/student/courses/$courseId/resources'
+    | '/student/courses/$courseId/session'
+    | '/student/courses/$courseId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -961,7 +1023,6 @@ export interface RootRouteChildren {
   QuizStartRoute: typeof QuizStartRoute
   StudentCertificatesRoute: typeof StudentCertificatesRouteWithChildren
   StudentCourseDetailsRoute: typeof StudentCourseDetailsRoute
-  StudentCoursesRoute: typeof StudentCoursesRoute
   StudentLeaderboardRoute: typeof StudentLeaderboardRoute
   StudentLessonRoute: typeof StudentLessonRoute
   StudentNotesRoute: typeof StudentNotesRoute
@@ -989,6 +1050,8 @@ export interface RootRouteChildren {
   StudentIndexRoute: typeof StudentIndexRoute
   SuperIndexRoute: typeof SuperIndexRoute
   TeacherIndexRoute: typeof TeacherIndexRoute
+  StudentCoursesCourseIdRoute: typeof StudentCoursesCourseIdRouteWithChildren
+  StudentCoursesIndexRoute: typeof StudentCoursesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1229,13 +1292,6 @@ declare module '@tanstack/react-router' {
       path: '/student/leaderboard'
       fullPath: '/student/leaderboard'
       preLoaderRoute: typeof StudentLeaderboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/student/courses': {
-      id: '/student/courses'
-      path: '/student/courses'
-      fullPath: '/student/courses'
-      preLoaderRoute: typeof StudentCoursesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/student/course-details': {
@@ -1497,6 +1553,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBannersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/student/courses/': {
+      id: '/student/courses/'
+      path: '/student/courses'
+      fullPath: '/student/courses/'
+      preLoaderRoute: typeof StudentCoursesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/teacher/questions/create': {
       id: '/teacher/questions/create'
       path: '/create'
@@ -1504,12 +1567,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherQuestionsCreateRouteImport
       parentRoute: typeof TeacherQuestionsRoute
     }
+    '/student/courses/$courseId': {
+      id: '/student/courses/$courseId'
+      path: '/student/courses/$courseId'
+      fullPath: '/student/courses/$courseId'
+      preLoaderRoute: typeof StudentCoursesCourseIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/student/certificates/$certificateId': {
       id: '/student/certificates/$certificateId'
       path: '/$certificateId'
       fullPath: '/student/certificates/$certificateId'
       preLoaderRoute: typeof StudentCertificatesCertificateIdRouteImport
       parentRoute: typeof StudentCertificatesRoute
+    }
+    '/student/courses/$courseId/': {
+      id: '/student/courses/$courseId/'
+      path: '/'
+      fullPath: '/student/courses/$courseId/'
+      preLoaderRoute: typeof StudentCoursesCourseIdIndexRouteImport
+      parentRoute: typeof StudentCoursesCourseIdRoute
+    }
+    '/student/courses/$courseId/session': {
+      id: '/student/courses/$courseId/session'
+      path: '/session'
+      fullPath: '/student/courses/$courseId/session'
+      preLoaderRoute: typeof StudentCoursesCourseIdSessionRouteImport
+      parentRoute: typeof StudentCoursesCourseIdRoute
+    }
+    '/student/courses/$courseId/resources': {
+      id: '/student/courses/$courseId/resources'
+      path: '/resources'
+      fullPath: '/student/courses/$courseId/resources'
+      preLoaderRoute: typeof StudentCoursesCourseIdResourcesRouteImport
+      parentRoute: typeof StudentCoursesCourseIdRoute
+    }
+    '/student/courses/$courseId/continue': {
+      id: '/student/courses/$courseId/continue'
+      path: '/continue'
+      fullPath: '/student/courses/$courseId/continue'
+      preLoaderRoute: typeof StudentCoursesCourseIdContinueRouteImport
+      parentRoute: typeof StudentCoursesCourseIdRoute
     }
   }
 }
@@ -1535,6 +1633,26 @@ const TeacherQuestionsRouteChildren: TeacherQuestionsRouteChildren = {
 
 const TeacherQuestionsRouteWithChildren =
   TeacherQuestionsRoute._addFileChildren(TeacherQuestionsRouteChildren)
+
+interface StudentCoursesCourseIdRouteChildren {
+  StudentCoursesCourseIdContinueRoute: typeof StudentCoursesCourseIdContinueRoute
+  StudentCoursesCourseIdResourcesRoute: typeof StudentCoursesCourseIdResourcesRoute
+  StudentCoursesCourseIdSessionRoute: typeof StudentCoursesCourseIdSessionRoute
+  StudentCoursesCourseIdIndexRoute: typeof StudentCoursesCourseIdIndexRoute
+}
+
+const StudentCoursesCourseIdRouteChildren: StudentCoursesCourseIdRouteChildren =
+  {
+    StudentCoursesCourseIdContinueRoute: StudentCoursesCourseIdContinueRoute,
+    StudentCoursesCourseIdResourcesRoute: StudentCoursesCourseIdResourcesRoute,
+    StudentCoursesCourseIdSessionRoute: StudentCoursesCourseIdSessionRoute,
+    StudentCoursesCourseIdIndexRoute: StudentCoursesCourseIdIndexRoute,
+  }
+
+const StudentCoursesCourseIdRouteWithChildren =
+  StudentCoursesCourseIdRoute._addFileChildren(
+    StudentCoursesCourseIdRouteChildren,
+  )
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -1581,7 +1699,6 @@ const rootRouteChildren: RootRouteChildren = {
   QuizStartRoute: QuizStartRoute,
   StudentCertificatesRoute: StudentCertificatesRouteWithChildren,
   StudentCourseDetailsRoute: StudentCourseDetailsRoute,
-  StudentCoursesRoute: StudentCoursesRoute,
   StudentLeaderboardRoute: StudentLeaderboardRoute,
   StudentLessonRoute: StudentLessonRoute,
   StudentNotesRoute: StudentNotesRoute,
@@ -1609,6 +1726,8 @@ const rootRouteChildren: RootRouteChildren = {
   StudentIndexRoute: StudentIndexRoute,
   SuperIndexRoute: SuperIndexRoute,
   TeacherIndexRoute: TeacherIndexRoute,
+  StudentCoursesCourseIdRoute: StudentCoursesCourseIdRouteWithChildren,
+  StudentCoursesIndexRoute: StudentCoursesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

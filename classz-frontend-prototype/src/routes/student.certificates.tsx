@@ -84,9 +84,9 @@ function CertificatesPage() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.06, duration: 0.5 }}
-        className="grid gap-5 xl:grid-cols-[1fr_320px]"
+        className="space-y-5"
       >
-        {/* ═══ LEFT: CERTIFICATE ═══ */}
+        {/* ═══ CERTIFICATE ═══ */}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <button onClick={prev} className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/[0.04] text-slate-300 transition-colors hover:bg-white/10 hover:text-white">
@@ -149,8 +149,8 @@ function CertificatesPage() {
           </div>
         </div>
 
-        {/* ═══ RIGHT PANEL ═══ */}
-        <div className="space-y-4">
+        {/* ═══ DETAILS GRID — below certificate ═══ */}
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <Panel title={t("Certificate Details", "تفاصيل الشهادة")} icon={Award}>
             <div className="space-y-2">
               <DetailRow label={t("Subject", "المادة")} value={cert.subjectName} />
@@ -339,6 +339,7 @@ function CertificatesPage() {
 const OVERLAY = {
   studentName:   { top: "49%",  left: "55%" },
   courseName:    { top: "73%",  left: "53%" },
+  teacherName:   { top: "85%",  left: "70%" },
   certificateId: { top: "5.5%", right: "4.5%" },
   qrCode:        { top: "20.5%", right: "7%" },
 } as const;
@@ -436,6 +437,26 @@ function TemplateCertificate({
               }}
             >
               {cert.certificateId}
+            </span>
+          </div>
+
+          {/* Teacher Name — signature style */}
+          <div
+            className="absolute -translate-x-1/2 -translate-y-1/2 text-center"
+            style={{ top: OVERLAY.teacherName.top, left: OVERLAY.teacherName.left }}
+          >
+            <span
+              className="inline-block whitespace-nowrap"
+              style={{
+                fontFamily: "'Great Vibes', cursive",
+                fontWeight: 700,
+                fontSize: "2.07cqw",
+                color: "#1A1A2E",
+                borderBottom: "1px solid rgba(26,26,46,0.3)",
+                paddingBottom: "0.15cqw",
+              }}
+            >
+              {cert.teacherName}
             </span>
           </div>
 

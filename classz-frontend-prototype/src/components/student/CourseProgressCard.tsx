@@ -45,7 +45,7 @@ export function CourseProgressCard({
       </div>
 
       <GradientButton variant="outline" size="sm" asChild className="mt-3 w-full">
-        <Link to="/student/lesson">Resume <ArrowRight className="h-3.5 w-3.5" /></Link>
+        <Link to="/student/courses">Resume <ArrowRight className="h-3.5 w-3.5" /></Link>
       </GradientButton>
     </div>
   );

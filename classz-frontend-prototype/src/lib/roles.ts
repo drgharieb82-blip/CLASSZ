@@ -4,7 +4,7 @@ import {
   Users, FolderTree, FileText, PencilRuler, Layers, Megaphone, Settings, Shield,
   Code2, Activity, Server, Bug, Rocket, Flag, History, Database, Image, Upload,
   CreditCard, DollarSign, Receipt, Ticket, Globe, ScrollText, SlidersHorizontal,
-  Grid3x3, UserCog, MessageSquare, ListChecks, Wallet, type LucideIcon,
+  Grid3x3, UserCog, MessageSquare, ListChecks, Wallet, StickyNote, type LucideIcon,
 } from "lucide-react";
 
 export type Role =
@@ -35,13 +35,12 @@ export const ROLES: Record<Role, RoleConfig> = {
       { group: "Learning", items: [
         { label: "Dashboard", to: "/student", icon: LayoutDashboard },
         { label: "My Courses", to: "/student/courses", icon: BookOpen },
-        { label: "Lesson Player", to: "/student/lesson", icon: PlayCircle },
+        { label: "My Notes", to: "/student/notes", icon: StickyNote },
         { label: "Progress", to: "/student/progress", icon: BarChart3 },
       ]},
       { group: "Practice", items: [
         { label: "Question Bank", to: "/questions", icon: Library },
-        { label: "Wrong Questions", to: "/questions/wrong", icon: HelpCircle },
-        { label: "Quizzes", to: "/quiz/start", icon: ClipboardList },
+        { label: "Wrong Questions", to: "/student/wrong-questions", icon: HelpCircle },
       ]},
       { group: "AI & Rewards", items: [
         { label: "AI Assistant", to: "/assistant", icon: Bot },
