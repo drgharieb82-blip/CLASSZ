@@ -37,8 +37,10 @@ import { Route as SuperSystemRouteImport } from './routes/super.system'
 import { Route as SuperAuditRouteImport } from './routes/super.audit'
 import { Route as SuperAnalyticsRouteImport } from './routes/super.analytics'
 import { Route as SuperAccessMatrixRouteImport } from './routes/super.access-matrix'
+import { Route as StudentWrongQuestionsRouteImport } from './routes/student.wrong-questions'
 import { Route as StudentProgressRouteImport } from './routes/student.progress'
 import { Route as StudentNotificationsRouteImport } from './routes/student.notifications'
+import { Route as StudentNotesRouteImport } from './routes/student.notes'
 import { Route as StudentLessonRouteImport } from './routes/student.lesson'
 import { Route as StudentLeaderboardRouteImport } from './routes/student.leaderboard'
 import { Route as StudentCoursesRouteImport } from './routes/student.courses'
@@ -80,6 +82,7 @@ import { Route as AdminNotificationsRouteImport } from './routes/admin.notificat
 import { Route as AdminCoursesRouteImport } from './routes/admin.courses'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
 import { Route as TeacherQuestionsCreateRouteImport } from './routes/teacher.questions.create'
+import { Route as StudentCertificatesCertificateIdRouteImport } from './routes/student.certificates.$certificateId'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -221,6 +224,11 @@ const SuperAccessMatrixRoute = SuperAccessMatrixRouteImport.update({
   path: '/super/access-matrix',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudentWrongQuestionsRoute = StudentWrongQuestionsRouteImport.update({
+  id: '/student/wrong-questions',
+  path: '/student/wrong-questions',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StudentProgressRoute = StudentProgressRouteImport.update({
   id: '/student/progress',
   path: '/student/progress',
@@ -229,6 +237,11 @@ const StudentProgressRoute = StudentProgressRouteImport.update({
 const StudentNotificationsRoute = StudentNotificationsRouteImport.update({
   id: '/student/notifications',
   path: '/student/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudentNotesRoute = StudentNotesRouteImport.update({
+  id: '/student/notes',
+  path: '/student/notes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StudentLessonRoute = StudentLessonRouteImport.update({
@@ -436,6 +449,12 @@ const TeacherQuestionsCreateRoute = TeacherQuestionsCreateRouteImport.update({
   path: '/create',
   getParentRoute: () => TeacherQuestionsRoute,
 } as any)
+const StudentCertificatesCertificateIdRoute =
+  StudentCertificatesCertificateIdRouteImport.update({
+    id: '/$certificateId',
+    path: '/$certificateId',
+    getParentRoute: () => StudentCertificatesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -480,13 +499,15 @@ export interface FileRoutesByFullPath {
   '/parent/progress': typeof ParentProgressRoute
   '/questions/wrong': typeof QuestionsWrongRoute
   '/quiz/start': typeof QuizStartRoute
-  '/student/certificates': typeof StudentCertificatesRoute
+  '/student/certificates': typeof StudentCertificatesRouteWithChildren
   '/student/course-details': typeof StudentCourseDetailsRoute
   '/student/courses': typeof StudentCoursesRoute
   '/student/leaderboard': typeof StudentLeaderboardRoute
   '/student/lesson': typeof StudentLessonRoute
+  '/student/notes': typeof StudentNotesRoute
   '/student/notifications': typeof StudentNotificationsRoute
   '/student/progress': typeof StudentProgressRoute
+  '/student/wrong-questions': typeof StudentWrongQuestionsRoute
   '/super/access-matrix': typeof SuperAccessMatrixRoute
   '/super/analytics': typeof SuperAnalyticsRoute
   '/super/audit': typeof SuperAuditRoute
@@ -508,6 +529,7 @@ export interface FileRoutesByFullPath {
   '/student/': typeof StudentIndexRoute
   '/super/': typeof SuperIndexRoute
   '/teacher/': typeof TeacherIndexRoute
+  '/student/certificates/$certificateId': typeof StudentCertificatesCertificateIdRoute
   '/teacher/questions/create': typeof TeacherQuestionsCreateRoute
 }
 export interface FileRoutesByTo {
@@ -553,13 +575,15 @@ export interface FileRoutesByTo {
   '/parent/progress': typeof ParentProgressRoute
   '/questions/wrong': typeof QuestionsWrongRoute
   '/quiz/start': typeof QuizStartRoute
-  '/student/certificates': typeof StudentCertificatesRoute
+  '/student/certificates': typeof StudentCertificatesRouteWithChildren
   '/student/course-details': typeof StudentCourseDetailsRoute
   '/student/courses': typeof StudentCoursesRoute
   '/student/leaderboard': typeof StudentLeaderboardRoute
   '/student/lesson': typeof StudentLessonRoute
+  '/student/notes': typeof StudentNotesRoute
   '/student/notifications': typeof StudentNotificationsRoute
   '/student/progress': typeof StudentProgressRoute
+  '/student/wrong-questions': typeof StudentWrongQuestionsRoute
   '/super/access-matrix': typeof SuperAccessMatrixRoute
   '/super/analytics': typeof SuperAnalyticsRoute
   '/super/audit': typeof SuperAuditRoute
@@ -581,6 +605,7 @@ export interface FileRoutesByTo {
   '/student': typeof StudentIndexRoute
   '/super': typeof SuperIndexRoute
   '/teacher': typeof TeacherIndexRoute
+  '/student/certificates/$certificateId': typeof StudentCertificatesCertificateIdRoute
   '/teacher/questions/create': typeof TeacherQuestionsCreateRoute
 }
 export interface FileRoutesById {
@@ -627,13 +652,15 @@ export interface FileRoutesById {
   '/parent/progress': typeof ParentProgressRoute
   '/questions/wrong': typeof QuestionsWrongRoute
   '/quiz/start': typeof QuizStartRoute
-  '/student/certificates': typeof StudentCertificatesRoute
+  '/student/certificates': typeof StudentCertificatesRouteWithChildren
   '/student/course-details': typeof StudentCourseDetailsRoute
   '/student/courses': typeof StudentCoursesRoute
   '/student/leaderboard': typeof StudentLeaderboardRoute
   '/student/lesson': typeof StudentLessonRoute
+  '/student/notes': typeof StudentNotesRoute
   '/student/notifications': typeof StudentNotificationsRoute
   '/student/progress': typeof StudentProgressRoute
+  '/student/wrong-questions': typeof StudentWrongQuestionsRoute
   '/super/access-matrix': typeof SuperAccessMatrixRoute
   '/super/analytics': typeof SuperAnalyticsRoute
   '/super/audit': typeof SuperAuditRoute
@@ -655,6 +682,7 @@ export interface FileRoutesById {
   '/student/': typeof StudentIndexRoute
   '/super/': typeof SuperIndexRoute
   '/teacher/': typeof TeacherIndexRoute
+  '/student/certificates/$certificateId': typeof StudentCertificatesCertificateIdRoute
   '/teacher/questions/create': typeof TeacherQuestionsCreateRoute
 }
 export interface FileRouteTypes {
@@ -707,8 +735,10 @@ export interface FileRouteTypes {
     | '/student/courses'
     | '/student/leaderboard'
     | '/student/lesson'
+    | '/student/notes'
     | '/student/notifications'
     | '/student/progress'
+    | '/student/wrong-questions'
     | '/super/access-matrix'
     | '/super/analytics'
     | '/super/audit'
@@ -730,6 +760,7 @@ export interface FileRouteTypes {
     | '/student/'
     | '/super/'
     | '/teacher/'
+    | '/student/certificates/$certificateId'
     | '/teacher/questions/create'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -780,8 +811,10 @@ export interface FileRouteTypes {
     | '/student/courses'
     | '/student/leaderboard'
     | '/student/lesson'
+    | '/student/notes'
     | '/student/notifications'
     | '/student/progress'
+    | '/student/wrong-questions'
     | '/super/access-matrix'
     | '/super/analytics'
     | '/super/audit'
@@ -803,6 +836,7 @@ export interface FileRouteTypes {
     | '/student'
     | '/super'
     | '/teacher'
+    | '/student/certificates/$certificateId'
     | '/teacher/questions/create'
   id:
     | '__root__'
@@ -853,8 +887,10 @@ export interface FileRouteTypes {
     | '/student/courses'
     | '/student/leaderboard'
     | '/student/lesson'
+    | '/student/notes'
     | '/student/notifications'
     | '/student/progress'
+    | '/student/wrong-questions'
     | '/super/access-matrix'
     | '/super/analytics'
     | '/super/audit'
@@ -876,6 +912,7 @@ export interface FileRouteTypes {
     | '/student/'
     | '/super/'
     | '/teacher/'
+    | '/student/certificates/$certificateId'
     | '/teacher/questions/create'
   fileRoutesById: FileRoutesById
 }
@@ -922,13 +959,15 @@ export interface RootRouteChildren {
   ParentProgressRoute: typeof ParentProgressRoute
   QuestionsWrongRoute: typeof QuestionsWrongRoute
   QuizStartRoute: typeof QuizStartRoute
-  StudentCertificatesRoute: typeof StudentCertificatesRoute
+  StudentCertificatesRoute: typeof StudentCertificatesRouteWithChildren
   StudentCourseDetailsRoute: typeof StudentCourseDetailsRoute
   StudentCoursesRoute: typeof StudentCoursesRoute
   StudentLeaderboardRoute: typeof StudentLeaderboardRoute
   StudentLessonRoute: typeof StudentLessonRoute
+  StudentNotesRoute: typeof StudentNotesRoute
   StudentNotificationsRoute: typeof StudentNotificationsRoute
   StudentProgressRoute: typeof StudentProgressRoute
+  StudentWrongQuestionsRoute: typeof StudentWrongQuestionsRoute
   SuperAccessMatrixRoute: typeof SuperAccessMatrixRoute
   SuperAnalyticsRoute: typeof SuperAnalyticsRoute
   SuperAuditRoute: typeof SuperAuditRoute
@@ -1150,6 +1189,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SuperAccessMatrixRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/student/wrong-questions': {
+      id: '/student/wrong-questions'
+      path: '/student/wrong-questions'
+      fullPath: '/student/wrong-questions'
+      preLoaderRoute: typeof StudentWrongQuestionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/student/progress': {
       id: '/student/progress'
       path: '/student/progress'
@@ -1162,6 +1208,13 @@ declare module '@tanstack/react-router' {
       path: '/student/notifications'
       fullPath: '/student/notifications'
       preLoaderRoute: typeof StudentNotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/student/notes': {
+      id: '/student/notes'
+      path: '/student/notes'
+      fullPath: '/student/notes'
+      preLoaderRoute: typeof StudentNotesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/student/lesson': {
@@ -1451,8 +1504,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherQuestionsCreateRouteImport
       parentRoute: typeof TeacherQuestionsRoute
     }
+    '/student/certificates/$certificateId': {
+      id: '/student/certificates/$certificateId'
+      path: '/$certificateId'
+      fullPath: '/student/certificates/$certificateId'
+      preLoaderRoute: typeof StudentCertificatesCertificateIdRouteImport
+      parentRoute: typeof StudentCertificatesRoute
+    }
   }
 }
+
+interface StudentCertificatesRouteChildren {
+  StudentCertificatesCertificateIdRoute: typeof StudentCertificatesCertificateIdRoute
+}
+
+const StudentCertificatesRouteChildren: StudentCertificatesRouteChildren = {
+  StudentCertificatesCertificateIdRoute: StudentCertificatesCertificateIdRoute,
+}
+
+const StudentCertificatesRouteWithChildren =
+  StudentCertificatesRoute._addFileChildren(StudentCertificatesRouteChildren)
 
 interface TeacherQuestionsRouteChildren {
   TeacherQuestionsCreateRoute: typeof TeacherQuestionsCreateRoute
@@ -1508,13 +1579,15 @@ const rootRouteChildren: RootRouteChildren = {
   ParentProgressRoute: ParentProgressRoute,
   QuestionsWrongRoute: QuestionsWrongRoute,
   QuizStartRoute: QuizStartRoute,
-  StudentCertificatesRoute: StudentCertificatesRoute,
+  StudentCertificatesRoute: StudentCertificatesRouteWithChildren,
   StudentCourseDetailsRoute: StudentCourseDetailsRoute,
   StudentCoursesRoute: StudentCoursesRoute,
   StudentLeaderboardRoute: StudentLeaderboardRoute,
   StudentLessonRoute: StudentLessonRoute,
+  StudentNotesRoute: StudentNotesRoute,
   StudentNotificationsRoute: StudentNotificationsRoute,
   StudentProgressRoute: StudentProgressRoute,
+  StudentWrongQuestionsRoute: StudentWrongQuestionsRoute,
   SuperAccessMatrixRoute: SuperAccessMatrixRoute,
   SuperAnalyticsRoute: SuperAnalyticsRoute,
   SuperAuditRoute: SuperAuditRoute,
