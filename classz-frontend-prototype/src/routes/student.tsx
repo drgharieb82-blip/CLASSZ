@@ -1,9 +1,15 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { requireAuth } from "@/lib/auth-guard";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { useAuthStore } from "@/lib/stores/auth-store";
 
 export const Route = createFileRoute("/student")({
   beforeLoad: ({ location }) => {
-    requireAuth({ currentPath: location.pathname + location.search });
+    if (!useAuthStore.getState().isAuthenticated) {
+      throw redirect({ to: "/login", search: { returnUrl: location.pathname } });
+    }
   },
-  component: () => <Outlet />,
+  component: StudentLayout,
 });
+
+function StudentLayout() {
+  return <Outlet />;
+}

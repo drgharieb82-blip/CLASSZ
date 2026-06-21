@@ -84,6 +84,10 @@ export const useAuthStore = create<AuthState>()(
           if (state.token) {
             localStorage.setItem("classz-auth-token", state.token);
           }
+          if (state.user && !state.user.publicCode) {
+            state.user.publicCode = (state.user as any).studentCode || "CLS-26-000000";
+            state.user.internalUUID = state.user.internalUUID || crypto.randomUUID();
+          }
         }
       },
     },
