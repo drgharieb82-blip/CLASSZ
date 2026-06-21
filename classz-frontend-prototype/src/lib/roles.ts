@@ -35,6 +35,7 @@ export const ROLES: Record<Role, RoleConfig> = {
       { group: "Learning", items: [
         { label: "Dashboard", to: "/student", icon: LayoutDashboard },
         { label: "My Courses", to: "/student/courses", icon: BookOpen },
+        { label: "Wallet", to: "/student/wallet", icon: Wallet },
         { label: "My Notes", to: "/student/notes", icon: StickyNote },
         { label: "Progress", to: "/student/progress", icon: BarChart3 },
       ]},
