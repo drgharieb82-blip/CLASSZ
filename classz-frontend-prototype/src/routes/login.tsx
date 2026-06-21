@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ROLES } from "@/lib/roles";
 import { useAuthStore } from "@/lib/stores/auth-store";
+import { useVisualModeStore } from "@/lib/stores/visual-mode-store";
 import { loginApi } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/client";
 import { useState } from "react";
@@ -128,28 +129,56 @@ function LoginPage() {
         </GradientButton>
       </form>
 
-      {import.meta.env.DEV && (
-        <div className="mt-6 rounded-xl border border-dashed border-amber-500/40 bg-amber-500/5 p-4">
-          <p className="mb-3 text-center text-xs font-semibold uppercase tracking-wide text-amber-600">Dev Quick Access</p>
-          <div className="grid grid-cols-2 gap-2">
-            {[
-              { label: "Student", to: "/student" },
-              { label: "Teacher", to: "/teacher" },
-              { label: "Parent", to: "/parent" },
-              { label: "Admin", to: "/admin" },
-              { label: "Courses Store", to: "/courses" },
-            ].map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className="rounded-lg border bg-card px-3 py-2 text-center text-xs font-medium transition-colors hover:bg-accent"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
+      {import.meta.env.DEV && <DevQuickAccess />}
     </AuthLayout>
+  );
+}
+
+const mockUsers = [
+  { label: "Student (16y)", role: "student" as const, age: 16, name: "Aya Mansour", code: "CLS-26-000001", home: "/student" },
+  { label: "Teacher", role: "teacher" as const, age: 35, name: "Dr. Layla Hassan", code: "TCH-26-0001", home: "/teacher" },
+  { label: "Parent", role: "parent" as const, age: 42, name: "Mohamed Mansour", code: "PRT-26-0001", home: "/parent" },
+  { label: "Admin", role: "admin" as const, age: 30, name: "System Admin", code: "ADM-26-0001", home: "/admin" },
+] as const;
+
+function DevQuickAccess() {
+  const navigate = useNavigate();
+  const login = useAuthStore((s) => s.login);
+  const setAge = useVisualModeStore((s) => s.setAge);
+
+  const handleQuickLogin = (user: (typeof mockUsers)[number]) => {
+    login("dev-token-" + user.role, {
+      id: user.code,
+      public_code: user.code,
+      email: `${user.role}@classz.dev`,
+      full_name: user.name,
+      role: user.role,
+      is_active: true,
+    });
+    setAge(user.age);
+    navigate({ to: user.home });
+  };
+
+  return (
+    <div className="mt-6 rounded-xl border border-dashed border-amber-500/40 bg-amber-500/5 p-4">
+      <p className="mb-3 text-center text-xs font-semibold uppercase tracking-wide text-amber-600">Dev Quick Access</p>
+      <div className="grid grid-cols-2 gap-2">
+        {mockUsers.map((user) => (
+          <button
+            key={user.role}
+            onClick={() => handleQuickLogin(user)}
+            className="rounded-lg border bg-card px-3 py-2 text-center text-xs font-medium transition-colors hover:bg-accent"
+          >
+            {user.label}
+          </button>
+        ))}
+        <Link
+          to="/courses"
+          className="col-span-2 rounded-lg border bg-card px-3 py-2 text-center text-xs font-medium transition-colors hover:bg-accent"
+        >
+          Courses Store (Public)
+        </Link>
+      </div>
+    </div>
   );
 }
