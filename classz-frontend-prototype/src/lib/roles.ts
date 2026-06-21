@@ -35,7 +35,7 @@ export const ROLES: Record<Role, RoleConfig> = {
       { group: "Learning", items: [
         { label: "Dashboard", to: "/student", icon: LayoutDashboard },
         { label: "My Courses", to: "/student/courses", icon: BookOpen },
-        { label: "Wallet", to: "/student/wallet", icon: Wallet },
+        { label: "Smart Revision", to: "/student/revision", icon: Activity },
         { label: "My Notes", to: "/student/notes", icon: StickyNote },
         { label: "Progress", to: "/student/progress", icon: BarChart3 },
       ]},
@@ -43,10 +43,14 @@ export const ROLES: Record<Role, RoleConfig> = {
         { label: "Question Bank", to: "/questions", icon: Library },
         { label: "Wrong Questions", to: "/student/wrong-questions", icon: HelpCircle },
       ]},
-      { group: "AI & Rewards", items: [
+      { group: "Rewards", items: [
+        { label: "Trophy Room", to: "/student/achievements", icon: Trophy },
+        { label: "Leaderboard", to: "/student/leaderboard", icon: Award },
+        { label: "Certificates", to: "/student/certificates", icon: GraduationCap },
+        { label: "Wallet", to: "/student/wallet", icon: Wallet },
+      ]},
+      { group: "More", items: [
         { label: "AI Assistant", to: "/assistant", icon: Bot },
-        { label: "Leaderboard", to: "/student/leaderboard", icon: Trophy },
-        { label: "Certificates", to: "/student/certificates", icon: Award },
         { label: "Notifications", to: "/student/notifications", icon: Bell },
       ]},
     ],

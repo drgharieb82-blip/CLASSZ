@@ -49,6 +49,7 @@ import { Route as SuperAnalyticsRouteImport } from './routes/super.analytics'
 import { Route as SuperAccessMatrixRouteImport } from './routes/super.access-matrix'
 import { Route as StudentWrongQuestionsRouteImport } from './routes/student.wrong-questions'
 import { Route as StudentWalletRouteImport } from './routes/student.wallet'
+import { Route as StudentRevisionRouteImport } from './routes/student.revision'
 import { Route as StudentProgressRouteImport } from './routes/student.progress'
 import { Route as StudentNotificationsRouteImport } from './routes/student.notifications'
 import { Route as StudentNotesRouteImport } from './routes/student.notes'
@@ -56,6 +57,7 @@ import { Route as StudentLessonRouteImport } from './routes/student.lesson'
 import { Route as StudentLeaderboardRouteImport } from './routes/student.leaderboard'
 import { Route as StudentCourseDetailsRouteImport } from './routes/student.course-details'
 import { Route as StudentCertificatesRouteImport } from './routes/student.certificates'
+import { Route as StudentAchievementsRouteImport } from './routes/student.achievements'
 import { Route as QuizStartRouteImport } from './routes/quiz.start'
 import { Route as QuestionsWrongRouteImport } from './routes/questions.wrong'
 import { Route as ParentProgressRouteImport } from './routes/parent.progress'
@@ -302,6 +304,11 @@ const StudentWalletRoute = StudentWalletRouteImport.update({
   path: '/wallet',
   getParentRoute: () => StudentRoute,
 } as any)
+const StudentRevisionRoute = StudentRevisionRouteImport.update({
+  id: '/revision',
+  path: '/revision',
+  getParentRoute: () => StudentRoute,
+} as any)
 const StudentProgressRoute = StudentProgressRouteImport.update({
   id: '/progress',
   path: '/progress',
@@ -335,6 +342,11 @@ const StudentCourseDetailsRoute = StudentCourseDetailsRouteImport.update({
 const StudentCertificatesRoute = StudentCertificatesRouteImport.update({
   id: '/certificates',
   path: '/certificates',
+  getParentRoute: () => StudentRoute,
+} as any)
+const StudentAchievementsRoute = StudentAchievementsRouteImport.update({
+  id: '/achievements',
+  path: '/achievements',
   getParentRoute: () => StudentRoute,
 } as any)
 const QuizStartRoute = QuizStartRouteImport.update({
@@ -615,6 +627,7 @@ export interface FileRoutesByFullPath {
   '/parent/progress': typeof ParentProgressRoute
   '/questions/wrong': typeof QuestionsWrongRoute
   '/quiz/start': typeof QuizStartRoute
+  '/student/achievements': typeof StudentAchievementsRoute
   '/student/certificates': typeof StudentCertificatesRouteWithChildren
   '/student/course-details': typeof StudentCourseDetailsRoute
   '/student/leaderboard': typeof StudentLeaderboardRoute
@@ -622,6 +635,7 @@ export interface FileRoutesByFullPath {
   '/student/notes': typeof StudentNotesRoute
   '/student/notifications': typeof StudentNotificationsRoute
   '/student/progress': typeof StudentProgressRoute
+  '/student/revision': typeof StudentRevisionRoute
   '/student/wallet': typeof StudentWalletRoute
   '/student/wrong-questions': typeof StudentWrongQuestionsRoute
   '/super/access-matrix': typeof SuperAccessMatrixRoute
@@ -707,6 +721,7 @@ export interface FileRoutesByTo {
   '/parent/progress': typeof ParentProgressRoute
   '/questions/wrong': typeof QuestionsWrongRoute
   '/quiz/start': typeof QuizStartRoute
+  '/student/achievements': typeof StudentAchievementsRoute
   '/student/certificates': typeof StudentCertificatesRouteWithChildren
   '/student/course-details': typeof StudentCourseDetailsRoute
   '/student/leaderboard': typeof StudentLeaderboardRoute
@@ -714,6 +729,7 @@ export interface FileRoutesByTo {
   '/student/notes': typeof StudentNotesRoute
   '/student/notifications': typeof StudentNotificationsRoute
   '/student/progress': typeof StudentProgressRoute
+  '/student/revision': typeof StudentRevisionRoute
   '/student/wallet': typeof StudentWalletRoute
   '/student/wrong-questions': typeof StudentWrongQuestionsRoute
   '/super/access-matrix': typeof SuperAccessMatrixRoute
@@ -801,6 +817,7 @@ export interface FileRoutesById {
   '/parent/progress': typeof ParentProgressRoute
   '/questions/wrong': typeof QuestionsWrongRoute
   '/quiz/start': typeof QuizStartRoute
+  '/student/achievements': typeof StudentAchievementsRoute
   '/student/certificates': typeof StudentCertificatesRouteWithChildren
   '/student/course-details': typeof StudentCourseDetailsRoute
   '/student/leaderboard': typeof StudentLeaderboardRoute
@@ -808,6 +825,7 @@ export interface FileRoutesById {
   '/student/notes': typeof StudentNotesRoute
   '/student/notifications': typeof StudentNotificationsRoute
   '/student/progress': typeof StudentProgressRoute
+  '/student/revision': typeof StudentRevisionRoute
   '/student/wallet': typeof StudentWalletRoute
   '/student/wrong-questions': typeof StudentWrongQuestionsRoute
   '/super/access-matrix': typeof SuperAccessMatrixRoute
@@ -897,6 +915,7 @@ export interface FileRouteTypes {
     | '/parent/progress'
     | '/questions/wrong'
     | '/quiz/start'
+    | '/student/achievements'
     | '/student/certificates'
     | '/student/course-details'
     | '/student/leaderboard'
@@ -904,6 +923,7 @@ export interface FileRouteTypes {
     | '/student/notes'
     | '/student/notifications'
     | '/student/progress'
+    | '/student/revision'
     | '/student/wallet'
     | '/student/wrong-questions'
     | '/super/access-matrix'
@@ -989,6 +1009,7 @@ export interface FileRouteTypes {
     | '/parent/progress'
     | '/questions/wrong'
     | '/quiz/start'
+    | '/student/achievements'
     | '/student/certificates'
     | '/student/course-details'
     | '/student/leaderboard'
@@ -996,6 +1017,7 @@ export interface FileRouteTypes {
     | '/student/notes'
     | '/student/notifications'
     | '/student/progress'
+    | '/student/revision'
     | '/student/wallet'
     | '/student/wrong-questions'
     | '/super/access-matrix'
@@ -1082,6 +1104,7 @@ export interface FileRouteTypes {
     | '/parent/progress'
     | '/questions/wrong'
     | '/quiz/start'
+    | '/student/achievements'
     | '/student/certificates'
     | '/student/course-details'
     | '/student/leaderboard'
@@ -1089,6 +1112,7 @@ export interface FileRouteTypes {
     | '/student/notes'
     | '/student/notifications'
     | '/student/progress'
+    | '/student/revision'
     | '/student/wallet'
     | '/student/wrong-questions'
     | '/super/access-matrix'
@@ -1487,6 +1511,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentWalletRouteImport
       parentRoute: typeof StudentRoute
     }
+    '/student/revision': {
+      id: '/student/revision'
+      path: '/revision'
+      fullPath: '/student/revision'
+      preLoaderRoute: typeof StudentRevisionRouteImport
+      parentRoute: typeof StudentRoute
+    }
     '/student/progress': {
       id: '/student/progress'
       path: '/progress'
@@ -1534,6 +1565,13 @@ declare module '@tanstack/react-router' {
       path: '/certificates'
       fullPath: '/student/certificates'
       preLoaderRoute: typeof StudentCertificatesRouteImport
+      parentRoute: typeof StudentRoute
+    }
+    '/student/achievements': {
+      id: '/student/achievements'
+      path: '/achievements'
+      fullPath: '/student/achievements'
+      preLoaderRoute: typeof StudentAchievementsRouteImport
       parentRoute: typeof StudentRoute
     }
     '/quiz/start': {
@@ -1901,6 +1939,7 @@ const StudentCoursesCourseIdRouteWithChildren =
   )
 
 interface StudentRouteChildren {
+  StudentAchievementsRoute: typeof StudentAchievementsRoute
   StudentCertificatesRoute: typeof StudentCertificatesRouteWithChildren
   StudentCourseDetailsRoute: typeof StudentCourseDetailsRoute
   StudentLeaderboardRoute: typeof StudentLeaderboardRoute
@@ -1908,6 +1947,7 @@ interface StudentRouteChildren {
   StudentNotesRoute: typeof StudentNotesRoute
   StudentNotificationsRoute: typeof StudentNotificationsRoute
   StudentProgressRoute: typeof StudentProgressRoute
+  StudentRevisionRoute: typeof StudentRevisionRoute
   StudentWalletRoute: typeof StudentWalletRoute
   StudentWrongQuestionsRoute: typeof StudentWrongQuestionsRoute
   StudentIndexRoute: typeof StudentIndexRoute
@@ -1916,6 +1956,7 @@ interface StudentRouteChildren {
 }
 
 const StudentRouteChildren: StudentRouteChildren = {
+  StudentAchievementsRoute: StudentAchievementsRoute,
   StudentCertificatesRoute: StudentCertificatesRouteWithChildren,
   StudentCourseDetailsRoute: StudentCourseDetailsRoute,
   StudentLeaderboardRoute: StudentLeaderboardRoute,
@@ -1923,6 +1964,7 @@ const StudentRouteChildren: StudentRouteChildren = {
   StudentNotesRoute: StudentNotesRoute,
   StudentNotificationsRoute: StudentNotificationsRoute,
   StudentProgressRoute: StudentProgressRoute,
+  StudentRevisionRoute: StudentRevisionRoute,
   StudentWalletRoute: StudentWalletRoute,
   StudentWrongQuestionsRoute: StudentWrongQuestionsRoute,
   StudentIndexRoute: StudentIndexRoute,
