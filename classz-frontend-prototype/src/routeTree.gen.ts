@@ -27,10 +27,17 @@ import { Route as CoursesIndexRouteImport } from './routes/courses.index'
 import { Route as ContentIndexRouteImport } from './routes/content.index'
 import { Route as AssistantIndexRouteImport } from './routes/assistant.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as TeacherTeamRouteImport } from './routes/teacher.team'
 import { Route as TeacherStudentsRouteImport } from './routes/teacher.students'
+import { Route as TeacherSessionsRouteImport } from './routes/teacher.sessions'
+import { Route as TeacherRewardsRouteImport } from './routes/teacher.rewards'
+import { Route as TeacherRevenueRouteImport } from './routes/teacher.revenue'
+import { Route as TeacherQuizzesRouteImport } from './routes/teacher.quizzes'
 import { Route as TeacherQuestionsRouteImport } from './routes/teacher.questions'
 import { Route as TeacherLessonsRouteImport } from './routes/teacher.lessons'
+import { Route as TeacherGeneratorRouteImport } from './routes/teacher.generator'
 import { Route as TeacherCoursesRouteImport } from './routes/teacher.courses'
+import { Route as TeacherChatRouteImport } from './routes/teacher.chat'
 import { Route as TeacherChaptersRouteImport } from './routes/teacher.chapters'
 import { Route as TeacherAssignmentsRouteImport } from './routes/teacher.assignments'
 import { Route as TeacherAnalyticsRouteImport } from './routes/teacher.analytics'
@@ -183,9 +190,34 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeacherTeamRoute = TeacherTeamRouteImport.update({
+  id: '/teacher/team',
+  path: '/teacher/team',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TeacherStudentsRoute = TeacherStudentsRouteImport.update({
   id: '/teacher/students',
   path: '/teacher/students',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeacherSessionsRoute = TeacherSessionsRouteImport.update({
+  id: '/teacher/sessions',
+  path: '/teacher/sessions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeacherRewardsRoute = TeacherRewardsRouteImport.update({
+  id: '/teacher/rewards',
+  path: '/teacher/rewards',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeacherRevenueRoute = TeacherRevenueRouteImport.update({
+  id: '/teacher/revenue',
+  path: '/teacher/revenue',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeacherQuizzesRoute = TeacherQuizzesRouteImport.update({
+  id: '/teacher/quizzes',
+  path: '/teacher/quizzes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TeacherQuestionsRoute = TeacherQuestionsRouteImport.update({
@@ -198,9 +230,19 @@ const TeacherLessonsRoute = TeacherLessonsRouteImport.update({
   path: '/teacher/lessons',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeacherGeneratorRoute = TeacherGeneratorRouteImport.update({
+  id: '/teacher/generator',
+  path: '/teacher/generator',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TeacherCoursesRoute = TeacherCoursesRouteImport.update({
   id: '/teacher/courses',
   path: '/teacher/courses',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeacherChatRoute = TeacherChatRouteImport.update({
+  id: '/teacher/chat',
+  path: '/teacher/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TeacherChaptersRoute = TeacherChaptersRouteImport.update({
@@ -575,10 +617,17 @@ export interface FileRoutesByFullPath {
   '/teacher/analytics': typeof TeacherAnalyticsRoute
   '/teacher/assignments': typeof TeacherAssignmentsRoute
   '/teacher/chapters': typeof TeacherChaptersRoute
+  '/teacher/chat': typeof TeacherChatRoute
   '/teacher/courses': typeof TeacherCoursesRoute
+  '/teacher/generator': typeof TeacherGeneratorRoute
   '/teacher/lessons': typeof TeacherLessonsRoute
   '/teacher/questions': typeof TeacherQuestionsRouteWithChildren
+  '/teacher/quizzes': typeof TeacherQuizzesRoute
+  '/teacher/revenue': typeof TeacherRevenueRoute
+  '/teacher/rewards': typeof TeacherRewardsRoute
+  '/teacher/sessions': typeof TeacherSessionsRoute
   '/teacher/students': typeof TeacherStudentsRoute
+  '/teacher/team': typeof TeacherTeamRoute
   '/admin/': typeof AdminIndexRoute
   '/assistant/': typeof AssistantIndexRoute
   '/content/': typeof ContentIndexRoute
@@ -659,10 +708,17 @@ export interface FileRoutesByTo {
   '/teacher/analytics': typeof TeacherAnalyticsRoute
   '/teacher/assignments': typeof TeacherAssignmentsRoute
   '/teacher/chapters': typeof TeacherChaptersRoute
+  '/teacher/chat': typeof TeacherChatRoute
   '/teacher/courses': typeof TeacherCoursesRoute
+  '/teacher/generator': typeof TeacherGeneratorRoute
   '/teacher/lessons': typeof TeacherLessonsRoute
   '/teacher/questions': typeof TeacherQuestionsRouteWithChildren
+  '/teacher/quizzes': typeof TeacherQuizzesRoute
+  '/teacher/revenue': typeof TeacherRevenueRoute
+  '/teacher/rewards': typeof TeacherRewardsRoute
+  '/teacher/sessions': typeof TeacherSessionsRoute
   '/teacher/students': typeof TeacherStudentsRoute
+  '/teacher/team': typeof TeacherTeamRoute
   '/admin': typeof AdminIndexRoute
   '/assistant': typeof AssistantIndexRoute
   '/content': typeof ContentIndexRoute
@@ -744,10 +800,17 @@ export interface FileRoutesById {
   '/teacher/analytics': typeof TeacherAnalyticsRoute
   '/teacher/assignments': typeof TeacherAssignmentsRoute
   '/teacher/chapters': typeof TeacherChaptersRoute
+  '/teacher/chat': typeof TeacherChatRoute
   '/teacher/courses': typeof TeacherCoursesRoute
+  '/teacher/generator': typeof TeacherGeneratorRoute
   '/teacher/lessons': typeof TeacherLessonsRoute
   '/teacher/questions': typeof TeacherQuestionsRouteWithChildren
+  '/teacher/quizzes': typeof TeacherQuizzesRoute
+  '/teacher/revenue': typeof TeacherRevenueRoute
+  '/teacher/rewards': typeof TeacherRewardsRoute
+  '/teacher/sessions': typeof TeacherSessionsRoute
   '/teacher/students': typeof TeacherStudentsRoute
+  '/teacher/team': typeof TeacherTeamRoute
   '/admin/': typeof AdminIndexRoute
   '/assistant/': typeof AssistantIndexRoute
   '/content/': typeof ContentIndexRoute
@@ -831,10 +894,17 @@ export interface FileRouteTypes {
     | '/teacher/analytics'
     | '/teacher/assignments'
     | '/teacher/chapters'
+    | '/teacher/chat'
     | '/teacher/courses'
+    | '/teacher/generator'
     | '/teacher/lessons'
     | '/teacher/questions'
+    | '/teacher/quizzes'
+    | '/teacher/revenue'
+    | '/teacher/rewards'
+    | '/teacher/sessions'
     | '/teacher/students'
+    | '/teacher/team'
     | '/admin/'
     | '/assistant/'
     | '/content/'
@@ -915,10 +985,17 @@ export interface FileRouteTypes {
     | '/teacher/analytics'
     | '/teacher/assignments'
     | '/teacher/chapters'
+    | '/teacher/chat'
     | '/teacher/courses'
+    | '/teacher/generator'
     | '/teacher/lessons'
     | '/teacher/questions'
+    | '/teacher/quizzes'
+    | '/teacher/revenue'
+    | '/teacher/rewards'
+    | '/teacher/sessions'
     | '/teacher/students'
+    | '/teacher/team'
     | '/admin'
     | '/assistant'
     | '/content'
@@ -999,10 +1076,17 @@ export interface FileRouteTypes {
     | '/teacher/analytics'
     | '/teacher/assignments'
     | '/teacher/chapters'
+    | '/teacher/chat'
     | '/teacher/courses'
+    | '/teacher/generator'
     | '/teacher/lessons'
     | '/teacher/questions'
+    | '/teacher/quizzes'
+    | '/teacher/revenue'
+    | '/teacher/rewards'
+    | '/teacher/sessions'
     | '/teacher/students'
+    | '/teacher/team'
     | '/admin/'
     | '/assistant/'
     | '/content/'
@@ -1084,10 +1168,17 @@ export interface RootRouteChildren {
   TeacherAnalyticsRoute: typeof TeacherAnalyticsRoute
   TeacherAssignmentsRoute: typeof TeacherAssignmentsRoute
   TeacherChaptersRoute: typeof TeacherChaptersRoute
+  TeacherChatRoute: typeof TeacherChatRoute
   TeacherCoursesRoute: typeof TeacherCoursesRoute
+  TeacherGeneratorRoute: typeof TeacherGeneratorRoute
   TeacherLessonsRoute: typeof TeacherLessonsRoute
   TeacherQuestionsRoute: typeof TeacherQuestionsRouteWithChildren
+  TeacherQuizzesRoute: typeof TeacherQuizzesRoute
+  TeacherRevenueRoute: typeof TeacherRevenueRoute
+  TeacherRewardsRoute: typeof TeacherRewardsRoute
+  TeacherSessionsRoute: typeof TeacherSessionsRoute
   TeacherStudentsRoute: typeof TeacherStudentsRoute
+  TeacherTeamRoute: typeof TeacherTeamRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AssistantIndexRoute: typeof AssistantIndexRoute
   ContentIndexRoute: typeof ContentIndexRoute
@@ -1230,11 +1321,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/teacher/team': {
+      id: '/teacher/team'
+      path: '/teacher/team'
+      fullPath: '/teacher/team'
+      preLoaderRoute: typeof TeacherTeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/teacher/students': {
       id: '/teacher/students'
       path: '/teacher/students'
       fullPath: '/teacher/students'
       preLoaderRoute: typeof TeacherStudentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teacher/sessions': {
+      id: '/teacher/sessions'
+      path: '/teacher/sessions'
+      fullPath: '/teacher/sessions'
+      preLoaderRoute: typeof TeacherSessionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teacher/rewards': {
+      id: '/teacher/rewards'
+      path: '/teacher/rewards'
+      fullPath: '/teacher/rewards'
+      preLoaderRoute: typeof TeacherRewardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teacher/revenue': {
+      id: '/teacher/revenue'
+      path: '/teacher/revenue'
+      fullPath: '/teacher/revenue'
+      preLoaderRoute: typeof TeacherRevenueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teacher/quizzes': {
+      id: '/teacher/quizzes'
+      path: '/teacher/quizzes'
+      fullPath: '/teacher/quizzes'
+      preLoaderRoute: typeof TeacherQuizzesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/teacher/questions': {
@@ -1251,11 +1377,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherLessonsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/teacher/generator': {
+      id: '/teacher/generator'
+      path: '/teacher/generator'
+      fullPath: '/teacher/generator'
+      preLoaderRoute: typeof TeacherGeneratorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/teacher/courses': {
       id: '/teacher/courses'
       path: '/teacher/courses'
       fullPath: '/teacher/courses'
       preLoaderRoute: typeof TeacherCoursesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teacher/chat': {
+      id: '/teacher/chat'
+      path: '/teacher/chat'
+      fullPath: '/teacher/chat'
+      preLoaderRoute: typeof TeacherChatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/teacher/chapters': {
@@ -1804,10 +1944,17 @@ const rootRouteChildren: RootRouteChildren = {
   TeacherAnalyticsRoute: TeacherAnalyticsRoute,
   TeacherAssignmentsRoute: TeacherAssignmentsRoute,
   TeacherChaptersRoute: TeacherChaptersRoute,
+  TeacherChatRoute: TeacherChatRoute,
   TeacherCoursesRoute: TeacherCoursesRoute,
+  TeacherGeneratorRoute: TeacherGeneratorRoute,
   TeacherLessonsRoute: TeacherLessonsRoute,
   TeacherQuestionsRoute: TeacherQuestionsRouteWithChildren,
+  TeacherQuizzesRoute: TeacherQuizzesRoute,
+  TeacherRevenueRoute: TeacherRevenueRoute,
+  TeacherRewardsRoute: TeacherRewardsRoute,
+  TeacherSessionsRoute: TeacherSessionsRoute,
   TeacherStudentsRoute: TeacherStudentsRoute,
+  TeacherTeamRoute: TeacherTeamRoute,
   AdminIndexRoute: AdminIndexRoute,
   AssistantIndexRoute: AssistantIndexRoute,
   ContentIndexRoute: ContentIndexRoute,

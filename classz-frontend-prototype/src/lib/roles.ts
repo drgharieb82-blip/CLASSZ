@@ -51,23 +51,30 @@ export const ROLES: Record<Role, RoleConfig> = {
     ],
   },
   teacher: {
-    key: "teacher", name: "Teacher", tagline: "Teach & inspire", color: "from-blue-500 to-cyan-500",
+    key: "teacher", name: "Teacher", tagline: "Your academy workspace", color: "from-blue-500 to-cyan-500",
     icon: PencilRuler, home: "/teacher",
     nav: [
-      { group: "Teaching", items: [
+      { group: "Workspace", items: [
         { label: "Dashboard", to: "/teacher", icon: LayoutDashboard },
         { label: "My Courses", to: "/teacher/courses", icon: BookOpen },
-        { label: "Chapters", to: "/teacher/chapters", icon: FolderTree },
-        { label: "Lessons", to: "/teacher/lessons", icon: PlayCircle },
+        { label: "Session Builder", to: "/teacher/sessions", icon: PlayCircle },
       ]},
       { group: "Assessment", items: [
-        { label: "Question Manager", to: "/teacher/questions", icon: Library },
-        { label: "Create Question", to: "/teacher/questions/create", icon: PencilRuler },
-        { label: "Assignments", to: "/teacher/assignments", icon: ClipboardList },
+        { label: "Question Bank", to: "/teacher/questions", icon: Library },
+        { label: "Quizzes & Exams", to: "/teacher/quizzes", icon: ClipboardList },
+      ]},
+      { group: "Business", items: [
+        { label: "Students", to: "/teacher/students", icon: Users },
+        { label: "Revenue & Wallet", to: "/teacher/revenue", icon: Wallet },
+        { label: "Rewards", to: "/teacher/rewards", icon: Trophy },
+      ]},
+      { group: "Team", items: [
+        { label: "Team Management", to: "/teacher/team", icon: UserCog },
+        { label: "Communication", to: "/teacher/chat", icon: MessageSquare },
       ]},
       { group: "Insights", items: [
-        { label: "Students", to: "/teacher/students", icon: Users },
         { label: "Analytics", to: "/teacher/analytics", icon: BarChart3 },
+        { label: "Generator Studio", to: "/teacher/generator", icon: Sparkles },
       ]},
     ],
   },
