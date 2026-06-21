@@ -1,3 +1,7 @@
+import { getCourseById as getTeacherCourse } from "./teacher/teacher-course-store";
+import { getPublishedSessions as getTeacherSessions } from "./teacher/teacher-session-store";
+import { getPublishedMaterials } from "./teacher/teacher-material-store";
+
 export type SessionItemType = "video" | "quiz" | "homework" | "attachment" | "notes" | "discussion";
 
 export interface SessionItem {
@@ -278,7 +282,52 @@ export const sessionCourseDataMap: Record<string, SessionCourse> = {
 
 export function getSessionCourseById(id: string): SessionCourse | undefined {
   if (id === "c1") return sessionCourseData;
-  return sessionCourseDataMap[id];
+  const fromMap = sessionCourseDataMap[id];
+  if (fromMap) return fromMap;
+  return buildTeacherSessionCourse(id);
+}
+
+function buildTeacherSessionCourse(courseId: string): SessionCourse | undefined {
+  const course = getTeacherCourse(courseId);
+  if (!course) return undefined;
+
+  const pubSessions = getTeacherSessions(courseId);
+  if (pubSessions.length === 0) return undefined;
+
+  const sessions: Session[] = pubSessions.map((s) => {
+    const mats = getPublishedMaterials(s.id);
+    const items: SessionItem[] = mats.map((m) => ({
+      id: m.id,
+      type: (m.type === "notes" ? "notes" : m.type === "video" ? "video" : "attachment") as SessionItemType,
+      title: m.title,
+      duration: m.videoDuration || undefined,
+      status: (s.accessStatus === "unlocked" ? "available" : "locked") as SessionItem["status"],
+      videoDescription: m.description || undefined,
+      fileName: m.fileName,
+      fileSize: m.fileSize,
+      fileType: m.fileType,
+    }));
+    return {
+      id: s.id,
+      title: s.title,
+      items,
+      access: {
+        type: (s.isFreePreview ? "free" : "purchase") as SessionAccessType,
+        durationDays: 30,
+        purchasedAt: s.accessStatus === "unlocked" ? new Date().toISOString() : null,
+        price: s.price,
+      },
+    };
+  });
+
+  return {
+    name: course.title,
+    emoji: course.coverEmoji,
+    color: course.coverColor,
+    progress: 0,
+    teacher: { name: course.teacherName, subject: course.subject, initials: course.teacherName.split(" ").map((w: string) => w[0]).join("").slice(0, 2) },
+    sessions,
+  };
 }
 
 export function getSessionProgress(course: SessionCourse): {

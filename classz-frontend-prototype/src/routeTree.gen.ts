@@ -107,6 +107,7 @@ import { Route as StudentCoursesCourseIdSessionRouteImport } from './routes/stud
 import { Route as StudentCoursesCourseIdResourcesRouteImport } from './routes/student.courses.$courseId.resources'
 import { Route as StudentCoursesCourseIdEnrollRouteImport } from './routes/student.courses.$courseId.enroll'
 import { Route as StudentCoursesCourseIdContinueRouteImport } from './routes/student.courses.$courseId.continue'
+import { Route as TeacherCoursesCourseIdSessionsSessionIdRouteImport } from './routes/teacher.courses.$courseId.sessions.$sessionId'
 
 const StudentRoute = StudentRouteImport.update({
   id: '/student',
@@ -607,6 +608,12 @@ const StudentCoursesCourseIdContinueRoute =
     path: '/continue',
     getParentRoute: () => StudentCoursesCourseIdRoute,
   } as any)
+const TeacherCoursesCourseIdSessionsSessionIdRoute =
+  TeacherCoursesCourseIdSessionsSessionIdRouteImport.update({
+    id: '/$sessionId',
+    path: '/$sessionId',
+    getParentRoute: () => TeacherCoursesCourseIdSessionsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -705,8 +712,9 @@ export interface FileRoutesByFullPath {
   '/student/courses/$courseId/session': typeof StudentCoursesCourseIdSessionRoute
   '/teacher/courses/$courseId/chapters': typeof TeacherCoursesCourseIdChaptersRoute
   '/teacher/courses/$courseId/edit': typeof TeacherCoursesCourseIdEditRoute
-  '/teacher/courses/$courseId/sessions': typeof TeacherCoursesCourseIdSessionsRoute
+  '/teacher/courses/$courseId/sessions': typeof TeacherCoursesCourseIdSessionsRouteWithChildren
   '/student/courses/$courseId/': typeof StudentCoursesCourseIdIndexRoute
+  '/teacher/courses/$courseId/sessions/$sessionId': typeof TeacherCoursesCourseIdSessionsSessionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -802,8 +810,9 @@ export interface FileRoutesByTo {
   '/student/courses/$courseId/session': typeof StudentCoursesCourseIdSessionRoute
   '/teacher/courses/$courseId/chapters': typeof TeacherCoursesCourseIdChaptersRoute
   '/teacher/courses/$courseId/edit': typeof TeacherCoursesCourseIdEditRoute
-  '/teacher/courses/$courseId/sessions': typeof TeacherCoursesCourseIdSessionsRoute
+  '/teacher/courses/$courseId/sessions': typeof TeacherCoursesCourseIdSessionsRouteWithChildren
   '/student/courses/$courseId': typeof StudentCoursesCourseIdIndexRoute
+  '/teacher/courses/$courseId/sessions/$sessionId': typeof TeacherCoursesCourseIdSessionsSessionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -903,8 +912,9 @@ export interface FileRoutesById {
   '/student/courses/$courseId/session': typeof StudentCoursesCourseIdSessionRoute
   '/teacher/courses/$courseId/chapters': typeof TeacherCoursesCourseIdChaptersRoute
   '/teacher/courses/$courseId/edit': typeof TeacherCoursesCourseIdEditRoute
-  '/teacher/courses/$courseId/sessions': typeof TeacherCoursesCourseIdSessionsRoute
+  '/teacher/courses/$courseId/sessions': typeof TeacherCoursesCourseIdSessionsRouteWithChildren
   '/student/courses/$courseId/': typeof StudentCoursesCourseIdIndexRoute
+  '/teacher/courses/$courseId/sessions/$sessionId': typeof TeacherCoursesCourseIdSessionsSessionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1007,6 +1017,7 @@ export interface FileRouteTypes {
     | '/teacher/courses/$courseId/edit'
     | '/teacher/courses/$courseId/sessions'
     | '/student/courses/$courseId/'
+    | '/teacher/courses/$courseId/sessions/$sessionId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1104,6 +1115,7 @@ export interface FileRouteTypes {
     | '/teacher/courses/$courseId/edit'
     | '/teacher/courses/$courseId/sessions'
     | '/student/courses/$courseId'
+    | '/teacher/courses/$courseId/sessions/$sessionId'
   id:
     | '__root__'
     | '/'
@@ -1204,6 +1216,7 @@ export interface FileRouteTypes {
     | '/teacher/courses/$courseId/edit'
     | '/teacher/courses/$courseId/sessions'
     | '/student/courses/$courseId/'
+    | '/teacher/courses/$courseId/sessions/$sessionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1968,6 +1981,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentCoursesCourseIdContinueRouteImport
       parentRoute: typeof StudentCoursesCourseIdRoute
     }
+    '/teacher/courses/$courseId/sessions/$sessionId': {
+      id: '/teacher/courses/$courseId/sessions/$sessionId'
+      path: '/$sessionId'
+      fullPath: '/teacher/courses/$courseId/sessions/$sessionId'
+      preLoaderRoute: typeof TeacherCoursesCourseIdSessionsSessionIdRouteImport
+      parentRoute: typeof TeacherCoursesCourseIdSessionsRoute
+    }
   }
 }
 
@@ -2054,18 +2074,34 @@ const StudentRouteChildren: StudentRouteChildren = {
 const StudentRouteWithChildren =
   StudentRoute._addFileChildren(StudentRouteChildren)
 
+interface TeacherCoursesCourseIdSessionsRouteChildren {
+  TeacherCoursesCourseIdSessionsSessionIdRoute: typeof TeacherCoursesCourseIdSessionsSessionIdRoute
+}
+
+const TeacherCoursesCourseIdSessionsRouteChildren: TeacherCoursesCourseIdSessionsRouteChildren =
+  {
+    TeacherCoursesCourseIdSessionsSessionIdRoute:
+      TeacherCoursesCourseIdSessionsSessionIdRoute,
+  }
+
+const TeacherCoursesCourseIdSessionsRouteWithChildren =
+  TeacherCoursesCourseIdSessionsRoute._addFileChildren(
+    TeacherCoursesCourseIdSessionsRouteChildren,
+  )
+
 interface TeacherCoursesRouteChildren {
   TeacherCoursesCreateRoute: typeof TeacherCoursesCreateRoute
   TeacherCoursesCourseIdChaptersRoute: typeof TeacherCoursesCourseIdChaptersRoute
   TeacherCoursesCourseIdEditRoute: typeof TeacherCoursesCourseIdEditRoute
-  TeacherCoursesCourseIdSessionsRoute: typeof TeacherCoursesCourseIdSessionsRoute
+  TeacherCoursesCourseIdSessionsRoute: typeof TeacherCoursesCourseIdSessionsRouteWithChildren
 }
 
 const TeacherCoursesRouteChildren: TeacherCoursesRouteChildren = {
   TeacherCoursesCreateRoute: TeacherCoursesCreateRoute,
   TeacherCoursesCourseIdChaptersRoute: TeacherCoursesCourseIdChaptersRoute,
   TeacherCoursesCourseIdEditRoute: TeacherCoursesCourseIdEditRoute,
-  TeacherCoursesCourseIdSessionsRoute: TeacherCoursesCourseIdSessionsRoute,
+  TeacherCoursesCourseIdSessionsRoute:
+    TeacherCoursesCourseIdSessionsRouteWithChildren,
 }
 
 const TeacherCoursesRouteWithChildren = TeacherCoursesRoute._addFileChildren(

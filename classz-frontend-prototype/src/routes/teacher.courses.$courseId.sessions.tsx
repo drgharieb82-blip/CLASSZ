@@ -197,6 +197,9 @@ function SessionsPage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
+                  <Button asChild variant="outline" size="sm" className="rounded-lg text-xs h-8">
+                    <Link to="/teacher/courses/$courseId/sessions/$sessionId" params={{ courseId, sessionId: session.id }}>Materials</Link>
+                  </Button>
                   {session.status === "draft" && (
                     <Button variant="outline" size="sm" className="rounded-lg text-xs h-8" onClick={() => publishSession(session.id)}>Publish</Button>
                   )}
