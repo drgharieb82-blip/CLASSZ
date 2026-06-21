@@ -11,16 +11,25 @@ from app.db.base import Base
 
 class Role(str, enum.Enum):
     ADMIN = "admin"
+    SUPER_ADMIN = "super_admin"
     TEACHER = "teacher"
     ASSISTANT = "assistant"
     STUDENT = "student"
     PARENT = "parent"
+    DEVELOPER = "developer"
+    CONTENT_MANAGER = "content_manager"
+    CONTENT_AUTHOR = "content_author"
+    FINANCE = "finance"
 
 
 class User(Base):
     __tablename__ = "users"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    public_code: Mapped[str] = mapped_column(
+        String(20), unique=True, index=True, nullable=False,
+        comment="Immutable public identifier (e.g. CLS-26-000145). Never changes after creation.",
+    )
     email: Mapped[str] = mapped_column(String(320), unique=True, index=True, nullable=False)
     full_name: Mapped[str] = mapped_column(String(160), nullable=False)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)

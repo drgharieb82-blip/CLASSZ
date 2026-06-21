@@ -1,8 +1,10 @@
 export interface Course {
   id: string;
+  publicCode?: string;
   title: string;
   subject: string;
   teacher: string;
+  teacherCode?: string;
   level: string;
   lessons: number;
   hours: number;
@@ -16,14 +18,14 @@ export interface Course {
 }
 
 export const courses: Course[] = [
-  { id: "c1", title: "Advanced Mathematics", subject: "Math", teacher: "Dr. Layla Hassan", level: "Grade 12", lessons: 48, hours: 32, rating: 4.9, students: 1240, progress: 68, price: 49, color: "from-violet-500 to-blue-500", emoji: "📐", tag: "Bestseller" },
-  { id: "c2", title: "Physics: Mechanics & Waves", subject: "Physics", teacher: "Mr. Omar Khalil", level: "Grade 11", lessons: 36, hours: 28, rating: 4.8, students: 980, progress: 42, price: 45, color: "from-blue-500 to-cyan-500", emoji: "⚛️", tag: "Popular" },
-  { id: "c3", title: "Organic Chemistry", subject: "Chemistry", teacher: "Dr. Sara Nour", level: "Grade 12", lessons: 40, hours: 30, rating: 4.7, students: 760, progress: 15, price: 47, color: "from-emerald-500 to-teal-500", emoji: "🧪", tag: "New" },
-  { id: "c4", title: "English Literature", subject: "English", teacher: "Ms. Hana Adel", level: "Grade 10", lessons: 30, hours: 22, rating: 4.6, students: 1530, progress: 90, price: 39, color: "from-pink-500 to-rose-500", emoji: "📚", tag: "Trending" },
-  { id: "c5", title: "Biology Essentials", subject: "Biology", teacher: "Dr. Yusuf Amin", level: "Grade 11", lessons: 34, hours: 26, rating: 4.8, students: 670, progress: 0, price: 43, color: "from-green-500 to-emerald-500", emoji: "🧬", tag: "New" },
-  { id: "c6", title: "Computer Science 101", subject: "CS", teacher: "Mr. Karim Saad", level: "Grade 12", lessons: 52, hours: 40, rating: 4.9, students: 2100, progress: 33, price: 55, color: "from-slate-500 to-blue-500", emoji: "💻", tag: "Bestseller" },
-  { id: "c7", title: "Arabic Grammar Mastery", subject: "Arabic", teacher: "Ustaz Fadi Aziz", level: "Grade 10", lessons: 28, hours: 20, rating: 4.7, students: 890, progress: 55, price: 35, color: "from-amber-500 to-orange-500", emoji: "🕌", tag: "Popular" },
-  { id: "c8", title: "World History", subject: "History", teacher: "Ms. Dina Salem", level: "Grade 11", lessons: 32, hours: 24, rating: 4.5, students: 540, progress: 0, price: 38, color: "from-orange-500 to-red-500", emoji: "🏛️", tag: "" },
+  { id: "c1", publicCode: "CRS-26-0001", title: "Advanced Mathematics", subject: "Math", teacher: "Dr. Layla Hassan", teacherCode: "TCH-26-0001", level: "Grade 12", lessons: 48, hours: 32, rating: 4.9, students: 1240, progress: 68, price: 49, color: "from-violet-500 to-blue-500", emoji: "📐", tag: "Bestseller" },
+  { id: "c2", publicCode: "CRS-26-0002", title: "Physics: Mechanics & Waves", subject: "Physics", teacher: "Mr. Omar Khalil", teacherCode: "TCH-26-0002", level: "Grade 11", lessons: 36, hours: 28, rating: 4.8, students: 980, progress: 42, price: 45, color: "from-blue-500 to-cyan-500", emoji: "⚛️", tag: "Popular" },
+  { id: "c3", publicCode: "CRS-26-0003", title: "Organic Chemistry", subject: "Chemistry", teacher: "Dr. Sara Nour", teacherCode: "TCH-26-0003", level: "Grade 12", lessons: 40, hours: 30, rating: 4.7, students: 760, progress: 15, price: 47, color: "from-emerald-500 to-teal-500", emoji: "🧪", tag: "New" },
+  { id: "c4", publicCode: "CRS-26-0004", title: "English Literature", subject: "English", teacher: "Ms. Hana Adel", teacherCode: "TCH-26-0004", level: "Grade 10", lessons: 30, hours: 22, rating: 4.6, students: 1530, progress: 90, price: 39, color: "from-pink-500 to-rose-500", emoji: "📚", tag: "Trending" },
+  { id: "c5", publicCode: "CRS-26-0005", title: "Biology Essentials", subject: "Biology", teacher: "Dr. Yusuf Amin", teacherCode: "TCH-26-0005", level: "Grade 11", lessons: 34, hours: 26, rating: 4.8, students: 670, progress: 0, price: 43, color: "from-green-500 to-emerald-500", emoji: "🧬", tag: "New" },
+  { id: "c6", publicCode: "CRS-26-0006", title: "Computer Science 101", subject: "CS", teacher: "Mr. Karim Saad", teacherCode: "TCH-26-0006", level: "Grade 12", lessons: 52, hours: 40, rating: 4.9, students: 2100, progress: 33, price: 55, color: "from-slate-500 to-blue-500", emoji: "💻", tag: "Bestseller" },
+  { id: "c7", publicCode: "CRS-26-0007", title: "Arabic Grammar Mastery", subject: "Arabic", teacher: "Ustaz Fadi Aziz", teacherCode: "TCH-26-0007", level: "Grade 10", lessons: 28, hours: 20, rating: 4.7, students: 890, progress: 55, price: 35, color: "from-amber-500 to-orange-500", emoji: "🕌", tag: "Popular" },
+  { id: "c8", publicCode: "CRS-26-0008", title: "World History", subject: "History", teacher: "Ms. Dina Salem", teacherCode: "TCH-26-0008", level: "Grade 11", lessons: 32, hours: 24, rating: 4.5, students: 540, progress: 0, price: 38, color: "from-orange-500 to-red-500", emoji: "🏛️", tag: "" },
 ];
 
 export const lessons = [

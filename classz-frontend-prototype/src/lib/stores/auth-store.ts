@@ -1,26 +1,50 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Role } from "../roles";
-import { generateStudentCode } from "../student-code";
+import { mockGenerateCode } from "../student-code";
 
 export interface AuthUser {
   id: string;
   internalUUID: string;
-  studentCode: string;
+  publicCode: string;
   email: string;
   full_name: string;
   role: Role;
   is_active: boolean;
 }
 
+type RawUser = {
+  id: string;
+  public_code?: string;
+  publicCode?: string;
+  internalUUID?: string;
+  email: string;
+  full_name: string;
+  role: Role;
+  is_active: boolean;
+};
+
 interface AuthState {
   user: AuthUser | null;
   token: string | null;
   isAuthenticated: boolean;
-  login: (token: string, user: Partial<AuthUser> & { id: string; email: string; full_name: string; role: Role; is_active: boolean }) => void;
+  login: (token: string, user: RawUser) => void;
   logout: () => void;
   setUser: (user: AuthUser) => void;
 }
+
+const ROLE_TO_ENTITY: Record<string, Parameters<typeof mockGenerateCode>[0]> = {
+  student: "student",
+  teacher: "teacher",
+  parent: "parent",
+  assistant: "assistant",
+  admin: "admin",
+  super_admin: "super_admin",
+  developer: "developer",
+  content_manager: "content_manager",
+  content_author: "content_author",
+  finance: "finance",
+};
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -30,10 +54,15 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
 
       login: (token, rawUser) => {
+        const entityType = ROLE_TO_ENTITY[rawUser.role] ?? "student";
         const user: AuthUser = {
-          ...rawUser,
+          id: rawUser.id,
+          email: rawUser.email,
+          full_name: rawUser.full_name,
+          role: rawUser.role,
+          is_active: rawUser.is_active,
           internalUUID: rawUser.internalUUID || crypto.randomUUID(),
-          studentCode: rawUser.studentCode || generateStudentCode(rawUser.id),
+          publicCode: rawUser.public_code || rawUser.publicCode || mockGenerateCode(entityType),
         };
         localStorage.setItem("classz-auth-token", token);
         set({ token, user, isAuthenticated: true });

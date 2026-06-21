@@ -41,7 +41,7 @@ export function UserMenu({ role }: { role: Role }) {
         <DropdownMenuLabel>
           <p className="font-semibold">{displayName}</p>
           <p className="flex items-center gap-1 text-xs font-normal text-muted-foreground">
-            <IdCard className="h-3 w-3" /> {user?.studentCode || getCurrentStudentCode()}
+            <IdCard className="h-3 w-3" /> {user?.publicCode || getCurrentStudentCode()}
           </p>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
