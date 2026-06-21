@@ -36,6 +36,7 @@ import { Route as TeacherRewardsRouteImport } from './routes/teacher.rewards'
 import { Route as TeacherRevenueRouteImport } from './routes/teacher.revenue'
 import { Route as TeacherQuizzesRouteImport } from './routes/teacher.quizzes'
 import { Route as TeacherQuestionsRouteImport } from './routes/teacher.questions'
+import { Route as TeacherMaterialsRouteImport } from './routes/teacher.materials'
 import { Route as TeacherLessonsRouteImport } from './routes/teacher.lessons'
 import { Route as TeacherGeneratorRouteImport } from './routes/teacher.generator'
 import { Route as TeacherCoursesRouteImport } from './routes/teacher.courses'
@@ -242,6 +243,11 @@ const TeacherQuizzesRoute = TeacherQuizzesRouteImport.update({
 const TeacherQuestionsRoute = TeacherQuestionsRouteImport.update({
   id: '/teacher/questions',
   path: '/teacher/questions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeacherMaterialsRoute = TeacherMaterialsRouteImport.update({
+  id: '/teacher/materials',
+  path: '/teacher/materials',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TeacherLessonsRoute = TeacherLessonsRouteImport.update({
@@ -683,6 +689,7 @@ export interface FileRoutesByFullPath {
   '/teacher/courses': typeof TeacherCoursesRouteWithChildren
   '/teacher/generator': typeof TeacherGeneratorRoute
   '/teacher/lessons': typeof TeacherLessonsRoute
+  '/teacher/materials': typeof TeacherMaterialsRoute
   '/teacher/questions': typeof TeacherQuestionsRouteWithChildren
   '/teacher/quizzes': typeof TeacherQuizzesRoute
   '/teacher/revenue': typeof TeacherRevenueRoute
@@ -782,6 +789,7 @@ export interface FileRoutesByTo {
   '/teacher/courses': typeof TeacherCoursesRouteWithChildren
   '/teacher/generator': typeof TeacherGeneratorRoute
   '/teacher/lessons': typeof TeacherLessonsRoute
+  '/teacher/materials': typeof TeacherMaterialsRoute
   '/teacher/questions': typeof TeacherQuestionsRouteWithChildren
   '/teacher/quizzes': typeof TeacherQuizzesRoute
   '/teacher/revenue': typeof TeacherRevenueRoute
@@ -883,6 +891,7 @@ export interface FileRoutesById {
   '/teacher/courses': typeof TeacherCoursesRouteWithChildren
   '/teacher/generator': typeof TeacherGeneratorRoute
   '/teacher/lessons': typeof TeacherLessonsRoute
+  '/teacher/materials': typeof TeacherMaterialsRoute
   '/teacher/questions': typeof TeacherQuestionsRouteWithChildren
   '/teacher/quizzes': typeof TeacherQuizzesRoute
   '/teacher/revenue': typeof TeacherRevenueRoute
@@ -986,6 +995,7 @@ export interface FileRouteTypes {
     | '/teacher/courses'
     | '/teacher/generator'
     | '/teacher/lessons'
+    | '/teacher/materials'
     | '/teacher/questions'
     | '/teacher/quizzes'
     | '/teacher/revenue'
@@ -1085,6 +1095,7 @@ export interface FileRouteTypes {
     | '/teacher/courses'
     | '/teacher/generator'
     | '/teacher/lessons'
+    | '/teacher/materials'
     | '/teacher/questions'
     | '/teacher/quizzes'
     | '/teacher/revenue'
@@ -1185,6 +1196,7 @@ export interface FileRouteTypes {
     | '/teacher/courses'
     | '/teacher/generator'
     | '/teacher/lessons'
+    | '/teacher/materials'
     | '/teacher/questions'
     | '/teacher/quizzes'
     | '/teacher/revenue'
@@ -1275,6 +1287,7 @@ export interface RootRouteChildren {
   TeacherCoursesRoute: typeof TeacherCoursesRouteWithChildren
   TeacherGeneratorRoute: typeof TeacherGeneratorRoute
   TeacherLessonsRoute: typeof TeacherLessonsRoute
+  TeacherMaterialsRoute: typeof TeacherMaterialsRoute
   TeacherQuestionsRoute: typeof TeacherQuestionsRouteWithChildren
   TeacherQuizzesRoute: typeof TeacherQuizzesRoute
   TeacherRevenueRoute: typeof TeacherRevenueRoute
@@ -1482,6 +1495,13 @@ declare module '@tanstack/react-router' {
       path: '/teacher/questions'
       fullPath: '/teacher/questions'
       preLoaderRoute: typeof TeacherQuestionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teacher/materials': {
+      id: '/teacher/materials'
+      path: '/teacher/materials'
+      fullPath: '/teacher/materials'
+      preLoaderRoute: typeof TeacherMaterialsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/teacher/lessons': {
@@ -2175,6 +2195,7 @@ const rootRouteChildren: RootRouteChildren = {
   TeacherCoursesRoute: TeacherCoursesRouteWithChildren,
   TeacherGeneratorRoute: TeacherGeneratorRoute,
   TeacherLessonsRoute: TeacherLessonsRoute,
+  TeacherMaterialsRoute: TeacherMaterialsRoute,
   TeacherQuestionsRoute: TeacherQuestionsRouteWithChildren,
   TeacherQuizzesRoute: TeacherQuizzesRoute,
   TeacherRevenueRoute: TeacherRevenueRoute,

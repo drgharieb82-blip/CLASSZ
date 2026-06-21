@@ -50,10 +50,11 @@ export interface TeacherMaterial {
   updatedAt: string;
 }
 
-export type CreateMaterialData = Pick<TeacherMaterial,
-  "sessionId" | "courseId" | "chapterId" | "type" | "title"
-> & Partial<Pick<TeacherMaterial,
-  "description" | "videoUrl" | "videoDuration" | "fileUrl" | "fileName" | "fileSize" | "fileType" | "notesContent" | "status"
+export type CreateMaterialData = Pick<TeacherMaterial, "type" | "title"> & Partial<Pick<TeacherMaterial,
+  "sessionId" | "courseId" | "chapterId" | "description" | "videoUrl" | "videoDuration" |
+  "videoDurationSeconds" | "thumbnailUrl" | "segments" |
+  "fileUrl" | "fileName" | "fileSize" | "fileType" | "notesContent" | "status" |
+  "linkedSessionIds" | "linkedChapterIds" | "linkedLessonIds" | "linkedConceptIds" | "linkedAtomicConceptIds"
 >>;
 
 interface MaterialState {
@@ -78,13 +79,14 @@ export const useTeacherMaterialStore = create<MaterialState>()(
       materials: [],
 
       createMaterial: (data) => {
-        const sessionMaterials = get().materials.filter((m) => m.sessionId === data.sessionId);
+        const sessionId = data.sessionId || "";
+        const sessionMaterials = sessionId ? get().materials.filter((m) => m.sessionId === sessionId) : [];
         const now = new Date().toISOString();
         const material: TeacherMaterial = {
           id: generateId(),
-          sessionId: data.sessionId,
-          courseId: data.courseId,
-          chapterId: data.chapterId,
+          sessionId,
+          courseId: data.courseId || "",
+          chapterId: data.chapterId || "",
           type: data.type,
           title: data.title,
           description: data.description || "",
@@ -92,16 +94,19 @@ export const useTeacherMaterialStore = create<MaterialState>()(
           status: data.status || "draft",
           videoUrl: data.videoUrl,
           videoDuration: data.videoDuration,
+          videoDurationSeconds: data.videoDurationSeconds,
+          thumbnailUrl: data.thumbnailUrl,
+          segments: data.segments,
           fileUrl: data.fileUrl,
           fileName: data.fileName,
           fileSize: data.fileSize,
           fileType: data.fileType,
           notesContent: data.notesContent,
-          linkedSessionIds: data.sessionId ? [data.sessionId] : [],
-          linkedChapterIds: data.chapterId ? [data.chapterId] : [],
-          linkedLessonIds: [],
-          linkedConceptIds: [],
-          linkedAtomicConceptIds: [],
+          linkedSessionIds: data.linkedSessionIds || (sessionId ? [sessionId] : []),
+          linkedChapterIds: data.linkedChapterIds || (data.chapterId ? [data.chapterId] : []),
+          linkedLessonIds: data.linkedLessonIds || [],
+          linkedConceptIds: data.linkedConceptIds || [],
+          linkedAtomicConceptIds: data.linkedAtomicConceptIds || [],
           reuseCount: 0,
           createdAt: now,
           updatedAt: now,
@@ -164,4 +169,23 @@ export function getMaterialsBySession(courseId: string): Map<string, TeacherMate
     map.set(m.sessionId, list);
   }
   return map;
+}
+
+export function getAllLibraryMaterials(): TeacherMaterial[] {
+  return useTeacherMaterialStore.getState().materials.sort((a, b) =>
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
+}
+
+export function linkMaterialToSession(materialId: string, sessionId: string): void {
+  const store = useTeacherMaterialStore.getState();
+  const mat = store.materials.find((m) => m.id === materialId);
+  if (!mat) return;
+  const linked = mat.linkedSessionIds || [];
+  if (!linked.includes(sessionId)) {
+    store.updateMaterial(materialId, {
+      linkedSessionIds: [...linked, sessionId],
+      reuseCount: (mat.reuseCount || 0) + 1,
+    });
+  }
 }

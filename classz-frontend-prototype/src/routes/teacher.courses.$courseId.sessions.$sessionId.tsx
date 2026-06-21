@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-  ArrowDown, ArrowLeft, ArrowUp, Eye, EyeOff, File, FileText, Image, Pencil,
-  Play, Plus, StickyNote, Trash2, Video,
+  ArrowDown, ArrowLeft, ArrowUp, BookOpen, ClipboardList, Eye, EyeOff, File, FileText,
+  HelpCircle, Image, Library, Pencil, Play, Plus, StickyNote, Trash2, Video,
 } from "lucide-react";
 import { DashPage } from "@/components/common/DashPage";
 import { Card } from "@/components/ui/card";
@@ -245,6 +245,71 @@ function SessionMaterialsPage() {
           </p>
         </Card>
       )}
+
+      {/* Session Blocks */}
+      <div className="space-y-3">
+        <h3 className="font-semibold flex items-center gap-2"><Library className="h-4 w-4 text-primary" /> Session Blocks</h3>
+
+        {/* Library Picker */}
+        <Card className="border bg-card p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Video className="h-4 w-4 text-blue-500" />
+              <span className="text-sm font-medium">Materials</span>
+              <Badge variant="outline" className="rounded-full text-xs">{materials.length} items</Badge>
+            </div>
+            <Link to="/teacher/materials" className="text-xs text-primary hover:underline">Open Library →</Link>
+          </div>
+        </Card>
+
+        {/* Practice Block */}
+        <Card className="border bg-card p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <HelpCircle className="h-4 w-4 text-emerald-500" />
+              <span className="text-sm font-medium">Practice Questions</span>
+              <Badge variant="outline" className="rounded-full text-xs">{session.questionIds?.length || 0} selected</Badge>
+            </div>
+            <Link to="/teacher/questions" className="text-xs text-primary hover:underline">Select from Bank →</Link>
+          </div>
+        </Card>
+
+        {/* Quiz Block - Placeholder */}
+        <Card className="border border-dashed bg-card/50 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ClipboardList className="h-4 w-4 text-violet-500" />
+              <span className="text-sm font-medium text-muted-foreground">Quiz</span>
+              <Badge variant="outline" className="rounded-full text-xs text-muted-foreground">No quiz attached</Badge>
+            </div>
+            <span className="text-xs text-muted-foreground">Create Quiz Later</span>
+          </div>
+        </Card>
+
+        {/* Exam Block - Placeholder */}
+        <Card className="border border-dashed bg-card/50 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4 text-rose-500" />
+              <span className="text-sm font-medium text-muted-foreground">Exam</span>
+              <Badge variant="outline" className="rounded-full text-xs text-muted-foreground">No exam attached</Badge>
+            </div>
+            <span className="text-xs text-muted-foreground">Create Exam Later</span>
+          </div>
+        </Card>
+
+        {/* Homework Block - Placeholder */}
+        <Card className="border border-dashed bg-card/50 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Pencil className="h-4 w-4 text-amber-500" />
+              <span className="text-sm font-medium text-muted-foreground">Homework</span>
+              <Badge variant="outline" className="rounded-full text-xs text-muted-foreground">No homework attached</Badge>
+            </div>
+            <span className="text-xs text-muted-foreground">Create Homework Later</span>
+          </div>
+        </Card>
+      </div>
     </DashPage>
   );
 }
