@@ -35,6 +35,12 @@ export interface TeacherQuestion {
   correctAnswer?: string;
   unit?: string;
   tolerance?: number;
+  // Flexible linking (Phase A)
+  chapterIds: string[];
+  lessonIds: string[];
+  conceptIds: string[];
+  atomicConceptIds: string[];
+  sessionIds: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -101,6 +107,11 @@ export const useTeacherQuestionStore = create<QuestionState>()(
           correctAnswer: data.correctAnswer,
           unit: data.unit,
           tolerance: data.tolerance,
+          chapterIds: data.chapterId ? [data.chapterId] : [],
+          lessonIds: [],
+          conceptIds: data.concept ? [data.concept] : [],
+          atomicConceptIds: data.atomicConcept ? [data.atomicConcept] : [],
+          sessionIds: data.sessionId ? [data.sessionId] : [],
           createdAt: now,
           updatedAt: now,
         };

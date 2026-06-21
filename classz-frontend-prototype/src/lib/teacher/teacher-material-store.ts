@@ -4,6 +4,18 @@ import { persist } from "zustand/middleware";
 export type MaterialType = "video" | "pdf" | "image" | "attachment" | "notes";
 export type MaterialStatus = "draft" | "published" | "archived";
 
+export interface VideoSegment {
+  id: string;
+  startTime: number;
+  endTime: number;
+  title: string;
+  chapterIds: string[];
+  lessonIds: string[];
+  conceptIds: string[];
+  atomicConceptIds: string[];
+  notes?: string;
+}
+
 export interface TeacherMaterial {
   id: string;
   sessionId: string;
@@ -17,6 +29,9 @@ export interface TeacherMaterial {
   // Video
   videoUrl?: string;
   videoDuration?: string;
+  videoDurationSeconds?: number;
+  thumbnailUrl?: string;
+  segments?: VideoSegment[];
   // PDF / Image / Attachment
   fileUrl?: string;
   fileName?: string;
@@ -24,6 +39,13 @@ export interface TeacherMaterial {
   fileType?: string;
   // Notes
   notesContent?: string;
+  // Flexible linking (Phase A)
+  linkedSessionIds: string[];
+  linkedChapterIds: string[];
+  linkedLessonIds: string[];
+  linkedConceptIds: string[];
+  linkedAtomicConceptIds: string[];
+  reuseCount: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -75,6 +97,12 @@ export const useTeacherMaterialStore = create<MaterialState>()(
           fileSize: data.fileSize,
           fileType: data.fileType,
           notesContent: data.notesContent,
+          linkedSessionIds: data.sessionId ? [data.sessionId] : [],
+          linkedChapterIds: data.chapterId ? [data.chapterId] : [],
+          linkedLessonIds: [],
+          linkedConceptIds: [],
+          linkedAtomicConceptIds: [],
+          reuseCount: 0,
           createdAt: now,
           updatedAt: now,
         };
@@ -118,7 +146,7 @@ export const useTeacherMaterialStore = create<MaterialState>()(
 
 export function listMaterials(sessionId: string): TeacherMaterial[] {
   return useTeacherMaterialStore.getState().materials
-    .filter((m) => m.sessionId === sessionId)
+    .filter((m) => m.sessionId === sessionId || (m.linkedSessionIds && m.linkedSessionIds.includes(sessionId)))
     .sort((a, b) => a.order - b.order);
 }
 

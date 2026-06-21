@@ -4,6 +4,8 @@ import { persist } from "zustand/middleware";
 export type SessionStatus = "draft" | "published" | "archived";
 export type AccessStatus = "locked" | "unlocked" | "scheduled";
 
+export type SessionType = "lesson" | "revision" | "practice" | "quiz" | "exam" | "homework" | "mixed";
+
 export interface TeacherSession {
   id: string;
   publicCode: string;
@@ -22,6 +24,21 @@ export interface TeacherSession {
   isFreePreview: boolean;
   createdAt: string;
   updatedAt: string;
+  // Flexible fields (Phase A)
+  sessionType: SessionType;
+  chapterIds: string[];
+  lessonIds: string[];
+  conceptIds: string[];
+  atomicConceptIds: string[];
+  materialIds: string[];
+  questionIds: string[];
+  quizIds: string[];
+  examIds: string[];
+  homeworkIds: string[];
+  hasQuiz: boolean;
+  hasExam: boolean;
+  hasHomework: boolean;
+  hasPractice: boolean;
 }
 
 export type CreateSessionData = Pick<TeacherSession,
@@ -33,6 +50,7 @@ export type CreateSessionData = Pick<TeacherSession,
   openAt?: string;
   closeAt?: string;
   durationMinutes?: number;
+  sessionType?: SessionType;
 };
 
 interface SessionState {
@@ -84,6 +102,20 @@ export const useTeacherSessionStore = create<SessionState>()(
           isFreePreview: data.isFreePreview || false,
           createdAt: now,
           updatedAt: now,
+          sessionType: data.sessionType || "lesson",
+          chapterIds: data.chapterId ? [data.chapterId] : [],
+          lessonIds: [],
+          conceptIds: [],
+          atomicConceptIds: [],
+          materialIds: [],
+          questionIds: [],
+          quizIds: [],
+          examIds: [],
+          homeworkIds: [],
+          hasQuiz: false,
+          hasExam: false,
+          hasHomework: false,
+          hasPractice: false,
         };
         set((state) => ({ sessions: [...state.sessions, session] }));
         return session;
