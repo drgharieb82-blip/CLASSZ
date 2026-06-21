@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowLeft, Save, Shield, Upload } from "lucide-react";
+import { ArrowLeft, BookOpen, FolderTree, PlayCircle, Save, Shield, Upload } from "lucide-react";
 import { DashPage } from "@/components/common/DashPage";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { ROLES } from "@/lib/roles";
 import { cn } from "@/lib/utils";
 import { useTeacherCourseStore, getCourseById, type CountryPrice } from "@/lib/teacher/teacher-course-store";
+import { listChapters } from "@/lib/teacher/teacher-chapter-store";
+import { listSessions } from "@/lib/teacher/teacher-session-store";
 import { COUNTRIES } from "@/lib/i18n/countries";
 
 export const Route = createFileRoute("/teacher/courses/$courseId/edit")({
@@ -103,6 +105,20 @@ function EditCoursePage() {
         <Badge variant="outline" className={cn("rounded-full text-xs", course.status === "published" ? "border-emerald-300 text-emerald-600" : "border-amber-300 text-amber-600")}>
           {course.status}
         </Badge>
+      </div>
+
+      {/* Content Navigation */}
+      <div className="flex flex-wrap gap-2">
+        <Button asChild variant="outline" size="sm" className="rounded-xl gap-1.5">
+          <Link to="/teacher/courses/$courseId/chapters" params={{ courseId }}>
+            <FolderTree className="h-3.5 w-3.5" /> Chapters ({listChapters(courseId).length})
+          </Link>
+        </Button>
+        <Button asChild variant="outline" size="sm" className="rounded-xl gap-1.5">
+          <Link to="/teacher/courses/$courseId/sessions" params={{ courseId }}>
+            <PlayCircle className="h-3.5 w-3.5" /> Sessions ({listSessions(courseId).length})
+          </Link>
+        </Button>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">

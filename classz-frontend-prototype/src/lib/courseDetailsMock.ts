@@ -1,5 +1,7 @@
 import { courses } from "./mock";
 import { getPublishedPublicCourses } from "./teacher/teacher-course-store";
+import { getPublishedChapters } from "./teacher/teacher-chapter-store";
+import { getPublishedSessions } from "./teacher/teacher-session-store";
 
 export interface CourseDetails {
   id: string;
@@ -118,6 +120,20 @@ export function getCourseDetails(courseId: string): CourseDetails | null {
   const tc = teacherCourses.find((c) => c.id === courseId);
   if (!tc) return null;
 
+  const pubChapters = getPublishedChapters(courseId);
+  const pubSessions = getPublishedSessions(courseId);
+  const chaptersList = pubChapters.length > 0
+    ? pubChapters.map((ch) => {
+        const chSessions = pubSessions.filter((s) => s.chapterId === ch.id);
+        return {
+          title: ch.title,
+          lessonsCount: chSessions.length,
+          duration: `${chSessions.length * 15}m`,
+          preview: chSessions.some((s) => s.isFreePreview),
+        };
+      })
+    : defaultDetails.chapters;
+
   return {
     id: tc.id,
     publicCode: tc.publicCode,
@@ -126,8 +142,8 @@ export function getCourseDetails(courseId: string): CourseDetails | null {
     teacher: tc.teacherName,
     teacherCode: tc.teacherPublicCode,
     level: tc.grade,
-    lessons: tc.lessonsCount || 0,
-    hours: tc.hoursCount || 0,
+    lessons: pubSessions.length || tc.lessonsCount || 0,
+    hours: tc.hoursCount || Math.ceil(pubSessions.length * 0.4),
     rating: tc.rating || 0,
     students: tc.enrollmentCount || 0,
     price: tc.price,
@@ -137,7 +153,7 @@ export function getCourseDetails(courseId: string): CourseDetails | null {
     description: tc.description || defaultDetails.description,
     teacherBio: defaultDetails.teacherBio,
     outcomes: defaultDetails.outcomes,
-    chapters: defaultDetails.chapters,
+    chapters: chaptersList,
     reviews: [],
     paymentOptions: defaultDetails.paymentOptions,
   } as CourseDetails;
