@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { getAllEnrolledCourses } from "@/lib/enrolled-courses";
 import { useEnrollmentStore } from "@/lib/stores/enrollment-store";
 import { EnrolledCourseCard } from "@/components/student/EnrolledCourseCard";
+import { EmptyBookshelf } from "@/components/illustrations/Characters";
 
 export const Route = createFileRoute("/student/courses/")({
   component: Page,
@@ -29,9 +30,10 @@ function Page() {
           animate={{ opacity: 1, y: 0 }}
           className="flex flex-col items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.02] p-12 text-center"
         >
+          <EmptyBookshelf size="lg" />
           <BookOpen className="h-12 w-12 text-slate-500" />
           <h2 className="text-lg font-semibold text-white">No courses yet</h2>
-          <p className="text-sm text-slate-400">Browse our catalog to find your first course.</p>
+          <p className="text-sm text-slate-400">Your learning adventure starts here.</p>
           <Button asChild className="rounded-xl gradient-brand border-0 text-white">
             <Link to="/courses">Browse Courses</Link>
           </Button>

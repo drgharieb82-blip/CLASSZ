@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { WalletCharacter } from "@/components/illustrations/Characters";
 import { useWalletStore } from "@/lib/stores/wallet-store";
 import type { Transaction } from "@/lib/stores/wallet-store";
 
@@ -138,6 +139,7 @@ function WalletPage() {
           <h2 className="font-semibold">Transaction History</h2>
           {transactions.length === 0 ? (
             <Card className="mt-4 flex flex-col items-center gap-3 border bg-card p-8 text-center">
+              <WalletCharacter size="md" />
               <Wallet className="h-10 w-10 text-muted-foreground" />
               <p className="text-muted-foreground">No transactions yet. Recharge your wallet to get started.</p>
             </Card>
