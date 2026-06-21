@@ -6,7 +6,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ROLES } from "@/lib/roles";
 import { studentDashboardPrestige as studentDashboard } from "@/lib/mock";
-import { welcomeMessages, currentXP, currentLevel, currentTitle, nextLevelXP, currentStreak, dailyMissions } from "@/lib/gamificationMock";
+import { getXPSummary, generateDailyMissions } from "@/lib/xp";
+import { welcomeMessages } from "@/lib/gamificationMock";
 
 import { TodayMissionCard } from "@/components/student/TodayMissionCard";
 import { WeakPointsCard } from "@/components/student/WeakPointsCard";
@@ -27,7 +28,8 @@ const d = studentDashboard;
 const welcomeMsg = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
 
 function StudentHome() {
-  const xpPercent = Math.min(100, Math.round((currentXP / nextLevelXP) * 100));
+  const summary = getXPSummary();
+  const dailyMissions = generateDailyMissions();
   const missionsComplete = dailyMissions.filter((m) => m.completed).length;
 
   return (
@@ -44,13 +46,13 @@ function StudentHome() {
           <div className="flex items-center gap-4 shrink-0">
             <div className="flex items-center gap-1.5">
               <Flame className="h-4 w-4 text-amber-500" />
-              <span className="text-sm font-bold">{currentStreak}</span>
+              <span className="text-sm font-bold">23</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Sparkles className="h-4 w-4 text-primary" />
-              <span className="text-sm font-bold">{currentXP.toLocaleString()} XP</span>
+              <span className="text-sm font-bold">{summary.totalXP.toLocaleString()} XP</span>
             </div>
-            <Badge className="rounded-full gradient-brand border-0 text-white text-xs">Lv.{currentLevel} {currentTitle}</Badge>
+            <Badge className="rounded-full gradient-brand border-0 text-white text-xs">Lv.{summary.currentLevel.level} {summary.currentLevel.title}</Badge>
           </div>
         </Card>
       </motion.div>

@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   Clock,
   RotateCcw,
+  Sparkles,
   Target,
   TrendingUp,
   XCircle,
@@ -13,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { GradientButton } from "@/components/premium/GradientButton";
 import { VictoryScene } from "@/components/illustrations/Characters";
+import { calculateQuizXP } from "@/lib/xp";
 import type { AnswerRecord, Confidence } from "./QuestionPractice";
 
 interface Props {
@@ -112,6 +114,9 @@ export function PracticeResult({
         </div>
         <h2 className="text-xl font-bold text-white">Practice Complete</h2>
         <p className="mt-1 text-sm text-slate-400">{title}</p>
+        <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-violet-500/15 px-3 py-1 text-sm font-semibold text-violet-300">
+          <Sparkles className="h-3.5 w-3.5" /> +{calculateQuizXP(score, 1).total} XP
+        </div>
       </div>
 
       {/* ── Stats grid ── */}
