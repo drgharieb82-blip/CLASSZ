@@ -1,4 +1,5 @@
 import { courses } from "./mock";
+import { getPublishedPublicCourses } from "./teacher/teacher-course-store";
 
 export interface CourseDetails {
   id: string;
@@ -100,15 +101,44 @@ const defaultDetails: Omit<CourseDetails, keyof typeof courses[0]> = {
 
 export function getCourseDetails(courseId: string): CourseDetails | null {
   const base = courses.find((c) => c.id === courseId);
-  if (!base) return null;
-  const extra = detailsMap[courseId] ?? {};
+  if (base) {
+    const extra = detailsMap[courseId] ?? {};
+    return {
+      ...base,
+      description: extra.description ?? defaultDetails.description,
+      teacherBio: extra.teacherBio ?? defaultDetails.teacherBio,
+      outcomes: extra.outcomes ?? defaultDetails.outcomes,
+      chapters: extra.chapters ?? defaultDetails.chapters,
+      reviews: extra.reviews ?? defaultDetails.reviews,
+      paymentOptions: extra.paymentOptions ?? defaultDetails.paymentOptions,
+    } as CourseDetails;
+  }
+
+  const teacherCourses = getPublishedPublicCourses();
+  const tc = teacherCourses.find((c) => c.id === courseId);
+  if (!tc) return null;
+
   return {
-    ...base,
-    description: extra.description ?? defaultDetails.description,
-    teacherBio: extra.teacherBio ?? defaultDetails.teacherBio,
-    outcomes: extra.outcomes ?? defaultDetails.outcomes,
-    chapters: extra.chapters ?? defaultDetails.chapters,
-    reviews: extra.reviews ?? defaultDetails.reviews,
-    paymentOptions: extra.paymentOptions ?? defaultDetails.paymentOptions,
+    id: tc.id,
+    publicCode: tc.publicCode,
+    title: tc.title,
+    subject: tc.subject,
+    teacher: tc.teacherName,
+    teacherCode: tc.teacherPublicCode,
+    level: tc.grade,
+    lessons: tc.lessonsCount || 0,
+    hours: tc.hoursCount || 0,
+    rating: tc.rating || 0,
+    students: tc.enrollmentCount || 0,
+    price: tc.price,
+    color: tc.coverColor,
+    emoji: tc.coverEmoji,
+    tag: "",
+    description: tc.description || defaultDetails.description,
+    teacherBio: defaultDetails.teacherBio,
+    outcomes: defaultDetails.outcomes,
+    chapters: defaultDetails.chapters,
+    reviews: [],
+    paymentOptions: defaultDetails.paymentOptions,
   } as CourseDetails;
 }

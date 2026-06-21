@@ -7,7 +7,8 @@ import { FloatingParticles } from "@/components/premium/FloatingParticles";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { courses } from "@/lib/mock";
+import { courses, type Course } from "@/lib/mock";
+import { getPublishedPublicCourses } from "@/lib/teacher/teacher-course-store";
 
 export const Route = createFileRoute("/courses/")({
   head: () => ({
@@ -23,10 +24,33 @@ export const Route = createFileRoute("/courses/")({
 
 const subjects = ["All", "Math", "Physics", "Chemistry", "Biology", "English", "CS", "Arabic", "History"];
 
+function teacherCourseToCatalog(tc: ReturnType<typeof getPublishedPublicCourses>[number]): Course {
+  return {
+    id: tc.id,
+    publicCode: tc.publicCode,
+    title: tc.title,
+    subject: tc.subject,
+    teacher: tc.teacherName,
+    teacherCode: tc.teacherPublicCode,
+    level: tc.grade,
+    lessons: tc.lessonsCount,
+    hours: tc.hoursCount,
+    rating: tc.rating,
+    students: tc.enrollmentCount,
+    progress: 0,
+    price: tc.price,
+    color: tc.coverColor,
+    emoji: tc.coverEmoji,
+    tag: "",
+  };
+}
+
 function CoursesPage() {
   const [subject, setSubject] = useState("All");
   const [q, setQ] = useState("");
-  const filtered = courses.filter(
+  const teacherCourses = getPublishedPublicCourses().map(teacherCourseToCatalog);
+  const allCourses = [...courses, ...teacherCourses];
+  const filtered = allCourses.filter(
     (c) => (subject === "All" || c.subject === subject) && c.title.toLowerCase().includes(q.toLowerCase()),
   );
   return (

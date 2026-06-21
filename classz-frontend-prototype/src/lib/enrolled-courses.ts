@@ -1,8 +1,14 @@
 import { courses, enrolledCourses, type EnrolledCourse } from "./mock";
 import { useEnrollmentStore } from "./stores/enrollment-store";
+import { getPublishedPublicCourses } from "./teacher/teacher-course-store";
 
 function courseToEnrolled(courseId: string): EnrolledCourse | null {
-  const base = courses.find((c) => c.id === courseId);
+  const base = courses.find((c) => c.id === courseId)
+    ?? (() => {
+      const tc = getPublishedPublicCourses().find((c) => c.id === courseId);
+      if (!tc) return undefined;
+      return { id: tc.id, title: tc.title, emoji: tc.coverEmoji, color: tc.coverColor, teacher: tc.teacherName, lessons: tc.lessonsCount, hours: tc.hoursCount, price: tc.price } as any;
+    })();
   if (!base) return null;
   return {
     id: base.id,
