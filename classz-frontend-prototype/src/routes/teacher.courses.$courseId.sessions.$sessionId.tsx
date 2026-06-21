@@ -2,8 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   ArrowDown, ArrowLeft, ArrowUp, BookOpen, ClipboardList, Eye, EyeOff, File, FileText,
-  HelpCircle, Image, Library, Pencil, Play, Plus, StickyNote, Trash2, Video,
+  HelpCircle, Image, Library, Pencil, Play, Plus, StickyNote, Sparkles, Trash2, Video,
 } from "lucide-react";
+import { getPublishedQuizzesForSession } from "@/lib/teacher/teacher-quiz-store";
 import { DashPage } from "@/components/common/DashPage";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -274,17 +275,36 @@ function SessionMaterialsPage() {
           </div>
         </Card>
 
-        {/* Quiz Block - Placeholder */}
-        <Card className="border border-dashed bg-card/50 p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <ClipboardList className="h-4 w-4 text-violet-500" />
-              <span className="text-sm font-medium text-muted-foreground">Quiz</span>
-              <Badge variant="outline" className="rounded-full text-xs text-muted-foreground">No quiz attached</Badge>
-            </div>
-            <span className="text-xs text-muted-foreground">Create Quiz Later</span>
-          </div>
-        </Card>
+        {/* Quiz Block - Active */}
+        {(() => {
+          const quizzes = getPublishedQuizzesForSession(sessionId);
+          if (quizzes.length > 0) {
+            return quizzes.map((qz) => (
+              <Card key={qz.id} className="border border-violet-500/20 bg-violet-500/5 p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ClipboardList className="h-4 w-4 text-violet-500" />
+                    <span className="text-sm font-medium">{qz.title}</span>
+                    <Badge variant="outline" className="rounded-full text-xs border-violet-300 text-violet-600">{qz.questionIds.length} Q · {qz.durationMinutes}m · +{qz.xpReward} XP</Badge>
+                  </div>
+                  <Link to="/teacher/quizzes/$quizId/edit" params={{ quizId: qz.id }} className="text-xs text-primary hover:underline">Edit</Link>
+                </div>
+              </Card>
+            ));
+          }
+          return (
+            <Card className="border border-dashed bg-card/50 p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ClipboardList className="h-4 w-4 text-violet-500" />
+                  <span className="text-sm font-medium text-muted-foreground">Quiz</span>
+                  <Badge variant="outline" className="rounded-full text-xs text-muted-foreground">No quiz attached</Badge>
+                </div>
+                <Link to="/teacher/quizzes/create" className="text-xs text-primary hover:underline">Create Quiz →</Link>
+              </div>
+            </Card>
+          );
+        })()}
 
         {/* Exam Block - Placeholder */}
         <Card className="border border-dashed bg-card/50 p-4">

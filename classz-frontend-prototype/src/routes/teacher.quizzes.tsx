@@ -1,65 +1,121 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Clock, ClipboardList, Plus, Users, BarChart3 } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState, useMemo } from "react";
+import { Clock, ClipboardList, Copy, HelpCircle, Plus, Sparkles, Trash2, Upload } from "lucide-react";
 import { DashPage } from "@/components/common/DashPage";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ROLES } from "@/lib/roles";
+import { cn } from "@/lib/utils";
+import { FilterBar, type FilterOption } from "@/components/filters/FilterBar";
+import { Pagination } from "@/components/filters/Pagination";
+import { useTeacherQuizStore, type TeacherQuiz } from "@/lib/teacher/teacher-quiz-store";
+import { useTeacherCourseStore } from "@/lib/teacher/teacher-course-store";
 
 export const Route = createFileRoute("/teacher/quizzes")({
   component: QuizzesPage,
 });
 
-const mockQuizzes = [
-  { id: "QZ-26-0001", title: "Derivatives Quick Quiz", type: "quick" as const, questions: 10, duration: "10 min", attempts: 456, avgScore: 78, status: "active" as const },
-  { id: "QZ-26-0002", title: "Calculus Mid-term Exam", type: "exam" as const, questions: 40, duration: "90 min", attempts: 320, avgScore: 72, status: "active" as const },
-  { id: "QZ-26-0003", title: "Integration Practice", type: "quick" as const, questions: 15, duration: "15 min", attempts: 280, avgScore: 65, status: "active" as const },
-  { id: "QZ-26-0004", title: "Calculus Final Exam 2026", type: "exam" as const, questions: 60, duration: "120 min", attempts: 0, avgScore: 0, status: "scheduled" as const },
-];
+const PAGE_SIZE = 10;
+
+const typeLabels: Record<string, string> = {
+  practice: "Practice", session_quiz: "Session Quiz", revision: "Revision",
+  homework_quiz: "Homework", checkpoint: "Checkpoint", exam_prep: "Exam Prep", standalone: "Standalone",
+};
 
 function QuizzesPage() {
+  const quizzes = useTeacherQuizStore((s) => s.quizzes);
+  const courses = useTeacherCourseStore((s) => s.courses);
+  const deleteQuiz = useTeacherQuizStore((s) => s.deleteQuiz);
+  const publishQuiz = useTeacherQuizStore((s) => s.publishQuiz);
+  const duplicateQuiz = useTeacherQuizStore((s) => s.duplicateQuiz);
+
+  const [search, setSearch] = useState("");
+  const [filters, setFilters] = useState<Record<string, string>>({});
+  const [page, setPage] = useState(1);
+
+  const filterOptions: FilterOption[] = [
+    { key: "type", label: "Type", options: Object.entries(typeLabels).map(([v, l]) => ({ value: v, label: l })) },
+    { key: "status", label: "Status", options: [
+      { value: "draft", label: "Draft" }, { value: "published", label: "Published" }, { value: "archived", label: "Archived" },
+    ]},
+    { key: "course", label: "Course", options: courses.map((c) => ({ value: c.id, label: c.title })) },
+  ];
+
+  const filtered = useMemo(() => {
+    let result = [...quizzes];
+    if (search) {
+      const q = search.toLowerCase();
+      result = result.filter((qz) => qz.title.toLowerCase().includes(q) || qz.publicCode.includes(q));
+    }
+    if (filters.type) result = result.filter((q) => q.quizType === filters.type);
+    if (filters.status) result = result.filter((q) => q.status === filters.status);
+    if (filters.course) result = result.filter((q) => q.courseId === filters.course);
+    return result;
+  }, [quizzes, search, filters]);
+
+  const total = filtered.length;
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   return (
-    <DashPage role="teacher" title="Quizzes & Exams" subtitle="Create, manage, and analyze assessments" icon={ROLES.teacher.icon}>
+    <DashPage role="teacher" title="Quizzes & Exams" subtitle="Create, manage, and attach quizzes to sessions" icon={ROLES.teacher.icon}>
       <div className="flex items-center justify-between">
-        <div className="flex gap-2">
-          <Badge variant="outline" className="rounded-full">{mockQuizzes.filter((q) => q.type === "quick").length} Quick Quizzes</Badge>
-          <Badge variant="outline" className="rounded-full">{mockQuizzes.filter((q) => q.type === "exam").length} Exams</Badge>
-        </div>
-        <Button className="rounded-xl gradient-brand border-0 text-white" size="sm">
-          <Plus className="me-1.5 h-4 w-4" /> Create Assessment
+        <Badge variant="outline" className="rounded-full">{quizzes.length} quizzes</Badge>
+        <Button asChild className="rounded-xl gradient-brand border-0 text-white" size="sm">
+          <Link to="/teacher/quizzes/create"><Plus className="me-1.5 h-4 w-4" /> Create Quiz</Link>
         </Button>
       </div>
 
-      <div className="space-y-3">
-        {mockQuizzes.map((quiz) => (
-          <Card key={quiz.id} className="border bg-card p-5">
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold">{quiz.title}</h3>
-                  <Badge variant="outline" className={`rounded-full text-xs ${quiz.type === "exam" ? "border-violet-300 text-violet-600" : "border-blue-300 text-blue-600"}`}>
-                    {quiz.type === "exam" ? "Full Exam" : "Quick Quiz"}
-                  </Badge>
-                  <Badge variant="outline" className={`rounded-full text-xs ${quiz.status === "active" ? "border-emerald-300 text-emerald-600" : "text-muted-foreground"}`}>
-                    {quiz.status}
-                  </Badge>
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">{quiz.id}</p>
-              </div>
-              <Button variant="outline" size="sm" className="rounded-xl">
-                <BarChart3 className="me-1.5 h-3.5 w-3.5" /> Analytics
-              </Button>
-            </div>
+      <FilterBar
+        search={search}
+        onSearchChange={(v) => { setSearch(v); setPage(1); }}
+        filters={filterOptions}
+        activeFilters={filters}
+        onFilterChange={(k, v) => { setFilters((f) => ({ ...f, [k]: v })); setPage(1); }}
+        onClearFilters={() => { setFilters({}); setPage(1); }}
+        totalResults={total}
+        placeholder="Search quizzes..."
+      />
 
-            <div className="mt-3 flex flex-wrap gap-4 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1.5"><ClipboardList className="h-3.5 w-3.5" /> {quiz.questions} questions</span>
-              <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> {quiz.duration}</span>
-              <span className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> {quiz.attempts} attempts</span>
-              {quiz.avgScore > 0 && <span className="flex items-center gap-1.5"><BarChart3 className="h-3.5 w-3.5" /> Avg: {quiz.avgScore}%</span>}
-            </div>
-          </Card>
-        ))}
-      </div>
+      {total === 0 && quizzes.length === 0 ? (
+        <Card className="flex flex-col items-center gap-4 border bg-card p-12 text-center">
+          <ClipboardList className="h-12 w-12 text-muted-foreground" />
+          <h2 className="text-lg font-semibold">No quizzes yet</h2>
+          <p className="text-sm text-muted-foreground">Create quizzes from your question bank.</p>
+          <Button asChild className="rounded-xl gradient-brand border-0 text-white">
+            <Link to="/teacher/quizzes/create"><Plus className="me-1.5 h-4 w-4" /> Create Quiz</Link>
+          </Button>
+        </Card>
+      ) : (
+        <div className="space-y-2">
+          {paginated.map((quiz) => (
+            <Card key={quiz.id} className="flex items-center gap-4 border bg-card px-5 py-4">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold truncate">{quiz.title}</p>
+                  <Badge variant="outline" className={cn("rounded-full text-xs", quiz.status === "published" ? "border-emerald-300 text-emerald-600" : "border-amber-300 text-amber-600")}>{quiz.status}</Badge>
+                  <Badge variant="outline" className="rounded-full text-xs">{typeLabels[quiz.quizType]}</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {quiz.publicCode} · {quiz.questionIds.length} questions · {quiz.durationMinutes} min · +{quiz.xpReward} XP
+                </p>
+              </div>
+              <div className="flex items-center gap-1 shrink-0">
+                <Button asChild variant="outline" size="sm" className="rounded-lg text-xs h-8">
+                  <Link to="/teacher/quizzes/$quizId/edit" params={{ quizId: quiz.id }}>Edit</Link>
+                </Button>
+                {quiz.status === "draft" && quiz.questionIds.length > 0 && (
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => publishQuiz(quiz.id)}><Upload className="h-3.5 w-3.5 text-emerald-600" /></Button>
+                )}
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => duplicateQuiz(quiz.id)}><Copy className="h-3.5 w-3.5" /></Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-destructive" onClick={() => deleteQuiz(quiz.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
     </DashPage>
   );
 }
