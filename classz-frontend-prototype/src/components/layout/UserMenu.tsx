@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { LogOut, User, Palette, Languages, Bell, ChevronsUpDown } from "lucide-react";
+import { LogOut, User, Palette, Languages, Bell, ChevronsUpDown, IdCard } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuGroup,
@@ -7,6 +7,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ROLE_LIST, type Role } from "@/lib/roles";
 import { useAuthStore } from "@/lib/stores/auth-store";
+import { getCurrentStudentCode } from "@/lib/student-code";
 
 export function UserMenu({ role }: { role: Role }) {
   const navigate = useNavigate();
@@ -39,7 +40,9 @@ export function UserMenu({ role }: { role: Role }) {
       <DropdownMenuContent align="end" className="w-60 rounded-xl">
         <DropdownMenuLabel>
           <p className="font-semibold">{displayName}</p>
-          {displayEmail && <p className="text-xs font-normal text-muted-foreground">{displayEmail}</p>}
+          <p className="flex items-center gap-1 text-xs font-normal text-muted-foreground">
+            <IdCard className="h-3 w-3" /> {user?.studentCode || getCurrentStudentCode()}
+          </p>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuLabel className="text-xs text-muted-foreground">Switch dashboard</DropdownMenuLabel>

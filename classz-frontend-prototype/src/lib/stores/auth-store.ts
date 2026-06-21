@@ -1,9 +1,12 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Role } from "../roles";
+import { generateStudentCode } from "../student-code";
 
 export interface AuthUser {
   id: string;
+  internalUUID: string;
+  studentCode: string;
   email: string;
   full_name: string;
   role: Role;
@@ -14,7 +17,7 @@ interface AuthState {
   user: AuthUser | null;
   token: string | null;
   isAuthenticated: boolean;
-  login: (token: string, user: AuthUser) => void;
+  login: (token: string, user: Partial<AuthUser> & { id: string; email: string; full_name: string; role: Role; is_active: boolean }) => void;
   logout: () => void;
   setUser: (user: AuthUser) => void;
 }
@@ -26,7 +29,12 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       isAuthenticated: false,
 
-      login: (token, user) => {
+      login: (token, rawUser) => {
+        const user: AuthUser = {
+          ...rawUser,
+          internalUUID: rawUser.internalUUID || crypto.randomUUID(),
+          studentCode: rawUser.studentCode || generateStudentCode(rawUser.id),
+        };
         localStorage.setItem("classz-auth-token", token);
         set({ token, user, isAuthenticated: true });
       },

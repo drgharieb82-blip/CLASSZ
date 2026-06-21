@@ -72,13 +72,13 @@ export const quizQuestions = [
 ];
 
 export const leaderboard = [
-  { rank: 1, name: "Aya Mansour", xp: 12480, streak: 64, avatar: "AM", change: "up" },
-  { rank: 2, name: "Omar Tarek", xp: 11920, streak: 51, avatar: "OT", change: "up" },
-  { rank: 3, name: "Lina Fares", xp: 11340, streak: 47, avatar: "LF", change: "down" },
-  { rank: 4, name: "You", xp: 10870, streak: 23, avatar: "ME", change: "up", me: true },
-  { rank: 5, name: "Karim Adel", xp: 9980, streak: 30, avatar: "KA", change: "same" },
-  { rank: 6, name: "Nour Sami", xp: 9420, streak: 18, avatar: "NS", change: "down" },
-  { rank: 7, name: "Hadi Wael", xp: 8870, streak: 12, avatar: "HW", change: "up" },
+  { rank: 1, name: "Aya Mansour", studentCode: "CLS-26-000001", xp: 12480, streak: 64, avatar: "AM", change: "up" },
+  { rank: 2, name: "Omar Tarek", studentCode: "CLS-26-000002", xp: 11920, streak: 51, avatar: "OT", change: "up" },
+  { rank: 3, name: "Lina Fares", studentCode: "CLS-26-000003", xp: 11340, streak: 47, avatar: "LF", change: "down" },
+  { rank: 4, name: "You", studentCode: "CLS-26-000004", xp: 10870, streak: 23, avatar: "ME", change: "up", me: true },
+  { rank: 5, name: "Karim Adel", studentCode: "CLS-26-000005", xp: 9980, streak: 30, avatar: "KA", change: "same" },
+  { rank: 6, name: "Nour Sami", studentCode: "CLS-26-000006", xp: 9420, streak: 18, avatar: "NS", change: "down" },
+  { rank: 7, name: "Hadi Wael", studentCode: "CLS-26-000007", xp: 8870, streak: 12, avatar: "HW", change: "up" },
 ];
 
 export const notifications = [
@@ -132,12 +132,12 @@ export const usersByRole = [
 ];
 
 export const students = [
-  { id: "s1", name: "Aya Mansour", grade: "Grade 12", courses: 5, progress: 87, lastActive: "2h ago", status: "Active" },
-  { id: "s2", name: "Omar Tarek", grade: "Grade 11", courses: 4, progress: 72, lastActive: "5h ago", status: "Active" },
-  { id: "s3", name: "Lina Fares", grade: "Grade 12", courses: 6, progress: 91, lastActive: "1d ago", status: "Active" },
-  { id: "s4", name: "Karim Adel", grade: "Grade 10", courses: 3, progress: 45, lastActive: "3d ago", status: "Idle" },
-  { id: "s5", name: "Nour Sami", grade: "Grade 11", courses: 5, progress: 63, lastActive: "1w ago", status: "Idle" },
-  { id: "s6", name: "Hadi Wael", grade: "Grade 12", courses: 4, progress: 78, lastActive: "4h ago", status: "Active" },
+  { id: "s1", studentCode: "CLS-26-000001", name: "Aya Mansour", grade: "Grade 12", courses: 5, progress: 87, lastActive: "2h ago", status: "Active" },
+  { id: "s2", studentCode: "CLS-26-000002", name: "Omar Tarek", grade: "Grade 11", courses: 4, progress: 72, lastActive: "5h ago", status: "Active" },
+  { id: "s3", studentCode: "CLS-26-000003", name: "Lina Fares", grade: "Grade 12", courses: 6, progress: 91, lastActive: "1d ago", status: "Active" },
+  { id: "s4", studentCode: "CLS-26-000004", name: "Karim Adel", grade: "Grade 10", courses: 3, progress: 45, lastActive: "3d ago", status: "Idle" },
+  { id: "s5", studentCode: "CLS-26-000005", name: "Nour Sami", grade: "Grade 11", courses: 5, progress: 63, lastActive: "1w ago", status: "Idle" },
+  { id: "s6", studentCode: "CLS-26-000006", name: "Hadi Wael", grade: "Grade 12", courses: 4, progress: 78, lastActive: "4h ago", status: "Active" },
 ];
 
 export const assignments = [
@@ -727,12 +727,12 @@ export const pricingPlans = [
 ];
 
 export const payments = [
-  { id: "PAY-9921", customer: "Aya Mansour", method: "Visa •••• 4242", plan: "Pro Monthly", amount: 19, status: "Paid", date: "Jun 14" },
-  { id: "PAY-9920", customer: "Omar Tarek", method: "Mastercard •••• 8810", plan: "Pro Monthly", amount: 19, status: "Paid", date: "Jun 14" },
-  { id: "PAY-9919", customer: "Lina Fares", method: "Apple Pay", plan: "Family Monthly", amount: 39, status: "Paid", date: "Jun 13" },
-  { id: "PAY-9918", customer: "Karim Adel", method: "Visa •••• 1190", plan: "Pro Annual", amount: 182, status: "Pending", date: "Jun 13" },
-  { id: "PAY-9917", customer: "Nour Sami", method: "Mada •••• 5521", plan: "Pro Monthly", amount: 19, status: "Failed", date: "Jun 12" },
-  { id: "PAY-9916", customer: "Hadi Wael", method: "PayPal", plan: "Family Monthly", amount: 39, status: "Paid", date: "Jun 12" },
+  { id: "PAY-9921", studentCode: "CLS-26-000001", customer: "Aya Mansour", method: "Visa •••• 4242", plan: "Course: English Grade 12", amount: 39, status: "Paid", date: "Jun 14" },
+  { id: "PAY-9920", studentCode: "CLS-26-000002", customer: "Omar Tarek", method: "Mastercard •••• 8810", plan: "Course: Advanced Mathematics", amount: 49, status: "Paid", date: "Jun 14" },
+  { id: "PAY-9919", studentCode: "CLS-26-000003", customer: "Lina Fares", method: "Fawry", plan: "Wallet Recharge", amount: 100, status: "Paid", date: "Jun 13" },
+  { id: "PAY-9918", studentCode: "CLS-26-000004", customer: "Karim Adel", method: "Visa •••• 1190", plan: "Course: Physics", amount: 45, status: "Pending", date: "Jun 13" },
+  { id: "PAY-9917", studentCode: "CLS-26-000005", customer: "Nour Sami", method: "Vodafone Cash", plan: "Wallet Recharge", amount: 50, status: "Failed", date: "Jun 12" },
+  { id: "PAY-9916", studentCode: "CLS-26-000006", customer: "Hadi Wael", method: "Credit Card", plan: "Session: Aromatic Compounds", amount: 20, status: "Paid", date: "Jun 12" },
 ];
 
 export const subscriptions = [

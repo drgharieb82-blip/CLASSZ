@@ -13,6 +13,7 @@ export interface HonorQuote {
 export interface CertificateData {
   id: string;
   certificateId: string;
+  studentCode: string;
   subjectName: string;
   courseName: string;
   emoji: string;
@@ -74,6 +75,7 @@ export const certificates: CertificateData[] = [
     courseName: "English Grade 12",
     emoji: "📚",
     color: "from-pink-500 to-rose-500",
+    studentCode: "CLS-26-000001",
     studentName: "Aya Mansour",
     teacherName: "Ms. Hana Adel",
     teacherTitle: "CLASSZ English Mentor",
@@ -92,6 +94,7 @@ export const certificates: CertificateData[] = [
   {
     id: "cert-math",
     certificateId: "CLSZ-2026-MTH-0420",
+    studentCode: "CLS-26-000001",
     subjectName: "Mathematics",
     courseName: "Advanced Mathematics",
     emoji: "📐",
@@ -114,6 +117,7 @@ export const certificates: CertificateData[] = [
   {
     id: "cert-chem",
     certificateId: "CLSZ-2026-CHM-0421",
+    studentCode: "CLS-26-000001",
     subjectName: "Chemistry",
     courseName: "Chemistry Grade 12",
     emoji: "🧪",
@@ -136,6 +140,7 @@ export const certificates: CertificateData[] = [
   {
     id: "cert-phys",
     certificateId: "CLSZ-2026-PHY-0422",
+    studentCode: "CLS-26-000001",
     subjectName: "Physics",
     courseName: "Physics Grade 12",
     emoji: "⚛️",
@@ -158,6 +163,7 @@ export const certificates: CertificateData[] = [
   {
     id: "cert-bio",
     certificateId: "CLSZ-2026-BIO-0423",
+    studentCode: "CLS-26-000001",
     subjectName: "Biology",
     courseName: "Biology Grade 12",
     emoji: "🧬",
@@ -180,6 +186,7 @@ export const certificates: CertificateData[] = [
   {
     id: "cert-ar",
     certificateId: "CLSZ-2026-ARB-0424",
+    studentCode: "CLS-26-000001",
     subjectName: "Arabic",
     courseName: "Arabic Grade 12",
     emoji: "🕌",
@@ -202,6 +209,7 @@ export const certificates: CertificateData[] = [
 ];
 
 export interface HallOfHonorEntry {
+  studentCode: string;
   studentName: string;
   challengeTitle: ChallengeTitle;
   subjectName: string;
@@ -215,6 +223,7 @@ export interface HallOfHonorEntry {
 
 export const hallOfHonorFeatured: HallOfHonorEntry[] = [
   {
+    studentCode: "CLS-26-000001",
     studentName: "Aya Mansour",
     challengeTitle: { en: LEGENDARY_TITLES[1].title, ar: LEGENDARY_TITLES[1].titleAr },
     subjectName: "English",
@@ -226,6 +235,7 @@ export const hallOfHonorFeatured: HallOfHonorEntry[] = [
     certificateId: "CLSZ-2026-ENG-0419",
   },
   {
+    studentCode: "CLS-26-000002",
     studentName: "Omar Tarek",
     challengeTitle: { en: LEGENDARY_TITLES[2].title, ar: LEGENDARY_TITLES[2].titleAr },
     subjectName: "Mathematics",
@@ -237,6 +247,7 @@ export const hallOfHonorFeatured: HallOfHonorEntry[] = [
     certificateId: "CLSZ-2026-MTH-0318",
   },
   {
+    studentCode: "CLS-26-000003",
     studentName: "Lina Fares",
     challengeTitle: { en: LEGENDARY_TITLES[3].title, ar: LEGENDARY_TITLES[3].titleAr },
     subjectName: "Chemistry",
