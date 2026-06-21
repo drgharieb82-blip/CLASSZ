@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { ThemeToggle, LangSwitcher } from "@/components/brand/Toggles";
+import { ChemistryBoy } from "@/components/illustrations/Characters";
 import { GradientButton } from "@/components/premium/GradientButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -401,6 +402,7 @@ function SuccessCard({ nickname, avatar }: { nickname: string; avatar: string })
       >
         {avatar}
       </motion.div>
+      <ChemistryBoy size="sm" className="mx-auto mt-4" />
       <div className="mt-6 flex items-center justify-center gap-2 text-2xl font-extrabold">
         <PartyPopper className="h-6 w-6 text-primary" /> Welcome to CLASSZ!
       </div>

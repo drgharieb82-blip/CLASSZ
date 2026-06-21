@@ -23,6 +23,7 @@ import {
 import { cn } from "@/lib/utils";
 import { DashPage } from "@/components/common/DashPage";
 import { GradientButton } from "@/components/premium/GradientButton";
+import { BrainGlow } from "@/components/illustrations/Characters";
 import { ROLES } from "@/lib/roles";
 import {
   initialNotes,
@@ -214,6 +215,7 @@ function MyNotesPage() {
 
   return (
     <DashPage role="student" title="My Notes" subtitle={subtitle} icon={ROLES.student.icon}>
+      <BrainGlow size="sm" className="mx-auto" />
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06, duration: 0.45 }} className="space-y-5">
 
         {/* ═══ BREADCRUMB ═══ */}

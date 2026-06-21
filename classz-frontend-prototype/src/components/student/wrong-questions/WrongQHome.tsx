@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GradientButton } from "@/components/premium/GradientButton";
+import { CorrectingMistakes } from "@/components/illustrations/Characters";
 import type { WrongQSubjectSummary } from "@/lib/wrongQuestionsMock";
 
 interface Props {
@@ -23,6 +24,7 @@ export function WrongQHome({ summaries, onOpenSubject }: Props) {
     <div className="space-y-5">
       {/* Overview banner */}
       <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-red-500/20 bg-red-500/[0.06] px-5 py-4">
+        <CorrectingMistakes size="sm" className="shrink-0" />
         <XCircle className="h-6 w-6 shrink-0 text-red-400" />
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold text-red-200">

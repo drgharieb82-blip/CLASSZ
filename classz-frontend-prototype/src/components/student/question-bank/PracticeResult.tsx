@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GradientButton } from "@/components/premium/GradientButton";
+import { VictoryScene } from "@/components/illustrations/Characters";
 import type { AnswerRecord, Confidence } from "./QuestionPractice";
 
 interface Props {
@@ -96,6 +97,7 @@ export function PracticeResult({
     <div className="mx-auto max-w-2xl space-y-5">
       {/* ── Score hero ── */}
       <div className="overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,24,42,0.96),rgba(10,14,28,0.92))] p-6 text-center shadow-[0_18px_50px_rgba(0,0,0,0.26)]">
+        {score >= 80 && <VictoryScene size="md" className="mx-auto mb-2" />}
         <div
           className={cn(
             "mx-auto mb-4 grid h-24 w-24 place-items-center rounded-full",
