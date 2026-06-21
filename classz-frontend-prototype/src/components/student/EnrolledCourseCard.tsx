@@ -182,9 +182,9 @@ export function EnrolledCourseCard({ course }: { course: EnrolledCourse }) {
         {course.status === "active" && (
           <>
             <GradientButton size="sm" className="flex-1 justify-center" asChild>
-              <a href={`/student/courses/${course.id}/session`}>
+              <Link to="/student/courses/$courseId/session" params={{ courseId: course.id }}>
                 <ArrowRight className="h-3.5 w-3.5" /> Continue Learning
-              </a>
+              </Link>
             </GradientButton>
             <GradientButton
               variant="outline"
@@ -192,9 +192,9 @@ export function EnrolledCourseCard({ course }: { course: EnrolledCourse }) {
               className="justify-center"
               asChild
             >
-              <a href={`/student/courses/${course.id}`}>
+              <Link to="/student/courses/$courseId" params={{ courseId: course.id }}>
                 <Eye className="h-3.5 w-3.5" /> Details
-              </a>
+              </Link>
             </GradientButton>
             <GradientButton
               variant="outline"
@@ -211,9 +211,9 @@ export function EnrolledCourseCard({ course }: { course: EnrolledCourse }) {
         {course.status === "completed" && (
           <>
             <GradientButton size="sm" className="flex-1 justify-center" asChild>
-              <a href={`/student/courses/${course.id}`}>
+              <Link to="/student/courses/$courseId" params={{ courseId: course.id }}>
                 <CheckCircle2 className="h-3.5 w-3.5" /> Results
-              </a>
+              </Link>
             </GradientButton>
             <GradientButton
               variant="outline"
@@ -221,9 +221,9 @@ export function EnrolledCourseCard({ course }: { course: EnrolledCourse }) {
               className="justify-center"
               asChild
             >
-              <a href={`/student/courses/${course.id}`}>
+              <Link to="/student/courses/$courseId" params={{ courseId: course.id }}>
                 <Eye className="h-3.5 w-3.5" /> Details
-              </a>
+              </Link>
             </GradientButton>
             <GradientButton
               variant="outline"

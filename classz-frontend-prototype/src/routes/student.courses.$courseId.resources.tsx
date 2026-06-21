@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Download, FileText, Shield, Video } from "lucide-react";
-import { getEnrolledCourseById } from "@/lib/mock";
+import { getEnrolledCourse } from "@/lib/enrolled-courses";
 import { getSessionCourseById } from "@/lib/sessionMock";
 import { CourseWorkspaceLayout } from "@/components/student/CourseWorkspaceLayout";
 
@@ -10,7 +10,7 @@ export const Route = createFileRoute("/student/courses/$courseId/resources")({
 
 function CourseResourcesPage() {
   const { courseId } = Route.useParams();
-  const course = getEnrolledCourseById(courseId);
+  const course = getEnrolledCourse(courseId);
 
   if (!course) {
     return (

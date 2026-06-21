@@ -10,7 +10,6 @@ const links = [
   { key: "nav.home", to: "/" },
   { key: "nav.courses", to: "/courses" },
   { key: "nav.about", to: "/about" },
-  { key: "nav.pricing", to: "/pricing" },
   { key: "nav.contact", to: "/contact" },
 ] as const;
 

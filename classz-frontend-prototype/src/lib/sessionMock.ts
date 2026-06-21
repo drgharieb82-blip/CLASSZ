@@ -204,12 +204,12 @@ export const sessionCourseData: SessionCourse = {
 };
 
 export const sessionCourseDataMap: Record<string, SessionCourse> = {
-  ec1: {
-    name: "Chemistry Grade 12",
+  c3: {
+    name: "Organic Chemistry",
     emoji: "🧪",
     color: "from-emerald-500 to-teal-500",
     progress: 64,
-    teacher: { name: "Dr. Ahmed Gharib", subject: "Chemistry", initials: "AG" },
+    teacher: { name: "Dr. Sara Nour", subject: "Chemistry", initials: "SN" },
     sessions: [
       {
         id: "ch-s1",
@@ -245,8 +245,8 @@ export const sessionCourseDataMap: Record<string, SessionCourse> = {
       },
     ],
   },
-  ec2: {
-    name: "Physics Grade 12",
+  c2: {
+    name: "Physics: Mechanics & Waves",
     emoji: "⚛️",
     color: "from-blue-500 to-cyan-500",
     progress: 42,
@@ -276,8 +276,8 @@ export const sessionCourseDataMap: Record<string, SessionCourse> = {
   },
 };
 
-// Default fallback — maps ec1 to existing data, others from map
 export function getSessionCourseById(id: string): SessionCourse | undefined {
+  if (id === "c1") return sessionCourseData;
   return sessionCourseDataMap[id];
 }
 

@@ -164,7 +164,7 @@ function RegisterPage() {
       });
       login(res.access_token, res.user);
       setDone(true);
-      setTimeout(() => navigate({ to: "/student" }), 2600);
+      setTimeout(() => navigate({ to: "/courses" }), 3200);
     } catch (err) {
       if (err instanceof ApiError) {
         const detail =
@@ -405,11 +405,20 @@ function SuccessCard({ nickname, avatar }: { nickname: string; avatar: string })
         <PartyPopper className="h-6 w-6 text-primary" /> Welcome to CLASSZ!
       </div>
       <p className="mt-2 text-muted-foreground">
-        Your account is ready{nickname ? `, ${nickname}` : ""}. Taking you to your dashboard…
+        Your account is ready{nickname ? `, ${nickname}` : ""}. Let's find your first course!
       </p>
-      <div className="mx-auto mt-6 h-1.5 w-48 overflow-hidden rounded-full bg-muted">
-        <motion.div className="h-full gradient-brand" initial={{ width: 0 }} animate={{ width: "100%" }} transition={{ duration: 2.4 }} />
+      <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+        <Link to="/courses" className="inline-flex items-center gap-2 rounded-xl gradient-brand px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition-transform hover:scale-[1.03]">
+          Browse Courses <ChevronRight className="h-4 w-4" />
+        </Link>
+        <Link to="/student" className="inline-flex items-center gap-2 rounded-xl border px-5 py-2.5 text-sm font-medium hover:bg-accent">
+          Go to Dashboard
+        </Link>
       </div>
+      <div className="mx-auto mt-6 h-1.5 w-48 overflow-hidden rounded-full bg-muted">
+        <motion.div className="h-full gradient-brand" initial={{ width: 0 }} animate={{ width: "100%" }} transition={{ duration: 3 }} />
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground">Auto-redirecting to courses…</p>
     </motion.div>
   );
 }

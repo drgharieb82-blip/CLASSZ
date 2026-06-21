@@ -8,7 +8,7 @@ import type { Course } from "@/lib/mock";
 
 export function CourseCard({ course, showProgress }: { course: Course; showProgress?: boolean }) {
   return (
-    <Link to="/student/course-details" className="group block">
+    <Link to="/courses/$courseId" params={{ courseId: course.id }} className="group block">
       <Card className="card-hover h-full overflow-hidden border bg-card p-0">
         <div className={cn("relative flex h-32 items-center justify-center bg-gradient-to-br text-5xl", course.color)}>
           <span className="drop-shadow-lg">{course.emoji}</span>

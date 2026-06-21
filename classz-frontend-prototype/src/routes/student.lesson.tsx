@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { enrolledCourses } from "@/lib/mock";
+import { getAllEnrolledCourses } from "@/lib/enrolled-courses";
 
 export const Route = createFileRoute("/student/lesson")({
   component: LessonRedirect,
@@ -10,7 +10,7 @@ function LessonRedirect() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const activeCourse = enrolledCourses.find((c) => c.status === "active");
+    const activeCourse = getAllEnrolledCourses().find((c) => c.status === "active");
     if (activeCourse) {
       navigate({
         to: "/student/courses/$courseId/session",

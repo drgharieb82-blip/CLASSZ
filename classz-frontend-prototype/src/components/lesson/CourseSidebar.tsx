@@ -49,7 +49,7 @@ export function CourseSidebar({
       </div>
 
       <div className="shrink-0 px-4 pt-3 pb-1">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Course Content</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Sessions</p>
       </div>
 
       <ScrollArea className="flex-1 px-2">

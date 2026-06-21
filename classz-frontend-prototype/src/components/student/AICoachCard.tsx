@@ -18,16 +18,16 @@ export function AICoachCard({ summary, plan }: AICoachCardProps) {
             <Bot className="h-7 w-7" />
           </span>
           <div className="min-w-0 flex-1 overflow-hidden">
-            <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-200">AI Coach</h3>
-            <p className="mt-1 break-words text-sm text-slate-400">Your personal study coach</p>
+            <h3 className="text-[11.76px] font-semibold uppercase tracking-[0.22em] text-cyan-200">AI Coach</h3>
+            <p className="mt-1 break-words text-[11.76px] text-slate-400">Your personal study coach</p>
           </div>
         </div>
 
         <div className="min-w-0 overflow-hidden rounded-[22px] border border-white/8 bg-white/[0.03] p-5">
-          <p className="break-words text-sm leading-7 text-slate-200">{summary}</p>
+          <p className="break-words text-[9.8px] leading-5 text-slate-200">{summary}</p>
           <div className="mt-4 space-y-2.5">
             {plan.map((item) => (
-              <div key={item} className="flex min-w-0 items-start gap-2.5 text-sm text-slate-300">
+              <div key={item} className="flex min-w-0 items-start gap-2.5 text-[9.8px] text-slate-300">
                 <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
                 <span className="min-w-0 break-words">{item}</span>
               </div>
@@ -36,27 +36,27 @@ export function AICoachCard({ summary, plan }: AICoachCardProps) {
         </div>
 
         <div className="mt-4 flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-          <GradientButton variant="outline" size="sm" className="w-full justify-center sm:w-auto sm:max-w-full" asChild>
+          <GradientButton variant="outline" size="sm" className="w-full justify-center text-[9.8px] sm:w-auto sm:max-w-full" asChild>
             <Link to="/assistant/study-plan" className="min-w-0 max-w-full flex-1 justify-center break-words px-3 text-center sm:flex-none">
               <CalendarDays className="h-3.5 w-3.5 shrink-0" /> Build Study Plan
             </Link>
           </GradientButton>
-          <GradientButton variant="outline" size="sm" className="w-full justify-center sm:w-auto sm:max-w-full" asChild>
+          <GradientButton variant="outline" size="sm" className="w-full justify-center text-[9.8px] sm:w-auto sm:max-w-full" asChild>
             <Link to="/assistant" className="min-w-0 max-w-full flex-1 justify-center break-words px-3 text-center sm:flex-none">
               <ClipboardList className="h-3.5 w-3.5 shrink-0" /> Generate Quiz
             </Link>
           </GradientButton>
-          <GradientButton variant="outline" size="sm" className="w-full justify-center sm:w-auto sm:max-w-full" asChild>
+          <GradientButton variant="outline" size="sm" className="w-full justify-center text-[9.8px] sm:w-auto sm:max-w-full" asChild>
             <Link to="/assistant/analyze" className="min-w-0 max-w-full flex-1 justify-center break-words px-3 text-center sm:flex-none">
               <Brain className="h-3.5 w-3.5 shrink-0" /> Explain Weak Points
             </Link>
           </GradientButton>
-          <GradientButton variant="outline" size="sm" className="w-full justify-center sm:w-auto sm:max-w-full" asChild>
+          <GradientButton variant="outline" size="sm" className="w-full justify-center text-[9.8px] sm:w-auto sm:max-w-full" asChild>
             <Link to="/assistant" className="min-w-0 max-w-full flex-1 justify-center break-words px-3 text-center sm:flex-none">
               <RotateCcw className="h-3.5 w-3.5 shrink-0" /> Review Due Lessons
             </Link>
           </GradientButton>
-          <GradientButton variant="outline" size="sm" className="w-full justify-center sm:w-auto sm:max-w-full" asChild>
+          <GradientButton variant="outline" size="sm" className="w-full justify-center text-[9.8px] sm:w-auto sm:max-w-full" asChild>
             <Link to="/assistant" className="min-w-0 max-w-full flex-1 justify-center break-words px-3 text-center sm:flex-none">
               <MessageSquareText className="h-3.5 w-3.5 shrink-0" /> Ask Anything
             </Link>

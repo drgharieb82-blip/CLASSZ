@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Sparkles, ArrowRight, PlayCircle, BookOpen, Bot, Users, Trophy, BarChart3,
-  Star, Check, GraduationCap, ClipboardCheck, Rocket,
+  Star, GraduationCap, ClipboardCheck, Rocket,
 } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { HeroSlider } from "@/components/premium/HeroSlider";
@@ -11,7 +11,9 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useApp } from "@/lib/app-context";
-import { courses, testimonials, pricingPlans } from "@/lib/mock";
+import { courses, testimonials } from "@/lib/mock";
+import { hallOfHonorFeatured } from "@/lib/certificatesMock";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -40,7 +42,7 @@ const features = [
 ];
 
 function Landing() {
-  const { t } = useApp();
+  const { t, lang } = useApp();
   return (
     <PublicLayout>
       {/* Premium animated banner */}
@@ -185,24 +187,59 @@ function Landing() {
         </div>
       </section>
 
-      {/* Pricing preview */}
+      {/* Hall of Honor */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-        <SectionHeading kicker="Pricing" title="Simple plans for everyone" />
+        <SectionHeading kicker="Hall of Honor" title="Featured achievements on CLASSZ" />
         <div className="mt-10 grid gap-5 md:grid-cols-3">
-          {pricingPlans.map((p) => (
-            <Card key={p.name} className={`relative border p-6 ${p.popular ? "border-primary shadow-lg glow" : "bg-card"}`}>
-              {p.popular && <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full gradient-brand border-0 text-white">Most popular</Badge>}
-              <h3 className="font-semibold">{p.name}</h3>
-              <p className="text-sm text-muted-foreground">{p.desc}</p>
-              <p className="mt-4 text-4xl font-extrabold">${p.price}<span className="text-base font-normal text-muted-foreground">/{p.period}</span></p>
-              <ul className="mt-6 space-y-2.5 text-sm">
-                {p.features.map((f) => <li key={f} className="flex items-center gap-2"><Check className="h-4 w-4 text-success" />{f}</li>)}
-              </ul>
-              <Button asChild className={`mt-6 w-full rounded-xl ${p.popular ? "gradient-brand text-white border-0" : ""}`} variant={p.popular ? "default" : "outline"}>
-                <Link to="/pricing">{p.cta}</Link>
-              </Button>
+          {hallOfHonorFeatured.map((entry) => {
+            const rankIcon = entry.rank === 1 ? "👑" : entry.rank === 2 ? "🥈" : "🥉";
+            const daysLeft = Math.max(0, Math.ceil((new Date(entry.featuredUntil).getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+            return (
+              <Card key={entry.certificateId} className="relative overflow-hidden border-amber-300/20 bg-gradient-to-b from-amber-950/30 to-card p-6 text-center">
+                <div className="absolute inset-x-0 top-0 h-16 bg-[radial-gradient(circle_at_top,rgba(252,211,77,0.12),transparent_70%)]" />
+                <span className="relative text-3xl">{rankIcon}</span>
+                <p className="relative mt-2 text-xl font-bold">{entry.studentName}</p>
+                <p className="text-sm font-semibold text-amber-400">
+                  {lang === "ar" ? entry.challengeTitle.ar : entry.challengeTitle.en}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {entry.emoji} {entry.subjectName} · #{entry.rank}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Honored by {entry.teacherName}
+                </p>
+                {daysLeft > 0 && (
+                  <p className="mt-2 text-xs text-amber-500/70">
+                    Featured for {daysLeft} more days
+                  </p>
+                )}
+              </Card>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Pay-per-course model */}
+      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+        <SectionHeading kicker="Flexible" title="Pay only for what you need" />
+        <p className="mx-auto mt-3 max-w-2xl text-center text-muted-foreground">Choose your courses and learn at your own pace. No subscriptions — pay only for the courses and sessions you need.</p>
+        <div className="mt-10 grid gap-5 md:grid-cols-3">
+          {[
+            { title: "Courses & Chapters", desc: "Purchase full courses or individual chapters that match your study goals.", icon: "📚" },
+            { title: "Sessions & Exams", desc: "Buy single sessions or exam access — perfect for focused revision.", icon: "🎯" },
+            { title: "Wallet Recharge", desc: "Recharge your wallet and unlock learning your way, anytime.", icon: "💳" },
+          ].map((item) => (
+            <Card key={item.title} className="border bg-card p-6 text-center">
+              <span className="text-4xl">{item.icon}</span>
+              <h3 className="mt-4 font-semibold">{item.title}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{item.desc}</p>
             </Card>
           ))}
+        </div>
+        <div className="mt-8 text-center">
+          <Button asChild size="lg" className="rounded-xl gradient-brand text-white border-0">
+            <Link to="/courses">Browse Courses <ArrowRight className="ms-1 h-4 w-4" /></Link>
+          </Button>
         </div>
       </section>
 

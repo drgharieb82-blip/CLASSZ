@@ -15,7 +15,7 @@ import {
   User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getEnrolledCourseById } from "@/lib/mock";
+import { getEnrolledCourse } from "@/lib/enrolled-courses";
 import { getSessionCourseById } from "@/lib/sessionMock";
 import { CourseWorkspaceLayout } from "@/components/student/CourseWorkspaceLayout";
 
@@ -25,7 +25,7 @@ export const Route = createFileRoute("/student/courses/$courseId/")({
 
 function CourseOverviewPage() {
   const { courseId } = Route.useParams();
-  const course = getEnrolledCourseById(courseId);
+  const course = getEnrolledCourse(courseId);
 
   if (!course) {
     return (

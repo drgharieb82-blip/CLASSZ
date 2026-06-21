@@ -12,11 +12,15 @@ import { useState } from "react";
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Log in — CLASSZ" }] }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    returnUrl: (search.returnUrl as string) || "",
+  }),
   component: LoginPage,
 });
 
 function LoginPage() {
   const navigate = useNavigate();
+  const { returnUrl } = Route.useSearch();
   const login = useAuthStore((s) => s.login);
 
   const [email, setEmail] = useState("");
@@ -32,8 +36,8 @@ function LoginPage() {
     try {
       const res = await loginApi(email, password);
       login(res.access_token, res.user);
-      const home = ROLES[res.user.role]?.home ?? "/";
-      navigate({ to: home });
+      const destination = returnUrl || ROLES[res.user.role]?.home || "/";
+      navigate({ to: destination });
     } catch (err) {
       if (err instanceof ApiError) {
         const detail =
@@ -120,6 +124,29 @@ function LoginPage() {
           )}
         </GradientButton>
       </form>
+
+      {import.meta.env.DEV && (
+        <div className="mt-6 rounded-xl border border-dashed border-amber-500/40 bg-amber-500/5 p-4">
+          <p className="mb-3 text-center text-xs font-semibold uppercase tracking-wide text-amber-600">Dev Quick Access</p>
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { label: "Student", to: "/student" },
+              { label: "Teacher", to: "/teacher" },
+              { label: "Parent", to: "/parent" },
+              { label: "Admin", to: "/admin" },
+              { label: "Courses Store", to: "/courses" },
+            ].map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className="rounded-lg border bg-card px-3 py-2 text-center text-xs font-medium transition-colors hover:bg-accent"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </AuthLayout>
   );
 }

@@ -28,8 +28,8 @@ export function FavoriteCourseCard({
           <Heart className="h-4 w-4" />
         </span>
         <div className="min-w-0 flex-1 overflow-hidden">
-          <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-fuchsia-300">Favorite Course</h3>
-          <p className="mt-1 break-words text-xs text-slate-400">Your most studied this week</p>
+          <h3 className="text-[11.76px] font-semibold uppercase tracking-[0.22em] text-fuchsia-300">Favorite Course</h3>
+          <p className="mt-1 break-words text-[10.08px] text-slate-400">Your most studied this week</p>
         </div>
       </div>
 
@@ -39,30 +39,27 @@ export function FavoriteCourseCard({
             {emoji}
           </div>
           <div className="min-w-0 flex-1 overflow-hidden">
-            <p className="line-clamp-2 min-w-0 break-words text-xl font-semibold leading-6 text-white">{name}</p>
-            <p className="mt-1 break-words text-sm text-slate-300">{teacher}</p>
+            <p className="line-clamp-2 min-w-0 break-words text-[14px] font-semibold leading-[16.8px] text-white">{name}</p>
+            <p className="mt-1 break-words text-[9.8px] text-slate-300">{teacher}</p>
           </div>
         </div>
       </div>
 
       <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-3">
         <div className="flex min-h-[112px] min-w-0 flex-col justify-center overflow-hidden rounded-[20px] border border-white/8 bg-white/[0.03] p-4 text-center sm:text-left">
-          <p className="min-w-0 break-words text-2xl font-bold text-white">{hoursThisWeek}</p>
-          <p className="mt-2 min-w-0 break-words text-xs leading-5 text-slate-400">Hours this week</p>
+          <p className="min-w-0 break-words text-[16.8px] font-bold text-white">{hoursThisWeek}</p>
+          <p className="mt-2 min-w-0 break-words text-[10.16px] leading-[14px] text-slate-400">Hours this week</p>
         </div>
         <div className="flex min-h-[112px] min-w-0 flex-col justify-center overflow-hidden rounded-[20px] border border-white/8 bg-white/[0.03] p-4 text-center sm:text-left">
-          <p className="min-w-0 break-words text-2xl font-bold text-white">{lessonsCompletedThisWeek}</p>
-          <p className="mt-2 min-w-0 break-words text-xs leading-5 text-slate-400">Lessons completed</p>
+          <p className="min-w-0 break-words text-[16.8px] font-bold text-white">{lessonsCompletedThisWeek}</p>
+          <p className="mt-2 min-w-0 break-words text-[10.16px] leading-[14px] text-slate-400">Lessons completed</p>
         </div>
-        <div className="flex min-h-[112px] min-w-0 flex-col justify-center overflow-hidden rounded-[20px] border border-white/8 bg-white/[0.03] p-4">
-          <div className="mb-2 flex min-w-0 items-center justify-between gap-2 text-sm">
-            <span className="min-w-0 break-words text-slate-300">Progress</span>
-            <span className="shrink-0 font-semibold text-white">{progressPercent}%</span>
-          </div>
-          <div className="h-2 overflow-hidden rounded-full bg-white/10">
+        <div className="flex min-h-[112px] min-w-0 flex-col items-center justify-center overflow-hidden rounded-[20px] border border-white/8 bg-white/[0.03] p-4 text-center">
+          <p className="font-semibold text-[11.86px] text-white">{progressPercent}%</p>
+          <p className="mt-1 text-[10.16px] leading-[14px] text-slate-300">Progress</p>
+          <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
             <div className="h-full rounded-full bg-[linear-gradient(90deg,#22c55e,#3b82f6,#8b5cf6)]" style={{ width: `${progressPercent}%` }} />
           </div>
-          <p className="mt-2 min-w-0 break-words text-xs leading-5 text-slate-400">{progressPercent}% Progress</p>
         </div>
       </div>
 

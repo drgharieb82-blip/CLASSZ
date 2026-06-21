@@ -42,18 +42,18 @@ export function UpcomingEventsCard({ items }: UpcomingEventsCardProps) {
             <div
               key={`${item.type}-${item.title}`}
               className={cn(
-                "flex items-center gap-3 rounded-2xl border bg-white/[0.03] px-3 py-3.5",
+                "flex items-start gap-3 rounded-2xl border bg-white/[0.03] px-3 py-3.5",
                 cfg.border,
               )}
             >
-              <span className={cn("grid h-11 w-11 shrink-0 place-items-center rounded-2xl", cfg.bg)}>
+              <span className={cn("mt-0.5 grid h-11 w-11 shrink-0 place-items-center rounded-2xl", cfg.bg)}>
                 <Icon className={cn("h-4 w-4", cfg.color)} />
               </span>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold text-white">{item.title}</p>
-                <p className="truncate text-sm text-slate-400">{item.course}</p>
+                <p className="break-words text-sm text-slate-400">{item.course}</p>
+                <p className="mt-1 text-xs text-slate-500">{item.when}</p>
               </div>
-              <span className="text-sm text-slate-400">{item.when}</span>
             </div>
           );
         })}

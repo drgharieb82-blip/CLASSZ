@@ -3,7 +3,7 @@ import { Logo } from "@/components/brand/Logo";
 import { Github, Twitter, Linkedin, Youtube } from "lucide-react";
 
 const cols = [
-  { title: "Product", links: [["Courses", "/courses"], ["Pricing", "/pricing"], ["AI Assistant", "/assistant"], ["Leaderboard", "/student/leaderboard"]] },
+  { title: "Product", links: [["Courses", "/courses"], ["AI Assistant", "/assistant"], ["Leaderboard", "/student/leaderboard"], ["Wallet", "/student/wallet"]] },
   { title: "Company", links: [["About", "/about"], ["Contact", "/contact"], ["Teachers", "/teacher"], ["Parents", "/parent"]] },
   { title: "Roles", links: [["Student", "/student"], ["Teacher", "/teacher"], ["Admin", "/admin"], ["Finance", "/finance"]] },
 ] as const;

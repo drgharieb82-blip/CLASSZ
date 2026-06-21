@@ -23,6 +23,7 @@ import { Route as QuestionsIndexRouteImport } from './routes/questions.index'
 import { Route as ParentIndexRouteImport } from './routes/parent.index'
 import { Route as FinanceIndexRouteImport } from './routes/finance.index'
 import { Route as DeveloperIndexRouteImport } from './routes/developer.index'
+import { Route as CoursesIndexRouteImport } from './routes/courses.index'
 import { Route as ContentIndexRouteImport } from './routes/content.index'
 import { Route as AssistantIndexRouteImport } from './routes/assistant.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
@@ -38,6 +39,7 @@ import { Route as SuperAuditRouteImport } from './routes/super.audit'
 import { Route as SuperAnalyticsRouteImport } from './routes/super.analytics'
 import { Route as SuperAccessMatrixRouteImport } from './routes/super.access-matrix'
 import { Route as StudentWrongQuestionsRouteImport } from './routes/student.wrong-questions'
+import { Route as StudentWalletRouteImport } from './routes/student.wallet'
 import { Route as StudentProgressRouteImport } from './routes/student.progress'
 import { Route as StudentNotificationsRouteImport } from './routes/student.notifications'
 import { Route as StudentNotesRouteImport } from './routes/student.notes'
@@ -63,6 +65,7 @@ import { Route as DeveloperErrorLogsRouteImport } from './routes/developer.error
 import { Route as DeveloperDeploymentsRouteImport } from './routes/developer.deployments'
 import { Route as DeveloperBackendRouteImport } from './routes/developer.backend'
 import { Route as DeveloperApiHealthRouteImport } from './routes/developer.api-health'
+import { Route as CoursesCourseIdRouteImport } from './routes/courses.$courseId'
 import { Route as ContentQuestionReviewRouteImport } from './routes/content.question-review'
 import { Route as ContentMediaRouteImport } from './routes/content.media'
 import { Route as ContentLessonReviewRouteImport } from './routes/content.lesson-review'
@@ -87,6 +90,7 @@ import { Route as StudentCertificatesCertificateIdRouteImport } from './routes/s
 import { Route as StudentCoursesCourseIdIndexRouteImport } from './routes/student.courses.$courseId.index'
 import { Route as StudentCoursesCourseIdSessionRouteImport } from './routes/student.courses.$courseId.session'
 import { Route as StudentCoursesCourseIdResourcesRouteImport } from './routes/student.courses.$courseId.resources'
+import { Route as StudentCoursesCourseIdEnrollRouteImport } from './routes/student.courses.$courseId.enroll'
 import { Route as StudentCoursesCourseIdContinueRouteImport } from './routes/student.courses.$courseId.continue'
 
 const RegisterRoute = RegisterRouteImport.update({
@@ -158,6 +162,11 @@ const DeveloperIndexRoute = DeveloperIndexRouteImport.update({
   id: '/developer/',
   path: '/developer/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const CoursesIndexRoute = CoursesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CoursesRoute,
 } as any)
 const ContentIndexRoute = ContentIndexRouteImport.update({
   id: '/content/',
@@ -232,6 +241,11 @@ const SuperAccessMatrixRoute = SuperAccessMatrixRouteImport.update({
 const StudentWrongQuestionsRoute = StudentWrongQuestionsRouteImport.update({
   id: '/student/wrong-questions',
   path: '/student/wrong-questions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudentWalletRoute = StudentWalletRouteImport.update({
+  id: '/student/wallet',
+  path: '/student/wallet',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StudentProgressRoute = StudentProgressRouteImport.update({
@@ -359,6 +373,11 @@ const DeveloperApiHealthRoute = DeveloperApiHealthRouteImport.update({
   path: '/developer/api-health',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CoursesCourseIdRoute = CoursesCourseIdRouteImport.update({
+  id: '/$courseId',
+  path: '/$courseId',
+  getParentRoute: () => CoursesRoute,
+} as any)
 const ContentQuestionReviewRoute = ContentQuestionReviewRouteImport.update({
   id: '/content/question-review',
   path: '/content/question-review',
@@ -483,6 +502,12 @@ const StudentCoursesCourseIdResourcesRoute =
     path: '/resources',
     getParentRoute: () => StudentCoursesCourseIdRoute,
   } as any)
+const StudentCoursesCourseIdEnrollRoute =
+  StudentCoursesCourseIdEnrollRouteImport.update({
+    id: '/enroll',
+    path: '/enroll',
+    getParentRoute: () => StudentCoursesCourseIdRoute,
+  } as any)
 const StudentCoursesCourseIdContinueRoute =
   StudentCoursesCourseIdContinueRouteImport.update({
     id: '/continue',
@@ -494,7 +519,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
-  '/courses': typeof CoursesRoute
+  '/courses': typeof CoursesRouteWithChildren
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/register': typeof RegisterRoute
@@ -515,6 +540,7 @@ export interface FileRoutesByFullPath {
   '/content/lesson-review': typeof ContentLessonReviewRoute
   '/content/media': typeof ContentMediaRoute
   '/content/question-review': typeof ContentQuestionReviewRoute
+  '/courses/$courseId': typeof CoursesCourseIdRoute
   '/developer/api-health': typeof DeveloperApiHealthRoute
   '/developer/backend': typeof DeveloperBackendRoute
   '/developer/deployments': typeof DeveloperDeploymentsRoute
@@ -540,6 +566,7 @@ export interface FileRoutesByFullPath {
   '/student/notes': typeof StudentNotesRoute
   '/student/notifications': typeof StudentNotificationsRoute
   '/student/progress': typeof StudentProgressRoute
+  '/student/wallet': typeof StudentWalletRoute
   '/student/wrong-questions': typeof StudentWrongQuestionsRoute
   '/super/access-matrix': typeof SuperAccessMatrixRoute
   '/super/analytics': typeof SuperAnalyticsRoute
@@ -555,6 +582,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/assistant/': typeof AssistantIndexRoute
   '/content/': typeof ContentIndexRoute
+  '/courses/': typeof CoursesIndexRoute
   '/developer/': typeof DeveloperIndexRoute
   '/finance/': typeof FinanceIndexRoute
   '/parent/': typeof ParentIndexRoute
@@ -567,6 +595,7 @@ export interface FileRoutesByFullPath {
   '/teacher/questions/create': typeof TeacherQuestionsCreateRoute
   '/student/courses/': typeof StudentCoursesIndexRoute
   '/student/courses/$courseId/continue': typeof StudentCoursesCourseIdContinueRoute
+  '/student/courses/$courseId/enroll': typeof StudentCoursesCourseIdEnrollRoute
   '/student/courses/$courseId/resources': typeof StudentCoursesCourseIdResourcesRoute
   '/student/courses/$courseId/session': typeof StudentCoursesCourseIdSessionRoute
   '/student/courses/$courseId/': typeof StudentCoursesCourseIdIndexRoute
@@ -575,7 +604,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
-  '/courses': typeof CoursesRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/register': typeof RegisterRoute
@@ -596,6 +624,7 @@ export interface FileRoutesByTo {
   '/content/lesson-review': typeof ContentLessonReviewRoute
   '/content/media': typeof ContentMediaRoute
   '/content/question-review': typeof ContentQuestionReviewRoute
+  '/courses/$courseId': typeof CoursesCourseIdRoute
   '/developer/api-health': typeof DeveloperApiHealthRoute
   '/developer/backend': typeof DeveloperBackendRoute
   '/developer/deployments': typeof DeveloperDeploymentsRoute
@@ -621,6 +650,7 @@ export interface FileRoutesByTo {
   '/student/notes': typeof StudentNotesRoute
   '/student/notifications': typeof StudentNotificationsRoute
   '/student/progress': typeof StudentProgressRoute
+  '/student/wallet': typeof StudentWalletRoute
   '/student/wrong-questions': typeof StudentWrongQuestionsRoute
   '/super/access-matrix': typeof SuperAccessMatrixRoute
   '/super/analytics': typeof SuperAnalyticsRoute
@@ -636,6 +666,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/assistant': typeof AssistantIndexRoute
   '/content': typeof ContentIndexRoute
+  '/courses': typeof CoursesIndexRoute
   '/developer': typeof DeveloperIndexRoute
   '/finance': typeof FinanceIndexRoute
   '/parent': typeof ParentIndexRoute
@@ -647,6 +678,7 @@ export interface FileRoutesByTo {
   '/teacher/questions/create': typeof TeacherQuestionsCreateRoute
   '/student/courses': typeof StudentCoursesIndexRoute
   '/student/courses/$courseId/continue': typeof StudentCoursesCourseIdContinueRoute
+  '/student/courses/$courseId/enroll': typeof StudentCoursesCourseIdEnrollRoute
   '/student/courses/$courseId/resources': typeof StudentCoursesCourseIdResourcesRoute
   '/student/courses/$courseId/session': typeof StudentCoursesCourseIdSessionRoute
   '/student/courses/$courseId': typeof StudentCoursesCourseIdIndexRoute
@@ -656,7 +688,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
-  '/courses': typeof CoursesRoute
+  '/courses': typeof CoursesRouteWithChildren
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/register': typeof RegisterRoute
@@ -677,6 +709,7 @@ export interface FileRoutesById {
   '/content/lesson-review': typeof ContentLessonReviewRoute
   '/content/media': typeof ContentMediaRoute
   '/content/question-review': typeof ContentQuestionReviewRoute
+  '/courses/$courseId': typeof CoursesCourseIdRoute
   '/developer/api-health': typeof DeveloperApiHealthRoute
   '/developer/backend': typeof DeveloperBackendRoute
   '/developer/deployments': typeof DeveloperDeploymentsRoute
@@ -702,6 +735,7 @@ export interface FileRoutesById {
   '/student/notes': typeof StudentNotesRoute
   '/student/notifications': typeof StudentNotificationsRoute
   '/student/progress': typeof StudentProgressRoute
+  '/student/wallet': typeof StudentWalletRoute
   '/student/wrong-questions': typeof StudentWrongQuestionsRoute
   '/super/access-matrix': typeof SuperAccessMatrixRoute
   '/super/analytics': typeof SuperAnalyticsRoute
@@ -717,6 +751,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/assistant/': typeof AssistantIndexRoute
   '/content/': typeof ContentIndexRoute
+  '/courses/': typeof CoursesIndexRoute
   '/developer/': typeof DeveloperIndexRoute
   '/finance/': typeof FinanceIndexRoute
   '/parent/': typeof ParentIndexRoute
@@ -729,6 +764,7 @@ export interface FileRoutesById {
   '/teacher/questions/create': typeof TeacherQuestionsCreateRoute
   '/student/courses/': typeof StudentCoursesIndexRoute
   '/student/courses/$courseId/continue': typeof StudentCoursesCourseIdContinueRoute
+  '/student/courses/$courseId/enroll': typeof StudentCoursesCourseIdEnrollRoute
   '/student/courses/$courseId/resources': typeof StudentCoursesCourseIdResourcesRoute
   '/student/courses/$courseId/session': typeof StudentCoursesCourseIdSessionRoute
   '/student/courses/$courseId/': typeof StudentCoursesCourseIdIndexRoute
@@ -760,6 +796,7 @@ export interface FileRouteTypes {
     | '/content/lesson-review'
     | '/content/media'
     | '/content/question-review'
+    | '/courses/$courseId'
     | '/developer/api-health'
     | '/developer/backend'
     | '/developer/deployments'
@@ -785,6 +822,7 @@ export interface FileRouteTypes {
     | '/student/notes'
     | '/student/notifications'
     | '/student/progress'
+    | '/student/wallet'
     | '/student/wrong-questions'
     | '/super/access-matrix'
     | '/super/analytics'
@@ -800,6 +838,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/assistant/'
     | '/content/'
+    | '/courses/'
     | '/developer/'
     | '/finance/'
     | '/parent/'
@@ -812,6 +851,7 @@ export interface FileRouteTypes {
     | '/teacher/questions/create'
     | '/student/courses/'
     | '/student/courses/$courseId/continue'
+    | '/student/courses/$courseId/enroll'
     | '/student/courses/$courseId/resources'
     | '/student/courses/$courseId/session'
     | '/student/courses/$courseId/'
@@ -820,7 +860,6 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
-    | '/courses'
     | '/login'
     | '/pricing'
     | '/register'
@@ -841,6 +880,7 @@ export interface FileRouteTypes {
     | '/content/lesson-review'
     | '/content/media'
     | '/content/question-review'
+    | '/courses/$courseId'
     | '/developer/api-health'
     | '/developer/backend'
     | '/developer/deployments'
@@ -866,6 +906,7 @@ export interface FileRouteTypes {
     | '/student/notes'
     | '/student/notifications'
     | '/student/progress'
+    | '/student/wallet'
     | '/student/wrong-questions'
     | '/super/access-matrix'
     | '/super/analytics'
@@ -881,6 +922,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/assistant'
     | '/content'
+    | '/courses'
     | '/developer'
     | '/finance'
     | '/parent'
@@ -892,6 +934,7 @@ export interface FileRouteTypes {
     | '/teacher/questions/create'
     | '/student/courses'
     | '/student/courses/$courseId/continue'
+    | '/student/courses/$courseId/enroll'
     | '/student/courses/$courseId/resources'
     | '/student/courses/$courseId/session'
     | '/student/courses/$courseId'
@@ -921,6 +964,7 @@ export interface FileRouteTypes {
     | '/content/lesson-review'
     | '/content/media'
     | '/content/question-review'
+    | '/courses/$courseId'
     | '/developer/api-health'
     | '/developer/backend'
     | '/developer/deployments'
@@ -946,6 +990,7 @@ export interface FileRouteTypes {
     | '/student/notes'
     | '/student/notifications'
     | '/student/progress'
+    | '/student/wallet'
     | '/student/wrong-questions'
     | '/super/access-matrix'
     | '/super/analytics'
@@ -961,6 +1006,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/assistant/'
     | '/content/'
+    | '/courses/'
     | '/developer/'
     | '/finance/'
     | '/parent/'
@@ -973,6 +1019,7 @@ export interface FileRouteTypes {
     | '/teacher/questions/create'
     | '/student/courses/'
     | '/student/courses/$courseId/continue'
+    | '/student/courses/$courseId/enroll'
     | '/student/courses/$courseId/resources'
     | '/student/courses/$courseId/session'
     | '/student/courses/$courseId/'
@@ -982,7 +1029,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
-  CoursesRoute: typeof CoursesRoute
+  CoursesRoute: typeof CoursesRouteWithChildren
   LoginRoute: typeof LoginRoute
   PricingRoute: typeof PricingRoute
   RegisterRoute: typeof RegisterRoute
@@ -1028,6 +1075,7 @@ export interface RootRouteChildren {
   StudentNotesRoute: typeof StudentNotesRoute
   StudentNotificationsRoute: typeof StudentNotificationsRoute
   StudentProgressRoute: typeof StudentProgressRoute
+  StudentWalletRoute: typeof StudentWalletRoute
   StudentWrongQuestionsRoute: typeof StudentWrongQuestionsRoute
   SuperAccessMatrixRoute: typeof SuperAccessMatrixRoute
   SuperAnalyticsRoute: typeof SuperAnalyticsRoute
@@ -1154,6 +1202,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeveloperIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/courses/': {
+      id: '/courses/'
+      path: '/'
+      fullPath: '/courses/'
+      preLoaderRoute: typeof CoursesIndexRouteImport
+      parentRoute: typeof CoursesRoute
+    }
     '/content/': {
       id: '/content/'
       path: '/content'
@@ -1257,6 +1312,13 @@ declare module '@tanstack/react-router' {
       path: '/student/wrong-questions'
       fullPath: '/student/wrong-questions'
       preLoaderRoute: typeof StudentWrongQuestionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/student/wallet': {
+      id: '/student/wallet'
+      path: '/student/wallet'
+      fullPath: '/student/wallet'
+      preLoaderRoute: typeof StudentWalletRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/student/progress': {
@@ -1434,6 +1496,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeveloperApiHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/courses/$courseId': {
+      id: '/courses/$courseId'
+      path: '/$courseId'
+      fullPath: '/courses/$courseId'
+      preLoaderRoute: typeof CoursesCourseIdRouteImport
+      parentRoute: typeof CoursesRoute
+    }
     '/content/question-review': {
       id: '/content/question-review'
       path: '/content/question-review'
@@ -1602,6 +1671,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentCoursesCourseIdResourcesRouteImport
       parentRoute: typeof StudentCoursesCourseIdRoute
     }
+    '/student/courses/$courseId/enroll': {
+      id: '/student/courses/$courseId/enroll'
+      path: '/enroll'
+      fullPath: '/student/courses/$courseId/enroll'
+      preLoaderRoute: typeof StudentCoursesCourseIdEnrollRouteImport
+      parentRoute: typeof StudentCoursesCourseIdRoute
+    }
     '/student/courses/$courseId/continue': {
       id: '/student/courses/$courseId/continue'
       path: '/continue'
@@ -1611,6 +1687,19 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface CoursesRouteChildren {
+  CoursesCourseIdRoute: typeof CoursesCourseIdRoute
+  CoursesIndexRoute: typeof CoursesIndexRoute
+}
+
+const CoursesRouteChildren: CoursesRouteChildren = {
+  CoursesCourseIdRoute: CoursesCourseIdRoute,
+  CoursesIndexRoute: CoursesIndexRoute,
+}
+
+const CoursesRouteWithChildren =
+  CoursesRoute._addFileChildren(CoursesRouteChildren)
 
 interface StudentCertificatesRouteChildren {
   StudentCertificatesCertificateIdRoute: typeof StudentCertificatesCertificateIdRoute
@@ -1636,6 +1725,7 @@ const TeacherQuestionsRouteWithChildren =
 
 interface StudentCoursesCourseIdRouteChildren {
   StudentCoursesCourseIdContinueRoute: typeof StudentCoursesCourseIdContinueRoute
+  StudentCoursesCourseIdEnrollRoute: typeof StudentCoursesCourseIdEnrollRoute
   StudentCoursesCourseIdResourcesRoute: typeof StudentCoursesCourseIdResourcesRoute
   StudentCoursesCourseIdSessionRoute: typeof StudentCoursesCourseIdSessionRoute
   StudentCoursesCourseIdIndexRoute: typeof StudentCoursesCourseIdIndexRoute
@@ -1644,6 +1734,7 @@ interface StudentCoursesCourseIdRouteChildren {
 const StudentCoursesCourseIdRouteChildren: StudentCoursesCourseIdRouteChildren =
   {
     StudentCoursesCourseIdContinueRoute: StudentCoursesCourseIdContinueRoute,
+    StudentCoursesCourseIdEnrollRoute: StudentCoursesCourseIdEnrollRoute,
     StudentCoursesCourseIdResourcesRoute: StudentCoursesCourseIdResourcesRoute,
     StudentCoursesCourseIdSessionRoute: StudentCoursesCourseIdSessionRoute,
     StudentCoursesCourseIdIndexRoute: StudentCoursesCourseIdIndexRoute,
@@ -1658,7 +1749,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
-  CoursesRoute: CoursesRoute,
+  CoursesRoute: CoursesRouteWithChildren,
   LoginRoute: LoginRoute,
   PricingRoute: PricingRoute,
   RegisterRoute: RegisterRoute,
@@ -1704,6 +1795,7 @@ const rootRouteChildren: RootRouteChildren = {
   StudentNotesRoute: StudentNotesRoute,
   StudentNotificationsRoute: StudentNotificationsRoute,
   StudentProgressRoute: StudentProgressRoute,
+  StudentWalletRoute: StudentWalletRoute,
   StudentWrongQuestionsRoute: StudentWrongQuestionsRoute,
   SuperAccessMatrixRoute: SuperAccessMatrixRoute,
   SuperAnalyticsRoute: SuperAnalyticsRoute,

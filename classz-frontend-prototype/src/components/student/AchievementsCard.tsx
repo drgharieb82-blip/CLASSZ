@@ -27,8 +27,8 @@ function StatTile({
       <span className={cn("mb-3 grid h-10 w-10 shrink-0 place-items-center rounded-2xl", accent)}>
         <Icon className="h-5 w-5" />
       </span>
-      <p className="min-w-0 break-words text-3xl font-bold leading-none text-white sm:text-4xl">{value}</p>
-      <p className="mt-3 min-w-0 break-words text-sm leading-5 text-slate-400">{label}</p>
+      <p className="min-w-0 break-words text-[17.85px] font-bold leading-none text-white sm:text-[21.42px]">{value}</p>
+      <p className="mt-3 min-w-0 break-words text-[9.8px] leading-[14px] text-slate-400">{label}</p>
     </div>
   );
 }
@@ -48,8 +48,8 @@ export function AchievementsCard({
           <Award className="h-4 w-4" />
         </span>
         <div className="min-w-0 flex-1 overflow-hidden">
-          <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-violet-300">Achievements</h3>
-          <p className="mt-1 break-words text-xs text-slate-400">You're doing great! Keep it up!</p>
+          <h3 className="text-[11.76px] font-semibold uppercase tracking-[0.22em] text-violet-300">Achievements</h3>
+          <p className="mt-1 break-words text-[10.08px] text-slate-400">You're doing great! Keep it up!</p>
         </div>
       </div>
 
@@ -62,21 +62,21 @@ export function AchievementsCard({
           <span className="mb-3 grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-violet-500/15 text-violet-300">
             <Star className="h-5 w-5" />
           </span>
-          <p className="line-clamp-2 min-w-0 break-words text-3xl font-bold leading-tight text-white">{bestSubject}</p>
-          <p className="mt-3 min-w-0 break-words text-sm leading-5 text-slate-400">Best Subject</p>
+          <p className="line-clamp-2 min-w-0 break-words text-[21px] font-bold leading-tight text-white">{bestSubject}</p>
+          <p className="mt-3 min-w-0 break-words text-[9.8px] leading-[14px] text-slate-400">Best Subject</p>
         </div>
         <div className="flex min-h-[148px] min-w-0 flex-col items-center justify-center overflow-hidden rounded-[22px] border border-white/8 bg-white/[0.03] p-5 text-center">
           <span className="mb-3 grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-violet-500/15 text-violet-300">
             <Award className="h-5 w-5" />
           </span>
-          <div className="flex min-w-0 flex-wrap items-center justify-center gap-2 text-2xl">
+          <div className="flex min-w-0 flex-wrap items-center justify-center gap-2 text-[16.8px]">
             {recentBadges.map((badge) => (
               <span key={badge.name} className="inline-flex items-center justify-center" title={badge.name}>
                 {badge.emoji}
               </span>
             ))}
           </div>
-          <p className="mt-3 min-w-0 break-words text-sm leading-5 text-slate-400">Awards</p>
+          <p className="mt-3 min-w-0 break-words text-[9.8px] leading-[14px] text-slate-400">Awards</p>
         </div>
       </div>
     </div>

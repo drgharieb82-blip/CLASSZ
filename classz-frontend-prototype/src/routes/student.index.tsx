@@ -12,7 +12,8 @@ import { UpcomingEventsCard } from "@/components/student/UpcomingEventsCard";
 import { AICoachCard } from "@/components/student/AICoachCard";
 import { AchievementsCard } from "@/components/student/AchievementsCard";
 import { FavoriteCourseCard } from "@/components/student/FavoriteCourseCard";
-import { WallOfHonorCard } from "@/components/student/WallOfHonorCard";
+import { SubjectDistributionCard } from "@/components/student/SubjectDistributionCard";
+import { subjectScores } from "@/lib/mock";
 
 export const Route = createFileRoute("/student/")({
   component: StudentHome,
@@ -51,7 +52,7 @@ function StudentHome() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.14, duration: 0.45 }}
-        className="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)_minmax(0,1fr)]"
+        className="grid gap-6 xl:grid-cols-[minmax(0,1.085fr)_minmax(0,1.15fr)_minmax(0,1.15fr)]"
       >
         <AICoachCard summary={d.aiCoach.summary} plan={d.aiCoach.plan} />
         <AchievementsCard
@@ -68,10 +69,11 @@ function StudentHome() {
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.45 }}
+        transition={{ delay: 0.18, duration: 0.45 }}
       >
-        <WallOfHonorCard courses={d.wallOfHonor} />
+        <SubjectDistributionCard scores={subjectScores} />
       </motion.div>
+
     </DashPage>
   );
 }
