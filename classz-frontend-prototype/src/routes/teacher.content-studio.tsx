@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import {
   ArrowDown, ArrowUp, BookOpen, Brain, Calendar, Check, ChevronDown,
-  ChevronRight, Clock, Copy, DollarSign, Eye, EyeOff, File, FileText,
+  ChevronRight, Clock, Copy, DollarSign, Edit3, Eye, EyeOff, File, FileText,
   Film, FolderTree, HelpCircle, ClipboardList, Image, Layers, Link2, Lock,
   Pencil, PlayCircle, Plus, ScrollText, Sparkles, StickyNote, Target,
   Trash2, Unlock, Upload, Users, Video, X, Zap,
@@ -34,6 +34,11 @@ import { SESSION_TYPE_META, type SessionWorkspaceType } from "@/lib/teacher/sess
 import { FilterBar, type FilterOption } from "@/components/filters/FilterBar";
 import { Pagination } from "@/components/filters/Pagination";
 import { PremiumSessionCard, type SessionStats } from "@/components/session/PremiumSessionCard";
+import {
+  TYPE_LABELS as QS_TYPE_LABELS, TYPE_COLORS as QS_TYPE_COLORS,
+  DIFF_COLORS as QS_DIFF_COLORS, CATEGORY_MAP as QS_CATEGORY_MAP,
+  ALL_TYPE_OPTIONS as QS_ALL_TYPE_OPTIONS,
+} from "@/components/question/question-bank-shared";
 
 export const Route = createFileRoute("/teacher/content-studio")({
   component: ContentStudioPage,
@@ -898,15 +903,6 @@ function MaterialsTab({ courseId }: { courseId: string }) {
    4. QUESTIONS TAB
    ═══════════════════════════════════════════════════════════════ */
 
-const Q_TYPE_COLORS: Record<string, string> = { mcq: "bg-blue-500/10 text-blue-600 border-blue-300", essay: "bg-violet-500/10 text-violet-600 border-violet-300", calculation: "bg-emerald-500/10 text-emerald-600 border-emerald-300" };
-const Q_DIFF_COLORS: Record<string, string> = { easy: "text-emerald-600", medium: "text-amber-600", hard: "text-rose-600" };
-
-const Q_FILTER_OPTIONS: FilterOption[] = [
-  { key: "type", label: "Type", options: [{ value: "mcq", label: "MCQ" }, { value: "essay", label: "Essay" }, { value: "calculation", label: "Calculation" }] },
-  { key: "difficulty", label: "Difficulty", options: [{ value: "easy", label: "Easy" }, { value: "medium", label: "Medium" }, { value: "hard", label: "Hard" }] },
-  { key: "status", label: "Status", options: [{ value: "draft", label: "Draft" }, { value: "published", label: "Published" }] },
-];
-
 function QuestionsTab({ courseId }: { courseId: string }) {
   const allQuestions = useTeacherQuestionStore((s) => s.questions);
   const deleteQuestion = useTeacherQuestionStore((s) => s.deleteQuestion);
@@ -918,32 +914,41 @@ function QuestionsTab({ courseId }: { courseId: string }) {
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [page, setPage] = useState(1);
 
+  const csQFilterOptions = useMemo<FilterOption[]>(() => [
+    { key: "type", label: "Type", options: QS_ALL_TYPE_OPTIONS },
+    { key: "category", label: "Category", options: Object.keys(QS_CATEGORY_MAP).map((c) => ({ value: c, label: c })) },
+    { key: "difficulty", label: "Difficulty", options: [{ value: "easy", label: "Easy" }, { value: "medium", label: "Medium" }, { value: "hard", label: "Hard" }, { value: "advanced", label: "Advanced" }] },
+    { key: "status", label: "Status", options: [{ value: "draft", label: "Draft" }, { value: "published", label: "Published" }, { value: "archived", label: "Archived" }] },
+    { key: "usage", label: "Usage", options: [{ value: "used", label: "Used" }, { value: "unused", label: "Unused" }] },
+  ], []);
+
   const filtered = useMemo(() => {
     let r = [...questions];
-    if (search) { const q = search.toLowerCase(); r = r.filter((qn) => qn.text.toLowerCase().includes(q) || qn.publicCode.includes(q) || qn.concept.toLowerCase().includes(q)); }
+    if (search) { const q = search.toLowerCase(); r = r.filter((qn) => qn.text.toLowerCase().includes(q) || qn.publicCode.includes(q) || (qn.concept || "").toLowerCase().includes(q)); }
     if (filters.type) r = r.filter((q) => q.type === filters.type);
+    if (filters.category) { const types = QS_CATEGORY_MAP[filters.category]; if (types) r = r.filter((q) => types.includes(q.type as any)); }
     if (filters.difficulty) r = r.filter((q) => q.difficulty === filters.difficulty);
     if (filters.status) r = r.filter((q) => q.status === filters.status);
+    if (filters.usage === "used") r = r.filter((q) => ((q.quizIds || []).length + (q.examIds || []).length + (q.homeworkIds || []).length + (q.sessionIds || []).length) > 0);
+    if (filters.usage === "unused") r = r.filter((q) => ((q.quizIds || []).length + (q.examIds || []).length + (q.homeworkIds || []).length + (q.sessionIds || []).length) === 0);
     return r;
   }, [questions, search, filters]);
 
   const total = filtered.length;
   const paginated = filtered.slice((page - 1) * 15, page * 15);
+  const published = questions.filter((q) => q.status === "published").length;
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Badge variant="outline" className="rounded-full">{questions.length} questions</Badge>
-          <Badge variant="outline" className="rounded-full text-blue-600 border-blue-300">{questions.filter((q) => q.type === "mcq").length} MCQ</Badge>
-          <Badge variant="outline" className="rounded-full text-violet-600 border-violet-300">{questions.filter((q) => q.type === "essay").length} Essay</Badge>
-          <Badge variant="outline" className="rounded-full text-emerald-600 border-emerald-300">{questions.filter((q) => q.type === "calculation").length} Calc</Badge>
-        </div>
-        <Button asChild className="rounded-xl gradient-brand border-0 text-white" size="sm">
+      <div className="flex flex-wrap items-center gap-3">
+        <Badge variant="outline" className="rounded-full">{questions.length} total</Badge>
+        <Badge variant="outline" className="rounded-full border-emerald-300 text-emerald-600">{published} published</Badge>
+        <Badge variant="outline" className="rounded-full border-amber-300 text-amber-600">{questions.length - published} drafts</Badge>
+        <Button asChild className="rounded-xl gradient-brand border-0 text-white ms-auto" size="sm">
           <Link to="/teacher/questions/create"><Plus className="me-1.5 h-4 w-4" /> Create Question</Link>
         </Button>
       </div>
-      <FilterBar search={search} onSearchChange={(v) => { setSearch(v); setPage(1); }} filters={Q_FILTER_OPTIONS} activeFilters={filters} onFilterChange={(k, v) => { setFilters((f) => ({ ...f, [k]: v })); setPage(1); }} onClearFilters={() => { setFilters({}); setPage(1); }} totalResults={total} placeholder="Search by text, concept, or code..." />
+      <FilterBar search={search} onSearchChange={(v) => { setSearch(v); setPage(1); }} filters={csQFilterOptions} activeFilters={filters} onFilterChange={(k, v) => { setFilters((f) => ({ ...f, [k]: v })); setPage(1); }} onClearFilters={() => { setFilters({}); setPage(1); }} totalResults={total} placeholder="Search by text, concept, or code..." />
       {total === 0 ? (
         <Card className="flex flex-col items-center gap-4 border bg-card p-12 text-center">
           <HelpCircle className="h-12 w-12 text-muted-foreground" />
@@ -954,17 +959,18 @@ function QuestionsTab({ courseId }: { courseId: string }) {
         <div className="space-y-2">
           {paginated.map((q) => (
             <Card key={q.id} className="flex items-start gap-3 border bg-card px-5 py-4">
-              <Badge variant="outline" className={cn("mt-0.5 rounded-full text-xs shrink-0", Q_TYPE_COLORS[q.type])}>{q.type.toUpperCase()}</Badge>
+              <Badge variant="outline" className={cn("mt-0.5 rounded-full text-xs shrink-0", QS_TYPE_COLORS[q.type])}>{QS_TYPE_LABELS[q.type] || q.type}</Badge>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium line-clamp-2">{q.text}</p>
                 <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                  <span className={cn("font-medium", Q_DIFF_COLORS[q.difficulty])}>{q.difficulty}</span>
+                  <span className={cn("font-medium", QS_DIFF_COLORS[q.difficulty])}>{q.difficulty}</span>
                   {q.concept && <span>· {q.concept}</span>}
                   <span>· {q.publicCode}</span>
                 </div>
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 <Badge variant="outline" className={cn("rounded-full text-xs", q.status === "published" ? "border-emerald-300 text-emerald-600" : "border-amber-300 text-amber-600")}>{q.status}</Badge>
+                <Button asChild variant="ghost" size="icon" className="h-7 w-7 rounded-lg" title="Edit"><Link to="/teacher/questions/$questionId/edit" params={{ questionId: q.id }}><Edit3 className="h-3.5 w-3.5" /></Link></Button>
                 {q.status === "draft" && <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => publishQuestion(q.id)}><Upload className="h-3.5 w-3.5 text-emerald-600" /></Button>}
                 <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => duplicateQuestion(q.id)}><Copy className="h-3.5 w-3.5" /></Button>
                 <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-destructive" onClick={() => deleteQuestion(q.id)}><Trash2 className="h-3.5 w-3.5" /></Button>

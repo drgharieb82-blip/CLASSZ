@@ -13,6 +13,7 @@ import { useTeacherQuizStore } from "./teacher-quiz-store";
 import { useTeacherExamStore } from "./teacher-exam-store";
 import { useTeacherHomeworkStore } from "./teacher-homework-store";
 import { useTeacherAssignmentStore } from "./teacher-assignment-store";
+import { useTeacherAssessmentStore } from "./teacher-assessment-store";
 import { useContentTreeStore } from "./content-tree-store";
 
 const SEED_KEY = "classz-teacher-seeded-v2";
@@ -126,6 +127,31 @@ export function seedTeacherData() {
     questionIds.push(created.id);
   }
 
+  // ── NEW QUESTION TYPES (mock data for every type) ──
+  const newTypeQuestions: { type: any; text: string; tags: string[]; difficulty: any; answerData?: any; estimatedTimeSeconds?: number; sourceLabel?: string; hint?: string; solution?: string; points?: number }[] = [
+    { type: "multi_select", text: "Which of the following are prime numbers? (Select all that apply)", tags: ["primes"], difficulty: "easy", answerData: { kind: "multi_select", choices: [{ id: "a", text: "2", isCorrect: true }, { id: "b", text: "4", isCorrect: false }, { id: "c", text: "7", isCorrect: true }, { id: "d", text: "9", isCorrect: false }], correctChoiceIds: ["a", "c"] }, estimatedTimeSeconds: 30, points: 2 },
+    { type: "true_false", text: "The derivative of a constant is always zero.", tags: ["derivatives"], difficulty: "easy", answerData: { kind: "true_false", correctBoolean: true }, estimatedTimeSeconds: 15 },
+    { type: "short_answer", text: "What is the value of π rounded to 2 decimal places?", tags: ["constants"], difficulty: "easy", answerData: { kind: "short_answer", acceptedAnswers: ["3.14"], caseSensitive: false }, estimatedTimeSeconds: 20 },
+    { type: "fill_blank", text: "The integral of cos(x) is ___.", tags: ["integration"], difficulty: "medium", answerData: { kind: "fill_blank", promptWithBlanks: "The integral of cos(x) is ___.", blanks: [{ id: "b1", acceptedAnswers: ["sin(x) + C", "sin(x)+C"] }] }, estimatedTimeSeconds: 30 },
+    { type: "matching", text: "Match each function with its derivative.", tags: ["derivatives"], difficulty: "medium", answerData: { kind: "matching", leftItems: [{ id: "l1", text: "x²" }, { id: "l2", text: "sin(x)" }, { id: "l3", text: "eˣ" }], rightItems: [{ id: "r1", text: "2x" }, { id: "r2", text: "cos(x)" }, { id: "r3", text: "eˣ" }], correctPairs: [{ leftId: "l1", rightId: "r1" }, { leftId: "l2", rightId: "r2" }, { leftId: "l3", rightId: "r3" }] }, estimatedTimeSeconds: 60, points: 3 },
+    { type: "ordering", text: "Order the steps to find the derivative using the chain rule.", tags: ["chain rule"], difficulty: "medium", answerData: { kind: "ordering", items: [{ id: "s1", text: "Identify outer function" }, { id: "s2", text: "Identify inner function" }, { id: "s3", text: "Differentiate outer" }, { id: "s4", text: "Multiply by derivative of inner" }], correctOrder: ["s1", "s2", "s3", "s4"] }, estimatedTimeSeconds: 45 },
+    { type: "classification", text: "Classify each expression as polynomial or non-polynomial.", tags: ["polynomials"], difficulty: "easy", answerData: { kind: "classification", items: [{ id: "i1", text: "3x² + 1" }, { id: "i2", text: "1/x" }, { id: "i3", text: "x³ - 2x" }, { id: "i4", text: "√x" }], categories: [{ id: "c1", text: "Polynomial" }, { id: "c2", text: "Non-polynomial" }], correctCategoryByItem: { i1: "c1", i2: "c2", i3: "c1", i4: "c2" } }, estimatedTimeSeconds: 40 },
+    { type: "passage", text: "Read the passage about limits and answer the sub-questions.", tags: ["limits", "reading"], difficulty: "hard", answerData: { kind: "passage", passageText: "A limit describes the value a function approaches as the input approaches some value. The formal epsilon-delta definition states that for every ε > 0 there exists δ > 0 such that...", subQuestionIds: [] }, estimatedTimeSeconds: 300, points: 10 },
+    { type: "drag_drop", text: "Drag each integration technique to the correct integral type.", tags: ["integration"], difficulty: "medium", answerData: { kind: "drag_drop", draggableItems: [{ id: "d1", text: "Substitution" }, { id: "d2", text: "By Parts" }, { id: "d3", text: "Partial Fractions" }], dropZones: [{ id: "z1", label: "∫ f(g(x))g'(x) dx" }, { id: "z2", label: "∫ u dv" }, { id: "z3", label: "∫ P(x)/Q(x) dx" }], correctMapping: { d1: "z1", d2: "z2", d3: "z3" } }, estimatedTimeSeconds: 60 },
+    { type: "equation_builder", text: "Write the quadratic formula.", tags: ["algebra"], difficulty: "medium", answerData: { kind: "equation_builder", expectedEquation: "x = (-b ± √(b²-4ac)) / 2a", acceptedEquivalentForms: ["(-b±√(b²-4ac))/(2a)"], variables: ["a", "b", "c"] }, estimatedTimeSeconds: 60 },
+    { type: "file_upload", text: "Upload your handwritten solution for the integration problem.", tags: ["integration", "submission"], difficulty: "hard", answerData: { kind: "file_upload", allowedFileTypes: ["pdf", "jpg", "png"], maxFileSizeMB: 10, rubric: "Clear steps, correct answer, proper notation" }, estimatedTimeSeconds: 600 },
+    { type: "coding", text: "Write a Python function that returns the nth Fibonacci number.", tags: ["programming", "algorithms"], difficulty: "medium", answerData: { kind: "coding", language: "python", starterCode: "def fibonacci(n):\n    # Your code here\n    pass", testCases: [{ input: "0", expectedOutput: "0", label: "Base case" }, { input: "1", expectedOutput: "1" }, { input: "10", expectedOutput: "55", label: "Standard" }], timeLimitSeconds: 5 }, estimatedTimeSeconds: 300, sourceLabel: "Programming Exercise" },
+    { type: "flashcard", text: "Definition of a limit", tags: ["limits", "revision"], difficulty: "easy", answerData: { kind: "flashcard", front: "What is the formal definition of a limit?", back: "lim(x→a) f(x) = L means for every ε>0 there exists δ>0 such that 0 < |x-a| < δ implies |f(x)-L| < ε", hint: "Think epsilon-delta" }, estimatedTimeSeconds: 20 },
+    { type: "table_completion", text: "Complete the derivatives table.", tags: ["derivatives"], difficulty: "easy", answerData: { kind: "table_completion", columns: ["f(x)", "f'(x)"], rows: ["xⁿ", "sin(x)", "eˣ", "ln(x)"], blankCells: [{ row: 0, col: 1 }, { row: 1, col: 1 }, { row: 2, col: 1 }, { row: 3, col: 1 }], acceptedAnswersByCell: [{ row: 0, col: 1, value: "nxⁿ⁻¹" }, { row: 1, col: 1, value: "cos(x)" }, { row: 2, col: 1, value: "eˣ" }, { row: 3, col: 1, value: "1/x" }] }, estimatedTimeSeconds: 90, points: 4 },
+    { type: "chemical_structure", text: "Draw the structure of ethanol (C₂H₅OH).", tags: ["chemistry"], difficulty: "medium", answerData: { kind: "chemical_structure", expectedStructure: "CCO", acceptedStructures: ["CCO", "C(C)O"], representation: "smiles" }, estimatedTimeSeconds: 60, sourceLabel: "Chemistry" },
+  ];
+  for (const q of newTypeQuestions) {
+    qu.createQuestion({ ...q, courseId: courseIds[0], source: q.sourceLabel || "Textbook", explanation: "", status: "published" });
+  }
+  // Unclassified questions (no course, no chapter, no concept)
+  qu.createQuestion({ type: "mcq", text: "What is 2 + 2?", difficulty: "easy", source: "Quick Import", tags: ["arithmetic"], explanation: "Basic addition.", choices: [{ id: "a", text: "3", isCorrect: false }, { id: "b", text: "4", isCorrect: true }, { id: "c", text: "5", isCorrect: false }, { id: "d", text: "6", isCorrect: false }], status: "published" });
+  qu.createQuestion({ type: "true_false", text: "Water boils at 100°C at standard pressure.", source: "General Knowledge", tags: ["physics"], explanation: "", answerData: { kind: "true_false", correctBoolean: true }, status: "draft" });
+
   // ── QUIZZES ──
   qz.createQuiz({ title: "Derivatives Quick Quiz", courseId: courseIds[0], quizType: "practice", questionIds: questionIds.slice(0, 4), durationMinutes: 10, xpReward: 30, status: "published" });
   qz.createQuiz({ title: "Calculus Checkpoint", courseId: courseIds[0], quizType: "checkpoint", questionIds: questionIds.slice(0, 6), durationMinutes: 15, xpReward: 50, status: "published" });
@@ -145,6 +171,24 @@ export function seedTeacherData() {
   // ── ASSIGNMENTS ──
   as_.createAssignment({ title: "Research: History of Calculus", courseId: courseIds[0], assignmentType: "research", dueDate: "2026-07-05", xpReward: 50, status: "published" });
   as_.createAssignment({ title: "Presentation: Real-World Applications", courseId: courseIds[0], assignmentType: "presentation", dueDate: "2026-07-10", status: "published" });
+
+  // ── UNIFIED ASSESSMENTS ──
+  const asm = useTeacherAssessmentStore.getState();
+  asm.createAssessment({ title: "Derivatives Practice Quiz", assessmentType: "practice_quiz", questionIds: questionIds.slice(0, 4), courseIds: [courseIds[0]], status: "published" });
+  asm.createAssessment({ title: "Calculus Session Quiz", assessmentType: "session_quiz", questionIds: questionIds.slice(0, 6), courseIds: [courseIds[0]], sessionIds: [sessionIds[0]], settings: { durationMinutes: 15 }, status: "published" });
+  asm.createAssessment({ title: "Limits Revision Quiz", assessmentType: "revision_quiz", questionIds: questionIds.slice(1, 5), courseIds: [courseIds[0]], status: "published" });
+  asm.createAssessment({ title: "Derivatives Homework", assessmentType: "homework", questionIds: questionIds.slice(0, 3), courseIds: [courseIds[0]], settings: { dueDate: "2026-07-01" }, status: "published" });
+  asm.createAssessment({ title: "Weekly Exam — Derivatives", assessmentType: "exam", questionIds: questionIds.slice(0, 5), courseIds: [courseIds[0]], settings: { durationMinutes: 30 }, rewards: { xpReward: 100, passScoreBonus: 25 }, status: "published" });
+  asm.createAssessment({ title: "Mock Final Exam", assessmentType: "mock_exam", questionIds: questionIds.slice(0, 8), courseIds: [courseIds[0]], settings: { durationMinutes: 90 }, rewards: { xpReward: 250 }, status: "draft" });
+  asm.createAssessment({ title: "Final Calculus Exam", assessmentType: "final_exam", questionIds: questionIds, courseIds: [courseIds[0]], settings: { durationMinutes: 120, totalScore: 200 }, rewards: { xpReward: 500, perfectScoreBonus: 200 }, status: "draft" });
+  asm.createAssessment({ title: "Math Placement Test", assessmentType: "placement_test", questionIds: questionIds.slice(0, 6), settings: { durationMinutes: 20 }, status: "published" });
+  asm.createAssessment({ title: "Diagnostic — Weak Concepts", assessmentType: "diagnostic_test", questionIds: questionIds.slice(2, 7), courseIds: [courseIds[0]], status: "published" });
+  asm.createAssessment({ title: "Research: History of Calculus", assessmentType: "research", courseIds: [courseIds[0]], settings: { dueDate: "2026-07-15", fileUploadAllowed: true }, rewards: { xpReward: 75 }, status: "published" });
+  asm.createAssessment({ title: "Calculus Presentation", assessmentType: "presentation", courseIds: [courseIds[0]], settings: { dueDate: "2026-07-20", fileUploadAllowed: true }, rewards: { xpReward: 50 }, status: "published" });
+  asm.createAssessment({ title: "Integration Project", assessmentType: "project", courseIds: [courseIds[0]], settings: { dueDate: "2026-08-01", fileUploadAllowed: true, rubric: "Problem selection, methodology, presentation" }, rewards: { xpReward: 150 }, status: "draft" });
+  asm.createAssessment({ title: "General Assignment", assessmentType: "assignment", courseIds: [courseIds[0]], settings: { dueDate: "2026-07-05" }, status: "published" });
+  asm.createAssessment({ title: "Adaptive Calculus Review", assessmentType: "adaptive_assessment", questionIds: questionIds.slice(0, 5), courseIds: [courseIds[0]], status: "draft" });
+  asm.createAssessment({ title: "Custom Assessment", assessmentType: "custom", questionIds: questionIds.slice(3, 7), courseIds: [courseIds[0]], status: "draft" });
 
   // ── CONTENT TREE for first course ──
   const treeChapters = ["Differential Calculus", "Integral Calculus", "Sequences & Series", "Probability"];
