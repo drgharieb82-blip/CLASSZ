@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import {
-  BookOpen, ChevronDown, ChevronRight, Eye, EyeOff, File, FileText, Film,
-  FolderTree, Image, ImagePlus, Link2, Plus, StickyNote, Trash2, Upload, Video, X,
+  BookOpen, Eye, EyeOff, File, FileText, Film,
+  Image, Link2, Plus, StickyNote, Trash2, Upload, Video,
 } from "lucide-react";
 import { DashPage } from "@/components/common/DashPage";
 import { Card } from "@/components/ui/card";
@@ -17,10 +17,6 @@ import { Pagination } from "@/components/filters/Pagination";
 import {
   useTeacherMaterialStore, type TeacherMaterial, type MaterialType, type CreateMaterialData,
 } from "@/lib/teacher/teacher-material-store";
-import {
-  useContentTreeStore, getTreeForCourse, getChildren, getCoverageSummary,
-  type ContentTreeNode, type CoverageStatus,
-} from "@/lib/teacher/content-tree-store";
 import { useTeacherCourseStore } from "@/lib/teacher/teacher-course-store";
 
 export const Route = createFileRoute("/teacher/materials")({ component: MaterialLibraryPage });
@@ -34,14 +30,7 @@ const TYPE_META: Record<MaterialType, { icon: React.ElementType; label: string; 
   notes: { icon: StickyNote, label: "Notes", color: "text-violet-500 bg-violet-500/10" },
 };
 
-const STATUS_COLORS: Record<CoverageStatus, string> = {
-  not_started: "bg-slate-500/10 text-slate-500",
-  missing_material: "bg-rose-500/10 text-rose-600",
-  partial: "bg-amber-500/10 text-amber-600",
-  covered: "bg-emerald-500/10 text-emerald-600",
-  needs_review: "bg-blue-500/10 text-blue-600",
-  extra: "bg-violet-500/10 text-violet-600",
-};
+
 
 function buildFilterOptions(courses: { id: string; title: string }[]): FilterOption[] {
   return [
@@ -71,9 +60,6 @@ function MaterialLibraryPage() {
   const [uploadUrl, setUploadUrl] = useState("");
   const [uploadDuration, setUploadDuration] = useState("");
   const [uploadFileName, setUploadFileName] = useState("");
-  const [selectedCourse, setSelectedCourse] = useState("");
-  const [selectedNode, setSelectedNode] = useState<string | null>(null);
-  const [showTree, setShowTree] = useState(false);
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
 
   const filtered = useMemo(() => {
@@ -119,7 +105,6 @@ function MaterialLibraryPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Button onClick={() => setShowUpload(true)} className="rounded-xl gradient-brand border-0 text-white" size="sm"><Plus className="me-1.5 h-4 w-4" /> Upload Material</Button>
-          <Button variant="outline" size="sm" className="rounded-xl" onClick={() => setShowTree(!showTree)}><FolderTree className="me-1.5 h-3.5 w-3.5" /> {showTree ? "Hide" : "Show"} Coverage Tree</Button>
         </div>
         <div className="flex gap-1">
           <Button variant={viewMode === "cards" ? "default" : "outline"} size="sm" className="rounded-lg h-8 text-xs" onClick={() => setViewMode("cards")}>Cards</Button>
@@ -182,30 +167,8 @@ function MaterialLibraryPage() {
         </Card>
       )}
 
-      {/* Main Layout */}
-      <div className={cn("grid gap-4", showTree && "lg:grid-cols-[280px_1fr]")}>
-        {/* Coverage Tree Panel */}
-        {showTree && (
-          <Card className="border bg-card p-3 max-h-[600px] overflow-y-auto">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-semibold uppercase text-muted-foreground">Content Tree</p>
-              <Button variant="ghost" size="sm" className="h-6 text-xs text-muted-foreground" onClick={() => { localStorage.removeItem("classz-content-tree"); window.location.reload(); }}>Reset</Button>
-            </div>
-            {courses.length === 0 ? (
-              <p className="text-xs text-muted-foreground py-4 text-center">Create a course first.</p>
-            ) : (
-              <div className="space-y-1">
-                <select value={selectedCourse} onChange={(e) => setSelectedCourse(e.target.value)} className="w-full h-8 rounded-lg border bg-card px-2 text-xs mb-2">
-                  <option value="">Select course</option>
-                  {courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
-                </select>
-                {selectedCourse && <SafeTreeWrapper courseId={selectedCourse} selectedNode={selectedNode} onSelect={setSelectedNode} />}
-              </div>
-            )}
-          </Card>
-        )}
-
-        {/* Materials */}
+      {/* Materials */}
+      <div className="space-y-4">
         <div className="space-y-4">
           <FilterBar search={search} onSearchChange={(v) => { setSearch(v); setPage(1); }} filters={buildFilterOptions(courses)} activeFilters={filters} onFilterChange={(k, v) => { setFilters((f) => ({ ...f, [k]: v })); setPage(1); }} onClearFilters={() => { setFilters({}); setPage(1); }} totalResults={total} placeholder="Search materials..." />
 
@@ -270,107 +233,3 @@ function MaterialRow({ mat, onPublish, onUnpublish, onDelete }: { mat: TeacherMa
   );
 }
 
-function SafeTreeWrapper({ courseId, selectedNode, onSelect }: { courseId: string; selectedNode: string | null; onSelect: (id: string | null) => void }) {
-  try {
-    const nodes = useContentTreeStore.getState().nodes.filter((n) => n.courseId === courseId);
-    // Validate data integrity before rendering
-    for (const n of nodes) {
-      if (!n.id || !n.type || !n.title) {
-        return <p className="text-xs text-destructive py-2">Tree data corrupted. Click Reset above.</p>;
-      }
-    }
-    return (
-      <>
-        <CourseTree courseId={courseId} selectedNode={selectedNode} onSelect={onSelect} />
-        <CoverageSummaryPanel courseId={courseId} />
-      </>
-    );
-  } catch {
-    return <p className="text-xs text-destructive py-2">Failed to load tree. Click Reset above.</p>;
-  }
-}
-
-function CourseTree({ courseId, selectedNode, onSelect }: { courseId: string; selectedNode: string | null; onSelect: (id: string | null) => void }) {
-  const nodes = useContentTreeStore((s) => s.nodes.filter((n) => n.courseId === courseId));
-  const createNode = useContentTreeStore((s) => s.createNode);
-  const roots = nodes.filter((n) => n.type === "chapter" && !n.parentId).sort((a, b) => a.order - b.order);
-
-  if (roots.length === 0) {
-    return (
-      <div className="py-4 text-center">
-        <p className="text-xs text-muted-foreground mb-2">No content tree yet.</p>
-        <Button variant="outline" size="sm" className="rounded-lg text-xs" onClick={() => createNode({ type: "chapter", title: "Chapter 1", parentId: "", courseId })}><Plus className="me-1 h-3 w-3" /> Add Chapter</Button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-0.5">
-      {roots.map((node) => <TreeNode key={node.id} node={node} depth={0} selectedNode={selectedNode} onSelect={onSelect} courseId={courseId} />)}
-      <Button variant="ghost" size="sm" className="w-full rounded-lg text-xs mt-1" onClick={() => createNode({ type: "chapter", title: `Chapter ${roots.length + 1}`, parentId: "", courseId })}><Plus className="me-1 h-3 w-3" /> Add Chapter</Button>
-    </div>
-  );
-}
-
-function TreeNode({ node, depth, selectedNode, onSelect, courseId }: { node: ContentTreeNode; depth: number; selectedNode: string | null; onSelect: (id: string | null) => void; courseId: string }) {
-  const [expanded, setExpanded] = useState(depth < 1);
-  const children = useContentTreeStore((s) => s.nodes.filter((n) => n.parentId === node.id).sort((a, b) => (a.order || 0) - (b.order || 0)));
-  const createNode = useContentTreeStore((s) => s.createNode);
-
-  if (!node || !node.id || !node.type) return null;
-  if (node.isHidden) return null;
-
-  const isSelected = selectedNode === node.id;
-  const hasChildren = children.length > 0;
-  const childType: Record<string, string> = { chapter: "lesson", lesson: "concept", concept: "atomic_concept" };
-  const nextType = childType[node.type] || "";
-  const statusColor = STATUS_COLORS[node.coverageStatus || "not_started"] || "bg-slate-500/10 text-slate-500";
-  const matCount = (node.linkedMaterialIds || []).length;
-
-  return (
-    <div>
-      <button
-        onClick={() => { onSelect(isSelected ? null : node.id); setExpanded(!expanded); }}
-        className={cn("flex w-full items-center gap-1 rounded-lg px-2 py-1 text-xs transition-colors", isSelected ? "bg-primary/10 text-primary" : "hover:bg-accent")}
-        style={{ paddingLeft: `${depth * 12 + 8}px` }}
-      >
-        {hasChildren ? (expanded ? <ChevronDown className="h-3 w-3 shrink-0" /> : <ChevronRight className="h-3 w-3 shrink-0" />) : <span className="w-3 shrink-0" />}
-        <span className={cn("h-2 w-2 shrink-0 rounded-full", statusColor.split(" ")[0])} />
-        <span className="truncate flex-1 text-start">{node.title || "Untitled"}</span>
-        {matCount > 0 && <span className="text-muted-foreground">{matCount}</span>}
-      </button>
-      {expanded && (
-        <div>
-          {children.map((child) => <TreeNode key={child.id} node={child} depth={depth + 1} selectedNode={selectedNode} onSelect={onSelect} courseId={courseId} />)}
-          {nextType && (
-            <button onClick={() => createNode({ type: nextType as any, title: `New ${nextType.replace("_", " ")}`, parentId: node.id, courseId })} className="flex items-center gap-1 rounded-lg px-2 py-0.5 text-xs text-muted-foreground hover:text-foreground" style={{ paddingLeft: `${(depth + 1) * 12 + 8}px` }}>
-              <Plus className="h-2.5 w-2.5" /> Add {nextType.replace("_", " ")}
-            </button>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function CoverageSummaryPanel({ courseId }: { courseId: string }) {
-  try {
-    const summary = getCoverageSummary(courseId);
-    if (!summary || summary.totalNodes === 0) return null;
-    return (
-      <div className="mt-3 space-y-1.5 border-t pt-3">
-        <p className="text-xs font-semibold">Coverage: {summary.coveragePercent}%</p>
-        <div className="h-2 rounded-full bg-muted overflow-hidden"><div className="h-full bg-gradient-to-r from-emerald-500 to-cyan-400 rounded-full" style={{ width: `${summary.coveragePercent}%` }} /></div>
-        <div className="grid grid-cols-2 gap-1 text-xs text-muted-foreground">
-          <span>Chapters: {summary.chapters.covered}/{summary.chapters.total}</span>
-          <span>Lessons: {summary.lessons.covered}/{summary.lessons.total}</span>
-          <span>Concepts: {summary.concepts.covered}/{summary.concepts.total}</span>
-          <span>Atomic: {summary.atomicConcepts.covered}/{summary.atomicConcepts.total}</span>
-        </div>
-        <p className="text-xs text-muted-foreground">{summary.materialsLinked} materials · {summary.sessionsLinked} sessions linked</p>
-      </div>
-    );
-  } catch {
-    return null;
-  }
-}
