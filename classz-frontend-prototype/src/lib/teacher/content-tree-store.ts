@@ -51,10 +51,13 @@ interface TreeState {
 
 function computeStatus(node: ContentTreeNode, children: ContentTreeNode[]): CoverageStatus {
   if (node.isHidden) return "not_started";
-  if (!node.isOfficial && node.linkedMaterialIds.length > 0) return "extra";
-  const hasMaterials = node.linkedMaterialIds.length > 0;
-  const hasQuestions = node.linkedQuestionIds.length > 0;
-  const hasSessions = node.linkedSessionIds.length > 0;
+  const mats = node.linkedMaterialIds || [];
+  const qs = node.linkedQuestionIds || [];
+  const sess = node.linkedSessionIds || [];
+  if (!node.isOfficial && mats.length > 0) return "extra";
+  const hasMaterials = mats.length > 0;
+  const hasQuestions = qs.length > 0;
+  const hasSessions = sess.length > 0;
   if (children.length > 0) {
     const visible = children.filter((c) => !c.isHidden);
     if (visible.length === 0) return "not_started";
@@ -182,7 +185,7 @@ export function getCoverageSummary(courseId: string) {
     lessons: { total: lessons.length, covered: covered("lesson") },
     concepts: { total: concepts.length, covered: covered("concept") },
     atomicConcepts: { total: atomics.length, covered: covered("atomic_concept") },
-    materialsLinked: new Set(nodes.flatMap((n) => n.linkedMaterialIds)).size,
-    sessionsLinked: new Set(nodes.flatMap((n) => n.linkedSessionIds)).size,
+    materialsLinked: new Set(nodes.flatMap((n) => n.linkedMaterialIds || [])).size,
+    sessionsLinked: new Set(nodes.flatMap((n) => n.linkedSessionIds || [])).size,
   };
 }

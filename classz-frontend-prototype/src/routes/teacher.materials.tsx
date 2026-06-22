@@ -43,11 +43,14 @@ const STATUS_COLORS: Record<CoverageStatus, string> = {
   extra: "bg-violet-500/10 text-violet-600",
 };
 
-const filterOptions: FilterOption[] = [
-  { key: "type", label: "Type", options: [{ value: "video", label: "Video" }, { value: "pdf", label: "PDF" }, { value: "image", label: "Image" }, { value: "attachment", label: "Attachment" }, { value: "notes", label: "Notes" }] },
-  { key: "status", label: "Status", options: [{ value: "draft", label: "Draft" }, { value: "published", label: "Published" }] },
-  { key: "usage", label: "Usage", options: [{ value: "used", label: "Used in sessions" }, { value: "unused", label: "Unused" }] },
-];
+function buildFilterOptions(courses: { id: string; title: string }[]): FilterOption[] {
+  return [
+    { key: "type", label: "Type", options: [{ value: "video", label: "Video" }, { value: "pdf", label: "PDF" }, { value: "image", label: "Image" }, { value: "attachment", label: "Attachment" }, { value: "notes", label: "Notes" }] },
+    { key: "status", label: "Status", options: [{ value: "draft", label: "Draft" }, { value: "published", label: "Published" }] },
+    { key: "usage", label: "Usage", options: [{ value: "used", label: "Used in sessions" }, { value: "unused", label: "Unused" }] },
+    { key: "course", label: "Course", options: courses.map((c) => ({ value: c.id, label: c.title })) },
+  ];
+}
 
 const SOURCES = ["Upload File", "YouTube", "Vimeo", "External URL", "Cloud Storage"];
 
@@ -80,6 +83,7 @@ function MaterialLibraryPage() {
     if (filters.status) r = r.filter((m) => m.status === filters.status);
     if (filters.usage === "used") r = r.filter((m) => (m.linkedSessionIds?.length || 0) > 0 || m.sessionId);
     if (filters.usage === "unused") r = r.filter((m) => (m.linkedSessionIds?.length || 0) === 0 && !m.sessionId);
+    if (filters.course) r = r.filter((m) => m.courseId === filters.course);
     return r;
   }, [materials, search, filters]);
 
@@ -201,7 +205,7 @@ function MaterialLibraryPage() {
 
         {/* Materials */}
         <div className="space-y-4">
-          <FilterBar search={search} onSearchChange={(v) => { setSearch(v); setPage(1); }} filters={filterOptions} activeFilters={filters} onFilterChange={(k, v) => { setFilters((f) => ({ ...f, [k]: v })); setPage(1); }} onClearFilters={() => { setFilters({}); setPage(1); }} totalResults={total} placeholder="Search materials..." />
+          <FilterBar search={search} onSearchChange={(v) => { setSearch(v); setPage(1); }} filters={buildFilterOptions(courses)} activeFilters={filters} onFilterChange={(k, v) => { setFilters((f) => ({ ...f, [k]: v })); setPage(1); }} onClearFilters={() => { setFilters({}); setPage(1); }} totalResults={total} placeholder="Search materials..." />
 
           {total === 0 && materials.length === 0 ? (
             <Card className="flex flex-col items-center gap-4 border bg-card p-12 text-center">
@@ -298,6 +302,9 @@ function TreeNode({ node, depth, selectedNode, onSelect, courseId }: { node: Con
 
   if (node.isHidden) return null;
 
+  const statusColor = STATUS_COLORS[node.coverageStatus || "not_started"] || STATUS_COLORS.not_started;
+  const matCount = node.linkedMaterialIds?.length || 0;
+
   return (
     <div>
       <button
@@ -306,9 +313,9 @@ function TreeNode({ node, depth, selectedNode, onSelect, courseId }: { node: Con
         style={{ paddingLeft: `${depth * 12 + 8}px` }}
       >
         {hasChildren ? (expanded ? <ChevronDown className="h-3 w-3 shrink-0" /> : <ChevronRight className="h-3 w-3 shrink-0" />) : <span className="w-3 shrink-0" />}
-        <span className={cn("h-2 w-2 shrink-0 rounded-full", STATUS_COLORS[node.coverageStatus].split(" ")[0])} />
+        <span className={cn("h-2 w-2 shrink-0 rounded-full", statusColor.split(" ")[0])} />
         <span className="truncate flex-1 text-start">{node.title}</span>
-        {node.linkedMaterialIds.length > 0 && <span className="text-muted-foreground">{node.linkedMaterialIds.length}</span>}
+        {matCount > 0 && <span className="text-muted-foreground">{matCount}</span>}
       </button>
       {expanded && (
         <div>
@@ -325,19 +332,23 @@ function TreeNode({ node, depth, selectedNode, onSelect, courseId }: { node: Con
 }
 
 function CoverageSummaryPanel({ courseId }: { courseId: string }) {
-  const summary = getCoverageSummary(courseId);
-  if (summary.totalNodes === 0) return null;
-  return (
-    <div className="mt-3 space-y-1.5 border-t pt-3">
-      <p className="text-xs font-semibold">Coverage: {summary.coveragePercent}%</p>
-      <div className="h-2 rounded-full bg-muted overflow-hidden"><div className="h-full bg-gradient-to-r from-emerald-500 to-cyan-400 rounded-full" style={{ width: `${summary.coveragePercent}%` }} /></div>
-      <div className="grid grid-cols-2 gap-1 text-xs text-muted-foreground">
-        <span>Chapters: {summary.chapters.covered}/{summary.chapters.total}</span>
-        <span>Lessons: {summary.lessons.covered}/{summary.lessons.total}</span>
-        <span>Concepts: {summary.concepts.covered}/{summary.concepts.total}</span>
-        <span>Atomic: {summary.atomicConcepts.covered}/{summary.atomicConcepts.total}</span>
+  try {
+    const summary = getCoverageSummary(courseId);
+    if (!summary || summary.totalNodes === 0) return null;
+    return (
+      <div className="mt-3 space-y-1.5 border-t pt-3">
+        <p className="text-xs font-semibold">Coverage: {summary.coveragePercent}%</p>
+        <div className="h-2 rounded-full bg-muted overflow-hidden"><div className="h-full bg-gradient-to-r from-emerald-500 to-cyan-400 rounded-full" style={{ width: `${summary.coveragePercent}%` }} /></div>
+        <div className="grid grid-cols-2 gap-1 text-xs text-muted-foreground">
+          <span>Chapters: {summary.chapters.covered}/{summary.chapters.total}</span>
+          <span>Lessons: {summary.lessons.covered}/{summary.lessons.total}</span>
+          <span>Concepts: {summary.concepts.covered}/{summary.concepts.total}</span>
+          <span>Atomic: {summary.atomicConcepts.covered}/{summary.atomicConcepts.total}</span>
+        </div>
+        <p className="text-xs text-muted-foreground">{summary.materialsLinked} materials · {summary.sessionsLinked} sessions linked</p>
       </div>
-      <p className="text-xs text-muted-foreground">{summary.materialsLinked} materials · {summary.sessionsLinked} sessions linked</p>
-    </div>
-  );
+    );
+  } catch {
+    return null;
+  }
 }
