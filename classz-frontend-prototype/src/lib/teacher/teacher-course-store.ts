@@ -18,14 +18,20 @@ export interface TeacherCourse {
   subject: string;
   grade: string;
   description: string;
+  shortDescription: string;
   teacherId: string;
   teacherName: string;
   teacherPublicCode: string;
   coverEmoji: string;
   coverColor: string;
+  previewVideoUrl: string;
   price: number;
   currency: string;
   countryPrices: CountryPrice[];
+  outcomes: string[];
+  requirements: string[];
+  targetAudience: string;
+  language: string;
   status: CourseStatus;
   visibility: CourseVisibility;
   enrollmentCount: number;
@@ -33,14 +39,23 @@ export interface TeacherCourse {
   rating: number;
   lessonsCount: number;
   hoursCount: number;
+  chaptersCount: number;
+  sessionsCount: number;
+  questionsCount: number;
+  quizzesCount: number;
+  assignedAssistant: string;
+  assignedContentManager: string;
+  tags: string[];
   createdAt: string;
   updatedAt: string;
 }
 
-export type CreateCourseData = Pick<TeacherCourse,
-  "title" | "subject" | "grade" | "description" | "coverEmoji" | "coverColor" |
-  "price" | "currency" | "countryPrices" | "visibility"
-> & { status?: CourseStatus };
+export type CreateCourseData = Pick<TeacherCourse, "title" | "subject" | "grade"> &
+  Partial<Pick<TeacherCourse,
+    "description" | "shortDescription" | "coverEmoji" | "coverColor" | "previewVideoUrl" |
+    "price" | "currency" | "countryPrices" | "visibility" | "outcomes" | "requirements" |
+    "targetAudience" | "language" | "tags" | "assignedAssistant" | "assignedContentManager"
+  >> & { status?: CourseStatus };
 
 interface TeacherCourseState {
   courses: TeacherCourse[];
@@ -82,15 +97,21 @@ export const useTeacherCourseStore = create<TeacherCourseState>()(
           slug: slugify(data.title),
           subject: data.subject,
           grade: data.grade,
-          description: data.description,
+          description: data.description || "",
+          shortDescription: data.shortDescription || "",
           teacherId: "TCH-26-0001",
           teacherName: "Dr. Layla Hassan",
           teacherPublicCode: "TCH-26-0001",
           coverEmoji: data.coverEmoji || "📘",
           coverColor: data.coverColor || "from-violet-500 to-blue-500",
-          price: data.price,
+          previewVideoUrl: data.previewVideoUrl || "",
+          price: data.price ?? 0,
           currency: data.currency || "USD",
           countryPrices: data.countryPrices || [],
+          outcomes: data.outcomes || [],
+          requirements: data.requirements || [],
+          targetAudience: data.targetAudience || "",
+          language: data.language || "Arabic",
           status: data.status || "draft",
           visibility: data.visibility || "public",
           enrollmentCount: 0,
@@ -98,6 +119,13 @@ export const useTeacherCourseStore = create<TeacherCourseState>()(
           rating: 0,
           lessonsCount: 0,
           hoursCount: 0,
+          chaptersCount: 0,
+          sessionsCount: 0,
+          questionsCount: 0,
+          quizzesCount: 0,
+          assignedAssistant: data.assignedAssistant || "",
+          assignedContentManager: data.assignedContentManager || "",
+          tags: data.tags || [],
           createdAt: now,
           updatedAt: now,
         };

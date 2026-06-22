@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
-import { BookOpen, Pencil, Plus, Trash2, Upload } from "lucide-react";
+import { BookOpen, DollarSign, FolderTree, HelpCircle, Pencil, PlayCircle, Plus, Star, Trash2, Upload, Users, UserCog } from "lucide-react";
 import { DashPage } from "@/components/common/DashPage";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,9 @@ import { cn } from "@/lib/utils";
 import { FilterBar, type FilterOption } from "@/components/filters/FilterBar";
 import { Pagination } from "@/components/filters/Pagination";
 import { useTeacherCourseStore, type TeacherCourse } from "@/lib/teacher/teacher-course-store";
+import { listChapters } from "@/lib/teacher/teacher-chapter-store";
+import { listSessions } from "@/lib/teacher/teacher-session-store";
+import { teacherTeam } from "@/lib/teacherMock";
 
 export const Route = createFileRoute("/teacher/courses")({
   component: TeacherCoursesPage,
@@ -150,49 +153,72 @@ function CourseRow({ course, onPublish, onUnpublish, onArchive, onDelete }: {
   onArchive: () => void;
   onDelete: () => void;
 }) {
+  const chapters = listChapters(course.id);
+  const sessions = listSessions(course.id);
+  const assistantName = course.assignedAssistant ? teacherTeam.find((t) => t.id === course.assignedAssistant)?.name : null;
+  const cmName = course.assignedContentManager ? teacherTeam.find((t) => t.id === course.assignedContentManager)?.name : null;
+
   return (
-    <Card className="flex items-center gap-4 border bg-card px-5 py-4">
-      <div className={cn("grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-gradient-to-br text-2xl", course.coverColor)}>
-        {course.coverEmoji}
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <p className="font-semibold truncate">{course.title}</p>
-          <Badge variant="outline" className={cn("rounded-full text-xs", statusColors[course.status])}>{course.status}</Badge>
-          {course.visibility !== "public" && (
-            <Badge variant="outline" className="rounded-full text-xs">{course.visibility}</Badge>
-          )}
+    <Card className="border bg-card p-5">
+      {/* Header */}
+      <div className="flex items-start gap-4">
+        <div className={cn("grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br text-3xl", course.coverColor)}>
+          {course.coverEmoji}
         </div>
-        <p className="text-xs text-muted-foreground">{course.publicCode} · {course.subject} · {course.grade} · ${course.price}</p>
-      </div>
-      <div className="hidden items-center gap-6 md:flex">
-        <div className="text-center">
-          <p className="text-sm font-semibold">{course.enrollmentCount}</p>
-          <p className="text-xs text-muted-foreground">Students</p>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-lg font-bold truncate">{course.title}</p>
+            <Badge variant="outline" className={cn("rounded-full text-xs", statusColors[course.status])}>{course.status}</Badge>
+            {course.visibility !== "public" && <Badge variant="outline" className="rounded-full text-xs">{course.visibility}</Badge>}
+          </div>
+          <p className="text-xs text-muted-foreground mt-0.5">{course.publicCode} · {course.subject} · {course.grade} · {course.language || "Arabic"}</p>
+          {course.shortDescription && <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{course.shortDescription}</p>}
         </div>
-        <div className="text-center">
-          <p className="text-sm font-semibold">${course.revenue}</p>
-          <p className="text-xs text-muted-foreground">Revenue</p>
-        </div>
-      </div>
-      <div className="flex items-center gap-1.5 shrink-0">
-        <Button asChild variant="outline" size="icon" className="h-8 w-8 rounded-lg">
-          <Link to="/teacher/courses/$courseId/edit" params={{ courseId: course.id }}><Pencil className="h-3.5 w-3.5" /></Link>
-        </Button>
-        {course.status === "draft" && (
-          <Button variant="outline" size="sm" className="rounded-lg text-xs h-8" onClick={onPublish}>Publish</Button>
-        )}
-        {course.status === "published" && (
-          <Button variant="outline" size="sm" className="rounded-lg text-xs h-8" onClick={onUnpublish}>Unpublish</Button>
-        )}
-        {course.status !== "archived" && (
-          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-muted-foreground" onClick={onArchive}>
-            <Upload className="h-3.5 w-3.5" />
+        <div className="flex items-center gap-1.5 shrink-0">
+          <Button asChild variant="outline" size="sm" className="rounded-lg text-xs h-8">
+            <Link to="/teacher/courses/$courseId/edit" params={{ courseId: course.id }}><Pencil className="me-1 h-3 w-3" /> Edit</Link>
           </Button>
-        )}
-        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-destructive" onClick={onDelete}>
-          <Trash2 className="h-3.5 w-3.5" />
-        </Button>
+          {course.status === "draft" && <Button variant="outline" size="sm" className="rounded-lg text-xs h-8" onClick={onPublish}>Publish</Button>}
+          {course.status === "published" && <Button variant="outline" size="sm" className="rounded-lg text-xs h-8" onClick={onUnpublish}>Unpublish</Button>}
+          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-destructive" onClick={onDelete}><Trash2 className="h-3.5 w-3.5" /></Button>
+        </div>
+      </div>
+
+      {/* Stats Row */}
+      <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-6">
+        <div className="flex items-center gap-2 rounded-lg border px-3 py-2">
+          <Users className="h-3.5 w-3.5 text-blue-500 shrink-0" />
+          <div><p className="text-sm font-bold">{course.enrollmentCount}</p><p className="text-xs text-muted-foreground">Students</p></div>
+        </div>
+        <div className="flex items-center gap-2 rounded-lg border px-3 py-2">
+          <DollarSign className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+          <div><p className="text-sm font-bold">${course.revenue}</p><p className="text-xs text-muted-foreground">Revenue</p></div>
+        </div>
+        <div className="flex items-center gap-2 rounded-lg border px-3 py-2">
+          <FolderTree className="h-3.5 w-3.5 text-violet-500 shrink-0" />
+          <div><p className="text-sm font-bold">{chapters.length}</p><p className="text-xs text-muted-foreground">Chapters</p></div>
+        </div>
+        <div className="flex items-center gap-2 rounded-lg border px-3 py-2">
+          <PlayCircle className="h-3.5 w-3.5 text-cyan-500 shrink-0" />
+          <div><p className="text-sm font-bold">{sessions.length}</p><p className="text-xs text-muted-foreground">Sessions</p></div>
+        </div>
+        <div className="flex items-center gap-2 rounded-lg border px-3 py-2">
+          <Star className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+          <div><p className="text-sm font-bold">{course.rating || "—"}</p><p className="text-xs text-muted-foreground">Rating</p></div>
+        </div>
+        <div className="flex items-center gap-2 rounded-lg border px-3 py-2">
+          <DollarSign className="h-3.5 w-3.5 text-primary shrink-0" />
+          <div><p className="text-sm font-bold">${course.price}</p><p className="text-xs text-muted-foreground">Price</p></div>
+        </div>
+      </div>
+
+      {/* Team + Quick Links */}
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+        {assistantName && <span className="flex items-center gap-1"><UserCog className="h-3 w-3" /> Assistant: <strong className="text-foreground">{assistantName}</strong></span>}
+        {cmName && <span className="flex items-center gap-1"><UserCog className="h-3 w-3" /> Content: <strong className="text-foreground">{cmName}</strong></span>}
+        {course.tags && course.tags.length > 0 && <span>{course.tags.join(", ")}</span>}
+        <Link to="/teacher/courses/$courseId/chapters" params={{ courseId: course.id }} className="text-primary hover:underline">Chapters →</Link>
+        <Link to="/teacher/courses/$courseId/sessions" params={{ courseId: course.id }} className="text-primary hover:underline">Sessions →</Link>
       </div>
     </Card>
   );
