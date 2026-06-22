@@ -98,6 +98,7 @@ import { Route as AdminRolesRouteImport } from './routes/admin.roles'
 import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
 import { Route as AdminCoursesRouteImport } from './routes/admin.courses'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
+import { Route as TeacherCoursesIndexRouteImport } from './routes/teacher.courses.index'
 import { Route as StudentCoursesIndexRouteImport } from './routes/student.courses.index'
 import { Route as TeacherQuizzesCreateRouteImport } from './routes/teacher.quizzes.create'
 import { Route as TeacherQuestionsCreateRouteImport } from './routes/teacher.questions.create'
@@ -563,6 +564,11 @@ const AdminBannersRoute = AdminBannersRouteImport.update({
   path: '/admin/banners',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeacherCoursesIndexRoute = TeacherCoursesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TeacherCoursesRoute,
+} as any)
 const StudentCoursesIndexRoute = StudentCoursesIndexRouteImport.update({
   id: '/courses/',
   path: '/courses/',
@@ -769,6 +775,7 @@ export interface FileRoutesByFullPath {
   '/teacher/questions/create': typeof TeacherQuestionsCreateRoute
   '/teacher/quizzes/create': typeof TeacherQuizzesCreateRoute
   '/student/courses/': typeof StudentCoursesIndexRoute
+  '/teacher/courses/': typeof TeacherCoursesIndexRoute
   '/student/courses/$courseId/continue': typeof StudentCoursesCourseIdContinueRoute
   '/student/courses/$courseId/enroll': typeof StudentCoursesCourseIdEnrollRoute
   '/student/courses/$courseId/resources': typeof StudentCoursesCourseIdResourcesRoute
@@ -843,7 +850,6 @@ export interface FileRoutesByTo {
   '/teacher/assignments': typeof TeacherAssignmentsRoute
   '/teacher/chapters': typeof TeacherChaptersRoute
   '/teacher/chat': typeof TeacherChatRoute
-  '/teacher/courses': typeof TeacherCoursesRouteWithChildren
   '/teacher/exams': typeof TeacherExamsRouteWithChildren
   '/teacher/generator': typeof TeacherGeneratorRoute
   '/teacher/grading': typeof TeacherGradingRoute
@@ -876,6 +882,7 @@ export interface FileRoutesByTo {
   '/teacher/questions/create': typeof TeacherQuestionsCreateRoute
   '/teacher/quizzes/create': typeof TeacherQuizzesCreateRoute
   '/student/courses': typeof StudentCoursesIndexRoute
+  '/teacher/courses': typeof TeacherCoursesIndexRoute
   '/student/courses/$courseId/continue': typeof StudentCoursesCourseIdContinueRoute
   '/student/courses/$courseId/enroll': typeof StudentCoursesCourseIdEnrollRoute
   '/student/courses/$courseId/resources': typeof StudentCoursesCourseIdResourcesRoute
@@ -987,6 +994,7 @@ export interface FileRoutesById {
   '/teacher/questions/create': typeof TeacherQuestionsCreateRoute
   '/teacher/quizzes/create': typeof TeacherQuizzesCreateRoute
   '/student/courses/': typeof StudentCoursesIndexRoute
+  '/teacher/courses/': typeof TeacherCoursesIndexRoute
   '/student/courses/$courseId/continue': typeof StudentCoursesCourseIdContinueRoute
   '/student/courses/$courseId/enroll': typeof StudentCoursesCourseIdEnrollRoute
   '/student/courses/$courseId/resources': typeof StudentCoursesCourseIdResourcesRoute
@@ -1099,6 +1107,7 @@ export interface FileRouteTypes {
     | '/teacher/questions/create'
     | '/teacher/quizzes/create'
     | '/student/courses/'
+    | '/teacher/courses/'
     | '/student/courses/$courseId/continue'
     | '/student/courses/$courseId/enroll'
     | '/student/courses/$courseId/resources'
@@ -1173,7 +1182,6 @@ export interface FileRouteTypes {
     | '/teacher/assignments'
     | '/teacher/chapters'
     | '/teacher/chat'
-    | '/teacher/courses'
     | '/teacher/exams'
     | '/teacher/generator'
     | '/teacher/grading'
@@ -1206,6 +1214,7 @@ export interface FileRouteTypes {
     | '/teacher/questions/create'
     | '/teacher/quizzes/create'
     | '/student/courses'
+    | '/teacher/courses'
     | '/student/courses/$courseId/continue'
     | '/student/courses/$courseId/enroll'
     | '/student/courses/$courseId/resources'
@@ -1316,6 +1325,7 @@ export interface FileRouteTypes {
     | '/teacher/questions/create'
     | '/teacher/quizzes/create'
     | '/student/courses/'
+    | '/teacher/courses/'
     | '/student/courses/$courseId/continue'
     | '/student/courses/$courseId/enroll'
     | '/student/courses/$courseId/resources'
@@ -2031,6 +2041,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBannersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/teacher/courses/': {
+      id: '/teacher/courses/'
+      path: '/'
+      fullPath: '/teacher/courses/'
+      preLoaderRoute: typeof TeacherCoursesIndexRouteImport
+      parentRoute: typeof TeacherCoursesRoute
+    }
     '/student/courses/': {
       id: '/student/courses/'
       path: '/courses'
@@ -2269,6 +2286,7 @@ const TeacherCoursesCourseIdSessionsRouteWithChildren =
 
 interface TeacherCoursesRouteChildren {
   TeacherCoursesCreateRoute: typeof TeacherCoursesCreateRoute
+  TeacherCoursesIndexRoute: typeof TeacherCoursesIndexRoute
   TeacherCoursesCourseIdChaptersRoute: typeof TeacherCoursesCourseIdChaptersRoute
   TeacherCoursesCourseIdEditRoute: typeof TeacherCoursesCourseIdEditRoute
   TeacherCoursesCourseIdSessionsRoute: typeof TeacherCoursesCourseIdSessionsRouteWithChildren
@@ -2276,6 +2294,7 @@ interface TeacherCoursesRouteChildren {
 
 const TeacherCoursesRouteChildren: TeacherCoursesRouteChildren = {
   TeacherCoursesCreateRoute: TeacherCoursesCreateRoute,
+  TeacherCoursesIndexRoute: TeacherCoursesIndexRoute,
   TeacherCoursesCourseIdChaptersRoute: TeacherCoursesCourseIdChaptersRoute,
   TeacherCoursesCourseIdEditRoute: TeacherCoursesCourseIdEditRoute,
   TeacherCoursesCourseIdSessionsRoute:
