@@ -3,6 +3,20 @@ import { persist } from "zustand/middleware";
 
 export type MaterialType = "video" | "pdf" | "image" | "attachment" | "notes";
 export type MaterialStatus = "draft" | "published" | "archived";
+export type SourceMode = "upload" | "url";
+export type SourceProvider = "local_upload" | "youtube" | "vimeo" | "external_url" | "cloud_storage" | "bunny" | "cloudflare" | "mux" | "s3";
+export type UploadStatus = "idle" | "uploading" | "processing" | "ready" | "failed";
+export type ProcessingStatus = "not_started" | "processing" | "ready" | "failed";
+
+export interface AcademicLink {
+  id: string;
+  fromTime?: string;
+  toTime?: string;
+  chapterId?: string;
+  lessonId?: string;
+  conceptId?: string;
+  atomicConceptId?: string;
+}
 
 export interface VideoSegment {
   id: string;
@@ -39,7 +53,20 @@ export interface TeacherMaterial {
   fileType?: string;
   // Notes
   notesContent?: string;
-  // Flexible linking (Phase A)
+  // Source metadata
+  sourceMode?: SourceMode;
+  sourceProvider?: SourceProvider;
+  originalUrl?: string;
+  studentDisplayTitle?: string;
+  customThumbnailUrl?: string;
+  uploadFileName?: string;
+  uploadFileSize?: number;
+  uploadMimeType?: string;
+  uploadStatus?: UploadStatus;
+  processingStatus?: ProcessingStatus;
+  // Academic links (multi-row with optional time ranges)
+  academicLinks?: AcademicLink[];
+  // Flexible linking (Phase A) — auto-populated from academicLinks
   linkedSessionIds: string[];
   linkedChapterIds: string[];
   linkedLessonIds: string[];
@@ -54,7 +81,10 @@ export type CreateMaterialData = Pick<TeacherMaterial, "type" | "title"> & Parti
   "sessionId" | "courseId" | "chapterId" | "description" | "videoUrl" | "videoDuration" |
   "videoDurationSeconds" | "thumbnailUrl" | "segments" |
   "fileUrl" | "fileName" | "fileSize" | "fileType" | "notesContent" | "status" |
-  "linkedSessionIds" | "linkedChapterIds" | "linkedLessonIds" | "linkedConceptIds" | "linkedAtomicConceptIds"
+  "linkedSessionIds" | "linkedChapterIds" | "linkedLessonIds" | "linkedConceptIds" | "linkedAtomicConceptIds" |
+  "sourceMode" | "sourceProvider" | "originalUrl" | "studentDisplayTitle" | "customThumbnailUrl" |
+  "uploadFileName" | "uploadFileSize" | "uploadMimeType" | "uploadStatus" | "processingStatus" |
+  "academicLinks"
 >>;
 
 interface MaterialState {
@@ -71,6 +101,12 @@ let counter = 0;
 
 function generateId(): string {
   return `mat-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+}
+
+function deriveIds(links: AcademicLink[] | undefined, key: keyof AcademicLink, fallback?: string): string[] {
+  if (!links || links.length === 0) return fallback ? [fallback] : [];
+  const ids = links.map((l) => l[key] as string | undefined).filter(Boolean) as string[];
+  return [...new Set(ids)];
 }
 
 export const useTeacherMaterialStore = create<MaterialState>()(
@@ -102,11 +138,22 @@ export const useTeacherMaterialStore = create<MaterialState>()(
           fileSize: data.fileSize,
           fileType: data.fileType,
           notesContent: data.notesContent,
+          sourceMode: data.sourceMode,
+          sourceProvider: data.sourceProvider,
+          originalUrl: data.originalUrl,
+          studentDisplayTitle: data.studentDisplayTitle || data.title,
+          customThumbnailUrl: data.customThumbnailUrl,
+          uploadFileName: data.uploadFileName,
+          uploadFileSize: data.uploadFileSize,
+          uploadMimeType: data.uploadMimeType,
+          uploadStatus: data.uploadStatus || "ready",
+          processingStatus: data.processingStatus || "ready",
+          academicLinks: data.academicLinks,
           linkedSessionIds: data.linkedSessionIds || (sessionId ? [sessionId] : []),
-          linkedChapterIds: data.linkedChapterIds || (data.chapterId ? [data.chapterId] : []),
-          linkedLessonIds: data.linkedLessonIds || [],
-          linkedConceptIds: data.linkedConceptIds || [],
-          linkedAtomicConceptIds: data.linkedAtomicConceptIds || [],
+          linkedChapterIds: data.linkedChapterIds || deriveIds(data.academicLinks, "chapterId", data.chapterId),
+          linkedLessonIds: data.linkedLessonIds || deriveIds(data.academicLinks, "lessonId"),
+          linkedConceptIds: data.linkedConceptIds || deriveIds(data.academicLinks, "conceptId"),
+          linkedAtomicConceptIds: data.linkedAtomicConceptIds || deriveIds(data.academicLinks, "atomicConceptId"),
           reuseCount: 0,
           createdAt: now,
           updatedAt: now,

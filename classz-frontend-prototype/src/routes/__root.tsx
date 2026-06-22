@@ -42,14 +42,18 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
+      <div className="max-w-lg text-center">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
           This page didn't load
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Something went wrong on our end. You can try refreshing or head back home.
         </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
+        <pre className="mt-4 max-h-40 overflow-auto rounded-lg border bg-muted/50 p-3 text-start text-xs text-destructive">
+          {error?.message || "Unknown error"}
+          {error?.stack ? `\n\n${error.stack.split("\n").slice(0, 6).join("\n")}` : ""}
+        </pre>
+        <div className="mt-4 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
               router.invalidate();
@@ -58,6 +62,16 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Try again
+          </button>
+          <button
+            onClick={() => {
+              const keys = Object.keys(localStorage).filter((k) => k.startsWith("classz-"));
+              keys.forEach((k) => localStorage.removeItem(k));
+              window.location.reload();
+            }}
+            className="inline-flex items-center justify-center rounded-md border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-800 transition-colors hover:bg-amber-100"
+          >
+            Clear data & reload
           </button>
           <a
             href="/"
