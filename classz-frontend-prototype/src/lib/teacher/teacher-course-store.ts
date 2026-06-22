@@ -10,52 +10,84 @@ export interface CountryPrice {
 export type CourseStatus = "draft" | "published" | "archived";
 export type CourseVisibility = "public" | "private" | "unlisted";
 
+export interface Testimonial {
+  name: string;
+  avatar: string;
+  rating: number;
+  comment: string;
+}
+
 export interface TeacherCourse {
   id: string;
   publicCode: string;
+  // Basic
   title: string;
   slug: string;
   subject: string;
   grade: string;
   description: string;
   shortDescription: string;
+  language: string;
+  // Cover
+  coverEmoji: string;
+  coverColor: string;
+  promoVideoUrl: string;
+  // Teacher
   teacherId: string;
   teacherName: string;
   teacherPublicCode: string;
-  coverEmoji: string;
-  coverColor: string;
-  previewVideoUrl: string;
+  teacherBio: string;
+  teacherHeadline: string;
+  // Marketing
+  whyJoinThisCourse: string[];
+  outcomes: string[];
+  whoIsThisFor: string[];
+  requirements: string[];
+  courseHighlights: string[];
+  includedFeatures: string[];
+  // Pricing
   price: number;
   currency: string;
   countryPrices: CountryPrice[];
-  outcomes: string[];
-  requirements: string[];
-  targetAudience: string;
-  language: string;
-  status: CourseStatus;
-  visibility: CourseVisibility;
+  discountPrice: number;
+  discountEndsAt: string;
+  allowWalletPayment: boolean;
+  // Social proof
+  testimonials: Testimonial[];
   enrollmentCount: number;
   revenue: number;
   rating: number;
+  reviewsCount: number;
+  completionRate: number;
+  // Content stats
   lessonsCount: number;
   hoursCount: number;
   chaptersCount: number;
   sessionsCount: number;
   questionsCount: number;
   quizzesCount: number;
+  // Certificate & support
+  certificateIncluded: boolean;
+  accessDuration: string;
+  refundPolicy: string;
+  // Team
   assignedAssistant: string;
   assignedContentManager: string;
+  // SEO
+  metaTitle: string;
+  metaDescription: string;
   tags: string[];
+  // Status
+  status: CourseStatus;
+  visibility: CourseVisibility;
+  isFeatured: boolean;
+  featuredUntil: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export type CreateCourseData = Pick<TeacherCourse, "title" | "subject" | "grade"> &
-  Partial<Pick<TeacherCourse,
-    "description" | "shortDescription" | "coverEmoji" | "coverColor" | "previewVideoUrl" |
-    "price" | "currency" | "countryPrices" | "visibility" | "outcomes" | "requirements" |
-    "targetAudience" | "language" | "tags" | "assignedAssistant" | "assignedContentManager"
-  >> & { status?: CourseStatus };
+  Partial<Omit<TeacherCourse, "id" | "publicCode" | "slug" | "createdAt" | "updatedAt">>;
 
 interface TeacherCourseState {
   courses: TeacherCourse[];
@@ -93,41 +125,36 @@ export const useTeacherCourseStore = create<TeacherCourseState>()(
         const course: TeacherCourse = {
           id: generateCourseId(),
           publicCode: generatePublicCode(),
-          title: data.title,
-          slug: slugify(data.title),
-          subject: data.subject,
-          grade: data.grade,
-          description: data.description || "",
-          shortDescription: data.shortDescription || "",
-          teacherId: "TCH-26-0001",
-          teacherName: "Dr. Layla Hassan",
-          teacherPublicCode: "TCH-26-0001",
-          coverEmoji: data.coverEmoji || "📘",
-          coverColor: data.coverColor || "from-violet-500 to-blue-500",
-          previewVideoUrl: data.previewVideoUrl || "",
-          price: data.price ?? 0,
-          currency: data.currency || "USD",
-          countryPrices: data.countryPrices || [],
-          outcomes: data.outcomes || [],
-          requirements: data.requirements || [],
-          targetAudience: data.targetAudience || "",
+          title: data.title, slug: slugify(data.title),
+          subject: data.subject, grade: data.grade,
+          description: data.description || "", shortDescription: data.shortDescription || "",
           language: data.language || "Arabic",
-          status: data.status || "draft",
-          visibility: data.visibility || "public",
-          enrollmentCount: 0,
-          revenue: 0,
-          rating: 0,
-          lessonsCount: 0,
-          hoursCount: 0,
-          chaptersCount: 0,
-          sessionsCount: 0,
-          questionsCount: 0,
-          quizzesCount: 0,
+          coverEmoji: data.coverEmoji || "📘", coverColor: data.coverColor || "from-violet-500 to-blue-500",
+          promoVideoUrl: data.promoVideoUrl || "",
+          teacherId: data.teacherId || "TCH-26-0001", teacherName: data.teacherName || "Dr. Layla Hassan",
+          teacherPublicCode: data.teacherPublicCode || "TCH-26-0001",
+          teacherBio: data.teacherBio || "", teacherHeadline: data.teacherHeadline || "",
+          whyJoinThisCourse: data.whyJoinThisCourse || [], outcomes: data.outcomes || [],
+          whoIsThisFor: data.whoIsThisFor || [], requirements: data.requirements || [],
+          courseHighlights: data.courseHighlights || [], includedFeatures: data.includedFeatures || [],
+          price: data.price ?? 0, currency: data.currency || "USD",
+          countryPrices: data.countryPrices || [],
+          discountPrice: data.discountPrice ?? 0, discountEndsAt: data.discountEndsAt || "",
+          allowWalletPayment: data.allowWalletPayment ?? true,
+          testimonials: data.testimonials || [],
+          enrollmentCount: 0, revenue: 0, rating: 0, reviewsCount: 0, completionRate: 0,
+          lessonsCount: 0, hoursCount: 0, chaptersCount: 0, sessionsCount: 0,
+          questionsCount: 0, quizzesCount: 0,
+          certificateIncluded: data.certificateIncluded ?? true,
+          accessDuration: data.accessDuration || "Lifetime",
+          refundPolicy: data.refundPolicy || "30-day money-back guarantee",
           assignedAssistant: data.assignedAssistant || "",
           assignedContentManager: data.assignedContentManager || "",
+          metaTitle: data.metaTitle || "", metaDescription: data.metaDescription || "",
           tags: data.tags || [],
-          createdAt: now,
-          updatedAt: now,
+          status: data.status || "draft", visibility: data.visibility || "public",
+          isFeatured: data.isFeatured ?? false, featuredUntil: data.featuredUntil || "",
+          createdAt: now, updatedAt: now,
         };
         set((state) => ({ courses: [course, ...state.courses] }));
         return course;
