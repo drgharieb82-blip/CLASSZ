@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect } from "react";
 import {
   BookOpen, CreditCard, DollarSign, FileText, MessageSquare, Plus,
   TrendingUp, Users, Wallet, ClipboardList, Bell, ArrowRight,
 } from "lucide-react";
+import { seedTeacherData } from "@/lib/teacher/seed-teacher-data";
 import { DashPage } from "@/components/common/DashPage";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +17,7 @@ export const Route = createFileRoute("/teacher/")({
 });
 
 function TeacherDashboard() {
+  useEffect(() => { seedTeacherData(); }, []);
   return (
     <DashPage role="teacher" title="Teacher Workspace" subtitle={`${teacherProfile.name} · ${teacherProfile.publicCode}`} icon={ROLES.teacher.icon}>
       {/* Stats Row */}

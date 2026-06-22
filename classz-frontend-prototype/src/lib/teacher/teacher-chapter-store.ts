@@ -16,7 +16,8 @@ export interface TeacherChapter {
   updatedAt: string;
 }
 
-export type CreateChapterData = Pick<TeacherChapter, "courseId" | "title" | "description"> & {
+export type CreateChapterData = Pick<TeacherChapter, "courseId" | "title"> & {
+  description?: string;
   status?: ChapterStatus;
 };
 

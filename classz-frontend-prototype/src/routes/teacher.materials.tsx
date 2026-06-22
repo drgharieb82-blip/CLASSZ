@@ -123,20 +123,56 @@ function MaterialLibraryPage() {
         </div>
       </div>
 
-      {/* Upload Panel */}
+      {/* Upload Panel — Step 1: Type, Step 2: Source, Step 3: Details */}
       {showUpload && (
-        <Card className="border bg-card p-5 space-y-4">
+        <Card className="border bg-card p-5 space-y-5">
           <h3 className="font-semibold">Upload Material</h3>
-          <div><Label className="text-xs mb-1.5 block">Source</Label><div className="flex flex-wrap gap-1.5">{SOURCES.map((s) => (<button key={s} onClick={() => setUploadSource(s)} className={cn("rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors", uploadSource === s ? "border-primary bg-primary/10 text-primary" : "hover:bg-accent")}>{s}</button>))}</div></div>
-          <div><Label className="text-xs mb-1.5 block">Type</Label><div className="flex flex-wrap gap-1.5">{(Object.keys(TYPE_META) as MaterialType[]).map((t) => { const m = TYPE_META[t]; return (<button key={t} onClick={() => setUploadType(t)} className={cn("flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors", uploadType === t ? "border-primary bg-primary/10 text-primary" : "hover:bg-accent")}><m.icon className="h-3 w-3" /> {m.label}</button>); })}</div></div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="space-y-1.5"><Label className="text-xs">Title *</Label><Input value={uploadTitle} onChange={(e) => setUploadTitle(e.target.value)} placeholder="Material title" className="rounded-xl" /></div>
-            {uploadType === "video" && (<><div className="space-y-1.5"><Label className="text-xs">{uploadSource === "YouTube" ? "YouTube URL" : uploadSource === "Vimeo" ? "Vimeo URL" : "Video URL"}</Label><Input value={uploadUrl} onChange={(e) => setUploadUrl(e.target.value)} placeholder="https://..." className="rounded-xl" /></div><div className="space-y-1.5"><Label className="text-xs">Duration</Label><Input value={uploadDuration} onChange={(e) => setUploadDuration(e.target.value)} placeholder="45:00" className="rounded-xl" /></div></>)}
-            {uploadType !== "video" && uploadType !== "notes" && (<div className="space-y-1.5"><Label className="text-xs">File URL</Label><Input value={uploadUrl} onChange={(e) => setUploadUrl(e.target.value)} placeholder="https://..." className="rounded-xl" /></div>)}
+
+          {/* Step 1: Material Type */}
+          <div>
+            <Label className="text-xs mb-2 block font-semibold">Step 1 — Material Type</Label>
+            <div className="flex flex-wrap gap-2">
+              {(Object.keys(TYPE_META) as MaterialType[]).map((t) => { const m = TYPE_META[t]; return (
+                <button key={t} onClick={() => setUploadType(t)} className={cn("flex items-center gap-1.5 rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors", uploadType === t ? "border-primary bg-primary/10 text-primary" : "hover:bg-accent")}>
+                  <m.icon className="h-4 w-4" /> {m.label}
+                </button>
+              ); })}
+            </div>
           </div>
-          <div className="space-y-1.5"><Label className="text-xs">Description</Label><textarea value={uploadDesc} onChange={(e) => setUploadDesc(e.target.value)} rows={2} placeholder="Optional description..." className="w-full rounded-xl border bg-card px-3 py-2 text-xs resize-none" /></div>
-          <div className="flex gap-2">
+
+          {/* Step 2: Source (only for video/pdf/image/attachment) */}
+          {uploadType !== "notes" && (
+            <div>
+              <Label className="text-xs mb-2 block font-semibold">Step 2 — Source</Label>
+              <div className="flex flex-wrap gap-1.5">
+                {(uploadType === "video" ? SOURCES : ["Upload File", "External URL", "Cloud Storage"]).map((s) => (
+                  <button key={s} onClick={() => setUploadSource(s)} className={cn("rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors", uploadSource === s ? "border-primary bg-primary/10 text-primary" : "hover:bg-accent")}>{s}</button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Details */}
+          <div>
+            <Label className="text-xs mb-2 block font-semibold">{uploadType === "notes" ? "Step 2" : "Step 3"} — Details</Label>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5"><Label className="text-xs">Title *</Label><Input value={uploadTitle} onChange={(e) => setUploadTitle(e.target.value)} placeholder="Material title" className="rounded-xl" /></div>
+              {uploadType === "video" && (<>
+                <div className="space-y-1.5"><Label className="text-xs">{uploadSource === "YouTube" ? "YouTube URL" : uploadSource === "Vimeo" ? "Vimeo URL" : "Video URL / File"}</Label><Input value={uploadUrl} onChange={(e) => setUploadUrl(e.target.value)} placeholder={uploadSource === "Upload File" ? "Select file or paste URL" : "https://..."} className="rounded-xl" /></div>
+                <div className="space-y-1.5"><Label className="text-xs">Duration</Label><Input value={uploadDuration} onChange={(e) => setUploadDuration(e.target.value)} placeholder="45:00" className="rounded-xl" /></div>
+                <div className="space-y-1.5"><Label className="text-xs">Thumbnail URL</Label><Input placeholder="https://... (optional)" className="rounded-xl" /></div>
+              </>)}
+              {(uploadType === "pdf" || uploadType === "image" || uploadType === "attachment") && (
+                <div className="space-y-1.5"><Label className="text-xs">{uploadSource === "Upload File" ? "Select file or paste URL" : "File URL"}</Label><Input value={uploadUrl} onChange={(e) => setUploadUrl(e.target.value)} placeholder="https://..." className="rounded-xl" /></div>
+              )}
+            </div>
+            <div className="mt-3 space-y-1.5"><Label className="text-xs">Description</Label><textarea value={uploadDesc} onChange={(e) => setUploadDesc(e.target.value)} rows={2} placeholder="Optional description..." className="w-full rounded-xl border bg-card px-3 py-2 text-xs resize-none" /></div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-2 pt-2 border-t">
             <Button onClick={handleUpload} disabled={!uploadTitle.trim()} className="rounded-xl gradient-brand border-0 text-white" size="sm"><Upload className="me-1.5 h-4 w-4" /> Upload to Library</Button>
+            <Button onClick={() => { if (uploadTitle.trim()) handleUpload(); }} variant="outline" size="sm" className="rounded-xl">Save Draft</Button>
             <Button variant="ghost" size="sm" className="rounded-xl" onClick={() => setShowUpload(false)}>Cancel</Button>
           </div>
         </Card>
