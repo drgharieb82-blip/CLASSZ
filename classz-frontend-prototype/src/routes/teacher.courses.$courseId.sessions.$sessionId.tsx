@@ -5,6 +5,9 @@ import {
   HelpCircle, Image, Library, Pencil, Play, Plus, StickyNote, Sparkles, Trash2, Video,
 } from "lucide-react";
 import { getPublishedQuizzesForSession } from "@/lib/teacher/teacher-quiz-store";
+import { getPublishedExamsForSession } from "@/lib/teacher/teacher-exam-store";
+import { getPublishedHomeworkForSession } from "@/lib/teacher/teacher-homework-store";
+import { getPublishedAssignmentsForSession } from "@/lib/teacher/teacher-assignment-store";
 import { DashPage } from "@/components/common/DashPage";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -306,29 +309,62 @@ function SessionMaterialsPage() {
           );
         })()}
 
-        {/* Exam Block - Placeholder */}
-        <Card className="border border-dashed bg-card/50 p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <BookOpen className="h-4 w-4 text-rose-500" />
-              <span className="text-sm font-medium text-muted-foreground">Exam</span>
-              <Badge variant="outline" className="rounded-full text-xs text-muted-foreground">No exam attached</Badge>
-            </div>
-            <span className="text-xs text-muted-foreground">Create Exam Later</span>
-          </div>
-        </Card>
+        {/* Exam Block - Active */}
+        {(() => {
+          const exams = getPublishedExamsForSession(sessionId);
+          if (exams.length > 0) return exams.map((ex) => (
+            <Card key={ex.id} className="border border-rose-500/20 bg-rose-500/5 p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-rose-500" /><span className="text-sm font-medium">{ex.title}</span>
+                  <Badge variant="outline" className="rounded-full text-xs border-rose-300 text-rose-600">{ex.questionIds.length} Q · {ex.durationMinutes}m · +{ex.examXpReward} XP</Badge></div>
+                <Link to="/teacher/exams/$examId/edit" params={{ examId: ex.id }} className="text-xs text-primary hover:underline">Edit</Link>
+              </div>
+            </Card>
+          ));
+          return (
+            <Card className="border border-dashed bg-card/50 p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-rose-500" /><span className="text-sm font-medium text-muted-foreground">Exam</span><Badge variant="outline" className="rounded-full text-xs text-muted-foreground">No exam attached</Badge></div>
+                <Link to="/teacher/exams/create" className="text-xs text-primary hover:underline">Create Exam →</Link>
+              </div>
+            </Card>
+          );
+        })()}
 
-        {/* Homework Block - Placeholder */}
-        <Card className="border border-dashed bg-card/50 p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Pencil className="h-4 w-4 text-amber-500" />
-              <span className="text-sm font-medium text-muted-foreground">Homework</span>
-              <Badge variant="outline" className="rounded-full text-xs text-muted-foreground">No homework attached</Badge>
-            </div>
-            <span className="text-xs text-muted-foreground">Create Homework Later</span>
-          </div>
-        </Card>
+        {/* Homework Block - Active */}
+        {(() => {
+          const hws = getPublishedHomeworkForSession(sessionId);
+          if (hws.length > 0) return hws.map((hw) => (
+            <Card key={hw.id} className="border border-amber-500/20 bg-amber-500/5 p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2"><Pencil className="h-4 w-4 text-amber-500" /><span className="text-sm font-medium">{hw.title}</span>
+                  <Badge variant="outline" className="rounded-full text-xs border-amber-300 text-amber-600">{hw.homeworkType}{hw.dueDate ? ` · Due ${hw.dueDate}` : ""}</Badge></div>
+              </div>
+            </Card>
+          ));
+          return (
+            <Card className="border border-dashed bg-card/50 p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2"><Pencil className="h-4 w-4 text-amber-500" /><span className="text-sm font-medium text-muted-foreground">Homework</span><Badge variant="outline" className="rounded-full text-xs text-muted-foreground">No homework attached</Badge></div>
+                <Link to="/teacher/homework/create" className="text-xs text-primary hover:underline">Create Homework →</Link>
+              </div>
+            </Card>
+          );
+        })()}
+
+        {/* Assignment Block - Active */}
+        {(() => {
+          const asns = getPublishedAssignmentsForSession(sessionId);
+          if (asns.length > 0) return asns.map((asn) => (
+            <Card key={asn.id} className="border border-cyan-500/20 bg-cyan-500/5 p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2"><ClipboardList className="h-4 w-4 text-cyan-500" /><span className="text-sm font-medium">{asn.title}</span>
+                  <Badge variant="outline" className="rounded-full text-xs border-cyan-300 text-cyan-600">{asn.assignmentType}{asn.dueDate ? ` · Due ${asn.dueDate}` : ""}</Badge></div>
+              </div>
+            </Card>
+          ));
+          return null;
+        })()}
       </div>
     </DashPage>
   );

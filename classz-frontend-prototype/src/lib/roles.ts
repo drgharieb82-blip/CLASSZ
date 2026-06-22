@@ -67,7 +67,10 @@ export const ROLES: Record<Role, RoleConfig> = {
       ]},
       { group: "Assessment", items: [
         { label: "Question Bank", to: "/teacher/questions", icon: Library },
-        { label: "Quizzes & Exams", to: "/teacher/quizzes", icon: ClipboardList },
+        { label: "Quizzes", to: "/teacher/quizzes", icon: ClipboardList },
+        { label: "Exams", to: "/teacher/exams", icon: ScrollText },
+        { label: "Homework", to: "/teacher/homework", icon: ListChecks },
+        { label: "Grading Queue", to: "/teacher/grading", icon: Receipt },
       ]},
       { group: "Business", items: [
         { label: "Students", to: "/teacher/students", icon: Users },

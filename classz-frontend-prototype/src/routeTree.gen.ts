@@ -38,7 +38,10 @@ import { Route as TeacherQuizzesRouteImport } from './routes/teacher.quizzes'
 import { Route as TeacherQuestionsRouteImport } from './routes/teacher.questions'
 import { Route as TeacherMaterialsRouteImport } from './routes/teacher.materials'
 import { Route as TeacherLessonsRouteImport } from './routes/teacher.lessons'
+import { Route as TeacherHomeworkRouteImport } from './routes/teacher.homework'
+import { Route as TeacherGradingRouteImport } from './routes/teacher.grading'
 import { Route as TeacherGeneratorRouteImport } from './routes/teacher.generator'
+import { Route as TeacherExamsRouteImport } from './routes/teacher.exams'
 import { Route as TeacherCoursesRouteImport } from './routes/teacher.courses'
 import { Route as TeacherChatRouteImport } from './routes/teacher.chat'
 import { Route as TeacherChaptersRouteImport } from './routes/teacher.chapters'
@@ -98,6 +101,8 @@ import { Route as AdminBannersRouteImport } from './routes/admin.banners'
 import { Route as StudentCoursesIndexRouteImport } from './routes/student.courses.index'
 import { Route as TeacherQuizzesCreateRouteImport } from './routes/teacher.quizzes.create'
 import { Route as TeacherQuestionsCreateRouteImport } from './routes/teacher.questions.create'
+import { Route as TeacherHomeworkCreateRouteImport } from './routes/teacher.homework.create'
+import { Route as TeacherExamsCreateRouteImport } from './routes/teacher.exams.create'
 import { Route as TeacherCoursesCreateRouteImport } from './routes/teacher.courses.create'
 import { Route as StudentQuizzesQuizIdRouteImport } from './routes/student.quizzes.$quizId'
 import { Route as StudentCoursesCourseIdRouteImport } from './routes/student.courses.$courseId'
@@ -258,9 +263,24 @@ const TeacherLessonsRoute = TeacherLessonsRouteImport.update({
   path: '/teacher/lessons',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeacherHomeworkRoute = TeacherHomeworkRouteImport.update({
+  id: '/teacher/homework',
+  path: '/teacher/homework',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeacherGradingRoute = TeacherGradingRouteImport.update({
+  id: '/teacher/grading',
+  path: '/teacher/grading',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TeacherGeneratorRoute = TeacherGeneratorRouteImport.update({
   id: '/teacher/generator',
   path: '/teacher/generator',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeacherExamsRoute = TeacherExamsRouteImport.update({
+  id: '/teacher/exams',
+  path: '/teacher/exams',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TeacherCoursesRoute = TeacherCoursesRouteImport.update({
@@ -558,6 +578,16 @@ const TeacherQuestionsCreateRoute = TeacherQuestionsCreateRouteImport.update({
   path: '/create',
   getParentRoute: () => TeacherQuestionsRoute,
 } as any)
+const TeacherHomeworkCreateRoute = TeacherHomeworkCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => TeacherHomeworkRoute,
+} as any)
+const TeacherExamsCreateRoute = TeacherExamsCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => TeacherExamsRoute,
+} as any)
 const TeacherCoursesCreateRoute = TeacherCoursesCreateRouteImport.update({
   id: '/create',
   path: '/create',
@@ -706,7 +736,10 @@ export interface FileRoutesByFullPath {
   '/teacher/chapters': typeof TeacherChaptersRoute
   '/teacher/chat': typeof TeacherChatRoute
   '/teacher/courses': typeof TeacherCoursesRouteWithChildren
+  '/teacher/exams': typeof TeacherExamsRouteWithChildren
   '/teacher/generator': typeof TeacherGeneratorRoute
+  '/teacher/grading': typeof TeacherGradingRoute
+  '/teacher/homework': typeof TeacherHomeworkRouteWithChildren
   '/teacher/lessons': typeof TeacherLessonsRoute
   '/teacher/materials': typeof TeacherMaterialsRoute
   '/teacher/questions': typeof TeacherQuestionsRouteWithChildren
@@ -731,6 +764,8 @@ export interface FileRoutesByFullPath {
   '/student/courses/$courseId': typeof StudentCoursesCourseIdRouteWithChildren
   '/student/quizzes/$quizId': typeof StudentQuizzesQuizIdRoute
   '/teacher/courses/create': typeof TeacherCoursesCreateRoute
+  '/teacher/exams/create': typeof TeacherExamsCreateRoute
+  '/teacher/homework/create': typeof TeacherHomeworkCreateRoute
   '/teacher/questions/create': typeof TeacherQuestionsCreateRoute
   '/teacher/quizzes/create': typeof TeacherQuizzesCreateRoute
   '/student/courses/': typeof StudentCoursesIndexRoute
@@ -809,7 +844,10 @@ export interface FileRoutesByTo {
   '/teacher/chapters': typeof TeacherChaptersRoute
   '/teacher/chat': typeof TeacherChatRoute
   '/teacher/courses': typeof TeacherCoursesRouteWithChildren
+  '/teacher/exams': typeof TeacherExamsRouteWithChildren
   '/teacher/generator': typeof TeacherGeneratorRoute
+  '/teacher/grading': typeof TeacherGradingRoute
+  '/teacher/homework': typeof TeacherHomeworkRouteWithChildren
   '/teacher/lessons': typeof TeacherLessonsRoute
   '/teacher/materials': typeof TeacherMaterialsRoute
   '/teacher/questions': typeof TeacherQuestionsRouteWithChildren
@@ -833,6 +871,8 @@ export interface FileRoutesByTo {
   '/student/certificates/$certificateId': typeof StudentCertificatesCertificateIdRoute
   '/student/quizzes/$quizId': typeof StudentQuizzesQuizIdRoute
   '/teacher/courses/create': typeof TeacherCoursesCreateRoute
+  '/teacher/exams/create': typeof TeacherExamsCreateRoute
+  '/teacher/homework/create': typeof TeacherHomeworkCreateRoute
   '/teacher/questions/create': typeof TeacherQuestionsCreateRoute
   '/teacher/quizzes/create': typeof TeacherQuizzesCreateRoute
   '/student/courses': typeof StudentCoursesIndexRoute
@@ -914,7 +954,10 @@ export interface FileRoutesById {
   '/teacher/chapters': typeof TeacherChaptersRoute
   '/teacher/chat': typeof TeacherChatRoute
   '/teacher/courses': typeof TeacherCoursesRouteWithChildren
+  '/teacher/exams': typeof TeacherExamsRouteWithChildren
   '/teacher/generator': typeof TeacherGeneratorRoute
+  '/teacher/grading': typeof TeacherGradingRoute
+  '/teacher/homework': typeof TeacherHomeworkRouteWithChildren
   '/teacher/lessons': typeof TeacherLessonsRoute
   '/teacher/materials': typeof TeacherMaterialsRoute
   '/teacher/questions': typeof TeacherQuestionsRouteWithChildren
@@ -939,6 +982,8 @@ export interface FileRoutesById {
   '/student/courses/$courseId': typeof StudentCoursesCourseIdRouteWithChildren
   '/student/quizzes/$quizId': typeof StudentQuizzesQuizIdRoute
   '/teacher/courses/create': typeof TeacherCoursesCreateRoute
+  '/teacher/exams/create': typeof TeacherExamsCreateRoute
+  '/teacher/homework/create': typeof TeacherHomeworkCreateRoute
   '/teacher/questions/create': typeof TeacherQuestionsCreateRoute
   '/teacher/quizzes/create': typeof TeacherQuizzesCreateRoute
   '/student/courses/': typeof StudentCoursesIndexRoute
@@ -1021,7 +1066,10 @@ export interface FileRouteTypes {
     | '/teacher/chapters'
     | '/teacher/chat'
     | '/teacher/courses'
+    | '/teacher/exams'
     | '/teacher/generator'
+    | '/teacher/grading'
+    | '/teacher/homework'
     | '/teacher/lessons'
     | '/teacher/materials'
     | '/teacher/questions'
@@ -1046,6 +1094,8 @@ export interface FileRouteTypes {
     | '/student/courses/$courseId'
     | '/student/quizzes/$quizId'
     | '/teacher/courses/create'
+    | '/teacher/exams/create'
+    | '/teacher/homework/create'
     | '/teacher/questions/create'
     | '/teacher/quizzes/create'
     | '/student/courses/'
@@ -1124,7 +1174,10 @@ export interface FileRouteTypes {
     | '/teacher/chapters'
     | '/teacher/chat'
     | '/teacher/courses'
+    | '/teacher/exams'
     | '/teacher/generator'
+    | '/teacher/grading'
+    | '/teacher/homework'
     | '/teacher/lessons'
     | '/teacher/materials'
     | '/teacher/questions'
@@ -1148,6 +1201,8 @@ export interface FileRouteTypes {
     | '/student/certificates/$certificateId'
     | '/student/quizzes/$quizId'
     | '/teacher/courses/create'
+    | '/teacher/exams/create'
+    | '/teacher/homework/create'
     | '/teacher/questions/create'
     | '/teacher/quizzes/create'
     | '/student/courses'
@@ -1228,7 +1283,10 @@ export interface FileRouteTypes {
     | '/teacher/chapters'
     | '/teacher/chat'
     | '/teacher/courses'
+    | '/teacher/exams'
     | '/teacher/generator'
+    | '/teacher/grading'
+    | '/teacher/homework'
     | '/teacher/lessons'
     | '/teacher/materials'
     | '/teacher/questions'
@@ -1253,6 +1311,8 @@ export interface FileRouteTypes {
     | '/student/courses/$courseId'
     | '/student/quizzes/$quizId'
     | '/teacher/courses/create'
+    | '/teacher/exams/create'
+    | '/teacher/homework/create'
     | '/teacher/questions/create'
     | '/teacher/quizzes/create'
     | '/student/courses/'
@@ -1322,7 +1382,10 @@ export interface RootRouteChildren {
   TeacherChaptersRoute: typeof TeacherChaptersRoute
   TeacherChatRoute: typeof TeacherChatRoute
   TeacherCoursesRoute: typeof TeacherCoursesRouteWithChildren
+  TeacherExamsRoute: typeof TeacherExamsRouteWithChildren
   TeacherGeneratorRoute: typeof TeacherGeneratorRoute
+  TeacherGradingRoute: typeof TeacherGradingRoute
+  TeacherHomeworkRoute: typeof TeacherHomeworkRouteWithChildren
   TeacherLessonsRoute: typeof TeacherLessonsRoute
   TeacherMaterialsRoute: typeof TeacherMaterialsRoute
   TeacherQuestionsRoute: typeof TeacherQuestionsRouteWithChildren
@@ -1548,11 +1611,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherLessonsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/teacher/homework': {
+      id: '/teacher/homework'
+      path: '/teacher/homework'
+      fullPath: '/teacher/homework'
+      preLoaderRoute: typeof TeacherHomeworkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teacher/grading': {
+      id: '/teacher/grading'
+      path: '/teacher/grading'
+      fullPath: '/teacher/grading'
+      preLoaderRoute: typeof TeacherGradingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/teacher/generator': {
       id: '/teacher/generator'
       path: '/teacher/generator'
       fullPath: '/teacher/generator'
       preLoaderRoute: typeof TeacherGeneratorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teacher/exams': {
+      id: '/teacher/exams'
+      path: '/teacher/exams'
+      fullPath: '/teacher/exams'
+      preLoaderRoute: typeof TeacherExamsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/teacher/courses': {
@@ -1968,6 +2052,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherQuestionsCreateRouteImport
       parentRoute: typeof TeacherQuestionsRoute
     }
+    '/teacher/homework/create': {
+      id: '/teacher/homework/create'
+      path: '/create'
+      fullPath: '/teacher/homework/create'
+      preLoaderRoute: typeof TeacherHomeworkCreateRouteImport
+      parentRoute: typeof TeacherHomeworkRoute
+    }
+    '/teacher/exams/create': {
+      id: '/teacher/exams/create'
+      path: '/create'
+      fullPath: '/teacher/exams/create'
+      preLoaderRoute: typeof TeacherExamsCreateRouteImport
+      parentRoute: typeof TeacherExamsRoute
+    }
     '/teacher/courses/create': {
       id: '/teacher/courses/create'
       path: '/create'
@@ -2188,6 +2286,30 @@ const TeacherCoursesRouteWithChildren = TeacherCoursesRoute._addFileChildren(
   TeacherCoursesRouteChildren,
 )
 
+interface TeacherExamsRouteChildren {
+  TeacherExamsCreateRoute: typeof TeacherExamsCreateRoute
+}
+
+const TeacherExamsRouteChildren: TeacherExamsRouteChildren = {
+  TeacherExamsCreateRoute: TeacherExamsCreateRoute,
+}
+
+const TeacherExamsRouteWithChildren = TeacherExamsRoute._addFileChildren(
+  TeacherExamsRouteChildren,
+)
+
+interface TeacherHomeworkRouteChildren {
+  TeacherHomeworkCreateRoute: typeof TeacherHomeworkCreateRoute
+}
+
+const TeacherHomeworkRouteChildren: TeacherHomeworkRouteChildren = {
+  TeacherHomeworkCreateRoute: TeacherHomeworkCreateRoute,
+}
+
+const TeacherHomeworkRouteWithChildren = TeacherHomeworkRoute._addFileChildren(
+  TeacherHomeworkRouteChildren,
+)
+
 interface TeacherQuestionsRouteChildren {
   TeacherQuestionsCreateRoute: typeof TeacherQuestionsCreateRoute
 }
@@ -2267,7 +2389,10 @@ const rootRouteChildren: RootRouteChildren = {
   TeacherChaptersRoute: TeacherChaptersRoute,
   TeacherChatRoute: TeacherChatRoute,
   TeacherCoursesRoute: TeacherCoursesRouteWithChildren,
+  TeacherExamsRoute: TeacherExamsRouteWithChildren,
   TeacherGeneratorRoute: TeacherGeneratorRoute,
+  TeacherGradingRoute: TeacherGradingRoute,
+  TeacherHomeworkRoute: TeacherHomeworkRouteWithChildren,
   TeacherLessonsRoute: TeacherLessonsRoute,
   TeacherMaterialsRoute: TeacherMaterialsRoute,
   TeacherQuestionsRoute: TeacherQuestionsRouteWithChildren,
