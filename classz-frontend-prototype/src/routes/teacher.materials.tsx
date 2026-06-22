@@ -187,7 +187,10 @@ function MaterialLibraryPage() {
         {/* Coverage Tree Panel */}
         {showTree && (
           <Card className="border bg-card p-3 max-h-[600px] overflow-y-auto">
-            <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">Content Tree</p>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-semibold uppercase text-muted-foreground">Content Tree</p>
+              <Button variant="ghost" size="sm" className="h-6 text-xs text-muted-foreground" onClick={() => { localStorage.removeItem("classz-content-tree"); window.location.reload(); }}>Reset</Button>
+            </div>
             {courses.length === 0 ? (
               <p className="text-xs text-muted-foreground py-4 text-center">Create a course first.</p>
             ) : (
@@ -196,10 +199,9 @@ function MaterialLibraryPage() {
                   <option value="">Select course</option>
                   {courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
                 </select>
-                {selectedCourse && <CourseTree courseId={selectedCourse} selectedNode={selectedNode} onSelect={setSelectedNode} />}
+                {selectedCourse && <SafeTreeWrapper courseId={selectedCourse} selectedNode={selectedNode} onSelect={setSelectedNode} />}
               </div>
             )}
-            {selectedCourse && <CoverageSummaryPanel courseId={selectedCourse} />}
           </Card>
         )}
 
@@ -268,6 +270,26 @@ function MaterialRow({ mat, onPublish, onUnpublish, onDelete }: { mat: TeacherMa
   );
 }
 
+function SafeTreeWrapper({ courseId, selectedNode, onSelect }: { courseId: string; selectedNode: string | null; onSelect: (id: string | null) => void }) {
+  try {
+    const nodes = useContentTreeStore.getState().nodes.filter((n) => n.courseId === courseId);
+    // Validate data integrity before rendering
+    for (const n of nodes) {
+      if (!n.id || !n.type || !n.title) {
+        return <p className="text-xs text-destructive py-2">Tree data corrupted. Click Reset above.</p>;
+      }
+    }
+    return (
+      <>
+        <CourseTree courseId={courseId} selectedNode={selectedNode} onSelect={onSelect} />
+        <CoverageSummaryPanel courseId={courseId} />
+      </>
+    );
+  } catch {
+    return <p className="text-xs text-destructive py-2">Failed to load tree. Click Reset above.</p>;
+  }
+}
+
 function CourseTree({ courseId, selectedNode, onSelect }: { courseId: string; selectedNode: string | null; onSelect: (id: string | null) => void }) {
   const nodes = useContentTreeStore((s) => s.nodes.filter((n) => n.courseId === courseId));
   const createNode = useContentTreeStore((s) => s.createNode);
@@ -291,30 +313,30 @@ function CourseTree({ courseId, selectedNode, onSelect }: { courseId: string; se
 }
 
 function TreeNode({ node, depth, selectedNode, onSelect, courseId }: { node: ContentTreeNode; depth: number; selectedNode: string | null; onSelect: (id: string | null) => void; courseId: string }) {
-  const [expanded, setExpanded] = useState(depth < 2);
-  const children = useContentTreeStore((s) => s.nodes.filter((n) => n.parentId === node.id).sort((a, b) => a.order - b.order));
+  const [expanded, setExpanded] = useState(depth < 1);
+  const children = useContentTreeStore((s) => s.nodes.filter((n) => n.parentId === node.id).sort((a, b) => (a.order || 0) - (b.order || 0)));
   const createNode = useContentTreeStore((s) => s.createNode);
-  const isSelected = selectedNode === node.id;
-  const hasChildren = children.length > 0;
 
-  const childType: Record<string, string> = { chapter: "lesson", lesson: "concept", concept: "atomic_concept" };
-  const nextType = childType[node.type];
-
+  if (!node || !node.id || !node.type) return null;
   if (node.isHidden) return null;
 
-  const statusColor = STATUS_COLORS[node.coverageStatus || "not_started"] || STATUS_COLORS.not_started;
-  const matCount = node.linkedMaterialIds?.length || 0;
+  const isSelected = selectedNode === node.id;
+  const hasChildren = children.length > 0;
+  const childType: Record<string, string> = { chapter: "lesson", lesson: "concept", concept: "atomic_concept" };
+  const nextType = childType[node.type] || "";
+  const statusColor = STATUS_COLORS[node.coverageStatus || "not_started"] || "bg-slate-500/10 text-slate-500";
+  const matCount = (node.linkedMaterialIds || []).length;
 
   return (
     <div>
       <button
-        onClick={() => { onSelect(isSelected ? null : node.id); if (hasChildren) setExpanded(!expanded); }}
+        onClick={() => { onSelect(isSelected ? null : node.id); setExpanded(!expanded); }}
         className={cn("flex w-full items-center gap-1 rounded-lg px-2 py-1 text-xs transition-colors", isSelected ? "bg-primary/10 text-primary" : "hover:bg-accent")}
         style={{ paddingLeft: `${depth * 12 + 8}px` }}
       >
         {hasChildren ? (expanded ? <ChevronDown className="h-3 w-3 shrink-0" /> : <ChevronRight className="h-3 w-3 shrink-0" />) : <span className="w-3 shrink-0" />}
         <span className={cn("h-2 w-2 shrink-0 rounded-full", statusColor.split(" ")[0])} />
-        <span className="truncate flex-1 text-start">{node.title}</span>
+        <span className="truncate flex-1 text-start">{node.title || "Untitled"}</span>
         {matCount > 0 && <span className="text-muted-foreground">{matCount}</span>}
       </button>
       {expanded && (
