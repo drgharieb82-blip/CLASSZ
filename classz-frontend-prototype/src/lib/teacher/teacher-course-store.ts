@@ -17,20 +17,36 @@ export interface Testimonial {
   comment: string;
 }
 
+export type CourseCategory = "academic" | "training" | "professional" | "general";
+export type PricingModel = "one_time" | "monthly" | "per_session" | "session_bundle";
+
+export interface SocialLinks {
+  facebook?: string;
+  instagram?: string;
+  telegram?: string;
+  whatsapp?: string;
+  youtube?: string;
+  website?: string;
+}
+
 export interface TeacherCourse {
   id: string;
   publicCode: string;
   // Basic
   title: string;
   slug: string;
+  category: CourseCategory;
   subject: string;
+  customSubject: string;
   grade: string;
+  customGrade: string;
   description: string;
   shortDescription: string;
   language: string;
   // Cover
   coverEmoji: string;
   coverColor: string;
+  coverImageUrl: string;
   promoVideoUrl: string;
   // Teacher
   teacherId: string;
@@ -45,8 +61,14 @@ export interface TeacherCourse {
   requirements: string[];
   courseHighlights: string[];
   includedFeatures: string[];
+  socialLinks: SocialLinks;
   // Pricing
+  pricingModel: PricingModel;
   price: number;
+  monthlyPrice: number;
+  perSessionPrice: number;
+  bundleSize: number;
+  bundlePrice: number;
   currency: string;
   countryPrices: CountryPrice[];
   discountPrice: number;
@@ -126,10 +148,13 @@ export const useTeacherCourseStore = create<TeacherCourseState>()(
           id: generateCourseId(),
           publicCode: generatePublicCode(),
           title: data.title, slug: slugify(data.title),
-          subject: data.subject, grade: data.grade,
+          category: data.category || "academic",
+          subject: data.subject, customSubject: data.customSubject || "",
+          grade: data.grade, customGrade: data.customGrade || "",
           description: data.description || "", shortDescription: data.shortDescription || "",
-          language: data.language || "Arabic",
+          language: data.language || "",
           coverEmoji: data.coverEmoji || "📘", coverColor: data.coverColor || "from-violet-500 to-blue-500",
+          coverImageUrl: data.coverImageUrl || "",
           promoVideoUrl: data.promoVideoUrl || "",
           teacherId: data.teacherId || "TCH-26-0001", teacherName: data.teacherName || "Dr. Layla Hassan",
           teacherPublicCode: data.teacherPublicCode || "TCH-26-0001",
@@ -137,8 +162,12 @@ export const useTeacherCourseStore = create<TeacherCourseState>()(
           whyJoinThisCourse: data.whyJoinThisCourse || [], outcomes: data.outcomes || [],
           whoIsThisFor: data.whoIsThisFor || [], requirements: data.requirements || [],
           courseHighlights: data.courseHighlights || [], includedFeatures: data.includedFeatures || [],
-          price: data.price ?? 0, currency: data.currency || "USD",
-          countryPrices: data.countryPrices || [],
+          socialLinks: data.socialLinks || {},
+          pricingModel: data.pricingModel || "one_time",
+          price: data.price ?? 0, monthlyPrice: data.monthlyPrice ?? 0,
+          perSessionPrice: data.perSessionPrice ?? 0,
+          bundleSize: data.bundleSize ?? 0, bundlePrice: data.bundlePrice ?? 0,
+          currency: data.currency || "USD", countryPrices: data.countryPrices || [],
           discountPrice: data.discountPrice ?? 0, discountEndsAt: data.discountEndsAt || "",
           allowWalletPayment: data.allowWalletPayment ?? true,
           testimonials: data.testimonials || [],

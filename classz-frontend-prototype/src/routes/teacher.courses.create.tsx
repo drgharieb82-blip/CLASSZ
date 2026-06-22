@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowLeft, Check, Plus, Save, Upload, X } from "lucide-react";
+import { ArrowLeft, ImagePlus, Plus, Save, Upload, X } from "lucide-react";
 import { DashPage } from "@/components/common/DashPage";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,17 +9,23 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ROLES } from "@/lib/roles";
 import { cn } from "@/lib/utils";
-import { useTeacherCourseStore, type CountryPrice, type Testimonial } from "@/lib/teacher/teacher-course-store";
+import { useTeacherCourseStore, type CountryPrice, type CourseCategory, type PricingModel, type SocialLinks } from "@/lib/teacher/teacher-course-store";
 import { COUNTRIES } from "@/lib/i18n/countries";
 import { teacherTeam } from "@/lib/teacherMock";
 
 export const Route = createFileRoute("/teacher/courses/create")({ component: CreateCoursePage });
 
-const SUBJECTS = ["Math", "Physics", "Chemistry", "Biology", "English", "Arabic", "CS", "History"];
-const GRADES = ["Grade 10", "Grade 11", "Grade 12"];
+const CATEGORIES: { value: CourseCategory; label: string }[] = [
+  { value: "academic", label: "Academic (School/University)" },
+  { value: "training", label: "Training Course" },
+  { value: "professional", label: "Professional Development" },
+  { value: "general", label: "General Learning" },
+];
+
+const COMMON_SUBJECTS = ["Math", "Physics", "Chemistry", "Biology", "English", "Arabic", "CS", "History", "IELTS", "TOEFL", "Supply Chain", "Marketing", "Accounting", "Programming", "Data Science", "Business"];
+
 const EMOJIS = ["📐", "⚛️", "🧪", "📚", "🧬", "💻", "🕌", "🏛️", "🎯", "🔬", "📊", "🎨", "📘", "🧮", "🔭", "🎭"];
 const COLORS = ["from-violet-500 to-blue-500", "from-blue-500 to-cyan-500", "from-emerald-500 to-teal-500", "from-pink-500 to-rose-500", "from-green-500 to-emerald-500", "from-slate-500 to-blue-500", "from-amber-500 to-orange-500", "from-orange-500 to-red-500"];
-const LANGUAGES = ["Arabic", "English", "French", "Arabic & English"];
 const TABS = ["Basic", "Marketing", "Pricing", "Media", "Settings"];
 
 function ListEditor({ items, onChange, placeholder }: { items: string[]; onChange: (v: string[]) => void; placeholder: string }) {
@@ -47,12 +53,14 @@ function CreateCoursePage() {
   const [title, setTitle] = useState("");
   const [shortDesc, setShortDesc] = useState("");
   const [description, setDescription] = useState("");
+  const [category, setCategory] = useState<CourseCategory>("academic");
   const [subject, setSubject] = useState("");
+  const [customSubject, setCustomSubject] = useState("");
   const [grade, setGrade] = useState("");
-  const [language, setLanguage] = useState("Arabic");
+  const [customGrade, setCustomGrade] = useState("");
+  const [language, setLanguage] = useState("");
   const [emoji, setEmoji] = useState("📘");
   const [color, setColor] = useState(COLORS[0]);
-  const [targetAudience, setTargetAudience] = useState("");
 
   // Marketing
   const [outcomes, setOutcomes] = useState<string[]>([""]);
@@ -63,9 +71,15 @@ function CreateCoursePage() {
   const [features, setFeatures] = useState<string[]>(["Lifetime access", "Certificate of completion", "AI study assistant"]);
   const [teacherBio, setTeacherBio] = useState("");
   const [teacherHeadline, setTeacherHeadline] = useState("");
+  const [social, setSocial] = useState<SocialLinks>({});
 
   // Pricing
+  const [pricingModel, setPricingModel] = useState<PricingModel>("one_time");
   const [price, setPrice] = useState("0");
+  const [monthlyPrice, setMonthlyPrice] = useState("0");
+  const [perSessionPrice, setPerSessionPrice] = useState("0");
+  const [bundleSize, setBundleSize] = useState("5");
+  const [bundlePrice, setBundlePrice] = useState("0");
   const [currency, setCurrency] = useState("USD");
   const [discountPrice, setDiscountPrice] = useState("");
   const [discountEndsAt, setDiscountEndsAt] = useState("");
@@ -73,6 +87,7 @@ function CreateCoursePage() {
   const [allowWallet, setAllowWallet] = useState(true);
 
   // Media
+  const [coverImageUrl, setCoverImageUrl] = useState("");
   const [promoVideo, setPromoVideo] = useState("");
 
   // Settings
@@ -89,12 +104,13 @@ function CreateCoursePage() {
   const [isFeatured, setIsFeatured] = useState(false);
 
   const addTag = () => { if (tagInput.trim() && !tags.includes(tagInput.trim())) { setTags([...tags, tagInput.trim()]); setTagInput(""); } };
+  const finalSubject = subject === "__custom" ? customSubject : subject;
+  const finalGrade = grade === "__custom" ? customGrade : grade;
 
   const validate = (): boolean => {
     const e: Record<string, string> = {};
     if (!title.trim()) e.title = "Title is required";
-    if (!subject) e.subject = "Subject is required";
-    if (!grade) e.grade = "Grade is required";
+    if (!finalSubject.trim()) e.subject = "Subject is required";
     setErrors(e);
     if (Object.keys(e).length > 0) { setTab(0); return false; }
     return true;
@@ -103,18 +119,18 @@ function CreateCoursePage() {
   const handleSave = (publish: boolean) => {
     if (!validate()) return;
     createCourse({
-      title: title.trim(), subject, grade, language,
-      description: description.trim(), shortDescription: shortDesc.trim(),
-      coverEmoji: emoji, coverColor: color, promoVideoUrl: promoVideo,
-      teacherBio, teacherHeadline,
+      title: title.trim(), category, subject: finalSubject, customSubject, grade: finalGrade, customGrade,
+      language, description: description.trim(), shortDescription: shortDesc.trim(),
+      coverEmoji: emoji, coverColor: color, coverImageUrl, promoVideoUrl: promoVideo,
+      teacherBio, teacherHeadline, socialLinks: social,
       outcomes: outcomes.filter((o) => o.trim()), whyJoinThisCourse: whyJoin.filter((w) => w.trim()),
       whoIsThisFor: whoIsFor.filter((w) => w.trim()), requirements: requirements.filter((r) => r.trim()),
       courseHighlights: highlights.filter((h) => h.trim()), includedFeatures: features.filter((f) => f.trim()),
-      price: Number(price), currency, countryPrices,
-      discountPrice: discountPrice ? Number(discountPrice) : 0, discountEndsAt,
-      allowWalletPayment: allowWallet,
-      visibility, certificateIncluded: certificate, accessDuration, refundPolicy,
-      metaTitle, metaDescription: metaDesc, tags,
+      pricingModel, price: Number(price), monthlyPrice: Number(monthlyPrice),
+      perSessionPrice: Number(perSessionPrice), bundleSize: Number(bundleSize), bundlePrice: Number(bundlePrice),
+      currency, countryPrices, discountPrice: discountPrice ? Number(discountPrice) : 0, discountEndsAt,
+      allowWalletPayment: allowWallet, visibility, certificateIncluded: certificate,
+      accessDuration, refundPolicy, metaTitle, metaDescription: metaDesc, tags,
       assignedAssistant: assistant, assignedContentManager: contentManager,
       isFeatured, status: publish ? "published" : "draft",
     });
@@ -125,7 +141,6 @@ function CreateCoursePage() {
     <DashPage role="teacher" title="Create Course" subtitle="Build the complete course page students will see" icon={ROLES.teacher.icon}>
       <Link to="/teacher/courses" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /> Back to My Courses</Link>
 
-      {/* Tabs */}
       <div className="flex gap-1 overflow-x-auto border-b pb-px">
         {TABS.map((t, i) => (
           <button key={t} onClick={() => setTab(i)} className={cn("whitespace-nowrap rounded-t-lg px-4 py-2 text-sm font-medium transition-colors", tab === i ? "border-b-2 border-primary text-primary" : "text-muted-foreground hover:text-foreground")}>{t}</button>
@@ -134,19 +149,57 @@ function CreateCoursePage() {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
         <div className="space-y-6">
+
           {/* TAB 0: Basic */}
           {tab === 0 && (<>
             <Card className="border bg-card p-5 space-y-4">
               <h3 className="font-semibold">Course Information</h3>
               <div className="space-y-1.5"><Label>Title *</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Advanced Mathematics Grade 12" className="rounded-xl" />{errors.title && <p className="text-xs text-destructive">{errors.title}</p>}</div>
               <div className="space-y-1.5"><Label>Short Description</Label><Input value={shortDesc} onChange={(e) => setShortDesc(e.target.value)} placeholder="One-line tagline for course cards" className="rounded-xl" /></div>
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div className="space-y-1.5"><Label>Subject *</Label><select value={subject} onChange={(e) => setSubject(e.target.value)} className="w-full h-10 rounded-xl border bg-card px-3 text-sm"><option value="">Select</option>{SUBJECTS.map((s) => <option key={s} value={s}>{s}</option>)}</select>{errors.subject && <p className="text-xs text-destructive">{errors.subject}</p>}</div>
-                <div className="space-y-1.5"><Label>Grade *</Label><select value={grade} onChange={(e) => setGrade(e.target.value)} className="w-full h-10 rounded-xl border bg-card px-3 text-sm"><option value="">Select</option>{GRADES.map((g) => <option key={g} value={g}>{g}</option>)}</select>{errors.grade && <p className="text-xs text-destructive">{errors.grade}</p>}</div>
-                <div className="space-y-1.5"><Label>Language</Label><select value={language} onChange={(e) => setLanguage(e.target.value)} className="w-full h-10 rounded-xl border bg-card px-3 text-sm">{LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}</select></div>
+
+              <div className="space-y-1.5">
+                <Label>Category</Label>
+                <div className="flex flex-wrap gap-2">
+                  {CATEGORIES.map((c) => (
+                    <button key={c.value} onClick={() => setCategory(c.value)} className={cn("rounded-xl border px-4 py-2 text-sm font-medium transition-colors", category === c.value ? "border-primary bg-primary/10 text-primary" : "hover:bg-accent")}>{c.label}</button>
+                  ))}
+                </div>
               </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label>Subject *</Label>
+                  <select value={subject} onChange={(e) => setSubject(e.target.value)} className="w-full h-10 rounded-xl border bg-card px-3 text-sm">
+                    <option value="">Select or type custom</option>
+                    {COMMON_SUBJECTS.map((s) => <option key={s} value={s}>{s}</option>)}
+                    <option value="__custom">Other (type below)</option>
+                  </select>
+                  {subject === "__custom" && <Input value={customSubject} onChange={(e) => setCustomSubject(e.target.value)} placeholder="Type your subject" className="rounded-xl mt-1.5" />}
+                  {errors.subject && <p className="text-xs text-destructive">{errors.subject}</p>}
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Grade / Level</Label>
+                  {category === "academic" ? (
+                    <>
+                      <select value={grade} onChange={(e) => setGrade(e.target.value)} className="w-full h-10 rounded-xl border bg-card px-3 text-sm">
+                        <option value="">Select or type custom</option>
+                        {["Grade 7", "Grade 8", "Grade 9", "Grade 10", "Grade 11", "Grade 12", "University Year 1", "University Year 2", "University Year 3", "University Year 4"].map((g) => <option key={g} value={g}>{g}</option>)}
+                        <option value="__custom">Other</option>
+                      </select>
+                      {grade === "__custom" && <Input value={customGrade} onChange={(e) => setCustomGrade(e.target.value)} placeholder="Type level" className="rounded-xl mt-1.5" />}
+                    </>
+                  ) : (
+                    <Input value={customGrade} onChange={(e) => { setGrade("__custom"); setCustomGrade(e.target.value); }} placeholder="e.g. Beginner, Intermediate, Advanced, All Levels" className="rounded-xl" />
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label>Language</Label>
+                <Input value={language} onChange={(e) => setLanguage(e.target.value)} placeholder="e.g. Arabic, English, Arabic & English, French" className="rounded-xl" />
+              </div>
+
               <div className="space-y-1.5"><Label>Full Description</Label><textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={5} placeholder="Detailed course description..." className="w-full rounded-xl border bg-card px-3 py-2 text-sm resize-none" /></div>
-              <div className="space-y-1.5"><Label>Target Audience</Label><Input value={targetAudience} onChange={(e) => setTargetAudience(e.target.value)} placeholder="Who is this course for?" className="rounded-xl" /></div>
             </Card>
           </>)}
 
@@ -154,7 +207,6 @@ function CreateCoursePage() {
           {tab === 1 && (<>
             <Card className="border bg-card p-5 space-y-4">
               <h3 className="font-semibold">What Students Will Learn</h3>
-              <p className="text-xs text-muted-foreground">Shown as checkmark list on the public course page.</p>
               <ListEditor items={outcomes} onChange={setOutcomes} placeholder="e.g. Solve complex differential equations" />
             </Card>
             <Card className="border bg-card p-5 space-y-4">
@@ -178,20 +230,61 @@ function CreateCoursePage() {
               <ListEditor items={features} onChange={setFeatures} placeholder="e.g. Lifetime access" />
             </Card>
             <Card className="border bg-card p-5 space-y-4">
-              <h3 className="font-semibold">Teacher Profile (on Course Page)</h3>
+              <h3 className="font-semibold">Teacher Profile</h3>
               <div className="space-y-1.5"><Label>Headline</Label><Input value={teacherHeadline} onChange={(e) => setTeacherHeadline(e.target.value)} placeholder="e.g. PhD in Mathematics, 15 years teaching" className="rounded-xl" /></div>
               <div className="space-y-1.5"><Label>Bio</Label><textarea value={teacherBio} onChange={(e) => setTeacherBio(e.target.value)} rows={3} placeholder="About the teacher..." className="w-full rounded-xl border bg-card px-3 py-2 text-sm resize-none" /></div>
+            </Card>
+            <Card className="border bg-card p-5 space-y-4">
+              <h3 className="font-semibold">Social Links</h3>
+              <p className="text-xs text-muted-foreground">Share your course on social media. Links shown on course page.</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5"><Label className="text-xs">Facebook</Label><Input value={social.facebook || ""} onChange={(e) => setSocial({ ...social, facebook: e.target.value })} placeholder="https://facebook.com/..." className="rounded-xl" /></div>
+                <div className="space-y-1.5"><Label className="text-xs">Instagram</Label><Input value={social.instagram || ""} onChange={(e) => setSocial({ ...social, instagram: e.target.value })} placeholder="https://instagram.com/..." className="rounded-xl" /></div>
+                <div className="space-y-1.5"><Label className="text-xs">YouTube Channel</Label><Input value={social.youtube || ""} onChange={(e) => setSocial({ ...social, youtube: e.target.value })} placeholder="https://youtube.com/..." className="rounded-xl" /></div>
+                <div className="space-y-1.5"><Label className="text-xs">Telegram</Label><Input value={social.telegram || ""} onChange={(e) => setSocial({ ...social, telegram: e.target.value })} placeholder="https://t.me/..." className="rounded-xl" /></div>
+                <div className="space-y-1.5"><Label className="text-xs">WhatsApp Group</Label><Input value={social.whatsapp || ""} onChange={(e) => setSocial({ ...social, whatsapp: e.target.value })} placeholder="https://chat.whatsapp.com/..." className="rounded-xl" /></div>
+                <div className="space-y-1.5"><Label className="text-xs">Website</Label><Input value={social.website || ""} onChange={(e) => setSocial({ ...social, website: e.target.value })} placeholder="https://..." className="rounded-xl" /></div>
+              </div>
             </Card>
           </>)}
 
           {/* TAB 2: Pricing */}
           {tab === 2 && (<>
             <Card className="border bg-card p-5 space-y-4">
-              <h3 className="font-semibold">Course Pricing</h3>
+              <h3 className="font-semibold">Pricing Model</h3>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {([
+                  { value: "one_time" as PricingModel, label: "One-Time Payment", desc: "Student pays once for full course access" },
+                  { value: "monthly" as PricingModel, label: "Monthly Subscription", desc: "Student pays monthly for continued access" },
+                  { value: "per_session" as PricingModel, label: "Per Session", desc: "Student pays for each session individually" },
+                  { value: "session_bundle" as PricingModel, label: "Session Bundle", desc: "Student buys a bundle of N sessions" },
+                ]).map((pm) => (
+                  <button key={pm.value} onClick={() => setPricingModel(pm.value)} className={cn("rounded-xl border p-3 text-start transition-colors", pricingModel === pm.value ? "border-primary bg-primary/5" : "hover:bg-accent")}>
+                    <p className="text-sm font-medium">{pm.label}</p>
+                    <p className="text-xs text-muted-foreground">{pm.desc}</p>
+                  </button>
+                ))}
+              </div>
+            </Card>
+            <Card className="border bg-card p-5 space-y-4">
+              <h3 className="font-semibold">Price Details</h3>
               <div className="grid gap-4 sm:grid-cols-3">
-                <div className="space-y-1.5"><Label>Base Price (USD)</Label><Input type="number" min="0" value={price} onChange={(e) => setPrice(e.target.value)} className="rounded-xl" /></div>
+                {pricingModel === "one_time" && (
+                  <div className="space-y-1.5"><Label>Course Price</Label><Input type="number" min="0" value={price} onChange={(e) => setPrice(e.target.value)} className="rounded-xl" /></div>
+                )}
+                {pricingModel === "monthly" && (
+                  <div className="space-y-1.5"><Label>Monthly Price</Label><Input type="number" min="0" value={monthlyPrice} onChange={(e) => setMonthlyPrice(e.target.value)} className="rounded-xl" /></div>
+                )}
+                {pricingModel === "per_session" && (
+                  <div className="space-y-1.5"><Label>Price Per Session</Label><Input type="number" min="0" value={perSessionPrice} onChange={(e) => setPerSessionPrice(e.target.value)} className="rounded-xl" /></div>
+                )}
+                {pricingModel === "session_bundle" && (<>
+                  <div className="space-y-1.5"><Label>Sessions in Bundle</Label><Input type="number" min="1" value={bundleSize} onChange={(e) => setBundleSize(e.target.value)} className="rounded-xl" /></div>
+                  <div className="space-y-1.5"><Label>Bundle Price</Label><Input type="number" min="0" value={bundlePrice} onChange={(e) => setBundlePrice(e.target.value)} className="rounded-xl" /></div>
+                </>)}
                 <div className="space-y-1.5"><Label>Discount Price</Label><Input type="number" min="0" value={discountPrice} onChange={(e) => setDiscountPrice(e.target.value)} placeholder="Optional" className="rounded-xl" /></div>
                 <div className="space-y-1.5"><Label>Discount Ends</Label><Input type="date" value={discountEndsAt} onChange={(e) => setDiscountEndsAt(e.target.value)} className="rounded-xl" /></div>
+                <div className="space-y-1.5"><Label>Currency</Label><Input value={currency} onChange={(e) => setCurrency(e.target.value)} className="rounded-xl" /></div>
               </div>
               <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={allowWallet} onChange={(e) => setAllowWallet(e.target.checked)} /> Allow wallet payment</label>
             </Card>
@@ -199,7 +292,7 @@ function CreateCoursePage() {
               <div className="flex items-center justify-between"><h3 className="font-semibold">Country-Specific Pricing</h3><Button variant="outline" size="sm" className="rounded-lg text-xs" onClick={() => setCountryPrices([...countryPrices, { countryCode: "EG", currency: "EGP", price: 0 }])}>+ Country</Button></div>
               {countryPrices.map((cp, i) => (
                 <div key={i} className="flex items-center gap-2">
-                  <select value={cp.countryCode} onChange={(e) => { const u = [...countryPrices]; const c = COUNTRIES.find((x) => x.code === e.target.value); u[i] = { ...u[i], countryCode: e.target.value, currency: c?.currencyCode ?? "USD" }; setCountryPrices(u); }} className="h-9 rounded-lg border bg-card px-2 text-xs flex-1">{COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.name} ({c.currencyCode})</option>)}</select>
+                  <select value={cp.countryCode} onChange={(e) => { const u = [...countryPrices]; const c = COUNTRIES.find((x) => x.code === e.target.value); u[i] = { countryCode: e.target.value, currency: c?.currencyCode ?? "USD", price: u[i].price }; setCountryPrices(u); }} className="h-9 rounded-lg border bg-card px-2 text-xs flex-1">{COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.name} ({c.currencyCode})</option>)}</select>
                   <Input type="number" min="0" value={cp.price} onChange={(e) => { const u = [...countryPrices]; u[i] = { ...u[i], price: Number(e.target.value) }; setCountryPrices(u); }} className="w-24 rounded-lg h-9 text-xs" />
                   <span className="text-xs text-muted-foreground w-8">{cp.currency}</span>
                   <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive" onClick={() => setCountryPrices(countryPrices.filter((_, j) => j !== i))}>×</Button>
@@ -211,12 +304,29 @@ function CreateCoursePage() {
           {/* TAB 3: Media */}
           {tab === 3 && (<>
             <Card className="border bg-card p-5 space-y-4">
-              <h3 className="font-semibold">Promotional Video</h3>
-              <div className="space-y-1.5"><Label>Video URL</Label><Input value={promoVideo} onChange={(e) => setPromoVideo(e.target.value)} placeholder="https://youtube.com/..." className="rounded-xl" /></div>
-              <p className="text-xs text-muted-foreground">This video appears on the public course details page as a preview.</p>
+              <h3 className="font-semibold">Course Cover Image</h3>
+              <p className="text-xs text-muted-foreground">Upload or paste URL for the course thumbnail shown on cards and the course page.</p>
+              {coverImageUrl ? (
+                <div className="relative">
+                  <img src={coverImageUrl} alt="Cover" className="w-full max-h-48 object-cover rounded-xl border" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                  <Button variant="ghost" size="icon" className="absolute top-2 end-2 h-8 w-8 rounded-full bg-background/80" onClick={() => setCoverImageUrl("")}><X className="h-4 w-4" /></Button>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed p-8">
+                  <ImagePlus className="h-10 w-10 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">Paste image URL below</p>
+                </div>
+              )}
+              <Input value={coverImageUrl} onChange={(e) => setCoverImageUrl(e.target.value)} placeholder="https://example.com/course-cover.jpg" className="rounded-xl" />
             </Card>
             <Card className="border bg-card p-5 space-y-4">
-              <h3 className="font-semibold">Course Cover</h3>
+              <h3 className="font-semibold">Promotional Video</h3>
+              <Input value={promoVideo} onChange={(e) => setPromoVideo(e.target.value)} placeholder="https://youtube.com/watch?v=..." className="rounded-xl" />
+              <p className="text-xs text-muted-foreground">Appears as a preview on the public course page.</p>
+            </Card>
+            <Card className="border bg-card p-5 space-y-4">
+              <h3 className="font-semibold">Course Cover (Emoji + Color)</h3>
+              <p className="text-xs text-muted-foreground">Used when no cover image is uploaded.</p>
               <div className={cn("mx-auto grid h-28 w-28 place-items-center rounded-2xl bg-gradient-to-br text-5xl", color)}>{emoji}</div>
               <div><Label className="text-xs">Emoji</Label><div className="mt-1 grid grid-cols-8 gap-1">{EMOJIS.map((e) => (<button key={e} onClick={() => setEmoji(e)} className={cn("grid h-8 w-8 place-items-center rounded-lg text-lg", emoji === e ? "bg-primary/10 ring-2 ring-primary" : "hover:bg-accent")}>{e}</button>))}</div></div>
               <div><Label className="text-xs">Color</Label><div className="mt-1 grid grid-cols-4 gap-1.5">{COLORS.map((c) => (<button key={c} onClick={() => setColor(c)} className={cn("h-7 rounded-lg bg-gradient-to-r", c, color === c && "ring-2 ring-primary ring-offset-2")} />))}</div></div>
@@ -235,7 +345,7 @@ function CreateCoursePage() {
             <Card className="border bg-card p-5 space-y-4">
               <h3 className="font-semibold">Certificate & Access</h3>
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="flex items-center"><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={certificate} onChange={(e) => setCertificate(e.target.checked)} /> Certificate included</label></div>
+                <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={certificate} onChange={(e) => setCertificate(e.target.checked)} /> Certificate included</label>
                 <div className="space-y-1.5"><Label>Access Duration</Label><Input value={accessDuration} onChange={(e) => setAccessDuration(e.target.value)} className="rounded-xl" /></div>
               </div>
               <div className="space-y-1.5"><Label>Refund Policy</Label><Input value={refundPolicy} onChange={(e) => setRefundPolicy(e.target.value)} className="rounded-xl" /></div>
@@ -249,8 +359,8 @@ function CreateCoursePage() {
             </Card>
             <Card className="border bg-card p-5 space-y-4">
               <h3 className="font-semibold">SEO & Tags</h3>
-              <div className="space-y-1.5"><Label>Meta Title</Label><Input value={metaTitle} onChange={(e) => setMetaTitle(e.target.value)} placeholder="SEO title (optional)" className="rounded-xl" /></div>
-              <div className="space-y-1.5"><Label>Meta Description</Label><Input value={metaDesc} onChange={(e) => setMetaDesc(e.target.value)} placeholder="SEO description (optional)" className="rounded-xl" /></div>
+              <Input value={metaTitle} onChange={(e) => setMetaTitle(e.target.value)} placeholder="SEO title" className="rounded-xl" />
+              <Input value={metaDesc} onChange={(e) => setMetaDesc(e.target.value)} placeholder="SEO description" className="rounded-xl" />
               <div><Label className="text-xs">Tags</Label><div className="mt-1 flex gap-1"><Input value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTag())} placeholder="Add tag" className="rounded-lg h-8 text-xs flex-1" /><Button variant="outline" size="sm" className="h-8 rounded-lg text-xs" onClick={addTag}>+</Button></div>
                 {tags.length > 0 && <div className="mt-2 flex flex-wrap gap-1">{tags.map((t) => (<Badge key={t} variant="outline" className="rounded-full text-xs gap-1">{t}<button onClick={() => setTags(tags.filter((x) => x !== t))}><X className="h-2.5 w-2.5" /></button></Badge>))}</div>}
               </div>
