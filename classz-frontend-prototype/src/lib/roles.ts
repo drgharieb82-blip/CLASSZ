@@ -62,7 +62,7 @@ export const ROLES: Record<Role, RoleConfig> = {
       { group: "Workspace", items: [
         { label: "Dashboard", to: "/teacher", icon: LayoutDashboard },
         { label: "My Courses", to: "/teacher/courses", icon: BookOpen },
-        { label: "Material Library", to: "/teacher/materials", icon: Image },
+        { label: "Content Studio", to: "/teacher/content-studio", icon: Layers },
         { label: "Session Builder", to: "/teacher/sessions", icon: PlayCircle },
       ]},
       { group: "Assessment", items: [

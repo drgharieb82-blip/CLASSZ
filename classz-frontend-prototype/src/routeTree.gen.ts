@@ -43,6 +43,7 @@ import { Route as TeacherGradingRouteImport } from './routes/teacher.grading'
 import { Route as TeacherGeneratorRouteImport } from './routes/teacher.generator'
 import { Route as TeacherExamsRouteImport } from './routes/teacher.exams'
 import { Route as TeacherCoursesRouteImport } from './routes/teacher.courses'
+import { Route as TeacherContentStudioRouteImport } from './routes/teacher.content-studio'
 import { Route as TeacherChatRouteImport } from './routes/teacher.chat'
 import { Route as TeacherChaptersRouteImport } from './routes/teacher.chapters'
 import { Route as TeacherAssignmentsRouteImport } from './routes/teacher.assignments'
@@ -287,6 +288,11 @@ const TeacherExamsRoute = TeacherExamsRouteImport.update({
 const TeacherCoursesRoute = TeacherCoursesRouteImport.update({
   id: '/teacher/courses',
   path: '/teacher/courses',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeacherContentStudioRoute = TeacherContentStudioRouteImport.update({
+  id: '/teacher/content-studio',
+  path: '/teacher/content-studio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TeacherChatRoute = TeacherChatRouteImport.update({
@@ -741,6 +747,7 @@ export interface FileRoutesByFullPath {
   '/teacher/assignments': typeof TeacherAssignmentsRoute
   '/teacher/chapters': typeof TeacherChaptersRoute
   '/teacher/chat': typeof TeacherChatRoute
+  '/teacher/content-studio': typeof TeacherContentStudioRoute
   '/teacher/courses': typeof TeacherCoursesRouteWithChildren
   '/teacher/exams': typeof TeacherExamsRouteWithChildren
   '/teacher/generator': typeof TeacherGeneratorRoute
@@ -850,6 +857,7 @@ export interface FileRoutesByTo {
   '/teacher/assignments': typeof TeacherAssignmentsRoute
   '/teacher/chapters': typeof TeacherChaptersRoute
   '/teacher/chat': typeof TeacherChatRoute
+  '/teacher/content-studio': typeof TeacherContentStudioRoute
   '/teacher/exams': typeof TeacherExamsRouteWithChildren
   '/teacher/generator': typeof TeacherGeneratorRoute
   '/teacher/grading': typeof TeacherGradingRoute
@@ -960,6 +968,7 @@ export interface FileRoutesById {
   '/teacher/assignments': typeof TeacherAssignmentsRoute
   '/teacher/chapters': typeof TeacherChaptersRoute
   '/teacher/chat': typeof TeacherChatRoute
+  '/teacher/content-studio': typeof TeacherContentStudioRoute
   '/teacher/courses': typeof TeacherCoursesRouteWithChildren
   '/teacher/exams': typeof TeacherExamsRouteWithChildren
   '/teacher/generator': typeof TeacherGeneratorRoute
@@ -1073,6 +1082,7 @@ export interface FileRouteTypes {
     | '/teacher/assignments'
     | '/teacher/chapters'
     | '/teacher/chat'
+    | '/teacher/content-studio'
     | '/teacher/courses'
     | '/teacher/exams'
     | '/teacher/generator'
@@ -1182,6 +1192,7 @@ export interface FileRouteTypes {
     | '/teacher/assignments'
     | '/teacher/chapters'
     | '/teacher/chat'
+    | '/teacher/content-studio'
     | '/teacher/exams'
     | '/teacher/generator'
     | '/teacher/grading'
@@ -1291,6 +1302,7 @@ export interface FileRouteTypes {
     | '/teacher/assignments'
     | '/teacher/chapters'
     | '/teacher/chat'
+    | '/teacher/content-studio'
     | '/teacher/courses'
     | '/teacher/exams'
     | '/teacher/generator'
@@ -1391,6 +1403,7 @@ export interface RootRouteChildren {
   TeacherAssignmentsRoute: typeof TeacherAssignmentsRoute
   TeacherChaptersRoute: typeof TeacherChaptersRoute
   TeacherChatRoute: typeof TeacherChatRoute
+  TeacherContentStudioRoute: typeof TeacherContentStudioRoute
   TeacherCoursesRoute: typeof TeacherCoursesRouteWithChildren
   TeacherExamsRoute: typeof TeacherExamsRouteWithChildren
   TeacherGeneratorRoute: typeof TeacherGeneratorRoute
@@ -1654,6 +1667,13 @@ declare module '@tanstack/react-router' {
       path: '/teacher/courses'
       fullPath: '/teacher/courses'
       preLoaderRoute: typeof TeacherCoursesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teacher/content-studio': {
+      id: '/teacher/content-studio'
+      path: '/teacher/content-studio'
+      fullPath: '/teacher/content-studio'
+      preLoaderRoute: typeof TeacherContentStudioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/teacher/chat': {
@@ -2407,6 +2427,7 @@ const rootRouteChildren: RootRouteChildren = {
   TeacherAssignmentsRoute: TeacherAssignmentsRoute,
   TeacherChaptersRoute: TeacherChaptersRoute,
   TeacherChatRoute: TeacherChatRoute,
+  TeacherContentStudioRoute: TeacherContentStudioRoute,
   TeacherCoursesRoute: TeacherCoursesRouteWithChildren,
   TeacherExamsRoute: TeacherExamsRouteWithChildren,
   TeacherGeneratorRoute: TeacherGeneratorRoute,

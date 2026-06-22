@@ -33,12 +33,20 @@ class EntityType(str, Enum):
     SUPER_ADMIN = "super_admin"
     CONTENT_AUTHOR = "content_author"
 
-    # Academic
+    # Academic / Content Studio
+    SUBJECT = "subject"
     COURSE = "course"
     CHAPTER = "chapter"
+    LESSON = "lesson"
+    CONCEPT = "concept"
+    ATOMIC_CONCEPT = "atomic_concept"
     SESSION = "session"
+    MATERIAL = "material"
+    VIDEO_SEGMENT = "video_segment"
     QUESTION = "question"
     QUIZ = "quiz"
+    EXAM = "exam"
+    HOMEWORK = "homework"
     ASSIGNMENT = "assignment"
 
     # Credentials & Records
@@ -69,13 +77,21 @@ CODE_FORMATS: dict[EntityType, CodeFormat] = {
     EntityType.SUPER_ADMIN: CodeFormat("SUP", 4),
     EntityType.CONTENT_AUTHOR: CodeFormat("AUT", 4),
 
-    # Academic
-    EntityType.COURSE: CodeFormat("CRS", 4),
-    EntityType.CHAPTER: CodeFormat("CHP", 4),
-    EntityType.SESSION: CodeFormat("SES", 4),
+    # Academic / Content Studio
+    EntityType.SUBJECT: CodeFormat("SUB", 6),
+    EntityType.COURSE: CodeFormat("CRS", 6),
+    EntityType.CHAPTER: CodeFormat("CHP", 6),
+    EntityType.LESSON: CodeFormat("LES", 6),
+    EntityType.CONCEPT: CodeFormat("CON", 6),
+    EntityType.ATOMIC_CONCEPT: CodeFormat("ATC", 6),
+    EntityType.SESSION: CodeFormat("SES", 6),
+    EntityType.MATERIAL: CodeFormat("MAT", 6),
+    EntityType.VIDEO_SEGMENT: CodeFormat("SEG", 6),
     EntityType.QUESTION: CodeFormat("QST", 6),
-    EntityType.QUIZ: CodeFormat("QZ", 4),
-    EntityType.ASSIGNMENT: CodeFormat("ASN", 4),
+    EntityType.QUIZ: CodeFormat("QZ", 6),
+    EntityType.EXAM: CodeFormat("EXM", 6),
+    EntityType.HOMEWORK: CodeFormat("HWK", 6),
+    EntityType.ASSIGNMENT: CodeFormat("ASN", 6),
 
     # Credentials & Records (6-digit for high-volume)
     EntityType.CERTIFICATE: CodeFormat("CERT", 6),
