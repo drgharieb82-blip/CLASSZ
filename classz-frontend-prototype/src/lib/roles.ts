@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, BookOpen, GraduationCap, PlayCircle, BarChart3, Bell, Trophy,
+  LayoutDashboard, BookOpen, GraduationCap, BarChart3, Bell, Trophy,
   Award, Library, HelpCircle, Bot, Sparkles, Brain, ClipboardList, CalendarDays,
   Users, FolderTree, FileText, PencilRuler, Layers, Megaphone, Settings, Shield,
   Code2, Activity, Server, Bug, Rocket, Flag, History, Database, Image, Upload,
@@ -63,7 +63,6 @@ export const ROLES: Record<Role, RoleConfig> = {
         { label: "Dashboard", to: "/teacher", icon: LayoutDashboard },
         { label: "My Courses", to: "/teacher/courses", icon: BookOpen },
         { label: "Content Studio", to: "/teacher/content-studio", icon: Layers },
-        { label: "Session Builder", to: "/teacher/sessions", icon: PlayCircle },
       ]},
       { group: "Assessment", items: [
         { label: "Question Bank", to: "/teacher/questions", icon: Library },

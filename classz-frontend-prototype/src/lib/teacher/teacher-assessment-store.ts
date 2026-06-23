@@ -200,6 +200,7 @@ interface AssessmentState {
   updateAssessment: (id: string, data: Partial<TeacherAssessment>) => void;
   deleteAssessment: (id: string) => void;
   publishAssessment: (id: string) => void;
+  unpublishAssessment: (id: string) => void;
   archiveAssessment: (id: string) => void;
   duplicateAssessment: (id: string) => TeacherAssessment | null;
   attachQuestion: (assessmentId: string, questionId: string) => void;
@@ -224,6 +225,7 @@ export const useTeacherAssessmentStore = create<AssessmentState>()(
           subtitle: data.subtitle || "",
           description: data.description || "",
           instructions: data.instructions || "",
+          thumbnail: data.thumbnail || "",
           tags: data.tags || [],
           assessmentType: data.assessmentType,
           questionIds: data.questionIds || [],
@@ -237,6 +239,8 @@ export const useTeacherAssessmentStore = create<AssessmentState>()(
           rewards: { ...preset.rewards, ...data.rewards },
           status: data.status || "draft",
           visibility: data.visibility || "enrolled_only",
+          createdBy: data.createdBy || "Teacher",
+          updatedBy: data.updatedBy || data.createdBy || "Teacher",
           version: 1,
           createdAt: now,
           updatedAt: now,
@@ -251,6 +255,7 @@ export const useTeacherAssessmentStore = create<AssessmentState>()(
 
       deleteAssessment: (id) => set((s) => ({ assessments: s.assessments.filter((a) => a.id !== id) })),
       publishAssessment: (id) => get().updateAssessment(id, { status: "published" }),
+      unpublishAssessment: (id) => get().updateAssessment(id, { status: "draft" }),
       archiveAssessment: (id) => get().updateAssessment(id, { status: "archived" }),
 
       duplicateAssessment: (id) => {

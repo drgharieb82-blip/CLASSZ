@@ -206,7 +206,7 @@ function QuestionBankPage() {
                 <div className={cn("grid transition-all duration-300 ease-in-out", isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]")}>
                   <div className="overflow-hidden">
                     <div className="border-t px-5 py-4 space-y-5">
-                      <QuestionPreview q={q} courseName={courseMap.get(q.courseId)} />
+                      <QuestionPreview q={q} courseName={courseMap.get(q.courseId)} chapterMap={treeChapters} lessonMap={treeLessons} conceptMap={treeConcepts} atomicMap={treeAtomics} />
                     </div>
                   </div>
                 </div>
@@ -237,14 +237,24 @@ function Field({ label, value, mono }: { label: string; value?: string | number 
   );
 }
 
-function QuestionPreview({ q, courseName }: { q: TeacherQuestion; courseName?: string }) {
+function QuestionPreview({ q, courseName, chapterMap, lessonMap, conceptMap, atomicMap }: {
+  q: TeacherQuestion; courseName?: string;
+  chapterMap: Map<string, string>; lessonMap: Map<string, string>;
+  conceptMap: Map<string, string>; atomicMap: Map<string, string>;
+}) {
   const ad = q.answerData;
-  const links = q.academicLinks || [];
   const qzCount = (q.quizIds || []).length;
   const exCount = (q.examIds || []).length;
   const hwCount = (q.homeworkIds || []).length;
   const sesCount = (q.sessionIds || []).length;
   const totalUse = qzCount + exCount + hwCount + sesCount;
+
+  const chapterNames = (q.chapterIds || []).map((id) => chapterMap.get(id)).filter(Boolean) as string[];
+  if (!chapterNames.length && q.chapterId && chapterMap.has(q.chapterId)) chapterNames.push(chapterMap.get(q.chapterId)!);
+  const lessonNames = (q.lessonIds || []).map((id) => lessonMap.get(id)).filter(Boolean) as string[];
+  const conceptNames = (q.conceptIds || []).map((id) => conceptMap.get(id)).filter(Boolean) as string[];
+  const atomicNames = (q.atomicConceptIds || []).map((id) => atomicMap.get(id)).filter(Boolean) as string[];
+  const hasClassification = !!(courseName || q.concept || chapterNames.length || lessonNames.length || conceptNames.length || atomicNames.length);
 
   return (
     <div className="grid gap-5 lg:grid-cols-2">
@@ -284,12 +294,13 @@ function QuestionPreview({ q, courseName }: { q: TeacherQuestion; courseName?: s
         {/* Classification */}
         <div>
           <SectionTitle>Classification</SectionTitle>
-          {courseName || (q.concept) || links.length > 0 ? (
+          {hasClassification ? (
             <div className="space-y-1">
               {courseName && <Field label="Course" value={courseName} />}
-              {q.concept && <Field label="Concept" value={q.concept} />}
-              {q.atomicConcept && <Field label="Atomic" value={q.atomicConcept} />}
-              {links.length > 0 && <Field label="Academic links" value={`${links.length} link(s)`} />}
+              {chapterNames.length > 0 && <Field label="Chapter(s)" value={chapterNames.join(", ")} />}
+              {lessonNames.length > 0 && <Field label="Lesson(s)" value={lessonNames.join(", ")} />}
+              {(conceptNames.length > 0 || q.concept) && <Field label="Concept(s)" value={conceptNames.length > 0 ? conceptNames.join(", ") : q.concept} />}
+              {(atomicNames.length > 0 || q.atomicConcept) && <Field label="Atomic(s)" value={atomicNames.length > 0 ? atomicNames.join(", ") : q.atomicConcept} />}
             </div>
           ) : (
             <p className="text-xs text-muted-foreground italic">Not classified</p>
@@ -303,7 +314,8 @@ function QuestionPreview({ q, courseName }: { q: TeacherQuestion; courseName?: s
             <Field label="Code" value={q.publicCode} mono />
             <Field label="Type" value={q.type.replace(/_/g, " ")} />
             <Field label="Difficulty" value={q.difficulty} />
-            <Field label="Est. time" value={q.estimatedTimeSeconds ? `${Math.round(q.estimatedTimeSeconds / 60)} min` : undefined} />
+            <Field label="Status" value={q.status} />
+            <Field label="Est. time" value={q.estimatedTimeSeconds ? (q.estimatedTimeSeconds < 60 ? `${q.estimatedTimeSeconds}s` : `${Math.round(q.estimatedTimeSeconds / 60)} min`) : undefined} />
             <Field label="Source" value={q.sourceLabel || q.source} />
             <Field label="Points" value={q.points} />
             {q.tags && q.tags.length > 0 && (
@@ -312,7 +324,9 @@ function QuestionPreview({ q, courseName }: { q: TeacherQuestion; courseName?: s
                 <div className="flex flex-wrap gap-1">{q.tags.map((t) => <span key={t} className="rounded bg-muted px-1.5 py-0.5 text-[10px]">{t}</span>)}</div>
               </div>
             )}
+            <Field label="Created by" value={q.createdBy} />
             <Field label="Created" value={new Date(q.createdAt).toLocaleString()} />
+            {q.updatedBy && <Field label="Updated by" value={q.updatedBy} />}
             {q.updatedAt !== q.createdAt && <Field label="Updated" value={new Date(q.updatedAt).toLocaleString()} />}
           </div>
         </div>

@@ -34,7 +34,7 @@ function TeacherDashboard() {
           <h3 className="font-semibold">Quick Actions</h3>
           <div className="mt-4 grid grid-cols-2 gap-2">
             {[
-              { label: "Create Session", icon: Plus, to: "/teacher/sessions" },
+              { label: "Create Session", icon: Plus, to: "/teacher/content-studio" },
               { label: "Add Quiz", icon: ClipboardList, to: "/teacher/quizzes" },
               { label: "Upload Material", icon: FileText, to: "/teacher/courses" },
               { label: "Add Questions", icon: BookOpen, to: "/teacher/questions" },
@@ -116,7 +116,7 @@ function TeacherDashboard() {
       <div className="grid gap-4 sm:grid-cols-3">
         <MiniCard icon={BookOpen} label="Active Courses" value={String(teacherProfile.totalCourses)} to="/teacher/courses" />
         <MiniCard icon={MessageSquare} label="Team Messages" value="12 unread" to="/teacher/chat" />
-        <MiniCard icon={Users} label="Active Sessions" value={String(teacherProfile.activeSessions)} to="/teacher/sessions" />
+        <MiniCard icon={Users} label="Active Sessions" value={String(teacherProfile.activeSessions)} to="/teacher/content-studio" />
       </div>
     </DashPage>
   );
