@@ -4,6 +4,7 @@ import { ClipboardList } from "lucide-react";
 import { DashPage } from "@/components/common/DashPage";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
@@ -15,6 +16,12 @@ import {
   type AssessmentSettings,
   type AssessmentType,
 } from "@/lib/teacher/teacher-assessment-store";
+import {
+  useTeacherQuestionStore,
+  type QuestionDifficulty,
+  type QuestionStatus,
+  type QuestionType,
+} from "@/lib/teacher/teacher-question-store";
 
 export const Route = createFileRoute("/teacher/assessments/create")({
   component: TeacherAssessmentsCreatePage,
@@ -58,11 +65,13 @@ type AssessmentDraft = {
   instructions: string;
   thumbnail: string;
   tags: string;
+  questionIds: string[];
   settings: AssessmentSettings;
   rewards: AssessmentRewards;
 };
 
 function TeacherAssessmentsCreatePage() {
+  const questions = useTeacherQuestionStore((state) => state.questions);
   const [activeStep, setActiveStep] = useState<(typeof ASSESSMENT_CREATE_STEPS)[number]>("Type");
   const [draft, setDraft] = useState<AssessmentDraft>({
     assessmentType: null,
@@ -72,9 +81,14 @@ function TeacherAssessmentsCreatePage() {
     instructions: "",
     thumbnail: "",
     tags: "",
+    questionIds: [],
     settings: {},
     rewards: {},
   });
+  const [questionSearch, setQuestionSearch] = useState("");
+  const [questionTypeFilter, setQuestionTypeFilter] = useState<QuestionType | "all">("all");
+  const [questionDifficultyFilter, setQuestionDifficultyFilter] = useState<QuestionDifficulty | "all">("all");
+  const [questionStatusFilter, setQuestionStatusFilter] = useState<QuestionStatus | "all">("all");
 
   const handleAssessmentTypeSelect = (assessmentType: AssessmentType) => {
     const preset = createAssessmentPreset(assessmentType);
@@ -91,6 +105,33 @@ function TeacherAssessmentsCreatePage() {
     setDraft((current) => ({
       ...current,
       [field]: value,
+    }));
+  };
+
+  const filteredQuestions = questions.filter((question) => {
+    const query = questionSearch.trim().toLowerCase();
+    const matchesSearch = !query
+      || question.text.toLowerCase().includes(query)
+      || (question.title || "").toLowerCase().includes(query)
+      || question.publicCode.toLowerCase().includes(query)
+      || question.concept.toLowerCase().includes(query);
+    const matchesType = questionTypeFilter === "all" || question.type === questionTypeFilter;
+    const matchesDifficulty = questionDifficultyFilter === "all" || question.difficulty === questionDifficultyFilter;
+    const matchesStatus = questionStatusFilter === "all" || question.status === questionStatusFilter;
+
+    return matchesSearch && matchesType && matchesDifficulty && matchesStatus;
+  });
+
+  const selectedQuestions = draft.questionIds
+    .map((questionId) => questions.find((question) => question.id === questionId))
+    .filter((question): question is NonNullable<typeof question> => Boolean(question));
+
+  const toggleQuestionSelection = (questionId: string) => {
+    setDraft((current) => ({
+      ...current,
+      questionIds: current.questionIds.includes(questionId)
+        ? current.questionIds.filter((existingQuestionId) => existingQuestionId !== questionId)
+        : [...current.questionIds, questionId],
     }));
   };
 
@@ -253,6 +294,178 @@ function TeacherAssessmentsCreatePage() {
                 </div>
               </div>
             </div>
+          ) : activeStep === "Questions" ? (
+            <div className="space-y-5">
+              <div>
+                <h2 className="text-sm font-semibold">Manual question selection</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Search your question bank, filter the results, and attach only question IDs to this assessment.
+                </p>
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                <div className="space-y-2 xl:col-span-4">
+                  <Label htmlFor="question-search">Search</Label>
+                  <Input
+                    id="question-search"
+                    value={questionSearch}
+                    onChange={(event) => setQuestionSearch(event.target.value)}
+                    placeholder="Search by text, concept, title, or code"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="question-type-filter">Type</Label>
+                  <select
+                    id="question-type-filter"
+                    value={questionTypeFilter}
+                    onChange={(event) => setQuestionTypeFilter(event.target.value as QuestionType | "all")}
+                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  >
+                    <option value="all">All types</option>
+                    {Array.from(new Set(questions.map((question) => question.type))).map((questionType) => (
+                      <option key={questionType} value={questionType}>
+                        {questionType.replace(/_/g, " ")}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="question-difficulty-filter">Difficulty</Label>
+                  <select
+                    id="question-difficulty-filter"
+                    value={questionDifficultyFilter}
+                    onChange={(event) => setQuestionDifficultyFilter(event.target.value as QuestionDifficulty | "all")}
+                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  >
+                    <option value="all">All difficulties</option>
+                    {["easy", "medium", "hard", "advanced"].map((difficulty) => (
+                      <option key={difficulty} value={difficulty}>
+                        {difficulty}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="question-status-filter">Status</Label>
+                  <select
+                    id="question-status-filter"
+                    value={questionStatusFilter}
+                    onChange={(event) => setQuestionStatusFilter(event.target.value as QuestionStatus | "all")}
+                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  >
+                    <option value="all">All statuses</option>
+                    {["draft", "published", "archived"].map((status) => (
+                      <option key={status} value={status}>
+                        {status}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium">Available questions</p>
+                    <p className="text-xs text-muted-foreground">{filteredQuestions.length} matches</p>
+                  </div>
+
+                  <div className="max-h-[28rem] space-y-2 overflow-y-auto">
+                    {filteredQuestions.length === 0 ? (
+                      <Card className="border-dashed p-6 text-center text-sm text-muted-foreground">
+                        No questions match the current search and filters.
+                      </Card>
+                    ) : (
+                      filteredQuestions.map((question) => {
+                        const isSelected = draft.questionIds.includes(question.id);
+
+                        return (
+                          <button
+                            key={question.id}
+                            type="button"
+                            onClick={() => toggleQuestionSelection(question.id)}
+                            className={cn(
+                              "w-full rounded-2xl border p-4 text-left transition-colors",
+                              isSelected
+                                ? "border-primary bg-primary/10"
+                                : "border-border hover:bg-accent",
+                            )}
+                          >
+                            <div className="flex flex-wrap items-center gap-2">
+                              <Badge variant="outline" className="rounded-full">
+                                {question.type.replace(/_/g, " ")}
+                              </Badge>
+                              <Badge variant="outline" className="rounded-full capitalize">
+                                {question.difficulty}
+                              </Badge>
+                              <Badge variant="outline" className="rounded-full capitalize">
+                                {question.status}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">{question.publicCode}</span>
+                            </div>
+
+                            <p className="mt-3 text-sm font-medium">{question.title || question.text}</p>
+                            {question.title ? (
+                              <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{question.text}</p>
+                            ) : null}
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+
+                <Card className="border bg-muted/20 p-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium">Selected questions</p>
+                      <Badge variant="secondary" className="rounded-full">
+                        {selectedQuestions.length}
+                      </Badge>
+                    </div>
+
+                    {selectedQuestions.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">
+                        Select questions from the list to build the assessment.
+                      </p>
+                    ) : (
+                      <div className="space-y-2">
+                        {selectedQuestions.map((question, index) => (
+                          <div key={question.id} className="rounded-xl border bg-card p-3">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0">
+                                <p className="text-xs text-muted-foreground">Question {index + 1}</p>
+                                <p className="mt-1 text-sm font-medium">{question.title || question.text}</p>
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toggleQuestionSelection(question.id)}
+                                className="shrink-0"
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              <Badge variant="outline" className="rounded-full">
+                                {question.type.replace(/_/g, " ")}
+                              </Badge>
+                              <Badge variant="outline" className="rounded-full capitalize">
+                                {question.difficulty}
+                              </Badge>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              </div>
+            </div>
           ) : (
             <div className="space-y-2">
               <h2 className="text-sm font-semibold">{activeStep}</h2>
@@ -277,6 +490,11 @@ function TeacherAssessmentsCreatePage() {
               <div>
                 <p className="text-xs font-medium text-muted-foreground">Name</p>
                 <p className="mt-1 font-medium">{draft.title || "Untitled assessment"}</p>
+              </div>
+
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">Questions</p>
+                <p className="mt-1 font-medium">{draft.questionIds.length} selected</p>
               </div>
 
               <div>
