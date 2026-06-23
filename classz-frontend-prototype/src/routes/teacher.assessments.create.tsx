@@ -24,6 +24,11 @@ import {
   type QuestionStatus,
   type QuestionType,
 } from "@/lib/teacher/teacher-question-store";
+import { useTeacherCourseStore } from "@/lib/teacher/teacher-course-store";
+import { useTeacherChapterStore } from "@/lib/teacher/teacher-chapter-store";
+import { useTeacherLessonStore } from "@/lib/teacher/teacher-lesson-store";
+import { useTeacherSessionStore } from "@/lib/teacher/teacher-session-store";
+import { useContentTreeStore } from "@/lib/teacher/content-tree-store";
 
 export const Route = createFileRoute("/teacher/assessments/create")({
   component: TeacherAssessmentsCreatePage,
@@ -68,6 +73,12 @@ type AssessmentDraft = {
   thumbnail: string;
   tags: string;
   questionIds: string[];
+  courseIds: string[];
+  chapterIds: string[];
+  lessonIds: string[];
+  conceptIds: string[];
+  atomicConceptIds: string[];
+  sessionIds: string[];
   visibility: AssessmentVisibility;
   settings: AssessmentSettings;
   rewards: AssessmentRewards;
@@ -75,6 +86,11 @@ type AssessmentDraft = {
 
 function TeacherAssessmentsCreatePage() {
   const questions = useTeacherQuestionStore((state) => state.questions);
+  const courses = useTeacherCourseStore((state) => state.courses);
+  const chapters = useTeacherChapterStore((state) => state.chapters);
+  const lessons = useTeacherLessonStore((state) => state.lessons);
+  const sessions = useTeacherSessionStore((state) => state.sessions);
+  const treeNodes = useContentTreeStore((state) => state.nodes);
   const [activeStep, setActiveStep] = useState<(typeof ASSESSMENT_CREATE_STEPS)[number]>("Type");
   const [draft, setDraft] = useState<AssessmentDraft>({
     assessmentType: null,
@@ -85,6 +101,12 @@ function TeacherAssessmentsCreatePage() {
     thumbnail: "",
     tags: "",
     questionIds: [],
+    courseIds: [],
+    chapterIds: [],
+    lessonIds: [],
+    conceptIds: [],
+    atomicConceptIds: [],
+    sessionIds: [],
     visibility: "enrolled_only",
     settings: {},
     rewards: {},
@@ -158,6 +180,23 @@ function TeacherAssessmentsCreatePage() {
         : [...current.questionIds, questionId],
     }));
   };
+
+  const selectedCourseId = draft.courseIds?.[0] ?? "";
+  const filteredChapters = selectedCourseId
+    ? chapters.filter((chapter) => chapter.courseId === selectedCourseId)
+    : chapters;
+  const filteredLessons = selectedCourseId
+    ? lessons.filter((lesson) => lesson.courseId === selectedCourseId)
+    : lessons;
+  const filteredSessions = selectedCourseId
+    ? sessions.filter((session) => session.courseId === selectedCourseId)
+    : sessions;
+  const filteredConceptNodes = selectedCourseId
+    ? treeNodes.filter((node) => node.courseId === selectedCourseId && node.type === "concept")
+    : treeNodes.filter((node) => node.type === "concept");
+  const filteredAtomicNodes = selectedCourseId
+    ? treeNodes.filter((node) => node.courseId === selectedCourseId && node.type === "atomic_concept")
+    : treeNodes.filter((node) => node.type === "atomic_concept");
 
   return (
     <DashPage
@@ -741,6 +780,176 @@ function TeacherAssessmentsCreatePage() {
                     placeholder="0"
                   />
                 </div>
+              </div>
+            </div>
+          ) : activeStep === "Academic Linking" ? (
+            <div className="space-y-5">
+              <div>
+                <h2 className="text-sm font-semibold">Academic linking</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Link the assessment to a course structure when needed. This section is optional.
+                </p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="link-course">Course</Label>
+                  <select
+                    id="link-course"
+                    value={draft.courseIds?.[0] ?? ""}
+                    onChange={(event) => updateDraftField("courseIds", event.target.value ? [event.target.value] : [])}
+                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  >
+                    <option value="">No course</option>
+                    {courses.map((course) => (
+                      <option key={course.id} value={course.id}>
+                        {course.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="link-chapter">Chapter</Label>
+                  <select
+                    id="link-chapter"
+                    value={draft.chapterIds?.[0] ?? ""}
+                    onChange={(event) => updateDraftField("chapterIds", event.target.value ? [event.target.value] : [])}
+                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  >
+                    <option value="">No chapter</option>
+                    {filteredChapters.map((chapter) => (
+                      <option key={chapter.id} value={chapter.id}>
+                        {chapter.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="link-lesson">Lesson</Label>
+                  <select
+                    id="link-lesson"
+                    value={draft.lessonIds?.[0] ?? ""}
+                    onChange={(event) => updateDraftField("lessonIds", event.target.value ? [event.target.value] : [])}
+                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  >
+                    <option value="">No lesson</option>
+                    {filteredLessons.map((lesson) => (
+                      <option key={lesson.id} value={lesson.id}>
+                        {lesson.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="link-concept">Concept</Label>
+                  <select
+                    id="link-concept"
+                    value={draft.conceptIds?.[0] ?? ""}
+                    onChange={(event) => updateDraftField("conceptIds", event.target.value ? [event.target.value] : [])}
+                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  >
+                    <option value="">No concept</option>
+                    {filteredConceptNodes.map((concept) => (
+                      <option key={concept.id} value={concept.id}>
+                        {concept.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="link-atomic-concept">Atomic concept</Label>
+                  <select
+                    id="link-atomic-concept"
+                    value={draft.atomicConceptIds?.[0] ?? ""}
+                    onChange={(event) => updateDraftField("atomicConceptIds", event.target.value ? [event.target.value] : [])}
+                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  >
+                    <option value="">No atomic concept</option>
+                    {filteredAtomicNodes.map((atomicConcept) => (
+                      <option key={atomicConcept.id} value={atomicConcept.id}>
+                        {atomicConcept.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="link-session">Session</Label>
+                  <select
+                    id="link-session"
+                    value={draft.sessionIds?.[0] ?? ""}
+                    onChange={(event) => updateDraftField("sessionIds", event.target.value ? [event.target.value] : [])}
+                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  >
+                    <option value="">No session</option>
+                    {filteredSessions.map((session) => (
+                      <option key={session.id} value={session.id}>
+                        {session.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          ) : activeStep === "Preview" ? (
+            <div className="space-y-5">
+              <div>
+                <h2 className="text-sm font-semibold">Preview</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Review the core setup before you save the assessment as a draft or publish it.
+                </p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <Card className="border bg-muted/20 p-4">
+                  <p className="text-xs font-medium text-muted-foreground">Type</p>
+                  <p className="mt-2 text-lg font-semibold">
+                    {draft.assessmentType ? ASSESSMENT_TYPE_LABELS[draft.assessmentType] : "Not selected"}
+                  </p>
+                </Card>
+
+                <Card className="border bg-muted/20 p-4">
+                  <p className="text-xs font-medium text-muted-foreground">Title</p>
+                  <p className="mt-2 text-lg font-semibold">{draft.title || "Untitled assessment"}</p>
+                </Card>
+
+                <Card className="border bg-muted/20 p-4">
+                  <p className="text-xs font-medium text-muted-foreground">Description</p>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {draft.description || "No description yet"}
+                  </p>
+                </Card>
+
+                <Card className="border bg-muted/20 p-4">
+                  <p className="text-xs font-medium text-muted-foreground">Questions count</p>
+                  <p className="mt-2 text-lg font-semibold">{draft.questionIds.length}</p>
+                </Card>
+
+                <Card className="border bg-muted/20 p-4">
+                  <p className="text-xs font-medium text-muted-foreground">Duration</p>
+                  <p className="mt-2 text-lg font-semibold">
+                    {draft.settings.durationMinutes ? `${draft.settings.durationMinutes} min` : "Not set"}
+                  </p>
+                </Card>
+
+                <Card className="border bg-muted/20 p-4">
+                  <p className="text-xs font-medium text-muted-foreground">Score</p>
+                  <p className="mt-2 text-lg font-semibold">{draft.settings.totalScore ?? "Not set"}</p>
+                </Card>
+
+                <Card className="border bg-muted/20 p-4">
+                  <p className="text-xs font-medium text-muted-foreground">XP</p>
+                  <p className="mt-2 text-lg font-semibold">{draft.rewards.xpReward ?? "Not set"}</p>
+                </Card>
+
+                <Card className="border bg-muted/20 p-4">
+                  <p className="text-xs font-medium text-muted-foreground">Attempts</p>
+                  <p className="mt-2 text-lg font-semibold">{draft.settings.attemptLimit ?? "Not set"}</p>
+                </Card>
               </div>
             </div>
           ) : (
