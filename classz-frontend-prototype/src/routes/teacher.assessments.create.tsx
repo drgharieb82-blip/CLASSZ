@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ClipboardList } from "lucide-react";
 import { DashPage } from "@/components/common/DashPage";
@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   ASSESSMENT_TYPE_LABELS,
   createAssessmentPreset,
+  useTeacherAssessmentStore,
   type AssessmentVisibility,
   type ShowPolicy,
   type AssessmentRewards,
@@ -64,6 +65,14 @@ const ASSESSMENT_TYPE_OPTIONS: AssessmentType[] = [
   "custom",
 ];
 
+const QUESTION_OPTIONAL_TYPES: AssessmentType[] = [
+  "assignment",
+  "project",
+  "research",
+  "presentation",
+  "custom",
+];
+
 type AssessmentDraft = {
   assessmentType: AssessmentType | null;
   title: string;
@@ -85,6 +94,8 @@ type AssessmentDraft = {
 };
 
 function TeacherAssessmentsCreatePage() {
+  const navigate = useNavigate();
+  const createAssessment = useTeacherAssessmentStore((state) => state.createAssessment);
   const questions = useTeacherQuestionStore((state) => state.questions);
   const courses = useTeacherCourseStore((state) => state.courses);
   const chapters = useTeacherChapterStore((state) => state.chapters);
@@ -115,6 +126,7 @@ function TeacherAssessmentsCreatePage() {
   const [questionTypeFilter, setQuestionTypeFilter] = useState<QuestionType | "all">("all");
   const [questionDifficultyFilter, setQuestionDifficultyFilter] = useState<QuestionDifficulty | "all">("all");
   const [questionStatusFilter, setQuestionStatusFilter] = useState<QuestionStatus | "all">("all");
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleAssessmentTypeSelect = (assessmentType: AssessmentType) => {
     const preset = createAssessmentPreset(assessmentType);
@@ -197,6 +209,61 @@ function TeacherAssessmentsCreatePage() {
   const filteredAtomicNodes = selectedCourseId
     ? treeNodes.filter((node) => node.courseId === selectedCourseId && node.type === "atomic_concept")
     : treeNodes.filter((node) => node.type === "atomic_concept");
+
+  const publishAllowsNoQuestions = Boolean(
+    draft.assessmentType
+    && QUESTION_OPTIONAL_TYPES.includes(draft.assessmentType)
+    && (draft.instructions.trim() || draft.settings.fileUploadAllowed),
+  );
+
+  const validationMessages = [
+    !draft.assessmentType ? "Select an assessment type." : null,
+    !draft.title.trim() ? "Name is required." : null,
+    !draft.description.trim() ? "Description is required." : null,
+  ].filter((message): message is string => Boolean(message));
+
+  const publishValidationMessages = [
+    ...validationMessages,
+    draft.questionIds.length === 0 && !publishAllowsNoQuestions
+      ? "Publishing requires questions unless this is an assignment-style assessment with instructions or file upload enabled."
+      : null,
+  ].filter((message): message is string => Boolean(message));
+
+  const handleSave = (status: "draft" | "published") => {
+    const issues = status === "published" ? publishValidationMessages : validationMessages;
+
+    if (issues.length > 0 || !draft.assessmentType) {
+      setSubmitError(issues[0] ?? "Complete the required fields before continuing.");
+      return;
+    }
+
+    createAssessment({
+      title: draft.title.trim(),
+      subtitle: draft.subtitle.trim(),
+      description: draft.description.trim(),
+      instructions: draft.instructions.trim(),
+      thumbnail: draft.thumbnail.trim(),
+      tags: draft.tags.split(",").map((tag) => tag.trim()).filter(Boolean),
+      assessmentType: draft.assessmentType,
+      questionIds: draft.questionIds,
+      courseIds: draft.courseIds,
+      chapterIds: draft.chapterIds,
+      lessonIds: draft.lessonIds,
+      conceptIds: draft.conceptIds,
+      atomicConceptIds: draft.atomicConceptIds,
+      sessionIds: draft.sessionIds,
+      settings: draft.settings,
+      rewards: {
+        ...draft.rewards,
+        allowRetakeXp: typeof draft.rewards.maxRetakeXp === "number" && draft.rewards.maxRetakeXp > 0,
+      },
+      visibility: draft.visibility,
+      status,
+    });
+
+    setSubmitError(null);
+    navigate({ to: "/teacher/content-studio" });
+  };
 
   return (
     <DashPage
@@ -952,6 +1019,52 @@ function TeacherAssessmentsCreatePage() {
                 </Card>
               </div>
             </div>
+          ) : activeStep === "Publish" ? (
+            <div className="space-y-5">
+              <div>
+                <h2 className="text-sm font-semibold">Save or publish</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Review validation and choose whether to store this as a draft or release it now.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border bg-muted/20 p-4">
+                <p className="text-sm font-medium">Draft validation</p>
+                <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+                  {validationMessages.length === 0 ? (
+                    <li>Ready to save as draft.</li>
+                  ) : (
+                    validationMessages.map((message) => <li key={message}>{message}</li>)
+                  )}
+                </ul>
+              </div>
+
+              <div className="rounded-2xl border bg-muted/20 p-4">
+                <p className="text-sm font-medium">Publish validation</p>
+                <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+                  {publishValidationMessages.length === 0 ? (
+                    <li>Ready to publish.</li>
+                  ) : (
+                    publishValidationMessages.map((message) => <li key={message}>{message}</li>)
+                  )}
+                </ul>
+              </div>
+
+              {submitError ? (
+                <div className="rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+                  {submitError}
+                </div>
+              ) : null}
+
+              <div className="flex flex-wrap gap-3">
+                <Button type="button" onClick={() => handleSave("draft")}>
+                  Save Draft
+                </Button>
+                <Button type="button" variant="outline" onClick={() => handleSave("published")}>
+                  Publish Assessment
+                </Button>
+              </div>
+            </div>
           ) : (
             <div className="space-y-2">
               <h2 className="text-sm font-semibold">{activeStep}</h2>
@@ -1023,6 +1136,20 @@ function TeacherAssessmentsCreatePage() {
                   </div>
                 </div>
               ) : null}
+
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">Visibility</p>
+                <p className="mt-1 font-medium">{draft.visibility.replace(/_/g, " ")}</p>
+              </div>
+
+              <div className="flex flex-wrap gap-2 pt-2">
+                <Button type="button" size="sm" onClick={() => handleSave("draft")}>
+                  Save Draft
+                </Button>
+                <Button type="button" size="sm" variant="outline" onClick={() => handleSave("published")}>
+                  Publish
+                </Button>
+              </div>
             </div>
           </div>
         </Card>

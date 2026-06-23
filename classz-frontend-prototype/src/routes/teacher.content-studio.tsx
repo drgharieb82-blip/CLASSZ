@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import {
-  ArrowDown, ArrowUp, BookOpen, Brain, Calendar, Check, ChevronDown,
+  ArrowDown, ArrowUp, BookOpen, Brain, Calendar, Check, ChevronDown, ChevronUp,
   ChevronRight, Clock, Copy, DollarSign, Edit3, Eye, EyeOff, File, FileText,
   Film, FolderTree, HelpCircle, ClipboardList, Image, Layers, Link2, Lock,
   Pencil, PlayCircle, Plus, ScrollText, Sparkles, StickyNote, Target,
@@ -21,7 +21,7 @@ import { useTeacherSessionStore } from "@/lib/teacher/teacher-session-store";
 import {
   useTeacherMaterialStore, type TeacherMaterial, type MaterialType, type CreateMaterialData, type AcademicLink,
 } from "@/lib/teacher/teacher-material-store";
-import { useTeacherQuestionStore } from "@/lib/teacher/teacher-question-store";
+import { useTeacherQuestionStore, type TeacherQuestion, type AnswerData, type MCQChoice } from "@/lib/teacher/teacher-question-store";
 import { useTeacherQuizStore } from "@/lib/teacher/teacher-quiz-store";
 import { useTeacherExamStore } from "@/lib/teacher/teacher-exam-store";
 import { useTeacherHomeworkStore } from "@/lib/teacher/teacher-homework-store";
@@ -1028,7 +1028,7 @@ function AssessmentEngineTab({ courseId }: { courseId: string }) {
             <button onClick={() => setViewMode("cards")} className={cn("px-2.5 py-1.5 text-xs font-medium transition-colors", viewMode === "cards" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent")}>Cards</button>
             <button onClick={() => setViewMode("table")} className={cn("px-2.5 py-1.5 text-xs font-medium transition-colors border-s", viewMode === "table" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent")}>Table</button>
           </div>
-          <Button className="rounded-xl gradient-brand border-0 text-white" size="sm"><Plus className="me-1.5 h-4 w-4" />Create Assessment</Button>
+          <Button asChild className="rounded-xl gradient-brand border-0 text-white" size="sm"><Link to="/teacher/assessments/create"><Plus className="me-1.5 h-4 w-4" />Create Assessment</Link></Button>
         </div>
       </div>
 
@@ -1039,7 +1039,7 @@ function AssessmentEngineTab({ courseId }: { courseId: string }) {
           <ClipboardList className="h-12 w-12 text-muted-foreground" />
           <h2 className="text-lg font-semibold">{assessments.length === 0 ? "No assessments yet" : "No match"}</h2>
           <p className="text-sm text-muted-foreground">Create quizzes, homework, exams, and assignments from one place.</p>
-          <Button className="rounded-xl gradient-brand border-0 text-white"><Plus className="me-1.5 h-4 w-4" />Create Assessment</Button>
+          <Button asChild className="rounded-xl gradient-brand border-0 text-white"><Link to="/teacher/assessments/create"><Plus className="me-1.5 h-4 w-4" />Create Assessment</Link></Button>
         </Card>
       ) : viewMode === "table" ? (
         <Card className="border bg-card overflow-hidden">
