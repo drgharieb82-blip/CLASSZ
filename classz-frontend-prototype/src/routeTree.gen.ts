@@ -107,6 +107,7 @@ import { Route as TeacherQuestionsCreateRouteImport } from './routes/teacher.que
 import { Route as TeacherHomeworkCreateRouteImport } from './routes/teacher.homework.create'
 import { Route as TeacherExamsCreateRouteImport } from './routes/teacher.exams.create'
 import { Route as TeacherCoursesCreateRouteImport } from './routes/teacher.courses.create'
+import { Route as TeacherAssessmentsCreateRouteImport } from './routes/teacher.assessments.create'
 import { Route as StudentQuizzesQuizIdRouteImport } from './routes/student.quizzes.$quizId'
 import { Route as StudentCoursesCourseIdRouteImport } from './routes/student.courses.$courseId'
 import { Route as StudentCertificatesCertificateIdRouteImport } from './routes/student.certificates.$certificateId'
@@ -612,6 +613,12 @@ const TeacherCoursesCreateRoute = TeacherCoursesCreateRouteImport.update({
   path: '/create',
   getParentRoute: () => TeacherCoursesRoute,
 } as any)
+const TeacherAssessmentsCreateRoute =
+  TeacherAssessmentsCreateRouteImport.update({
+    id: '/teacher/assessments/create',
+    path: '/teacher/assessments/create',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const StudentQuizzesQuizIdRoute = StudentQuizzesQuizIdRouteImport.update({
   id: '/quizzes/$quizId',
   path: '/quizzes/$quizId',
@@ -789,6 +796,7 @@ export interface FileRoutesByFullPath {
   '/student/certificates/$certificateId': typeof StudentCertificatesCertificateIdRoute
   '/student/courses/$courseId': typeof StudentCoursesCourseIdRouteWithChildren
   '/student/quizzes/$quizId': typeof StudentQuizzesQuizIdRoute
+  '/teacher/assessments/create': typeof TeacherAssessmentsCreateRoute
   '/teacher/courses/create': typeof TeacherCoursesCreateRoute
   '/teacher/exams/create': typeof TeacherExamsCreateRoute
   '/teacher/homework/create': typeof TeacherHomeworkCreateRoute
@@ -898,6 +906,7 @@ export interface FileRoutesByTo {
   '/teacher': typeof TeacherIndexRoute
   '/student/certificates/$certificateId': typeof StudentCertificatesCertificateIdRoute
   '/student/quizzes/$quizId': typeof StudentQuizzesQuizIdRoute
+  '/teacher/assessments/create': typeof TeacherAssessmentsCreateRoute
   '/teacher/courses/create': typeof TeacherCoursesCreateRoute
   '/teacher/exams/create': typeof TeacherExamsCreateRoute
   '/teacher/homework/create': typeof TeacherHomeworkCreateRoute
@@ -1013,6 +1022,7 @@ export interface FileRoutesById {
   '/student/certificates/$certificateId': typeof StudentCertificatesCertificateIdRoute
   '/student/courses/$courseId': typeof StudentCoursesCourseIdRouteWithChildren
   '/student/quizzes/$quizId': typeof StudentQuizzesQuizIdRoute
+  '/teacher/assessments/create': typeof TeacherAssessmentsCreateRoute
   '/teacher/courses/create': typeof TeacherCoursesCreateRoute
   '/teacher/exams/create': typeof TeacherExamsCreateRoute
   '/teacher/homework/create': typeof TeacherHomeworkCreateRoute
@@ -1129,6 +1139,7 @@ export interface FileRouteTypes {
     | '/student/certificates/$certificateId'
     | '/student/courses/$courseId'
     | '/student/quizzes/$quizId'
+    | '/teacher/assessments/create'
     | '/teacher/courses/create'
     | '/teacher/exams/create'
     | '/teacher/homework/create'
@@ -1238,6 +1249,7 @@ export interface FileRouteTypes {
     | '/teacher'
     | '/student/certificates/$certificateId'
     | '/student/quizzes/$quizId'
+    | '/teacher/assessments/create'
     | '/teacher/courses/create'
     | '/teacher/exams/create'
     | '/teacher/homework/create'
@@ -1352,6 +1364,7 @@ export interface FileRouteTypes {
     | '/student/certificates/$certificateId'
     | '/student/courses/$courseId'
     | '/student/quizzes/$quizId'
+    | '/teacher/assessments/create'
     | '/teacher/courses/create'
     | '/teacher/exams/create'
     | '/teacher/homework/create'
@@ -1450,6 +1463,7 @@ export interface RootRouteChildren {
   QuestionsIndexRoute: typeof QuestionsIndexRoute
   SuperIndexRoute: typeof SuperIndexRoute
   TeacherIndexRoute: typeof TeacherIndexRoute
+  TeacherAssessmentsCreateRoute: typeof TeacherAssessmentsCreateRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -2140,6 +2154,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherCoursesCreateRouteImport
       parentRoute: typeof TeacherCoursesRoute
     }
+    '/teacher/assessments/create': {
+      id: '/teacher/assessments/create'
+      path: '/teacher/assessments/create'
+      fullPath: '/teacher/assessments/create'
+      preLoaderRoute: typeof TeacherAssessmentsCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/student/quizzes/$quizId': {
       id: '/student/quizzes/$quizId'
       path: '/quizzes/$quizId'
@@ -2492,6 +2513,7 @@ const rootRouteChildren: RootRouteChildren = {
   QuestionsIndexRoute: QuestionsIndexRoute,
   SuperIndexRoute: SuperIndexRoute,
   TeacherIndexRoute: TeacherIndexRoute,
+  TeacherAssessmentsCreateRoute: TeacherAssessmentsCreateRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

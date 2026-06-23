@@ -26,6 +26,7 @@ import { useTeacherQuizStore } from "@/lib/teacher/teacher-quiz-store";
 import { useTeacherExamStore } from "@/lib/teacher/teacher-exam-store";
 import { useTeacherHomeworkStore } from "@/lib/teacher/teacher-homework-store";
 import { useTeacherAssignmentStore } from "@/lib/teacher/teacher-assignment-store";
+import { useTeacherAssessmentStore, ASSESSMENT_TYPE_LABELS, type AssessmentType } from "@/lib/teacher/teacher-assessment-store";
 import {
   useContentTreeStore, getCoverageSummary,
   type ContentTreeNode,
@@ -48,10 +49,7 @@ const CONTENT_TABS = [
   { key: "tree", label: "Content Tree", icon: FolderTree },
   { key: "materials", label: "Materials", icon: FileText },
   { key: "questions", label: "Question Bank", icon: HelpCircle },
-  { key: "quizzes", label: "Quizzes", icon: ClipboardList },
-  { key: "homework", label: "Homework", icon: Pencil },
-  { key: "exams", label: "Exams", icon: ScrollText },
-  { key: "assignments", label: "Assignments", icon: BookOpen },
+  { key: "assessments", label: "Assessment Engine", icon: ClipboardList },
 ];
 
 const SESSION_TAB = { key: "sessions", label: "Sessions", icon: PlayCircle };
@@ -106,10 +104,7 @@ function ContentStudioPage() {
           {activeTab === "tree" && <ContentTreeTab courseId={selectedCourseId} onSwitchTab={setActiveTab} />}
           {activeTab === "materials" && <MaterialsTab courseId={selectedCourseId} />}
           {activeTab === "questions" && <QuestionsTab courseId={selectedCourseId} />}
-          {activeTab === "quizzes" && <QuizzesTab courseId={selectedCourseId} />}
-          {activeTab === "homework" && <HomeworkTab courseId={selectedCourseId} />}
-          {activeTab === "exams" && <ExamsTab courseId={selectedCourseId} />}
-          {activeTab === "assignments" && <AssignmentsTab courseId={selectedCourseId} />}
+          {activeTab === "assessments" && <AssessmentEngineTab courseId={selectedCourseId} />}
           {activeTab === "sessions" && <SessionsTab courseId={selectedCourseId} />}
         </>
       )}
@@ -983,6 +978,148 @@ function QuestionsTab({ courseId }: { courseId: string }) {
     </div>
   );
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   ASSESSMENT ENGINE TAB (unified)
+   ═══════════════════════════════════════════════════════════════ */
+
+const ASM_TYPE_OPTIONS = Object.entries(ASSESSMENT_TYPE_LABELS).map(([v, l]) => ({ value: v, label: l }));
+const ASM_FILTER_OPTIONS: FilterOption[] = [
+  { key: "type", label: "Type", options: ASM_TYPE_OPTIONS },
+  { key: "status", label: "Status", options: [{ value: "draft", label: "Draft" }, { value: "published", label: "Published" }, { value: "archived", label: "Archived" }] },
+];
+
+function AssessmentEngineTab({ courseId }: { courseId: string }) {
+  const allAssessments = useTeacherAssessmentStore((s) => s.assessments);
+  const deleteAssessment = useTeacherAssessmentStore((s) => s.deleteAssessment);
+  const publishAssessment = useTeacherAssessmentStore((s) => s.publishAssessment);
+  const archiveAssessment = useTeacherAssessmentStore((s) => s.archiveAssessment);
+  const duplicateAssessment = useTeacherAssessmentStore((s) => s.duplicateAssessment);
+  const assessments = useMemo(() => allAssessments.filter((a) => (a.courseIds || []).includes(courseId) || (a.courseIds || []).length === 0), [allAssessments, courseId]);
+
+  const [search, setSearch] = useState("");
+  const [filters, setFilters] = useState<Record<string, string>>({});
+  const [page, setPage] = useState(1);
+  const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
+
+  const filtered = useMemo(() => {
+    let r = [...assessments];
+    if (search) { const q = search.toLowerCase(); r = r.filter((a) => a.title.toLowerCase().includes(q) || a.publicCode.toLowerCase().includes(q)); }
+    if (filters.type) r = r.filter((a) => a.assessmentType === filters.type);
+    if (filters.status) r = r.filter((a) => a.status === filters.status);
+    return r;
+  }, [assessments, search, filters]);
+
+  const total = filtered.length;
+  const paginated = filtered.slice((page - 1) * 12, page * 12);
+  const published = assessments.filter((a) => a.status === "published").length;
+  const drafts = assessments.filter((a) => a.status === "draft").length;
+
+  return (
+    <div className="space-y-5">
+      {/* Stats */}
+      <div className="flex flex-wrap items-center gap-3">
+        <Card className="flex items-center gap-2 border bg-card px-3 py-2"><Layers className="h-4 w-4 text-primary shrink-0" /><span className="text-sm font-bold">{assessments.length}</span><span className="text-xs text-muted-foreground">Total</span></Card>
+        <Card className="flex items-center gap-2 border bg-card px-3 py-2"><Eye className="h-4 w-4 text-emerald-500 shrink-0" /><span className="text-sm font-bold">{published}</span><span className="text-xs text-muted-foreground">Published</span></Card>
+        <Card className="flex items-center gap-2 border bg-card px-3 py-2"><Clock className="h-4 w-4 text-amber-500 shrink-0" /><span className="text-sm font-bold">{drafts}</span><span className="text-xs text-muted-foreground">Drafts</span></Card>
+        <Card className="flex items-center gap-2 border bg-card px-3 py-2"><Sparkles className="h-4 w-4 text-violet-500 shrink-0" /><span className="text-sm font-bold">{assessments.filter((a) => a.status === "published" && (!a.settings.endAt || new Date(a.settings.endAt) > new Date())).length}</span><span className="text-xs text-muted-foreground">Active</span></Card>
+        <div className="ms-auto flex items-center gap-2">
+          <div className="flex rounded-xl border overflow-hidden">
+            <button onClick={() => setViewMode("cards")} className={cn("px-2.5 py-1.5 text-xs font-medium transition-colors", viewMode === "cards" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent")}>Cards</button>
+            <button onClick={() => setViewMode("table")} className={cn("px-2.5 py-1.5 text-xs font-medium transition-colors border-s", viewMode === "table" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent")}>Table</button>
+          </div>
+          <Button className="rounded-xl gradient-brand border-0 text-white" size="sm"><Plus className="me-1.5 h-4 w-4" />Create Assessment</Button>
+        </div>
+      </div>
+
+      <FilterBar search={search} onSearchChange={(v) => { setSearch(v); setPage(1); }} filters={ASM_FILTER_OPTIONS} activeFilters={filters} onFilterChange={(k, v) => { setFilters((f) => ({ ...f, [k]: v })); setPage(1); }} onClearFilters={() => { setFilters({}); setPage(1); }} totalResults={total} placeholder="Search assessments..." />
+
+      {total === 0 ? (
+        <Card className="flex flex-col items-center gap-4 border bg-card p-12 text-center">
+          <ClipboardList className="h-12 w-12 text-muted-foreground" />
+          <h2 className="text-lg font-semibold">{assessments.length === 0 ? "No assessments yet" : "No match"}</h2>
+          <p className="text-sm text-muted-foreground">Create quizzes, homework, exams, and assignments from one place.</p>
+          <Button className="rounded-xl gradient-brand border-0 text-white"><Plus className="me-1.5 h-4 w-4" />Create Assessment</Button>
+        </Card>
+      ) : viewMode === "table" ? (
+        <Card className="border bg-card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead><tr className="border-b bg-muted/30">
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground text-xs">Assessment</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground text-xs">Type</th>
+                <th className="px-4 py-3 text-center font-medium text-muted-foreground text-xs">Qs</th>
+                <th className="px-4 py-3 text-center font-medium text-muted-foreground text-xs">Duration</th>
+                <th className="px-4 py-3 text-center font-medium text-muted-foreground text-xs">XP</th>
+                <th className="px-4 py-3 text-start font-medium text-muted-foreground text-xs">Status</th>
+                <th className="px-4 py-3 text-end font-medium text-muted-foreground text-xs">Actions</th>
+              </tr></thead>
+              <tbody>
+                {paginated.map((a) => (
+                  <tr key={a.id} className="border-b last:border-0 hover:bg-muted/20 transition-colors">
+                    <td className="px-4 py-3"><p className="font-medium truncate max-w-[200px]">{a.title}</p><p className="text-[11px] text-muted-foreground font-mono">{a.publicCode}</p></td>
+                    <td className="px-4 py-3"><Badge variant="outline" className="rounded-full text-[10px]">{ASSESSMENT_TYPE_LABELS[a.assessmentType]}</Badge></td>
+                    <td className="px-4 py-3 text-center text-muted-foreground">{a.questionIds.length}</td>
+                    <td className="px-4 py-3 text-center text-muted-foreground">{a.settings.durationMinutes ? `${a.settings.durationMinutes}m` : "—"}</td>
+                    <td className="px-4 py-3 text-center text-muted-foreground">{a.rewards.xpReward || "—"}</td>
+                    <td className="px-4 py-3"><Badge variant="outline" className={cn("rounded-full text-[10px]", a.status === "published" ? "border-emerald-300 text-emerald-600" : "border-amber-300 text-amber-600")}>{a.status}</Badge></td>
+                    <td className="px-4 py-3 text-end">
+                      <div className="flex items-center justify-end gap-0.5">
+                        {a.status === "draft" && <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => publishAssessment(a.id)} title="Publish"><Upload className="h-3.5 w-3.5 text-emerald-600" /></Button>}
+                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => duplicateAssessment(a.id)} title="Duplicate"><Copy className="h-3.5 w-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-destructive" onClick={() => deleteAssessment(a.id)} title="Delete"><Trash2 className="h-3.5 w-3.5" /></Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {paginated.map((a) => (
+            <Card key={a.id} className="border bg-card overflow-hidden transition-colors hover:border-primary/20">
+              <div className="p-4 space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold truncate">{a.title}</p>
+                    <p className="text-[11px] text-muted-foreground font-mono mt-0.5">{a.publicCode}</p>
+                  </div>
+                  <Badge variant="outline" className={cn("shrink-0 rounded-full text-[10px]", a.status === "published" ? "border-emerald-300 text-emerald-600" : a.status === "archived" ? "border-slate-300 text-slate-500" : "border-amber-300 text-amber-600")}>{a.status}</Badge>
+                </div>
+                <Badge variant="outline" className="rounded-full text-[10px]">{ASSESSMENT_TYPE_LABELS[a.assessmentType]}</Badge>
+                <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+                  <span>{a.questionIds.length} questions</span>
+                  {a.settings.durationMinutes && <span>{a.settings.durationMinutes} min</span>}
+                  {a.rewards.xpReward && <span>+{a.rewards.xpReward} XP</span>}
+                  {a.settings.attemptLimit && <span>{a.settings.attemptLimit} attempt{a.settings.attemptLimit !== 1 ? "s" : ""}</span>}
+                </div>
+                <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+                  {(a.sessionIds || []).length > 0 && <span>{a.sessionIds!.length} session(s)</span>}
+                  {(a.chapterIds || []).length > 0 && <span>{a.chapterIds!.length} chapter(s)</span>}
+                  <span>{new Date(a.updatedAt).toLocaleDateString()}</span>
+                </div>
+                <div className="flex items-center gap-1 pt-2 border-t">
+                  {a.status === "draft" && <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => publishAssessment(a.id)} title="Publish"><Upload className="h-3.5 w-3.5 text-emerald-600" /></Button>}
+                  {a.status === "published" && <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => archiveAssessment(a.id)} title="Archive"><EyeOff className="h-3.5 w-3.5 text-amber-600" /></Button>}
+                  <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => duplicateAssessment(a.id)} title="Duplicate"><Copy className="h-3.5 w-3.5" /></Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-destructive" onClick={() => deleteAssessment(a.id)} title="Delete"><Trash2 className="h-3.5 w-3.5" /></Button>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <Pagination page={page} pageSize={12} total={total} onPageChange={setPage} />
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LEGACY TABS (kept for old standalone routes, not shown in Content Studio tabs)
+   ═══════════════════════════════════════════════════════════════ */
 
 /* ═══════════════════════════════════════════════════════════════
    5. QUIZZES TAB

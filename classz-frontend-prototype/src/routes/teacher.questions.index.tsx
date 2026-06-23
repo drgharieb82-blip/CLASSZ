@@ -41,9 +41,19 @@ function QuestionBankPage() {
     for (const n of allTreeNodes) { if (n.type === "chapter") seen.set(n.id, n.title); }
     return seen;
   }, [allTreeNodes]);
+  const treeLessons = useMemo(() => {
+    const seen = new Map<string, string>();
+    for (const n of allTreeNodes) { if (n.type === "lesson") seen.set(n.id, n.title); }
+    return seen;
+  }, [allTreeNodes]);
   const treeConcepts = useMemo(() => {
     const seen = new Map<string, string>();
     for (const n of allTreeNodes) { if (n.type === "concept") seen.set(n.id, n.title); }
+    return seen;
+  }, [allTreeNodes]);
+  const treeAtomics = useMemo(() => {
+    const seen = new Map<string, string>();
+    for (const n of allTreeNodes) { if (n.type === "atomic_concept") seen.set(n.id, n.title); }
     return seen;
   }, [allTreeNodes]);
 
@@ -60,11 +70,13 @@ function QuestionBankPage() {
     { key: "status", label: "Status", options: [{ value: "draft", label: "Draft" }, { value: "published", label: "Published" }, { value: "archived", label: "Archived" }] },
     { key: "course", label: "Course", options: courses.map((c) => ({ value: c.id, label: c.title })) },
     { key: "chapter", label: "Chapter", options: [{ value: "__unclassified", label: "Unclassified" }, ...[...treeChapters.entries()].map(([id, t]) => ({ value: id, label: t }))] },
+    { key: "lesson", label: "Lesson", options: [...treeLessons.entries()].map(([id, t]) => ({ value: id, label: t })) },
     { key: "concept", label: "Concept", options: [...treeConcepts.entries()].map(([id, t]) => ({ value: id, label: t })) },
+    { key: "atomic", label: "Atomic Concept", options: [...treeAtomics.entries()].map(([id, t]) => ({ value: id, label: t })) },
     ...(uniqueSources.length > 0 ? [{ key: "source", label: "Source", options: uniqueSources.map((s) => ({ value: s, label: s })) }] : []),
     { key: "time", label: "Est. Time", options: [{ value: "lt1", label: "< 1 min" }, { value: "1to3", label: "1–3 min" }, { value: "3to5", label: "3–5 min" }, { value: "gt5", label: "> 5 min" }] },
     { key: "usage", label: "Usage", options: [{ value: "used", label: "Used" }, { value: "unused", label: "Unused" }, { value: "quiz", label: "In Quiz" }, { value: "exam", label: "In Exam" }, { value: "homework", label: "In Homework" }, { value: "session", label: "In Session" }] },
-  ], [courses, treeChapters, treeConcepts, uniqueSources]);
+  ], [courses, treeChapters, treeLessons, treeConcepts, treeAtomics, uniqueSources]);
 
   const filtered = useMemo(() => {
     let r = [...questions];
@@ -78,7 +90,9 @@ function QuestionBankPage() {
       if (filters.chapter === "__unclassified") r = r.filter((q) => (!q.chapterIds || q.chapterIds.length === 0) && !q.chapterId);
       else r = r.filter((q) => (q.chapterIds || []).includes(filters.chapter) || q.chapterId === filters.chapter);
     }
+    if (filters.lesson) r = r.filter((q) => (q.lessonIds || []).includes(filters.lesson));
     if (filters.concept) r = r.filter((q) => (q.conceptIds || []).includes(filters.concept));
+    if (filters.atomic) r = r.filter((q) => (q.atomicConceptIds || []).includes(filters.atomic));
     if (filters.source) r = r.filter((q) => (q.sourceLabel || q.source) === filters.source);
     if (filters.time) {
       r = r.filter((q) => {
