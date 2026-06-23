@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   ASSESSMENT_TYPE_LABELS,
   createAssessmentPreset,
+  type ShowPolicy,
   type AssessmentRewards,
   type AssessmentSettings,
   type AssessmentType,
@@ -105,6 +106,16 @@ function TeacherAssessmentsCreatePage() {
     setDraft((current) => ({
       ...current,
       [field]: value,
+    }));
+  };
+
+  const updateDraftSettings = <Field extends keyof AssessmentSettings>(field: Field, value: AssessmentSettings[Field]) => {
+    setDraft((current) => ({
+      ...current,
+      settings: {
+        ...current.settings,
+        [field]: value,
+      },
     }));
   };
 
@@ -466,6 +477,123 @@ function TeacherAssessmentsCreatePage() {
                 </Card>
               </div>
             </div>
+          ) : activeStep === "Settings" ? (
+            <div className="space-y-5">
+              <div>
+                <h2 className="text-sm font-semibold">Assessment settings</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Configure timing, attempts, grading, and answer visibility for this assessment.
+                </p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="settings-duration">Duration (minutes)</Label>
+                  <Input
+                    id="settings-duration"
+                    type="number"
+                    min="0"
+                    value={draft.settings.durationMinutes ?? ""}
+                    onChange={(event) => updateDraftSettings("durationMinutes", event.target.value ? Number(event.target.value) : undefined)}
+                    placeholder="60"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="settings-attempts">Attempts</Label>
+                  <Input
+                    id="settings-attempts"
+                    type="number"
+                    min="1"
+                    value={draft.settings.attemptLimit ?? ""}
+                    onChange={(event) => updateDraftSettings("attemptLimit", event.target.value ? Number(event.target.value) : undefined)}
+                    placeholder="1"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="settings-total-score">Total score</Label>
+                  <Input
+                    id="settings-total-score"
+                    type="number"
+                    min="0"
+                    value={draft.settings.totalScore ?? ""}
+                    onChange={(event) => updateDraftSettings("totalScore", event.target.value ? Number(event.target.value) : undefined)}
+                    placeholder="100"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="settings-passing-score">Passing score</Label>
+                  <Input
+                    id="settings-passing-score"
+                    type="number"
+                    min="0"
+                    value={draft.settings.passingScorePercent ?? ""}
+                    onChange={(event) => updateDraftSettings("passingScorePercent", event.target.value ? Number(event.target.value) : undefined)}
+                    placeholder="60"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="settings-show-answers">Show answers policy</Label>
+                  <select
+                    id="settings-show-answers"
+                    value={draft.settings.showAnswersPolicy ?? "after_submit"}
+                    onChange={(event) => updateDraftSettings("showAnswersPolicy", event.target.value as ShowPolicy)}
+                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  >
+                    <option value="immediately">Immediately</option>
+                    <option value="after_submit">After submit</option>
+                    <option value="after_due_date">After due date</option>
+                    <option value="never">Never</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="settings-show-explanations">Show explanations policy</Label>
+                  <select
+                    id="settings-show-explanations"
+                    value={draft.settings.showExplanationPolicy ?? "after_submit"}
+                    onChange={(event) => updateDraftSettings("showExplanationPolicy", event.target.value as ShowPolicy)}
+                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  >
+                    <option value="immediately">Immediately</option>
+                    <option value="after_submit">After submit</option>
+                    <option value="after_due_date">After due date</option>
+                    <option value="never">Never</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-2">
+                {[
+                  { key: "hasStrictTimer", label: "Strict timer" },
+                  { key: "shuffleQuestions", label: "Shuffle questions" },
+                  { key: "shuffleChoices", label: "Shuffle choices" },
+                  { key: "manualReviewRequired", label: "Manual review" },
+                  { key: "autoGradeAllowed", label: "Auto grade" },
+                  { key: "fileUploadAllowed", label: "File upload allowed" },
+                ].map((option) => (
+                  <label
+                    key={option.key}
+                    className="flex items-center justify-between rounded-xl border px-4 py-3 text-sm"
+                  >
+                    <span>{option.label}</span>
+                    <input
+                      type="checkbox"
+                      checked={Boolean(draft.settings[option.key as keyof AssessmentSettings])}
+                      onChange={(event) =>
+                        updateDraftSettings(
+                          option.key as keyof AssessmentSettings,
+                          event.target.checked as AssessmentSettings[keyof AssessmentSettings],
+                        )
+                      }
+                    />
+                  </label>
+                ))}
+              </div>
+            </div>
           ) : (
             <div className="space-y-2">
               <h2 className="text-sm font-semibold">{activeStep}</h2>
@@ -495,6 +623,18 @@ function TeacherAssessmentsCreatePage() {
               <div>
                 <p className="text-xs font-medium text-muted-foreground">Questions</p>
                 <p className="mt-1 font-medium">{draft.questionIds.length} selected</p>
+              </div>
+
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">Duration</p>
+                <p className="mt-1 font-medium">
+                  {draft.settings.durationMinutes ? `${draft.settings.durationMinutes} minutes` : "Not set"}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">Attempts</p>
+                <p className="mt-1 font-medium">{draft.settings.attemptLimit ?? "Not set"}</p>
               </div>
 
               <div>
