@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   ASSESSMENT_TYPE_LABELS,
   createAssessmentPreset,
+  type AssessmentVisibility,
   type ShowPolicy,
   type AssessmentRewards,
   type AssessmentSettings,
@@ -67,6 +68,7 @@ type AssessmentDraft = {
   thumbnail: string;
   tags: string;
   questionIds: string[];
+  visibility: AssessmentVisibility;
   settings: AssessmentSettings;
   rewards: AssessmentRewards;
 };
@@ -83,6 +85,7 @@ function TeacherAssessmentsCreatePage() {
     thumbnail: "",
     tags: "",
     questionIds: [],
+    visibility: "enrolled_only",
     settings: {},
     rewards: {},
   });
@@ -114,6 +117,16 @@ function TeacherAssessmentsCreatePage() {
       ...current,
       settings: {
         ...current.settings,
+        [field]: value,
+      },
+    }));
+  };
+
+  const updateDraftRewards = <Field extends keyof AssessmentRewards>(field: Field, value: AssessmentRewards[Field]) => {
+    setDraft((current) => ({
+      ...current,
+      rewards: {
+        ...current.rewards,
         [field]: value,
       },
     }));
@@ -594,6 +607,142 @@ function TeacherAssessmentsCreatePage() {
                 ))}
               </div>
             </div>
+          ) : activeStep === "Availability" ? (
+            <div className="space-y-5">
+              <div>
+                <h2 className="text-sm font-semibold">Availability</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Decide when the assessment opens, closes, and whether late submissions are allowed.
+                </p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="availability-start">Start at</Label>
+                  <Input
+                    id="availability-start"
+                    type="datetime-local"
+                    value={draft.settings.startAt ?? ""}
+                    onChange={(event) => updateDraftSettings("startAt", event.target.value || undefined)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="availability-end">End at</Label>
+                  <Input
+                    id="availability-end"
+                    type="datetime-local"
+                    value={draft.settings.endAt ?? ""}
+                    onChange={(event) => updateDraftSettings("endAt", event.target.value || undefined)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="availability-due-date">Due date</Label>
+                  <Input
+                    id="availability-due-date"
+                    type="datetime-local"
+                    value={draft.settings.dueDate ?? ""}
+                    onChange={(event) => updateDraftSettings("dueDate", event.target.value || undefined)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="availability-visibility">Visibility</Label>
+                  <select
+                    id="availability-visibility"
+                    value={draft.visibility}
+                    onChange={(event) => updateDraftField("visibility", event.target.value as AssessmentVisibility)}
+                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  >
+                    <option value="private">Private</option>
+                    <option value="course">Course</option>
+                    <option value="enrolled_only">Enrolled only</option>
+                    <option value="public">Public</option>
+                  </select>
+                </div>
+              </div>
+
+              <label className="flex items-center justify-between rounded-xl border px-4 py-3 text-sm">
+                <span>Late submission</span>
+                <input
+                  type="checkbox"
+                  checked={Boolean(draft.settings.allowLateSubmission)}
+                  onChange={(event) => updateDraftSettings("allowLateSubmission", event.target.checked)}
+                />
+              </label>
+            </div>
+          ) : activeStep === "Rewards" ? (
+            <div className="space-y-5">
+              <div>
+                <h2 className="text-sm font-semibold">Rewards</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Configure XP and coin rewards for completion, passing, and strong performance.
+                </p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="rewards-xp">XP reward</Label>
+                  <Input
+                    id="rewards-xp"
+                    type="number"
+                    min="0"
+                    value={draft.rewards.xpReward ?? ""}
+                    onChange={(event) => updateDraftRewards("xpReward", event.target.value ? Number(event.target.value) : undefined)}
+                    placeholder="30"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="rewards-pass-bonus">Pass bonus</Label>
+                  <Input
+                    id="rewards-pass-bonus"
+                    type="number"
+                    min="0"
+                    value={draft.rewards.passScoreBonus ?? ""}
+                    onChange={(event) => updateDraftRewards("passScoreBonus", event.target.value ? Number(event.target.value) : undefined)}
+                    placeholder="10"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="rewards-perfect-bonus">Perfect bonus</Label>
+                  <Input
+                    id="rewards-perfect-bonus"
+                    type="number"
+                    min="0"
+                    value={draft.rewards.perfectScoreBonus ?? ""}
+                    onChange={(event) => updateDraftRewards("perfectScoreBonus", event.target.value ? Number(event.target.value) : undefined)}
+                    placeholder="25"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="rewards-retake-xp">Retake XP</Label>
+                  <Input
+                    id="rewards-retake-xp"
+                    type="number"
+                    min="0"
+                    value={draft.rewards.maxRetakeXp ?? ""}
+                    onChange={(event) => updateDraftRewards("maxRetakeXp", event.target.value ? Number(event.target.value) : undefined)}
+                    placeholder="5"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="rewards-wallet-coins">Wallet coins</Label>
+                  <Input
+                    id="rewards-wallet-coins"
+                    type="number"
+                    min="0"
+                    value={draft.rewards.walletCoinsReward ?? ""}
+                    onChange={(event) => updateDraftRewards("walletCoinsReward", event.target.value ? Number(event.target.value) : undefined)}
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="space-y-2">
               <h2 className="text-sm font-semibold">{activeStep}</h2>
@@ -635,6 +784,11 @@ function TeacherAssessmentsCreatePage() {
               <div>
                 <p className="text-xs font-medium text-muted-foreground">Attempts</p>
                 <p className="mt-1 font-medium">{draft.settings.attemptLimit ?? "Not set"}</p>
+              </div>
+
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">XP reward</p>
+                <p className="mt-1 font-medium">{draft.rewards.xpReward ?? "Not set"}</p>
               </div>
 
               <div>
