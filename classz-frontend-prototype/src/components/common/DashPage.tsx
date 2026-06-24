@@ -4,6 +4,7 @@ import { type LucideIcon } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { type Role } from "@/lib/roles";
 import { cn } from "@/lib/utils";
+import { useApp } from "@/lib/app-context";
 
 export function DashPage({
   role,
@@ -20,6 +21,8 @@ export function DashPage({
   actions?: ReactNode;
   children: ReactNode;
 }) {
+  const { t } = useApp();
+
   return (
     <DashboardLayout role={role}>
       <motion.div
@@ -35,8 +38,8 @@ export function DashPage({
             </span>
           )}
           <div className="min-w-0">
-            <h1 className="truncate text-2xl font-bold tracking-tight sm:text-3xl">{title}</h1>
-            {subtitle && <p className="mt-0.5 text-sm text-muted-foreground">{subtitle}</p>}
+            <h1 className="truncate text-2xl font-bold tracking-tight sm:text-3xl">{t(title)}</h1>
+            {subtitle && <p className="mt-0.5 text-sm text-muted-foreground">{t(subtitle)}</p>}
           </div>
         </div>
         {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}

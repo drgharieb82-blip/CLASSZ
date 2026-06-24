@@ -1,5 +1,6 @@
 import { BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useApp } from "@/lib/app-context";
 
 interface SubjectScore {
   subject: string;
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export function SubjectDistributionCard({ scores }: Props) {
+  const { t } = useApp();
   const max = Math.max(...scores.map((s) => s.score), 1);
 
   return (
@@ -30,10 +32,10 @@ export function SubjectDistributionCard({ scores }: Props) {
         </span>
         <div>
           <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-200">
-            Subject Distribution
+            {t("student.subjectDistribution")}
           </h3>
           <p className="mt-0.5 text-xs text-slate-400">
-            Your score across subjects
+            {t("student.scoreAcrossSubjects")}
           </p>
         </div>
       </div>

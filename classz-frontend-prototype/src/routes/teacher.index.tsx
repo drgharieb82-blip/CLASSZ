@@ -11,36 +11,40 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ROLES } from "@/lib/roles";
 import { teacherProfile, teacherRevenue, essayQueue } from "@/lib/teacherMock";
+import { useApp } from "@/lib/app-context";
 
 export const Route = createFileRoute("/teacher/")({
   component: TeacherDashboard,
 });
 
-function TeacherDashboard() {
+export function TeacherDashboard() {
+  const { t } = useApp();
   useEffect(() => { seedTeacherData(); }, []);
+  const quickActions = [
+    { label: t("teacher.createSession"), icon: Plus, to: "/teacher/content-studio" },
+    { label: t("teacher.addQuiz"), icon: ClipboardList, to: "/teacher/quizzes" },
+    { label: t("teacher.uploadMaterial"), icon: FileText, to: "/teacher/courses" },
+    { label: t("teacher.addQuestions"), icon: BookOpen, to: "/teacher/questions" },
+    { label: t("teacher.announcement"), icon: Bell, to: "/teacher/chat" },
+    { label: t("teacher.viewRevenue"), icon: CreditCard, to: "/teacher/revenue" },
+  ];
+
   return (
-    <DashPage role="teacher" title="Teacher Workspace" subtitle={`${teacherProfile.name} · ${teacherProfile.publicCode}`} icon={ROLES.teacher.icon}>
+    <DashPage role="teacher" title={t("teacher.workspaceTitle")} subtitle={`${teacherProfile.name} · ${teacherProfile.publicCode}`} icon={ROLES.teacher.icon}>
       {/* Stats Row */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard icon={DollarSign} label="Today's Revenue" value={`$${teacherRevenue.todayRevenue.toLocaleString()}`} change="+12%" color="text-emerald-400" bg="bg-emerald-500/10" />
-        <StatCard icon={TrendingUp} label="Monthly Revenue" value={`$${teacherRevenue.monthlyRevenue.toLocaleString()}`} change="+8%" color="text-blue-400" bg="bg-blue-500/10" />
-        <StatCard icon={Users} label="Total Students" value={teacherProfile.totalStudents.toLocaleString()} change="+45 this week" color="text-violet-400" bg="bg-violet-500/10" />
-        <StatCard icon={Wallet} label="Wallet Balance" value={`$${teacherRevenue.walletBalance.toLocaleString()}`} change="" color="text-amber-400" bg="bg-amber-500/10" />
+        <StatCard icon={DollarSign} label={t("biz.todayRevenue")} value={`$${teacherRevenue.todayRevenue.toLocaleString()}`} change="+12%" color="text-emerald-400" bg="bg-emerald-500/10" />
+        <StatCard icon={TrendingUp} label={t("biz.monthlyRevenue")} value={`$${teacherRevenue.monthlyRevenue.toLocaleString()}`} change="+8%" color="text-blue-400" bg="bg-blue-500/10" />
+        <StatCard icon={Users} label={t("stu.totalStudents")} value={teacherProfile.totalStudents.toLocaleString()} change={`+45 ${t("teacher.thisWeek")}`} color="text-violet-400" bg="bg-violet-500/10" />
+        <StatCard icon={Wallet} label={t("stu.walletBalance")} value={`$${teacherRevenue.walletBalance.toLocaleString()}`} change="" color="text-amber-400" bg="bg-amber-500/10" />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
         {/* Quick Actions */}
         <Card className="border bg-card p-5 lg:col-span-1">
-          <h3 className="font-semibold">Quick Actions</h3>
+          <h3 className="font-semibold">{t("team.quickActions")}</h3>
           <div className="mt-4 grid grid-cols-2 gap-2">
-            {[
-              { label: "Create Session", icon: Plus, to: "/teacher/content-studio" },
-              { label: "Add Quiz", icon: ClipboardList, to: "/teacher/quizzes" },
-              { label: "Upload Material", icon: FileText, to: "/teacher/courses" },
-              { label: "Add Questions", icon: BookOpen, to: "/teacher/questions" },
-              { label: "Announcement", icon: Bell, to: "/teacher/chat" },
-              { label: "View Revenue", icon: CreditCard, to: "/teacher/revenue" },
-            ].map((action) => (
+            {quickActions.map((action) => (
               <Link
                 key={action.label}
                 to={action.to}
@@ -56,8 +60,8 @@ function TeacherDashboard() {
         {/* Essay Grading Queue */}
         <Card className="border bg-card p-5 lg:col-span-2">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold">Essay Grading Queue</h3>
-            <Badge variant="outline" className="rounded-full">{essayQueue.filter((e) => e.status === "pending").length} pending</Badge>
+            <h3 className="font-semibold">{t("teacher.essayGradingQueue")}</h3>
+            <Badge variant="outline" className="rounded-full">{essayQueue.filter((e) => e.status === "pending").length} {t("assess.pending")}</Badge>
           </div>
           <div className="mt-4 space-y-2">
             {essayQueue.map((essay) => (
@@ -67,7 +71,7 @@ function TeacherDashboard() {
                   <p className="text-xs text-muted-foreground">{essay.student} · {essay.studentCode} · {essay.submitted}</p>
                 </div>
                 <Badge variant={essay.status === "pending" ? "default" : "outline"} className="shrink-0 rounded-full text-xs">
-                  {essay.status}
+                  {t(`assess.${essay.status}`)}
                 </Badge>
               </div>
             ))}
@@ -78,20 +82,20 @@ function TeacherDashboard() {
       {/* Recent Sales */}
       <Card className="border bg-card p-5">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold">Recent Sales</h3>
+          <h3 className="font-semibold">{t("teacher.recentSales")}</h3>
           <Button asChild variant="ghost" size="sm" className="rounded-xl">
-            <Link to="/teacher/revenue">View all <ArrowRight className="ms-1 h-3.5 w-3.5" /></Link>
+            <Link to="/teacher/revenue">{t("common.viewAll")} <ArrowRight className="ms-1 h-3.5 w-3.5 rtl:rotate-180" /></Link>
           </Button>
         </div>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b text-xs text-muted-foreground">
-                <th className="pb-2 text-start font-medium">Payment ID</th>
-                <th className="pb-2 text-start font-medium">Student</th>
-                <th className="pb-2 text-start font-medium">Item</th>
-                <th className="pb-2 text-end font-medium">Amount</th>
-                <th className="pb-2 text-end font-medium">Date</th>
+                <th className="pb-2 text-start font-medium">{t("teacher.paymentId")}</th>
+                <th className="pb-2 text-start font-medium">{t("assess.student")}</th>
+                <th className="pb-2 text-start font-medium">{t("teacher.item")}</th>
+                <th className="pb-2 text-end font-medium">{t("team.amount")}</th>
+                <th className="pb-2 text-end font-medium">{t("teacher.date")}</th>
               </tr>
             </thead>
             <tbody>
@@ -114,9 +118,9 @@ function TeacherDashboard() {
 
       {/* Bottom Row */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <MiniCard icon={BookOpen} label="Active Courses" value={String(teacherProfile.totalCourses)} to="/teacher/courses" />
-        <MiniCard icon={MessageSquare} label="Team Messages" value="12 unread" to="/teacher/chat" />
-        <MiniCard icon={Users} label="Active Sessions" value={String(teacherProfile.activeSessions)} to="/teacher/content-studio" />
+        <MiniCard icon={BookOpen} label={t("teacher.activeCourses")} value={String(teacherProfile.totalCourses)} to="/teacher/courses" />
+        <MiniCard icon={MessageSquare} label={t("teacher.teamMessages")} value={`12 ${t("teacher.unread")}`} to="/teacher/chat" />
+        <MiniCard icon={Users} label={t("teacher.activeSessions")} value={String(teacherProfile.activeSessions)} to="/teacher/content-studio" />
       </div>
     </DashPage>
   );

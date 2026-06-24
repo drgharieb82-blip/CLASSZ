@@ -1,18 +1,74 @@
 import { type ReactNode, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, X, Search, Bell } from "lucide-react";
+import { Menu, X, Search, Bell, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/brand/Logo";
 import { ThemeToggle, LangSwitcher } from "@/components/brand/Toggles";
 import { UserMenu } from "@/components/layout/UserMenu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ROLES, type Role } from "@/lib/roles";
+import { ROLES, type Role, type NavItem } from "@/lib/roles";
+import { useApp } from "@/lib/app-context";
+
+function CollapsibleNavItem({ item, pathname, onNav, labelFor }: { item: NavItem; pathname: string; onNav?: () => void; labelFor: (label: string) => string }) {
+  const parentActive = pathname === item.to || pathname.startsWith(item.to + "/");
+  const [open, setOpen] = useState(parentActive);
+
+  return (
+    <div>
+      <button
+        onClick={() => setOpen((p) => !p)}
+        className={cn(
+          "group relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
+          parentActive ? "gradient-brand text-white shadow-md" : "text-muted-foreground hover:bg-accent hover:text-foreground"
+        )}
+      >
+        {parentActive && <span className="absolute inset-y-1.5 -start-3 w-1 rounded-full bg-white/80" />}
+        <item.icon className={cn("h-[18px] w-[18px] shrink-0 transition-transform", !parentActive && "group-hover:scale-110")} />
+        <span className="truncate flex-1 text-start">{labelFor(item.label)}</span>
+        <ChevronDown className={cn("h-4 w-4 shrink-0 transition-transform duration-200", open && "rotate-180")} />
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            <div className="mt-1 ms-4 space-y-0.5 border-s border-border ps-3">
+              {item.children!.map((child) => {
+                const childActive = child.to === item.to
+                  ? pathname === child.to
+                  : pathname === child.to || pathname.startsWith(child.to + "/");
+                return (
+                  <Link key={child.to} to={child.to} onClick={onNav}
+                    className={cn(
+                      "group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-all",
+                      childActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                    )}
+                  >
+                    <child.icon className="h-4 w-4 shrink-0" />
+                    <span className="truncate">{labelFor(child.label)}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 function SidebarContent({ role, onNav }: { role: Role; onNav?: () => void }) {
   const cfg = ROLES[role];
+  const { t } = useApp();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const labelFor = (label: string) => t(label);
+
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-16 shrink-0 items-center px-5">
@@ -23,16 +79,19 @@ function SidebarContent({ role, onNav }: { role: Role; onNav?: () => void }) {
           <cfg.icon className="h-4 w-4" />
         </span>
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold">{cfg.name}</p>
-          <p className="truncate text-xs text-muted-foreground">{cfg.tagline}</p>
+          <p className="truncate text-sm font-semibold">{labelFor(cfg.name)}</p>
+          <p className="truncate text-xs text-muted-foreground">{labelFor(cfg.tagline)}</p>
         </div>
       </div>
       <nav className="flex-1 space-y-5 overflow-y-auto px-3 pb-6">
         {cfg.nav.map((group) => (
           <div key={group.group}>
-            <p className="px-3 pb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{group.group}</p>
+            {group.group && <p className="px-3 pb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{labelFor(group.group)}</p>}
             <div className="space-y-0.5">
               {group.items.map((item) => {
+                if (item.children) {
+                  return <CollapsibleNavItem key={item.to} item={item} pathname={pathname} onNav={onNav} labelFor={labelFor} />;
+                }
                 const active = pathname === item.to;
                 return (
                   <Link key={item.to} to={item.to} onClick={onNav}
@@ -44,7 +103,7 @@ function SidebarContent({ role, onNav }: { role: Role; onNav?: () => void }) {
                       <span className="absolute inset-y-1.5 -start-3 w-1 rounded-full bg-white/80" />
                     )}
                     <item.icon className={cn("h-[18px] w-[18px] shrink-0 transition-transform", !active && "group-hover:scale-110")} />
-                    <span className="truncate">{item.label}</span>
+                    <span className="truncate">{labelFor(item.label)}</span>
                   </Link>
                 );
               })}
@@ -58,8 +117,11 @@ function SidebarContent({ role, onNav }: { role: Role; onNav?: () => void }) {
 
 export function DashboardLayout({ role, children }: { role: Role; children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const { dir, t } = useApp();
+  const closedX = dir === "rtl" ? "100%" : "-100%";
+
   return (
-    <div className="min-h-screen w-full">
+    <div className="min-h-screen w-full" dir={dir}>
       <aside className="fixed inset-y-0 z-40 hidden w-64 border-e border-border bg-sidebar lg:block">
         <SidebarContent role={role} />
       </aside>
@@ -73,7 +135,7 @@ export function DashboardLayout({ role, children }: { role: Role; children: Reac
               className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" onClick={() => setOpen(false)}
             />
             <motion.aside
-              initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }}
+              initial={{ x: closedX }} animate={{ x: 0 }} exit={{ x: closedX }}
               transition={{ type: "spring", stiffness: 320, damping: 34 }}
               className="absolute inset-y-0 start-0 w-72 border-e border-border bg-sidebar shadow-2xl rtl:[transform-origin:right]"
             >
@@ -89,7 +151,7 @@ export function DashboardLayout({ role, children }: { role: Role; children: Reac
           <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setOpen(true)}><Menu /></Button>
           <div className="relative hidden max-w-md flex-1 sm:block">
             <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Search courses, lessons, students…" className="ps-9 rounded-xl bg-card" />
+            <Input placeholder={t("common.globalSearchPlaceholder")} className="ps-9 rounded-xl bg-card" />
           </div>
           <div className="ms-auto flex items-center gap-1">
             <LangSwitcher />

@@ -8,20 +8,22 @@ import { getAllEnrolledCourses } from "@/lib/enrolled-courses";
 import { useEnrollmentStore } from "@/lib/stores/enrollment-store";
 import { EnrolledCourseCard } from "@/components/student/EnrolledCourseCard";
 import { EmptyBookshelf } from "@/components/illustrations/Characters";
+import { useApp } from "@/lib/app-context";
 
 export const Route = createFileRoute("/student/courses/")({
   component: Page,
 });
 
 function Page() {
+  const { t } = useApp();
   useEnrollmentStore((s) => s.enrolledCourseIds);
   const courses = getAllEnrolledCourses();
 
   return (
     <DashPage
       role="student"
-      title="My Courses"
-      subtitle="Continue where you left off"
+      title={t("workspace.myCourses")}
+      subtitle={t("student.continueWhereLeftOff")}
       icon={ROLES.student.icon}
     >
       {courses.length === 0 ? (
@@ -32,10 +34,10 @@ function Page() {
         >
           <EmptyBookshelf size="lg" />
           <BookOpen className="h-12 w-12 text-slate-500" />
-          <h2 className="text-lg font-semibold text-white">No courses yet</h2>
-          <p className="text-sm text-slate-400">Your learning adventure starts here.</p>
+          <h2 className="text-lg font-semibold text-white">{t("student.noCoursesYet")}</h2>
+          <p className="text-sm text-slate-400">{t("student.learningAdventureStarts")}</p>
           <Button asChild className="rounded-xl gradient-brand border-0 text-white">
-            <Link to="/courses">Browse Courses</Link>
+            <Link to="/courses">{t("student.browseCourses")}</Link>
           </Button>
         </motion.div>
       ) : (

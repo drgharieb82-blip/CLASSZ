@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { ArrowLeft, ArrowRight, CircleDot, FlaskConical, NotebookText, PlayCircle, Rocket, Sparkles, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GradientButton } from "@/components/premium/GradientButton";
+import { useApp } from "@/lib/app-context";
 
 interface MissionItem {
   icon?: string;
@@ -70,6 +71,7 @@ function MissionSection({
   label: keyof typeof sectionConfig;
   items: MissionItem[];
 }) {
+  const { t } = useApp();
   const config = sectionConfig[label];
 
   return (
@@ -77,9 +79,9 @@ function MissionSection({
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <span className={cn("h-2.5 w-2.5 rounded-full", config.dot)} />
         <p className={cn("text-xs font-semibold uppercase tracking-[0.22em]", config.accent)}>
-          {config.title}
+          {t(config.title)}
         </p>
-        {config.suffix ? <span className="text-[10px] uppercase tracking-[0.16em] text-slate-500">{config.suffix}</span> : null}
+        {config.suffix ? <span className="text-[10px] uppercase tracking-[0.16em] text-slate-500">{t(config.suffix)}</span> : null}
       </div>
 
       <div className="space-y-3">
@@ -107,6 +109,7 @@ function MissionSection({
 }
 
 export function TodayMissionCard({ mustDo, recommended, optional, continueLearning }: TodayMissionCardProps) {
+  const { t } = useApp();
   const sectionsRef = useRef<HTMLDivElement>(null);
 
   const scrollSections = (direction: "left" | "right") => {
@@ -121,15 +124,15 @@ export function TodayMissionCard({ mustDo, recommended, optional, continueLearni
 
   return (
     <div className="relative overflow-hidden rounded-[30px] border border-violet-500/15 bg-[radial-gradient(circle_at_top_left,rgba(99,102,241,0.18),transparent_32%),linear-gradient(180deg,rgba(14,19,39,0.98),rgba(10,14,29,0.94))] p-6 shadow-[0_28px_80px_rgba(4,6,20,0.45)] backdrop-blur-2xl">
-      <div className="absolute inset-y-0 right-0 w-72 bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.18),transparent_65%)]" />
+      <div className="absolute inset-y-0 end-0 w-72 bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.18),transparent_65%)]" />
       <div className="relative">
         <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <div className="mb-2 flex items-center gap-2 text-violet-300">
               <Rocket className="h-4 w-4" />
-              <span className="text-xs font-semibold uppercase tracking-[0.24em]">Today's Mission</span>
+              <span className="text-xs font-semibold uppercase tracking-[0.24em]">{t("Today's Mission")}</span>
             </div>
-            <h2 className="text-3xl font-bold tracking-tight text-white">What will you achieve today?</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-white">{t("What will you achieve today?")}</h2>
           </div>
 
           <div className="flex items-center gap-2">
@@ -138,14 +141,14 @@ export function TodayMissionCard({ mustDo, recommended, optional, continueLearni
               onClick={() => scrollSections("left")}
               className="grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/[0.04] text-slate-200 transition-colors hover:bg-white/[0.08]"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
             </button>
             <button
               type="button"
               onClick={() => scrollSections("right")}
               className="grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/[0.04] text-slate-200 transition-colors hover:bg-white/[0.08]"
             >
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 rtl:rotate-180" />
             </button>
           </div>
         </div>
@@ -165,11 +168,11 @@ export function TodayMissionCard({ mustDo, recommended, optional, continueLearni
 
           <div className="flex min-w-0 flex-col gap-4">
             <GradientButton className="h-20 w-full justify-center rounded-[22px] text-lg">
-              <Rocket className="h-5 w-5" /> Start Today
+              <Rocket className="h-5 w-5" /> {t("Start Today")}
             </GradientButton>
             <div className="rounded-[22px] border border-white/8 bg-white/[0.03] px-4 py-5 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-              <p className="text-sm text-slate-400">Discipline today</p>
-              <p className="mt-1 text-lg font-medium text-white">Success tomorrow</p>
+              <p className="text-sm text-slate-400">{t("Discipline today")}</p>
+              <p className="mt-1 text-lg font-medium text-white">{t("Success tomorrow")}</p>
             </div>
           </div>
         </div>
@@ -187,7 +190,7 @@ export function TodayMissionCard({ mustDo, recommended, optional, continueLearni
             <span className="text-xs font-semibold text-slate-300">{continueLearning.progress}%</span>
           </div>
           <button className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-violet-300 transition-colors hover:text-white">
-            Resume <ArrowRight className="h-4 w-4" />
+            {t("Resume")} <ArrowRight className="h-4 w-4 rtl:rotate-180" />
           </button>
         </div>
       </div>

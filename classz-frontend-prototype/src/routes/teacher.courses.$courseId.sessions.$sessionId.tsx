@@ -31,17 +31,15 @@ import { useTeacherExamStore } from "@/lib/teacher/teacher-exam-store";
 import { useTeacherHomeworkStore } from "@/lib/teacher/teacher-homework-store";
 import { useContentTreeStore, getTreeForCourse, getChildren, getCoverageSummary, type ContentTreeNode } from "@/lib/teacher/content-tree-store";
 import {
-  SESSION_TYPE_META, BLOCK_META, type SessionWorkspaceType, type SessionBlockType,
+  SESSION_TYPE_META, BLOCK_META, NEW_BLOCK_TYPES,
+  type SessionWorkspaceType, type SessionBlockType,
 } from "@/lib/teacher/session-workspace-types";
 
 export const Route = createFileRoute("/teacher/courses/$courseId/sessions/$sessionId")({
   component: SessionBuilderPage,
 });
 
-const BLOCK_TYPES: SessionBlockType[] = [
-  "video", "pdf", "notes", "image", "question_block", "quiz_block",
-  "homework_block", "exam_block", "assignment_block", "meeting_link", "mind_map", "summary",
-];
+const BLOCK_TYPES: SessionBlockType[] = [...NEW_BLOCK_TYPES];
 
 interface CanvasBlock {
   id: string;

@@ -1,5 +1,6 @@
 import { Atom, BookMarked, CircleDot, RefreshCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useApp } from "@/lib/app-context";
 
 interface RevisionItem {
   lesson: string;
@@ -30,6 +31,7 @@ const statusMap = {
 } as const;
 
 export function RevisionDueCard({ items }: RevisionDueCardProps) {
+  const { t } = useApp();
   return (
     <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,24,42,0.96),rgba(10,14,28,0.92))] p-6 shadow-[0_18px_50px_rgba(0,0,0,0.26)] backdrop-blur-xl">
       <div className="mb-5 flex items-start justify-between gap-3">
@@ -38,11 +40,11 @@ export function RevisionDueCard({ items }: RevisionDueCardProps) {
             <RefreshCcw className="h-4 w-4" />
           </span>
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-emerald-300">Revision Due</h3>
-            <p className="mt-1 text-xs text-slate-400">Based on memory system</p>
+            <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-emerald-300">{t("Revision Due")}</h3>
+            <p className="mt-1 text-xs text-slate-400">{t("Based on memory system")}</p>
           </div>
         </div>
-        <button className="text-xs font-medium text-violet-300 transition-colors hover:text-white">View all</button>
+        <button className="text-xs font-medium text-violet-300 transition-colors hover:text-white">{t("common.viewAll")}</button>
       </div>
 
       <div className="space-y-2.5">
@@ -62,7 +64,7 @@ export function RevisionDueCard({ items }: RevisionDueCardProps) {
                 <p className="text-sm text-slate-400">{item.course}</p>
               </div>
               <span className={cn("rounded-xl border px-2.5 py-1 text-xs font-semibold", status.className)}>
-                {status.label}
+                {t(status.label)}
               </span>
             </div>
           );

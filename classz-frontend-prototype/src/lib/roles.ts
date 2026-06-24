@@ -5,6 +5,13 @@ import {
   Code2, Activity, Server, Bug, Rocket, Flag, History, Database, Image, Upload,
   CreditCard, DollarSign, Receipt, Ticket, Globe, ScrollText, SlidersHorizontal,
   Grid3x3, UserCog, MessageSquare, ListChecks, Wallet, StickyNote, type LucideIcon,
+  Briefcase, FileCheck, ShieldCheck, UsersRound, PieChart, KanbanSquare, Clock, Mail,
+  Eye, BrainCircuit, HeartHandshake,
+  FileBarChart, CheckSquare, PenTool, Inbox, Medal, BookMarked, LineChart,
+  ShieldAlert, AlertTriangle, TrendingUp, Store, ShoppingCart, BadgeDollarSign,
+  Tags, RefreshCw, Banknote, ReceiptText, Gift, FileSpreadsheet, Calculator,
+  Megaphone as MegaphoneIcon, Lightbulb, BrainCog, Target, Telescope, FileOutput,
+  Wand2,
 } from "lucide-react";
 
 export type Role =
@@ -15,6 +22,7 @@ export interface NavItem {
   label: string;
   to: string;
   icon: LucideIcon;
+  children?: { label: string; to: string; icon: LucideIcon }[];
 }
 
 export interface RoleConfig {
@@ -29,60 +37,105 @@ export interface RoleConfig {
 
 export const ROLES: Record<Role, RoleConfig> = {
   student: {
-    key: "student", name: "Student", tagline: "Learn & grow", color: "from-violet-500 to-blue-500",
+    key: "student", name: "role.student", tagline: "role.studentTagline", color: "from-violet-500 to-blue-500",
     icon: GraduationCap, home: "/student",
     nav: [
-      { group: "Learning", items: [
-        { label: "Dashboard", to: "/student", icon: LayoutDashboard },
-        { label: "My Courses", to: "/student/courses", icon: BookOpen },
-        { label: "Smart Revision", to: "/student/revision", icon: Activity },
-        { label: "My Notes", to: "/student/notes", icon: StickyNote },
-        { label: "Progress", to: "/student/progress", icon: BarChart3 },
+      { group: "nav.learning", items: [
+        { label: "workspace.dashboard", to: "/student", icon: LayoutDashboard },
+        { label: "workspace.myCourses", to: "/student/courses", icon: BookOpen },
+        { label: "student.smartRevision", to: "/student/revision", icon: Activity },
+        { label: "student.myNotes", to: "/student/notes", icon: StickyNote },
+        { label: "student.progress", to: "/student/progress", icon: BarChart3 },
       ]},
-      { group: "Practice", items: [
-        { label: "Question Bank", to: "/questions", icon: Library },
-        { label: "Wrong Questions", to: "/student/wrong-questions", icon: HelpCircle },
+      { group: "nav.practice", items: [
+        { label: "student.questionBank", to: "/questions", icon: Library },
+        { label: "student.wrongQuestions", to: "/student/wrong-questions", icon: HelpCircle },
       ]},
-      { group: "Rewards", items: [
-        { label: "Trophy Room", to: "/student/achievements", icon: Trophy },
-        { label: "Leaderboard", to: "/student/leaderboard", icon: Award },
-        { label: "Certificates", to: "/student/certificates", icon: GraduationCap },
-        { label: "Wallet", to: "/student/wallet", icon: Wallet },
+      { group: "nav.rewards", items: [
+        { label: "student.trophyRoom", to: "/student/achievements", icon: Trophy },
+        { label: "student.leaderboard", to: "/student/leaderboard", icon: Award },
+        { label: "student.certificates", to: "/student/certificates", icon: GraduationCap },
+        { label: "student.wallet", to: "/student/wallet", icon: Wallet },
       ]},
-      { group: "More", items: [
-        { label: "AI Assistant", to: "/assistant", icon: Bot },
-        { label: "Notifications", to: "/student/notifications", icon: Bell },
+      { group: "nav.more", items: [
+        { label: "student.aiAssistant", to: "/assistant", icon: Bot },
+        { label: "student.notifications", to: "/student/notifications", icon: Bell },
       ]},
     ],
   },
   teacher: {
-    key: "teacher", name: "Teacher", tagline: "Your academy workspace", color: "from-blue-500 to-cyan-500",
-    icon: PencilRuler, home: "/teacher",
+    key: "teacher", name: "role.teacher", tagline: "role.teacherTagline", color: "from-blue-500 to-cyan-500",
+    icon: PencilRuler, home: "/teacher/dashboard",
     nav: [
-      { group: "Workspace", items: [
-        { label: "Dashboard", to: "/teacher", icon: LayoutDashboard },
-        { label: "My Courses", to: "/teacher/courses", icon: BookOpen },
-        { label: "Content Studio", to: "/teacher/content-studio", icon: Layers },
-      ]},
-      { group: "Assessment", items: [
-        { label: "Question Bank", to: "/teacher/questions", icon: Library },
-        { label: "Quizzes", to: "/teacher/quizzes", icon: ClipboardList },
-        { label: "Exams", to: "/teacher/exams", icon: ScrollText },
-        { label: "Homework", to: "/teacher/homework", icon: ListChecks },
-        { label: "Grading Queue", to: "/teacher/grading", icon: Receipt },
-      ]},
-      { group: "Business", items: [
-        { label: "Students", to: "/teacher/students", icon: Users },
-        { label: "Revenue & Wallet", to: "/teacher/revenue", icon: Wallet },
-        { label: "Rewards", to: "/teacher/rewards", icon: Trophy },
-      ]},
-      { group: "Team", items: [
-        { label: "Team Management", to: "/teacher/team", icon: UserCog },
-        { label: "Communication", to: "/teacher/chat", icon: MessageSquare },
-      ]},
-      { group: "Insights", items: [
-        { label: "Analytics", to: "/teacher/analytics", icon: BarChart3 },
-        { label: "Generator Studio", to: "/teacher/generator", icon: Sparkles },
+      { group: "", items: [
+        { label: "workspace.title", to: "/teacher/dashboard", icon: LayoutDashboard, children: [
+          { label: "workspace.dashboard", to: "/teacher/dashboard", icon: LayoutDashboard },
+          { label: "workspace.myCourses", to: "/teacher/courses", icon: BookOpen },
+          { label: "workspace.contentStudio", to: "/teacher/content-studio", icon: Layers },
+        ]},
+        { label: "stu.title", to: "/teacher/students", icon: Users, children: [
+          { label: "stu.overview", to: "/teacher/students", icon: Eye },
+          { label: "stu.allStudents", to: "/teacher/students/all", icon: Users },
+          { label: "stu.pods", to: "/teacher/students/pods", icon: UsersRound },
+          { label: "stu.progress", to: "/teacher/students/progress", icon: TrendingUp },
+          { label: "stu.atRisk", to: "/teacher/students/at-risk", icon: AlertTriangle },
+          { label: "stu.wrongQuestions", to: "/teacher/students/wrong-questions", icon: HelpCircle },
+          { label: "stu.memory", to: "/teacher/students/memory", icon: BrainCircuit },
+          { label: "stu.parents", to: "/teacher/students/parents", icon: HeartHandshake },
+          { label: "stu.payments", to: "/teacher/students/payments", icon: CreditCard },
+          { label: "stu.certificates", to: "/teacher/students/certificates", icon: GraduationCap },
+          { label: "stu.reports", to: "/teacher/students/reports", icon: FileBarChart },
+        ]},
+        { label: "assess.title", to: "/teacher/assessment", icon: CheckSquare, children: [
+          { label: "assess.gradingQueue", to: "/teacher/assessment/grading-queue", icon: Inbox },
+          { label: "assess.manualGrading", to: "/teacher/assessment/manual-grading", icon: PenTool },
+          { label: "assess.submissions", to: "/teacher/assessment/submissions", icon: FileCheck },
+          { label: "assess.results", to: "/teacher/assessment/results", icon: Medal },
+          { label: "assess.gradebook", to: "/teacher/assessment/gradebook", icon: BookMarked },
+          { label: "assess.analytics", to: "/teacher/assessment/analytics", icon: LineChart },
+          { label: "assess.academicIntegrity", to: "/teacher/assessment/academic-integrity", icon: ShieldAlert },
+        ]},
+        { label: "team.title", to: "/teacher/team", icon: UserCog, children: [
+          { label: "team.overview", to: "/teacher/team", icon: Eye },
+          { label: "team.members", to: "/teacher/team/members", icon: Users },
+          { label: "team.recruitment", to: "/teacher/team/recruitment", icon: Briefcase },
+          { label: "team.applications", to: "/teacher/team/applications", icon: FileCheck },
+          { label: "team.roles", to: "/teacher/team/roles", icon: ShieldCheck },
+          { label: "stu.pods", to: "/teacher/team/student-pods", icon: UsersRound },
+          { label: "team.revenueSharing", to: "/teacher/team/revenue-sharing", icon: PieChart },
+          { label: "team.tasks", to: "/teacher/team/tasks", icon: KanbanSquare },
+          { label: "team.activityLogs", to: "/teacher/team/activity-logs", icon: Clock },
+          { label: "team.invitations", to: "/teacher/team/invitations", icon: Mail },
+        ]},
+        { label: "biz.title", to: "/teacher/business", icon: Store, children: [
+          { label: "biz.revenueWallet", to: "/teacher/business", icon: Wallet },
+          { label: "biz.sales", to: "/teacher/business/sales", icon: ShoppingCart },
+          { label: "biz.orders", to: "/teacher/business/orders", icon: Receipt },
+          { label: "biz.studentPayments", to: "/teacher/business/student-payments", icon: BadgeDollarSign },
+          { label: "biz.couponsPricing", to: "/teacher/business/coupons-pricing", icon: Tags },
+          { label: "biz.subscriptions", to: "/teacher/business/subscriptions", icon: RefreshCw },
+          { label: "biz.revenueSharing", to: "/teacher/business/revenue-sharing", icon: PieChart },
+          { label: "biz.payouts", to: "/teacher/business/payouts", icon: Banknote },
+          { label: "biz.expenses", to: "/teacher/business/expenses", icon: ReceiptText },
+          { label: "biz.rewards", to: "/teacher/business/rewards", icon: Gift },
+          { label: "biz.financialReports", to: "/teacher/business/financial-reports", icon: FileSpreadsheet },
+          { label: "biz.taxesInvoices", to: "/teacher/business/taxes-invoices", icon: Calculator },
+          { label: "biz.marketing", to: "/teacher/business/marketing", icon: Megaphone },
+        ]},
+        { label: "ins.title", to: "/teacher/insights", icon: Lightbulb, children: [
+          { label: "ins.overview", to: "/teacher/insights", icon: Eye },
+          { label: "ins.courseAnalytics", to: "/teacher/insights/course-analytics", icon: BookOpen },
+          { label: "ins.studentAnalytics", to: "/teacher/insights/student-analytics", icon: Users },
+          { label: "ins.assessmentAnalytics", to: "/teacher/insights/assessment-analytics", icon: CheckSquare },
+          { label: "ins.conceptAnalytics", to: "/teacher/insights/concept-analytics", icon: Target },
+          { label: "ins.memoryInsights", to: "/teacher/insights/memory-insights", icon: BrainCog },
+          { label: "ins.revenueAnalytics", to: "/teacher/insights/revenue-analytics", icon: DollarSign },
+          { label: "ins.aiInsights", to: "/teacher/insights/ai-insights", icon: Sparkles },
+          { label: "ins.predictions", to: "/teacher/insights/predictions", icon: Telescope },
+          { label: "ins.reportsCenter", to: "/teacher/insights/reports-center", icon: FileOutput },
+          { label: "ins.generatorStudio", to: "/teacher/insights/generator-studio", icon: Wand2 },
+        ]},
+        { label: "nav.communication", to: "/teacher/chat", icon: MessageSquare },
       ]},
     ],
   },
@@ -100,15 +153,12 @@ export const ROLES: Record<Role, RoleConfig> = {
     ],
   },
   parent: {
-    key: "parent", name: "Parent", tagline: "Track your child", color: "from-emerald-500 to-teal-500",
+    key: "parent", name: "role.parent", tagline: "role.parentTagline", color: "from-emerald-500 to-teal-500",
     icon: Users, home: "/parent",
     nav: [
-      { group: "Monitoring", items: [
-        { label: "Dashboard", to: "/parent", icon: LayoutDashboard },
-        { label: "Child Progress", to: "/parent/progress", icon: BarChart3 },
-        { label: "Homework", to: "/parent/homework", icon: ClipboardList },
-        { label: "Attendance", to: "/parent/attendance", icon: CalendarDays },
-        { label: "Messages", to: "/parent/messages", icon: MessageSquare },
+      { group: "", items: [
+        { label: "parent.dashboard", to: "/parent", icon: LayoutDashboard },
+        { label: "parent.settings", to: "/parent/settings", icon: Settings },
       ]},
     ],
   },

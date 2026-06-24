@@ -38,15 +38,19 @@ import { Route as TeacherQuizzesRouteImport } from './routes/teacher.quizzes'
 import { Route as TeacherQuestionsRouteImport } from './routes/teacher.questions'
 import { Route as TeacherMaterialsRouteImport } from './routes/teacher.materials'
 import { Route as TeacherLessonsRouteImport } from './routes/teacher.lessons'
+import { Route as TeacherInsightsRouteImport } from './routes/teacher.insights'
 import { Route as TeacherHomeworkRouteImport } from './routes/teacher.homework'
 import { Route as TeacherGradingRouteImport } from './routes/teacher.grading'
 import { Route as TeacherGeneratorRouteImport } from './routes/teacher.generator'
 import { Route as TeacherExamsRouteImport } from './routes/teacher.exams'
+import { Route as TeacherDashboardRouteImport } from './routes/teacher.dashboard'
 import { Route as TeacherCoursesRouteImport } from './routes/teacher.courses'
 import { Route as TeacherContentStudioRouteImport } from './routes/teacher.content-studio'
 import { Route as TeacherChatRouteImport } from './routes/teacher.chat'
 import { Route as TeacherChaptersRouteImport } from './routes/teacher.chapters'
+import { Route as TeacherBusinessRouteImport } from './routes/teacher.business'
 import { Route as TeacherAssignmentsRouteImport } from './routes/teacher.assignments'
+import { Route as TeacherAssessmentRouteImport } from './routes/teacher.assessment'
 import { Route as TeacherAnalyticsRouteImport } from './routes/teacher.analytics'
 import { Route as SuperSystemRouteImport } from './routes/super.system'
 import { Route as SuperAuditRouteImport } from './routes/super.audit'
@@ -99,16 +103,69 @@ import { Route as AdminRolesRouteImport } from './routes/admin.roles'
 import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
 import { Route as AdminCoursesRouteImport } from './routes/admin.courses'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
+import { Route as TeacherTeamIndexRouteImport } from './routes/teacher.team.index'
+import { Route as TeacherStudentsIndexRouteImport } from './routes/teacher.students.index'
 import { Route as TeacherQuestionsIndexRouteImport } from './routes/teacher.questions.index'
+import { Route as TeacherInsightsIndexRouteImport } from './routes/teacher.insights.index'
 import { Route as TeacherCoursesIndexRouteImport } from './routes/teacher.courses.index'
+import { Route as TeacherBusinessIndexRouteImport } from './routes/teacher.business.index'
+import { Route as TeacherAssessmentIndexRouteImport } from './routes/teacher.assessment.index'
 import { Route as StudentCoursesIndexRouteImport } from './routes/student.courses.index'
+import { Route as TeacherTeamTasksRouteImport } from './routes/teacher.team.tasks'
+import { Route as TeacherTeamStudentPodsRouteImport } from './routes/teacher.team.student-pods'
+import { Route as TeacherTeamRolesRouteImport } from './routes/teacher.team.roles'
+import { Route as TeacherTeamRevenueSharingRouteImport } from './routes/teacher.team.revenue-sharing'
+import { Route as TeacherTeamRecruitmentRouteImport } from './routes/teacher.team.recruitment'
+import { Route as TeacherTeamMembersRouteImport } from './routes/teacher.team.members'
+import { Route as TeacherTeamInvitationsRouteImport } from './routes/teacher.team.invitations'
+import { Route as TeacherTeamApplicationsRouteImport } from './routes/teacher.team.applications'
+import { Route as TeacherTeamActivityLogsRouteImport } from './routes/teacher.team.activity-logs'
+import { Route as TeacherStudentsWrongQuestionsRouteImport } from './routes/teacher.students.wrong-questions'
+import { Route as TeacherStudentsReportsRouteImport } from './routes/teacher.students.reports'
+import { Route as TeacherStudentsProgressRouteImport } from './routes/teacher.students.progress'
+import { Route as TeacherStudentsPodsRouteImport } from './routes/teacher.students.pods'
+import { Route as TeacherStudentsPaymentsRouteImport } from './routes/teacher.students.payments'
+import { Route as TeacherStudentsParentsRouteImport } from './routes/teacher.students.parents'
+import { Route as TeacherStudentsMemoryRouteImport } from './routes/teacher.students.memory'
+import { Route as TeacherStudentsCertificatesRouteImport } from './routes/teacher.students.certificates'
+import { Route as TeacherStudentsAtRiskRouteImport } from './routes/teacher.students.at-risk'
+import { Route as TeacherStudentsAllRouteImport } from './routes/teacher.students.all'
 import { Route as TeacherQuizzesCreateRouteImport } from './routes/teacher.quizzes.create'
 import { Route as TeacherQuestionsCreateRouteImport } from './routes/teacher.questions.create'
+import { Route as TeacherInsightsStudentAnalyticsRouteImport } from './routes/teacher.insights.student-analytics'
+import { Route as TeacherInsightsRevenueAnalyticsRouteImport } from './routes/teacher.insights.revenue-analytics'
+import { Route as TeacherInsightsReportsCenterRouteImport } from './routes/teacher.insights.reports-center'
+import { Route as TeacherInsightsPredictionsRouteImport } from './routes/teacher.insights.predictions'
+import { Route as TeacherInsightsMemoryInsightsRouteImport } from './routes/teacher.insights.memory-insights'
+import { Route as TeacherInsightsGeneratorStudioRouteImport } from './routes/teacher.insights.generator-studio'
+import { Route as TeacherInsightsCourseAnalyticsRouteImport } from './routes/teacher.insights.course-analytics'
+import { Route as TeacherInsightsConceptAnalyticsRouteImport } from './routes/teacher.insights.concept-analytics'
+import { Route as TeacherInsightsAssessmentAnalyticsRouteImport } from './routes/teacher.insights.assessment-analytics'
+import { Route as TeacherInsightsAiInsightsRouteImport } from './routes/teacher.insights.ai-insights'
 import { Route as TeacherHomeworkCreateRouteImport } from './routes/teacher.homework.create'
 import { Route as TeacherExamsCreateRouteImport } from './routes/teacher.exams.create'
 import { Route as TeacherCoursesCreateRouteImport } from './routes/teacher.courses.create'
+import { Route as TeacherBusinessTaxesInvoicesRouteImport } from './routes/teacher.business.taxes-invoices'
+import { Route as TeacherBusinessSubscriptionsRouteImport } from './routes/teacher.business.subscriptions'
+import { Route as TeacherBusinessStudentPaymentsRouteImport } from './routes/teacher.business.student-payments'
+import { Route as TeacherBusinessSalesRouteImport } from './routes/teacher.business.sales'
+import { Route as TeacherBusinessRewardsRouteImport } from './routes/teacher.business.rewards'
+import { Route as TeacherBusinessRevenueSharingRouteImport } from './routes/teacher.business.revenue-sharing'
+import { Route as TeacherBusinessPayoutsRouteImport } from './routes/teacher.business.payouts'
+import { Route as TeacherBusinessOrdersRouteImport } from './routes/teacher.business.orders'
+import { Route as TeacherBusinessMarketingRouteImport } from './routes/teacher.business.marketing'
+import { Route as TeacherBusinessFinancialReportsRouteImport } from './routes/teacher.business.financial-reports'
+import { Route as TeacherBusinessExpensesRouteImport } from './routes/teacher.business.expenses'
+import { Route as TeacherBusinessCouponsPricingRouteImport } from './routes/teacher.business.coupons-pricing'
 import { Route as TeacherAssessmentsCreateRouteImport } from './routes/teacher.assessments.create'
 import { Route as TeacherAssessmentsAssessmentIdRouteImport } from './routes/teacher.assessments.$assessmentId'
+import { Route as TeacherAssessmentSubmissionsRouteImport } from './routes/teacher.assessment.submissions'
+import { Route as TeacherAssessmentResultsRouteImport } from './routes/teacher.assessment.results'
+import { Route as TeacherAssessmentManualGradingRouteImport } from './routes/teacher.assessment.manual-grading'
+import { Route as TeacherAssessmentGradingQueueRouteImport } from './routes/teacher.assessment.grading-queue'
+import { Route as TeacherAssessmentGradebookRouteImport } from './routes/teacher.assessment.gradebook'
+import { Route as TeacherAssessmentAnalyticsRouteImport } from './routes/teacher.assessment.analytics'
+import { Route as TeacherAssessmentAcademicIntegrityRouteImport } from './routes/teacher.assessment.academic-integrity'
 import { Route as StudentQuizzesQuizIdRouteImport } from './routes/student.quizzes.$quizId'
 import { Route as StudentCoursesCourseIdRouteImport } from './routes/student.courses.$courseId'
 import { Route as StudentCertificatesCertificateIdRouteImport } from './routes/student.certificates.$certificateId'
@@ -270,6 +327,11 @@ const TeacherLessonsRoute = TeacherLessonsRouteImport.update({
   path: '/teacher/lessons',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeacherInsightsRoute = TeacherInsightsRouteImport.update({
+  id: '/teacher/insights',
+  path: '/teacher/insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TeacherHomeworkRoute = TeacherHomeworkRouteImport.update({
   id: '/teacher/homework',
   path: '/teacher/homework',
@@ -288,6 +350,11 @@ const TeacherGeneratorRoute = TeacherGeneratorRouteImport.update({
 const TeacherExamsRoute = TeacherExamsRouteImport.update({
   id: '/teacher/exams',
   path: '/teacher/exams',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeacherDashboardRoute = TeacherDashboardRouteImport.update({
+  id: '/teacher/dashboard',
+  path: '/teacher/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TeacherCoursesRoute = TeacherCoursesRouteImport.update({
@@ -310,9 +377,19 @@ const TeacherChaptersRoute = TeacherChaptersRouteImport.update({
   path: '/teacher/chapters',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeacherBusinessRoute = TeacherBusinessRouteImport.update({
+  id: '/teacher/business',
+  path: '/teacher/business',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TeacherAssignmentsRoute = TeacherAssignmentsRouteImport.update({
   id: '/teacher/assignments',
   path: '/teacher/assignments',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeacherAssessmentRoute = TeacherAssessmentRouteImport.update({
+  id: '/teacher/assessment',
+  path: '/teacher/assessment',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TeacherAnalyticsRoute = TeacherAnalyticsRouteImport.update({
@@ -575,20 +652,143 @@ const AdminBannersRoute = AdminBannersRouteImport.update({
   path: '/admin/banners',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeacherTeamIndexRoute = TeacherTeamIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TeacherTeamRoute,
+} as any)
+const TeacherStudentsIndexRoute = TeacherStudentsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TeacherStudentsRoute,
+} as any)
 const TeacherQuestionsIndexRoute = TeacherQuestionsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => TeacherQuestionsRoute,
+} as any)
+const TeacherInsightsIndexRoute = TeacherInsightsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TeacherInsightsRoute,
 } as any)
 const TeacherCoursesIndexRoute = TeacherCoursesIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => TeacherCoursesRoute,
 } as any)
+const TeacherBusinessIndexRoute = TeacherBusinessIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TeacherBusinessRoute,
+} as any)
+const TeacherAssessmentIndexRoute = TeacherAssessmentIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TeacherAssessmentRoute,
+} as any)
 const StudentCoursesIndexRoute = StudentCoursesIndexRouteImport.update({
   id: '/courses/',
   path: '/courses/',
   getParentRoute: () => StudentRoute,
+} as any)
+const TeacherTeamTasksRoute = TeacherTeamTasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => TeacherTeamRoute,
+} as any)
+const TeacherTeamStudentPodsRoute = TeacherTeamStudentPodsRouteImport.update({
+  id: '/student-pods',
+  path: '/student-pods',
+  getParentRoute: () => TeacherTeamRoute,
+} as any)
+const TeacherTeamRolesRoute = TeacherTeamRolesRouteImport.update({
+  id: '/roles',
+  path: '/roles',
+  getParentRoute: () => TeacherTeamRoute,
+} as any)
+const TeacherTeamRevenueSharingRoute =
+  TeacherTeamRevenueSharingRouteImport.update({
+    id: '/revenue-sharing',
+    path: '/revenue-sharing',
+    getParentRoute: () => TeacherTeamRoute,
+  } as any)
+const TeacherTeamRecruitmentRoute = TeacherTeamRecruitmentRouteImport.update({
+  id: '/recruitment',
+  path: '/recruitment',
+  getParentRoute: () => TeacherTeamRoute,
+} as any)
+const TeacherTeamMembersRoute = TeacherTeamMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => TeacherTeamRoute,
+} as any)
+const TeacherTeamInvitationsRoute = TeacherTeamInvitationsRouteImport.update({
+  id: '/invitations',
+  path: '/invitations',
+  getParentRoute: () => TeacherTeamRoute,
+} as any)
+const TeacherTeamApplicationsRoute = TeacherTeamApplicationsRouteImport.update({
+  id: '/applications',
+  path: '/applications',
+  getParentRoute: () => TeacherTeamRoute,
+} as any)
+const TeacherTeamActivityLogsRoute = TeacherTeamActivityLogsRouteImport.update({
+  id: '/activity-logs',
+  path: '/activity-logs',
+  getParentRoute: () => TeacherTeamRoute,
+} as any)
+const TeacherStudentsWrongQuestionsRoute =
+  TeacherStudentsWrongQuestionsRouteImport.update({
+    id: '/wrong-questions',
+    path: '/wrong-questions',
+    getParentRoute: () => TeacherStudentsRoute,
+  } as any)
+const TeacherStudentsReportsRoute = TeacherStudentsReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => TeacherStudentsRoute,
+} as any)
+const TeacherStudentsProgressRoute = TeacherStudentsProgressRouteImport.update({
+  id: '/progress',
+  path: '/progress',
+  getParentRoute: () => TeacherStudentsRoute,
+} as any)
+const TeacherStudentsPodsRoute = TeacherStudentsPodsRouteImport.update({
+  id: '/pods',
+  path: '/pods',
+  getParentRoute: () => TeacherStudentsRoute,
+} as any)
+const TeacherStudentsPaymentsRoute = TeacherStudentsPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => TeacherStudentsRoute,
+} as any)
+const TeacherStudentsParentsRoute = TeacherStudentsParentsRouteImport.update({
+  id: '/parents',
+  path: '/parents',
+  getParentRoute: () => TeacherStudentsRoute,
+} as any)
+const TeacherStudentsMemoryRoute = TeacherStudentsMemoryRouteImport.update({
+  id: '/memory',
+  path: '/memory',
+  getParentRoute: () => TeacherStudentsRoute,
+} as any)
+const TeacherStudentsCertificatesRoute =
+  TeacherStudentsCertificatesRouteImport.update({
+    id: '/certificates',
+    path: '/certificates',
+    getParentRoute: () => TeacherStudentsRoute,
+  } as any)
+const TeacherStudentsAtRiskRoute = TeacherStudentsAtRiskRouteImport.update({
+  id: '/at-risk',
+  path: '/at-risk',
+  getParentRoute: () => TeacherStudentsRoute,
+} as any)
+const TeacherStudentsAllRoute = TeacherStudentsAllRouteImport.update({
+  id: '/all',
+  path: '/all',
+  getParentRoute: () => TeacherStudentsRoute,
 } as any)
 const TeacherQuizzesCreateRoute = TeacherQuizzesCreateRouteImport.update({
   id: '/create',
@@ -600,6 +800,66 @@ const TeacherQuestionsCreateRoute = TeacherQuestionsCreateRouteImport.update({
   path: '/create',
   getParentRoute: () => TeacherQuestionsRoute,
 } as any)
+const TeacherInsightsStudentAnalyticsRoute =
+  TeacherInsightsStudentAnalyticsRouteImport.update({
+    id: '/student-analytics',
+    path: '/student-analytics',
+    getParentRoute: () => TeacherInsightsRoute,
+  } as any)
+const TeacherInsightsRevenueAnalyticsRoute =
+  TeacherInsightsRevenueAnalyticsRouteImport.update({
+    id: '/revenue-analytics',
+    path: '/revenue-analytics',
+    getParentRoute: () => TeacherInsightsRoute,
+  } as any)
+const TeacherInsightsReportsCenterRoute =
+  TeacherInsightsReportsCenterRouteImport.update({
+    id: '/reports-center',
+    path: '/reports-center',
+    getParentRoute: () => TeacherInsightsRoute,
+  } as any)
+const TeacherInsightsPredictionsRoute =
+  TeacherInsightsPredictionsRouteImport.update({
+    id: '/predictions',
+    path: '/predictions',
+    getParentRoute: () => TeacherInsightsRoute,
+  } as any)
+const TeacherInsightsMemoryInsightsRoute =
+  TeacherInsightsMemoryInsightsRouteImport.update({
+    id: '/memory-insights',
+    path: '/memory-insights',
+    getParentRoute: () => TeacherInsightsRoute,
+  } as any)
+const TeacherInsightsGeneratorStudioRoute =
+  TeacherInsightsGeneratorStudioRouteImport.update({
+    id: '/generator-studio',
+    path: '/generator-studio',
+    getParentRoute: () => TeacherInsightsRoute,
+  } as any)
+const TeacherInsightsCourseAnalyticsRoute =
+  TeacherInsightsCourseAnalyticsRouteImport.update({
+    id: '/course-analytics',
+    path: '/course-analytics',
+    getParentRoute: () => TeacherInsightsRoute,
+  } as any)
+const TeacherInsightsConceptAnalyticsRoute =
+  TeacherInsightsConceptAnalyticsRouteImport.update({
+    id: '/concept-analytics',
+    path: '/concept-analytics',
+    getParentRoute: () => TeacherInsightsRoute,
+  } as any)
+const TeacherInsightsAssessmentAnalyticsRoute =
+  TeacherInsightsAssessmentAnalyticsRouteImport.update({
+    id: '/assessment-analytics',
+    path: '/assessment-analytics',
+    getParentRoute: () => TeacherInsightsRoute,
+  } as any)
+const TeacherInsightsAiInsightsRoute =
+  TeacherInsightsAiInsightsRouteImport.update({
+    id: '/ai-insights',
+    path: '/ai-insights',
+    getParentRoute: () => TeacherInsightsRoute,
+  } as any)
 const TeacherHomeworkCreateRoute = TeacherHomeworkCreateRouteImport.update({
   id: '/create',
   path: '/create',
@@ -615,6 +875,73 @@ const TeacherCoursesCreateRoute = TeacherCoursesCreateRouteImport.update({
   path: '/create',
   getParentRoute: () => TeacherCoursesRoute,
 } as any)
+const TeacherBusinessTaxesInvoicesRoute =
+  TeacherBusinessTaxesInvoicesRouteImport.update({
+    id: '/taxes-invoices',
+    path: '/taxes-invoices',
+    getParentRoute: () => TeacherBusinessRoute,
+  } as any)
+const TeacherBusinessSubscriptionsRoute =
+  TeacherBusinessSubscriptionsRouteImport.update({
+    id: '/subscriptions',
+    path: '/subscriptions',
+    getParentRoute: () => TeacherBusinessRoute,
+  } as any)
+const TeacherBusinessStudentPaymentsRoute =
+  TeacherBusinessStudentPaymentsRouteImport.update({
+    id: '/student-payments',
+    path: '/student-payments',
+    getParentRoute: () => TeacherBusinessRoute,
+  } as any)
+const TeacherBusinessSalesRoute = TeacherBusinessSalesRouteImport.update({
+  id: '/sales',
+  path: '/sales',
+  getParentRoute: () => TeacherBusinessRoute,
+} as any)
+const TeacherBusinessRewardsRoute = TeacherBusinessRewardsRouteImport.update({
+  id: '/rewards',
+  path: '/rewards',
+  getParentRoute: () => TeacherBusinessRoute,
+} as any)
+const TeacherBusinessRevenueSharingRoute =
+  TeacherBusinessRevenueSharingRouteImport.update({
+    id: '/revenue-sharing',
+    path: '/revenue-sharing',
+    getParentRoute: () => TeacherBusinessRoute,
+  } as any)
+const TeacherBusinessPayoutsRoute = TeacherBusinessPayoutsRouteImport.update({
+  id: '/payouts',
+  path: '/payouts',
+  getParentRoute: () => TeacherBusinessRoute,
+} as any)
+const TeacherBusinessOrdersRoute = TeacherBusinessOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => TeacherBusinessRoute,
+} as any)
+const TeacherBusinessMarketingRoute =
+  TeacherBusinessMarketingRouteImport.update({
+    id: '/marketing',
+    path: '/marketing',
+    getParentRoute: () => TeacherBusinessRoute,
+  } as any)
+const TeacherBusinessFinancialReportsRoute =
+  TeacherBusinessFinancialReportsRouteImport.update({
+    id: '/financial-reports',
+    path: '/financial-reports',
+    getParentRoute: () => TeacherBusinessRoute,
+  } as any)
+const TeacherBusinessExpensesRoute = TeacherBusinessExpensesRouteImport.update({
+  id: '/expenses',
+  path: '/expenses',
+  getParentRoute: () => TeacherBusinessRoute,
+} as any)
+const TeacherBusinessCouponsPricingRoute =
+  TeacherBusinessCouponsPricingRouteImport.update({
+    id: '/coupons-pricing',
+    path: '/coupons-pricing',
+    getParentRoute: () => TeacherBusinessRoute,
+  } as any)
 const TeacherAssessmentsCreateRoute =
   TeacherAssessmentsCreateRouteImport.update({
     id: '/teacher/assessments/create',
@@ -626,6 +953,48 @@ const TeacherAssessmentsAssessmentIdRoute =
     id: '/teacher/assessments/$assessmentId',
     path: '/teacher/assessments/$assessmentId',
     getParentRoute: () => rootRouteImport,
+  } as any)
+const TeacherAssessmentSubmissionsRoute =
+  TeacherAssessmentSubmissionsRouteImport.update({
+    id: '/submissions',
+    path: '/submissions',
+    getParentRoute: () => TeacherAssessmentRoute,
+  } as any)
+const TeacherAssessmentResultsRoute =
+  TeacherAssessmentResultsRouteImport.update({
+    id: '/results',
+    path: '/results',
+    getParentRoute: () => TeacherAssessmentRoute,
+  } as any)
+const TeacherAssessmentManualGradingRoute =
+  TeacherAssessmentManualGradingRouteImport.update({
+    id: '/manual-grading',
+    path: '/manual-grading',
+    getParentRoute: () => TeacherAssessmentRoute,
+  } as any)
+const TeacherAssessmentGradingQueueRoute =
+  TeacherAssessmentGradingQueueRouteImport.update({
+    id: '/grading-queue',
+    path: '/grading-queue',
+    getParentRoute: () => TeacherAssessmentRoute,
+  } as any)
+const TeacherAssessmentGradebookRoute =
+  TeacherAssessmentGradebookRouteImport.update({
+    id: '/gradebook',
+    path: '/gradebook',
+    getParentRoute: () => TeacherAssessmentRoute,
+  } as any)
+const TeacherAssessmentAnalyticsRoute =
+  TeacherAssessmentAnalyticsRouteImport.update({
+    id: '/analytics',
+    path: '/analytics',
+    getParentRoute: () => TeacherAssessmentRoute,
+  } as any)
+const TeacherAssessmentAcademicIntegrityRoute =
+  TeacherAssessmentAcademicIntegrityRouteImport.update({
+    id: '/academic-integrity',
+    path: '/academic-integrity',
+    getParentRoute: () => TeacherAssessmentRoute,
   } as any)
 const StudentQuizzesQuizIdRoute = StudentQuizzesQuizIdRouteImport.update({
   id: '/quizzes/$quizId',
@@ -778,15 +1147,19 @@ export interface FileRoutesByFullPath {
   '/super/audit': typeof SuperAuditRoute
   '/super/system': typeof SuperSystemRoute
   '/teacher/analytics': typeof TeacherAnalyticsRoute
+  '/teacher/assessment': typeof TeacherAssessmentRouteWithChildren
   '/teacher/assignments': typeof TeacherAssignmentsRoute
+  '/teacher/business': typeof TeacherBusinessRouteWithChildren
   '/teacher/chapters': typeof TeacherChaptersRoute
   '/teacher/chat': typeof TeacherChatRoute
   '/teacher/content-studio': typeof TeacherContentStudioRoute
   '/teacher/courses': typeof TeacherCoursesRouteWithChildren
+  '/teacher/dashboard': typeof TeacherDashboardRoute
   '/teacher/exams': typeof TeacherExamsRouteWithChildren
   '/teacher/generator': typeof TeacherGeneratorRoute
   '/teacher/grading': typeof TeacherGradingRoute
   '/teacher/homework': typeof TeacherHomeworkRouteWithChildren
+  '/teacher/insights': typeof TeacherInsightsRouteWithChildren
   '/teacher/lessons': typeof TeacherLessonsRoute
   '/teacher/materials': typeof TeacherMaterialsRoute
   '/teacher/questions': typeof TeacherQuestionsRouteWithChildren
@@ -794,8 +1167,8 @@ export interface FileRoutesByFullPath {
   '/teacher/revenue': typeof TeacherRevenueRoute
   '/teacher/rewards': typeof TeacherRewardsRoute
   '/teacher/sessions': typeof TeacherSessionsRoute
-  '/teacher/students': typeof TeacherStudentsRoute
-  '/teacher/team': typeof TeacherTeamRoute
+  '/teacher/students': typeof TeacherStudentsRouteWithChildren
+  '/teacher/team': typeof TeacherTeamRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/assistant/': typeof AssistantIndexRoute
   '/content/': typeof ContentIndexRoute
@@ -810,16 +1183,69 @@ export interface FileRoutesByFullPath {
   '/student/certificates/$certificateId': typeof StudentCertificatesCertificateIdRoute
   '/student/courses/$courseId': typeof StudentCoursesCourseIdRouteWithChildren
   '/student/quizzes/$quizId': typeof StudentQuizzesQuizIdRoute
+  '/teacher/assessment/academic-integrity': typeof TeacherAssessmentAcademicIntegrityRoute
+  '/teacher/assessment/analytics': typeof TeacherAssessmentAnalyticsRoute
+  '/teacher/assessment/gradebook': typeof TeacherAssessmentGradebookRoute
+  '/teacher/assessment/grading-queue': typeof TeacherAssessmentGradingQueueRoute
+  '/teacher/assessment/manual-grading': typeof TeacherAssessmentManualGradingRoute
+  '/teacher/assessment/results': typeof TeacherAssessmentResultsRoute
+  '/teacher/assessment/submissions': typeof TeacherAssessmentSubmissionsRoute
   '/teacher/assessments/$assessmentId': typeof TeacherAssessmentsAssessmentIdRouteWithChildren
   '/teacher/assessments/create': typeof TeacherAssessmentsCreateRoute
+  '/teacher/business/coupons-pricing': typeof TeacherBusinessCouponsPricingRoute
+  '/teacher/business/expenses': typeof TeacherBusinessExpensesRoute
+  '/teacher/business/financial-reports': typeof TeacherBusinessFinancialReportsRoute
+  '/teacher/business/marketing': typeof TeacherBusinessMarketingRoute
+  '/teacher/business/orders': typeof TeacherBusinessOrdersRoute
+  '/teacher/business/payouts': typeof TeacherBusinessPayoutsRoute
+  '/teacher/business/revenue-sharing': typeof TeacherBusinessRevenueSharingRoute
+  '/teacher/business/rewards': typeof TeacherBusinessRewardsRoute
+  '/teacher/business/sales': typeof TeacherBusinessSalesRoute
+  '/teacher/business/student-payments': typeof TeacherBusinessStudentPaymentsRoute
+  '/teacher/business/subscriptions': typeof TeacherBusinessSubscriptionsRoute
+  '/teacher/business/taxes-invoices': typeof TeacherBusinessTaxesInvoicesRoute
   '/teacher/courses/create': typeof TeacherCoursesCreateRoute
   '/teacher/exams/create': typeof TeacherExamsCreateRoute
   '/teacher/homework/create': typeof TeacherHomeworkCreateRoute
+  '/teacher/insights/ai-insights': typeof TeacherInsightsAiInsightsRoute
+  '/teacher/insights/assessment-analytics': typeof TeacherInsightsAssessmentAnalyticsRoute
+  '/teacher/insights/concept-analytics': typeof TeacherInsightsConceptAnalyticsRoute
+  '/teacher/insights/course-analytics': typeof TeacherInsightsCourseAnalyticsRoute
+  '/teacher/insights/generator-studio': typeof TeacherInsightsGeneratorStudioRoute
+  '/teacher/insights/memory-insights': typeof TeacherInsightsMemoryInsightsRoute
+  '/teacher/insights/predictions': typeof TeacherInsightsPredictionsRoute
+  '/teacher/insights/reports-center': typeof TeacherInsightsReportsCenterRoute
+  '/teacher/insights/revenue-analytics': typeof TeacherInsightsRevenueAnalyticsRoute
+  '/teacher/insights/student-analytics': typeof TeacherInsightsStudentAnalyticsRoute
   '/teacher/questions/create': typeof TeacherQuestionsCreateRoute
   '/teacher/quizzes/create': typeof TeacherQuizzesCreateRoute
+  '/teacher/students/all': typeof TeacherStudentsAllRoute
+  '/teacher/students/at-risk': typeof TeacherStudentsAtRiskRoute
+  '/teacher/students/certificates': typeof TeacherStudentsCertificatesRoute
+  '/teacher/students/memory': typeof TeacherStudentsMemoryRoute
+  '/teacher/students/parents': typeof TeacherStudentsParentsRoute
+  '/teacher/students/payments': typeof TeacherStudentsPaymentsRoute
+  '/teacher/students/pods': typeof TeacherStudentsPodsRoute
+  '/teacher/students/progress': typeof TeacherStudentsProgressRoute
+  '/teacher/students/reports': typeof TeacherStudentsReportsRoute
+  '/teacher/students/wrong-questions': typeof TeacherStudentsWrongQuestionsRoute
+  '/teacher/team/activity-logs': typeof TeacherTeamActivityLogsRoute
+  '/teacher/team/applications': typeof TeacherTeamApplicationsRoute
+  '/teacher/team/invitations': typeof TeacherTeamInvitationsRoute
+  '/teacher/team/members': typeof TeacherTeamMembersRoute
+  '/teacher/team/recruitment': typeof TeacherTeamRecruitmentRoute
+  '/teacher/team/revenue-sharing': typeof TeacherTeamRevenueSharingRoute
+  '/teacher/team/roles': typeof TeacherTeamRolesRoute
+  '/teacher/team/student-pods': typeof TeacherTeamStudentPodsRoute
+  '/teacher/team/tasks': typeof TeacherTeamTasksRoute
   '/student/courses/': typeof StudentCoursesIndexRoute
+  '/teacher/assessment/': typeof TeacherAssessmentIndexRoute
+  '/teacher/business/': typeof TeacherBusinessIndexRoute
   '/teacher/courses/': typeof TeacherCoursesIndexRoute
+  '/teacher/insights/': typeof TeacherInsightsIndexRoute
   '/teacher/questions/': typeof TeacherQuestionsIndexRoute
+  '/teacher/students/': typeof TeacherStudentsIndexRoute
+  '/teacher/team/': typeof TeacherTeamIndexRoute
   '/student/courses/$courseId/continue': typeof StudentCoursesCourseIdContinueRoute
   '/student/courses/$courseId/enroll': typeof StudentCoursesCourseIdEnrollRoute
   '/student/courses/$courseId/resources': typeof StudentCoursesCourseIdResourcesRoute
@@ -897,6 +1323,7 @@ export interface FileRoutesByTo {
   '/teacher/chapters': typeof TeacherChaptersRoute
   '/teacher/chat': typeof TeacherChatRoute
   '/teacher/content-studio': typeof TeacherContentStudioRoute
+  '/teacher/dashboard': typeof TeacherDashboardRoute
   '/teacher/exams': typeof TeacherExamsRouteWithChildren
   '/teacher/generator': typeof TeacherGeneratorRoute
   '/teacher/grading': typeof TeacherGradingRoute
@@ -907,8 +1334,6 @@ export interface FileRoutesByTo {
   '/teacher/revenue': typeof TeacherRevenueRoute
   '/teacher/rewards': typeof TeacherRewardsRoute
   '/teacher/sessions': typeof TeacherSessionsRoute
-  '/teacher/students': typeof TeacherStudentsRoute
-  '/teacher/team': typeof TeacherTeamRoute
   '/admin': typeof AdminIndexRoute
   '/assistant': typeof AssistantIndexRoute
   '/content': typeof ContentIndexRoute
@@ -922,16 +1347,69 @@ export interface FileRoutesByTo {
   '/teacher': typeof TeacherIndexRoute
   '/student/certificates/$certificateId': typeof StudentCertificatesCertificateIdRoute
   '/student/quizzes/$quizId': typeof StudentQuizzesQuizIdRoute
+  '/teacher/assessment/academic-integrity': typeof TeacherAssessmentAcademicIntegrityRoute
+  '/teacher/assessment/analytics': typeof TeacherAssessmentAnalyticsRoute
+  '/teacher/assessment/gradebook': typeof TeacherAssessmentGradebookRoute
+  '/teacher/assessment/grading-queue': typeof TeacherAssessmentGradingQueueRoute
+  '/teacher/assessment/manual-grading': typeof TeacherAssessmentManualGradingRoute
+  '/teacher/assessment/results': typeof TeacherAssessmentResultsRoute
+  '/teacher/assessment/submissions': typeof TeacherAssessmentSubmissionsRoute
   '/teacher/assessments/$assessmentId': typeof TeacherAssessmentsAssessmentIdRouteWithChildren
   '/teacher/assessments/create': typeof TeacherAssessmentsCreateRoute
+  '/teacher/business/coupons-pricing': typeof TeacherBusinessCouponsPricingRoute
+  '/teacher/business/expenses': typeof TeacherBusinessExpensesRoute
+  '/teacher/business/financial-reports': typeof TeacherBusinessFinancialReportsRoute
+  '/teacher/business/marketing': typeof TeacherBusinessMarketingRoute
+  '/teacher/business/orders': typeof TeacherBusinessOrdersRoute
+  '/teacher/business/payouts': typeof TeacherBusinessPayoutsRoute
+  '/teacher/business/revenue-sharing': typeof TeacherBusinessRevenueSharingRoute
+  '/teacher/business/rewards': typeof TeacherBusinessRewardsRoute
+  '/teacher/business/sales': typeof TeacherBusinessSalesRoute
+  '/teacher/business/student-payments': typeof TeacherBusinessStudentPaymentsRoute
+  '/teacher/business/subscriptions': typeof TeacherBusinessSubscriptionsRoute
+  '/teacher/business/taxes-invoices': typeof TeacherBusinessTaxesInvoicesRoute
   '/teacher/courses/create': typeof TeacherCoursesCreateRoute
   '/teacher/exams/create': typeof TeacherExamsCreateRoute
   '/teacher/homework/create': typeof TeacherHomeworkCreateRoute
+  '/teacher/insights/ai-insights': typeof TeacherInsightsAiInsightsRoute
+  '/teacher/insights/assessment-analytics': typeof TeacherInsightsAssessmentAnalyticsRoute
+  '/teacher/insights/concept-analytics': typeof TeacherInsightsConceptAnalyticsRoute
+  '/teacher/insights/course-analytics': typeof TeacherInsightsCourseAnalyticsRoute
+  '/teacher/insights/generator-studio': typeof TeacherInsightsGeneratorStudioRoute
+  '/teacher/insights/memory-insights': typeof TeacherInsightsMemoryInsightsRoute
+  '/teacher/insights/predictions': typeof TeacherInsightsPredictionsRoute
+  '/teacher/insights/reports-center': typeof TeacherInsightsReportsCenterRoute
+  '/teacher/insights/revenue-analytics': typeof TeacherInsightsRevenueAnalyticsRoute
+  '/teacher/insights/student-analytics': typeof TeacherInsightsStudentAnalyticsRoute
   '/teacher/questions/create': typeof TeacherQuestionsCreateRoute
   '/teacher/quizzes/create': typeof TeacherQuizzesCreateRoute
+  '/teacher/students/all': typeof TeacherStudentsAllRoute
+  '/teacher/students/at-risk': typeof TeacherStudentsAtRiskRoute
+  '/teacher/students/certificates': typeof TeacherStudentsCertificatesRoute
+  '/teacher/students/memory': typeof TeacherStudentsMemoryRoute
+  '/teacher/students/parents': typeof TeacherStudentsParentsRoute
+  '/teacher/students/payments': typeof TeacherStudentsPaymentsRoute
+  '/teacher/students/pods': typeof TeacherStudentsPodsRoute
+  '/teacher/students/progress': typeof TeacherStudentsProgressRoute
+  '/teacher/students/reports': typeof TeacherStudentsReportsRoute
+  '/teacher/students/wrong-questions': typeof TeacherStudentsWrongQuestionsRoute
+  '/teacher/team/activity-logs': typeof TeacherTeamActivityLogsRoute
+  '/teacher/team/applications': typeof TeacherTeamApplicationsRoute
+  '/teacher/team/invitations': typeof TeacherTeamInvitationsRoute
+  '/teacher/team/members': typeof TeacherTeamMembersRoute
+  '/teacher/team/recruitment': typeof TeacherTeamRecruitmentRoute
+  '/teacher/team/revenue-sharing': typeof TeacherTeamRevenueSharingRoute
+  '/teacher/team/roles': typeof TeacherTeamRolesRoute
+  '/teacher/team/student-pods': typeof TeacherTeamStudentPodsRoute
+  '/teacher/team/tasks': typeof TeacherTeamTasksRoute
   '/student/courses': typeof StudentCoursesIndexRoute
+  '/teacher/assessment': typeof TeacherAssessmentIndexRoute
+  '/teacher/business': typeof TeacherBusinessIndexRoute
   '/teacher/courses': typeof TeacherCoursesIndexRoute
+  '/teacher/insights': typeof TeacherInsightsIndexRoute
   '/teacher/questions': typeof TeacherQuestionsIndexRoute
+  '/teacher/students': typeof TeacherStudentsIndexRoute
+  '/teacher/team': typeof TeacherTeamIndexRoute
   '/student/courses/$courseId/continue': typeof StudentCoursesCourseIdContinueRoute
   '/student/courses/$courseId/enroll': typeof StudentCoursesCourseIdEnrollRoute
   '/student/courses/$courseId/resources': typeof StudentCoursesCourseIdResourcesRoute
@@ -1008,15 +1486,19 @@ export interface FileRoutesById {
   '/super/audit': typeof SuperAuditRoute
   '/super/system': typeof SuperSystemRoute
   '/teacher/analytics': typeof TeacherAnalyticsRoute
+  '/teacher/assessment': typeof TeacherAssessmentRouteWithChildren
   '/teacher/assignments': typeof TeacherAssignmentsRoute
+  '/teacher/business': typeof TeacherBusinessRouteWithChildren
   '/teacher/chapters': typeof TeacherChaptersRoute
   '/teacher/chat': typeof TeacherChatRoute
   '/teacher/content-studio': typeof TeacherContentStudioRoute
   '/teacher/courses': typeof TeacherCoursesRouteWithChildren
+  '/teacher/dashboard': typeof TeacherDashboardRoute
   '/teacher/exams': typeof TeacherExamsRouteWithChildren
   '/teacher/generator': typeof TeacherGeneratorRoute
   '/teacher/grading': typeof TeacherGradingRoute
   '/teacher/homework': typeof TeacherHomeworkRouteWithChildren
+  '/teacher/insights': typeof TeacherInsightsRouteWithChildren
   '/teacher/lessons': typeof TeacherLessonsRoute
   '/teacher/materials': typeof TeacherMaterialsRoute
   '/teacher/questions': typeof TeacherQuestionsRouteWithChildren
@@ -1024,8 +1506,8 @@ export interface FileRoutesById {
   '/teacher/revenue': typeof TeacherRevenueRoute
   '/teacher/rewards': typeof TeacherRewardsRoute
   '/teacher/sessions': typeof TeacherSessionsRoute
-  '/teacher/students': typeof TeacherStudentsRoute
-  '/teacher/team': typeof TeacherTeamRoute
+  '/teacher/students': typeof TeacherStudentsRouteWithChildren
+  '/teacher/team': typeof TeacherTeamRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/assistant/': typeof AssistantIndexRoute
   '/content/': typeof ContentIndexRoute
@@ -1040,16 +1522,69 @@ export interface FileRoutesById {
   '/student/certificates/$certificateId': typeof StudentCertificatesCertificateIdRoute
   '/student/courses/$courseId': typeof StudentCoursesCourseIdRouteWithChildren
   '/student/quizzes/$quizId': typeof StudentQuizzesQuizIdRoute
+  '/teacher/assessment/academic-integrity': typeof TeacherAssessmentAcademicIntegrityRoute
+  '/teacher/assessment/analytics': typeof TeacherAssessmentAnalyticsRoute
+  '/teacher/assessment/gradebook': typeof TeacherAssessmentGradebookRoute
+  '/teacher/assessment/grading-queue': typeof TeacherAssessmentGradingQueueRoute
+  '/teacher/assessment/manual-grading': typeof TeacherAssessmentManualGradingRoute
+  '/teacher/assessment/results': typeof TeacherAssessmentResultsRoute
+  '/teacher/assessment/submissions': typeof TeacherAssessmentSubmissionsRoute
   '/teacher/assessments/$assessmentId': typeof TeacherAssessmentsAssessmentIdRouteWithChildren
   '/teacher/assessments/create': typeof TeacherAssessmentsCreateRoute
+  '/teacher/business/coupons-pricing': typeof TeacherBusinessCouponsPricingRoute
+  '/teacher/business/expenses': typeof TeacherBusinessExpensesRoute
+  '/teacher/business/financial-reports': typeof TeacherBusinessFinancialReportsRoute
+  '/teacher/business/marketing': typeof TeacherBusinessMarketingRoute
+  '/teacher/business/orders': typeof TeacherBusinessOrdersRoute
+  '/teacher/business/payouts': typeof TeacherBusinessPayoutsRoute
+  '/teacher/business/revenue-sharing': typeof TeacherBusinessRevenueSharingRoute
+  '/teacher/business/rewards': typeof TeacherBusinessRewardsRoute
+  '/teacher/business/sales': typeof TeacherBusinessSalesRoute
+  '/teacher/business/student-payments': typeof TeacherBusinessStudentPaymentsRoute
+  '/teacher/business/subscriptions': typeof TeacherBusinessSubscriptionsRoute
+  '/teacher/business/taxes-invoices': typeof TeacherBusinessTaxesInvoicesRoute
   '/teacher/courses/create': typeof TeacherCoursesCreateRoute
   '/teacher/exams/create': typeof TeacherExamsCreateRoute
   '/teacher/homework/create': typeof TeacherHomeworkCreateRoute
+  '/teacher/insights/ai-insights': typeof TeacherInsightsAiInsightsRoute
+  '/teacher/insights/assessment-analytics': typeof TeacherInsightsAssessmentAnalyticsRoute
+  '/teacher/insights/concept-analytics': typeof TeacherInsightsConceptAnalyticsRoute
+  '/teacher/insights/course-analytics': typeof TeacherInsightsCourseAnalyticsRoute
+  '/teacher/insights/generator-studio': typeof TeacherInsightsGeneratorStudioRoute
+  '/teacher/insights/memory-insights': typeof TeacherInsightsMemoryInsightsRoute
+  '/teacher/insights/predictions': typeof TeacherInsightsPredictionsRoute
+  '/teacher/insights/reports-center': typeof TeacherInsightsReportsCenterRoute
+  '/teacher/insights/revenue-analytics': typeof TeacherInsightsRevenueAnalyticsRoute
+  '/teacher/insights/student-analytics': typeof TeacherInsightsStudentAnalyticsRoute
   '/teacher/questions/create': typeof TeacherQuestionsCreateRoute
   '/teacher/quizzes/create': typeof TeacherQuizzesCreateRoute
+  '/teacher/students/all': typeof TeacherStudentsAllRoute
+  '/teacher/students/at-risk': typeof TeacherStudentsAtRiskRoute
+  '/teacher/students/certificates': typeof TeacherStudentsCertificatesRoute
+  '/teacher/students/memory': typeof TeacherStudentsMemoryRoute
+  '/teacher/students/parents': typeof TeacherStudentsParentsRoute
+  '/teacher/students/payments': typeof TeacherStudentsPaymentsRoute
+  '/teacher/students/pods': typeof TeacherStudentsPodsRoute
+  '/teacher/students/progress': typeof TeacherStudentsProgressRoute
+  '/teacher/students/reports': typeof TeacherStudentsReportsRoute
+  '/teacher/students/wrong-questions': typeof TeacherStudentsWrongQuestionsRoute
+  '/teacher/team/activity-logs': typeof TeacherTeamActivityLogsRoute
+  '/teacher/team/applications': typeof TeacherTeamApplicationsRoute
+  '/teacher/team/invitations': typeof TeacherTeamInvitationsRoute
+  '/teacher/team/members': typeof TeacherTeamMembersRoute
+  '/teacher/team/recruitment': typeof TeacherTeamRecruitmentRoute
+  '/teacher/team/revenue-sharing': typeof TeacherTeamRevenueSharingRoute
+  '/teacher/team/roles': typeof TeacherTeamRolesRoute
+  '/teacher/team/student-pods': typeof TeacherTeamStudentPodsRoute
+  '/teacher/team/tasks': typeof TeacherTeamTasksRoute
   '/student/courses/': typeof StudentCoursesIndexRoute
+  '/teacher/assessment/': typeof TeacherAssessmentIndexRoute
+  '/teacher/business/': typeof TeacherBusinessIndexRoute
   '/teacher/courses/': typeof TeacherCoursesIndexRoute
+  '/teacher/insights/': typeof TeacherInsightsIndexRoute
   '/teacher/questions/': typeof TeacherQuestionsIndexRoute
+  '/teacher/students/': typeof TeacherStudentsIndexRoute
+  '/teacher/team/': typeof TeacherTeamIndexRoute
   '/student/courses/$courseId/continue': typeof StudentCoursesCourseIdContinueRoute
   '/student/courses/$courseId/enroll': typeof StudentCoursesCourseIdEnrollRoute
   '/student/courses/$courseId/resources': typeof StudentCoursesCourseIdResourcesRoute
@@ -1127,15 +1662,19 @@ export interface FileRouteTypes {
     | '/super/audit'
     | '/super/system'
     | '/teacher/analytics'
+    | '/teacher/assessment'
     | '/teacher/assignments'
+    | '/teacher/business'
     | '/teacher/chapters'
     | '/teacher/chat'
     | '/teacher/content-studio'
     | '/teacher/courses'
+    | '/teacher/dashboard'
     | '/teacher/exams'
     | '/teacher/generator'
     | '/teacher/grading'
     | '/teacher/homework'
+    | '/teacher/insights'
     | '/teacher/lessons'
     | '/teacher/materials'
     | '/teacher/questions'
@@ -1159,16 +1698,69 @@ export interface FileRouteTypes {
     | '/student/certificates/$certificateId'
     | '/student/courses/$courseId'
     | '/student/quizzes/$quizId'
+    | '/teacher/assessment/academic-integrity'
+    | '/teacher/assessment/analytics'
+    | '/teacher/assessment/gradebook'
+    | '/teacher/assessment/grading-queue'
+    | '/teacher/assessment/manual-grading'
+    | '/teacher/assessment/results'
+    | '/teacher/assessment/submissions'
     | '/teacher/assessments/$assessmentId'
     | '/teacher/assessments/create'
+    | '/teacher/business/coupons-pricing'
+    | '/teacher/business/expenses'
+    | '/teacher/business/financial-reports'
+    | '/teacher/business/marketing'
+    | '/teacher/business/orders'
+    | '/teacher/business/payouts'
+    | '/teacher/business/revenue-sharing'
+    | '/teacher/business/rewards'
+    | '/teacher/business/sales'
+    | '/teacher/business/student-payments'
+    | '/teacher/business/subscriptions'
+    | '/teacher/business/taxes-invoices'
     | '/teacher/courses/create'
     | '/teacher/exams/create'
     | '/teacher/homework/create'
+    | '/teacher/insights/ai-insights'
+    | '/teacher/insights/assessment-analytics'
+    | '/teacher/insights/concept-analytics'
+    | '/teacher/insights/course-analytics'
+    | '/teacher/insights/generator-studio'
+    | '/teacher/insights/memory-insights'
+    | '/teacher/insights/predictions'
+    | '/teacher/insights/reports-center'
+    | '/teacher/insights/revenue-analytics'
+    | '/teacher/insights/student-analytics'
     | '/teacher/questions/create'
     | '/teacher/quizzes/create'
+    | '/teacher/students/all'
+    | '/teacher/students/at-risk'
+    | '/teacher/students/certificates'
+    | '/teacher/students/memory'
+    | '/teacher/students/parents'
+    | '/teacher/students/payments'
+    | '/teacher/students/pods'
+    | '/teacher/students/progress'
+    | '/teacher/students/reports'
+    | '/teacher/students/wrong-questions'
+    | '/teacher/team/activity-logs'
+    | '/teacher/team/applications'
+    | '/teacher/team/invitations'
+    | '/teacher/team/members'
+    | '/teacher/team/recruitment'
+    | '/teacher/team/revenue-sharing'
+    | '/teacher/team/roles'
+    | '/teacher/team/student-pods'
+    | '/teacher/team/tasks'
     | '/student/courses/'
+    | '/teacher/assessment/'
+    | '/teacher/business/'
     | '/teacher/courses/'
+    | '/teacher/insights/'
     | '/teacher/questions/'
+    | '/teacher/students/'
+    | '/teacher/team/'
     | '/student/courses/$courseId/continue'
     | '/student/courses/$courseId/enroll'
     | '/student/courses/$courseId/resources'
@@ -1246,6 +1838,7 @@ export interface FileRouteTypes {
     | '/teacher/chapters'
     | '/teacher/chat'
     | '/teacher/content-studio'
+    | '/teacher/dashboard'
     | '/teacher/exams'
     | '/teacher/generator'
     | '/teacher/grading'
@@ -1256,8 +1849,6 @@ export interface FileRouteTypes {
     | '/teacher/revenue'
     | '/teacher/rewards'
     | '/teacher/sessions'
-    | '/teacher/students'
-    | '/teacher/team'
     | '/admin'
     | '/assistant'
     | '/content'
@@ -1271,16 +1862,69 @@ export interface FileRouteTypes {
     | '/teacher'
     | '/student/certificates/$certificateId'
     | '/student/quizzes/$quizId'
+    | '/teacher/assessment/academic-integrity'
+    | '/teacher/assessment/analytics'
+    | '/teacher/assessment/gradebook'
+    | '/teacher/assessment/grading-queue'
+    | '/teacher/assessment/manual-grading'
+    | '/teacher/assessment/results'
+    | '/teacher/assessment/submissions'
     | '/teacher/assessments/$assessmentId'
     | '/teacher/assessments/create'
+    | '/teacher/business/coupons-pricing'
+    | '/teacher/business/expenses'
+    | '/teacher/business/financial-reports'
+    | '/teacher/business/marketing'
+    | '/teacher/business/orders'
+    | '/teacher/business/payouts'
+    | '/teacher/business/revenue-sharing'
+    | '/teacher/business/rewards'
+    | '/teacher/business/sales'
+    | '/teacher/business/student-payments'
+    | '/teacher/business/subscriptions'
+    | '/teacher/business/taxes-invoices'
     | '/teacher/courses/create'
     | '/teacher/exams/create'
     | '/teacher/homework/create'
+    | '/teacher/insights/ai-insights'
+    | '/teacher/insights/assessment-analytics'
+    | '/teacher/insights/concept-analytics'
+    | '/teacher/insights/course-analytics'
+    | '/teacher/insights/generator-studio'
+    | '/teacher/insights/memory-insights'
+    | '/teacher/insights/predictions'
+    | '/teacher/insights/reports-center'
+    | '/teacher/insights/revenue-analytics'
+    | '/teacher/insights/student-analytics'
     | '/teacher/questions/create'
     | '/teacher/quizzes/create'
+    | '/teacher/students/all'
+    | '/teacher/students/at-risk'
+    | '/teacher/students/certificates'
+    | '/teacher/students/memory'
+    | '/teacher/students/parents'
+    | '/teacher/students/payments'
+    | '/teacher/students/pods'
+    | '/teacher/students/progress'
+    | '/teacher/students/reports'
+    | '/teacher/students/wrong-questions'
+    | '/teacher/team/activity-logs'
+    | '/teacher/team/applications'
+    | '/teacher/team/invitations'
+    | '/teacher/team/members'
+    | '/teacher/team/recruitment'
+    | '/teacher/team/revenue-sharing'
+    | '/teacher/team/roles'
+    | '/teacher/team/student-pods'
+    | '/teacher/team/tasks'
     | '/student/courses'
+    | '/teacher/assessment'
+    | '/teacher/business'
     | '/teacher/courses'
+    | '/teacher/insights'
     | '/teacher/questions'
+    | '/teacher/students'
+    | '/teacher/team'
     | '/student/courses/$courseId/continue'
     | '/student/courses/$courseId/enroll'
     | '/student/courses/$courseId/resources'
@@ -1356,15 +2000,19 @@ export interface FileRouteTypes {
     | '/super/audit'
     | '/super/system'
     | '/teacher/analytics'
+    | '/teacher/assessment'
     | '/teacher/assignments'
+    | '/teacher/business'
     | '/teacher/chapters'
     | '/teacher/chat'
     | '/teacher/content-studio'
     | '/teacher/courses'
+    | '/teacher/dashboard'
     | '/teacher/exams'
     | '/teacher/generator'
     | '/teacher/grading'
     | '/teacher/homework'
+    | '/teacher/insights'
     | '/teacher/lessons'
     | '/teacher/materials'
     | '/teacher/questions'
@@ -1388,16 +2036,69 @@ export interface FileRouteTypes {
     | '/student/certificates/$certificateId'
     | '/student/courses/$courseId'
     | '/student/quizzes/$quizId'
+    | '/teacher/assessment/academic-integrity'
+    | '/teacher/assessment/analytics'
+    | '/teacher/assessment/gradebook'
+    | '/teacher/assessment/grading-queue'
+    | '/teacher/assessment/manual-grading'
+    | '/teacher/assessment/results'
+    | '/teacher/assessment/submissions'
     | '/teacher/assessments/$assessmentId'
     | '/teacher/assessments/create'
+    | '/teacher/business/coupons-pricing'
+    | '/teacher/business/expenses'
+    | '/teacher/business/financial-reports'
+    | '/teacher/business/marketing'
+    | '/teacher/business/orders'
+    | '/teacher/business/payouts'
+    | '/teacher/business/revenue-sharing'
+    | '/teacher/business/rewards'
+    | '/teacher/business/sales'
+    | '/teacher/business/student-payments'
+    | '/teacher/business/subscriptions'
+    | '/teacher/business/taxes-invoices'
     | '/teacher/courses/create'
     | '/teacher/exams/create'
     | '/teacher/homework/create'
+    | '/teacher/insights/ai-insights'
+    | '/teacher/insights/assessment-analytics'
+    | '/teacher/insights/concept-analytics'
+    | '/teacher/insights/course-analytics'
+    | '/teacher/insights/generator-studio'
+    | '/teacher/insights/memory-insights'
+    | '/teacher/insights/predictions'
+    | '/teacher/insights/reports-center'
+    | '/teacher/insights/revenue-analytics'
+    | '/teacher/insights/student-analytics'
     | '/teacher/questions/create'
     | '/teacher/quizzes/create'
+    | '/teacher/students/all'
+    | '/teacher/students/at-risk'
+    | '/teacher/students/certificates'
+    | '/teacher/students/memory'
+    | '/teacher/students/parents'
+    | '/teacher/students/payments'
+    | '/teacher/students/pods'
+    | '/teacher/students/progress'
+    | '/teacher/students/reports'
+    | '/teacher/students/wrong-questions'
+    | '/teacher/team/activity-logs'
+    | '/teacher/team/applications'
+    | '/teacher/team/invitations'
+    | '/teacher/team/members'
+    | '/teacher/team/recruitment'
+    | '/teacher/team/revenue-sharing'
+    | '/teacher/team/roles'
+    | '/teacher/team/student-pods'
+    | '/teacher/team/tasks'
     | '/student/courses/'
+    | '/teacher/assessment/'
+    | '/teacher/business/'
     | '/teacher/courses/'
+    | '/teacher/insights/'
     | '/teacher/questions/'
+    | '/teacher/students/'
+    | '/teacher/team/'
     | '/student/courses/$courseId/continue'
     | '/student/courses/$courseId/enroll'
     | '/student/courses/$courseId/resources'
@@ -1462,15 +2163,19 @@ export interface RootRouteChildren {
   SuperAuditRoute: typeof SuperAuditRoute
   SuperSystemRoute: typeof SuperSystemRoute
   TeacherAnalyticsRoute: typeof TeacherAnalyticsRoute
+  TeacherAssessmentRoute: typeof TeacherAssessmentRouteWithChildren
   TeacherAssignmentsRoute: typeof TeacherAssignmentsRoute
+  TeacherBusinessRoute: typeof TeacherBusinessRouteWithChildren
   TeacherChaptersRoute: typeof TeacherChaptersRoute
   TeacherChatRoute: typeof TeacherChatRoute
   TeacherContentStudioRoute: typeof TeacherContentStudioRoute
   TeacherCoursesRoute: typeof TeacherCoursesRouteWithChildren
+  TeacherDashboardRoute: typeof TeacherDashboardRoute
   TeacherExamsRoute: typeof TeacherExamsRouteWithChildren
   TeacherGeneratorRoute: typeof TeacherGeneratorRoute
   TeacherGradingRoute: typeof TeacherGradingRoute
   TeacherHomeworkRoute: typeof TeacherHomeworkRouteWithChildren
+  TeacherInsightsRoute: typeof TeacherInsightsRouteWithChildren
   TeacherLessonsRoute: typeof TeacherLessonsRoute
   TeacherMaterialsRoute: typeof TeacherMaterialsRoute
   TeacherQuestionsRoute: typeof TeacherQuestionsRouteWithChildren
@@ -1478,8 +2183,8 @@ export interface RootRouteChildren {
   TeacherRevenueRoute: typeof TeacherRevenueRoute
   TeacherRewardsRoute: typeof TeacherRewardsRoute
   TeacherSessionsRoute: typeof TeacherSessionsRoute
-  TeacherStudentsRoute: typeof TeacherStudentsRoute
-  TeacherTeamRoute: typeof TeacherTeamRoute
+  TeacherStudentsRoute: typeof TeacherStudentsRouteWithChildren
+  TeacherTeamRoute: typeof TeacherTeamRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
   AssistantIndexRoute: typeof AssistantIndexRoute
   ContentIndexRoute: typeof ContentIndexRoute
@@ -1698,6 +2403,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherLessonsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/teacher/insights': {
+      id: '/teacher/insights'
+      path: '/teacher/insights'
+      fullPath: '/teacher/insights'
+      preLoaderRoute: typeof TeacherInsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/teacher/homework': {
       id: '/teacher/homework'
       path: '/teacher/homework'
@@ -1724,6 +2436,13 @@ declare module '@tanstack/react-router' {
       path: '/teacher/exams'
       fullPath: '/teacher/exams'
       preLoaderRoute: typeof TeacherExamsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teacher/dashboard': {
+      id: '/teacher/dashboard'
+      path: '/teacher/dashboard'
+      fullPath: '/teacher/dashboard'
+      preLoaderRoute: typeof TeacherDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/teacher/courses': {
@@ -1754,11 +2473,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherChaptersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/teacher/business': {
+      id: '/teacher/business'
+      path: '/teacher/business'
+      fullPath: '/teacher/business'
+      preLoaderRoute: typeof TeacherBusinessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/teacher/assignments': {
       id: '/teacher/assignments'
       path: '/teacher/assignments'
       fullPath: '/teacher/assignments'
       preLoaderRoute: typeof TeacherAssignmentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teacher/assessment': {
+      id: '/teacher/assessment'
+      path: '/teacher/assessment'
+      fullPath: '/teacher/assessment'
+      preLoaderRoute: typeof TeacherAssessmentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/teacher/analytics': {
@@ -2125,12 +2858,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBannersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/teacher/team/': {
+      id: '/teacher/team/'
+      path: '/'
+      fullPath: '/teacher/team/'
+      preLoaderRoute: typeof TeacherTeamIndexRouteImport
+      parentRoute: typeof TeacherTeamRoute
+    }
+    '/teacher/students/': {
+      id: '/teacher/students/'
+      path: '/'
+      fullPath: '/teacher/students/'
+      preLoaderRoute: typeof TeacherStudentsIndexRouteImport
+      parentRoute: typeof TeacherStudentsRoute
+    }
     '/teacher/questions/': {
       id: '/teacher/questions/'
       path: '/'
       fullPath: '/teacher/questions/'
       preLoaderRoute: typeof TeacherQuestionsIndexRouteImport
       parentRoute: typeof TeacherQuestionsRoute
+    }
+    '/teacher/insights/': {
+      id: '/teacher/insights/'
+      path: '/'
+      fullPath: '/teacher/insights/'
+      preLoaderRoute: typeof TeacherInsightsIndexRouteImport
+      parentRoute: typeof TeacherInsightsRoute
     }
     '/teacher/courses/': {
       id: '/teacher/courses/'
@@ -2139,12 +2893,159 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherCoursesIndexRouteImport
       parentRoute: typeof TeacherCoursesRoute
     }
+    '/teacher/business/': {
+      id: '/teacher/business/'
+      path: '/'
+      fullPath: '/teacher/business/'
+      preLoaderRoute: typeof TeacherBusinessIndexRouteImport
+      parentRoute: typeof TeacherBusinessRoute
+    }
+    '/teacher/assessment/': {
+      id: '/teacher/assessment/'
+      path: '/'
+      fullPath: '/teacher/assessment/'
+      preLoaderRoute: typeof TeacherAssessmentIndexRouteImport
+      parentRoute: typeof TeacherAssessmentRoute
+    }
     '/student/courses/': {
       id: '/student/courses/'
       path: '/courses'
       fullPath: '/student/courses/'
       preLoaderRoute: typeof StudentCoursesIndexRouteImport
       parentRoute: typeof StudentRoute
+    }
+    '/teacher/team/tasks': {
+      id: '/teacher/team/tasks'
+      path: '/tasks'
+      fullPath: '/teacher/team/tasks'
+      preLoaderRoute: typeof TeacherTeamTasksRouteImport
+      parentRoute: typeof TeacherTeamRoute
+    }
+    '/teacher/team/student-pods': {
+      id: '/teacher/team/student-pods'
+      path: '/student-pods'
+      fullPath: '/teacher/team/student-pods'
+      preLoaderRoute: typeof TeacherTeamStudentPodsRouteImport
+      parentRoute: typeof TeacherTeamRoute
+    }
+    '/teacher/team/roles': {
+      id: '/teacher/team/roles'
+      path: '/roles'
+      fullPath: '/teacher/team/roles'
+      preLoaderRoute: typeof TeacherTeamRolesRouteImport
+      parentRoute: typeof TeacherTeamRoute
+    }
+    '/teacher/team/revenue-sharing': {
+      id: '/teacher/team/revenue-sharing'
+      path: '/revenue-sharing'
+      fullPath: '/teacher/team/revenue-sharing'
+      preLoaderRoute: typeof TeacherTeamRevenueSharingRouteImport
+      parentRoute: typeof TeacherTeamRoute
+    }
+    '/teacher/team/recruitment': {
+      id: '/teacher/team/recruitment'
+      path: '/recruitment'
+      fullPath: '/teacher/team/recruitment'
+      preLoaderRoute: typeof TeacherTeamRecruitmentRouteImport
+      parentRoute: typeof TeacherTeamRoute
+    }
+    '/teacher/team/members': {
+      id: '/teacher/team/members'
+      path: '/members'
+      fullPath: '/teacher/team/members'
+      preLoaderRoute: typeof TeacherTeamMembersRouteImport
+      parentRoute: typeof TeacherTeamRoute
+    }
+    '/teacher/team/invitations': {
+      id: '/teacher/team/invitations'
+      path: '/invitations'
+      fullPath: '/teacher/team/invitations'
+      preLoaderRoute: typeof TeacherTeamInvitationsRouteImport
+      parentRoute: typeof TeacherTeamRoute
+    }
+    '/teacher/team/applications': {
+      id: '/teacher/team/applications'
+      path: '/applications'
+      fullPath: '/teacher/team/applications'
+      preLoaderRoute: typeof TeacherTeamApplicationsRouteImport
+      parentRoute: typeof TeacherTeamRoute
+    }
+    '/teacher/team/activity-logs': {
+      id: '/teacher/team/activity-logs'
+      path: '/activity-logs'
+      fullPath: '/teacher/team/activity-logs'
+      preLoaderRoute: typeof TeacherTeamActivityLogsRouteImport
+      parentRoute: typeof TeacherTeamRoute
+    }
+    '/teacher/students/wrong-questions': {
+      id: '/teacher/students/wrong-questions'
+      path: '/wrong-questions'
+      fullPath: '/teacher/students/wrong-questions'
+      preLoaderRoute: typeof TeacherStudentsWrongQuestionsRouteImport
+      parentRoute: typeof TeacherStudentsRoute
+    }
+    '/teacher/students/reports': {
+      id: '/teacher/students/reports'
+      path: '/reports'
+      fullPath: '/teacher/students/reports'
+      preLoaderRoute: typeof TeacherStudentsReportsRouteImport
+      parentRoute: typeof TeacherStudentsRoute
+    }
+    '/teacher/students/progress': {
+      id: '/teacher/students/progress'
+      path: '/progress'
+      fullPath: '/teacher/students/progress'
+      preLoaderRoute: typeof TeacherStudentsProgressRouteImport
+      parentRoute: typeof TeacherStudentsRoute
+    }
+    '/teacher/students/pods': {
+      id: '/teacher/students/pods'
+      path: '/pods'
+      fullPath: '/teacher/students/pods'
+      preLoaderRoute: typeof TeacherStudentsPodsRouteImport
+      parentRoute: typeof TeacherStudentsRoute
+    }
+    '/teacher/students/payments': {
+      id: '/teacher/students/payments'
+      path: '/payments'
+      fullPath: '/teacher/students/payments'
+      preLoaderRoute: typeof TeacherStudentsPaymentsRouteImport
+      parentRoute: typeof TeacherStudentsRoute
+    }
+    '/teacher/students/parents': {
+      id: '/teacher/students/parents'
+      path: '/parents'
+      fullPath: '/teacher/students/parents'
+      preLoaderRoute: typeof TeacherStudentsParentsRouteImport
+      parentRoute: typeof TeacherStudentsRoute
+    }
+    '/teacher/students/memory': {
+      id: '/teacher/students/memory'
+      path: '/memory'
+      fullPath: '/teacher/students/memory'
+      preLoaderRoute: typeof TeacherStudentsMemoryRouteImport
+      parentRoute: typeof TeacherStudentsRoute
+    }
+    '/teacher/students/certificates': {
+      id: '/teacher/students/certificates'
+      path: '/certificates'
+      fullPath: '/teacher/students/certificates'
+      preLoaderRoute: typeof TeacherStudentsCertificatesRouteImport
+      parentRoute: typeof TeacherStudentsRoute
+    }
+    '/teacher/students/at-risk': {
+      id: '/teacher/students/at-risk'
+      path: '/at-risk'
+      fullPath: '/teacher/students/at-risk'
+      preLoaderRoute: typeof TeacherStudentsAtRiskRouteImport
+      parentRoute: typeof TeacherStudentsRoute
+    }
+    '/teacher/students/all': {
+      id: '/teacher/students/all'
+      path: '/all'
+      fullPath: '/teacher/students/all'
+      preLoaderRoute: typeof TeacherStudentsAllRouteImport
+      parentRoute: typeof TeacherStudentsRoute
     }
     '/teacher/quizzes/create': {
       id: '/teacher/quizzes/create'
@@ -2159,6 +3060,76 @@ declare module '@tanstack/react-router' {
       fullPath: '/teacher/questions/create'
       preLoaderRoute: typeof TeacherQuestionsCreateRouteImport
       parentRoute: typeof TeacherQuestionsRoute
+    }
+    '/teacher/insights/student-analytics': {
+      id: '/teacher/insights/student-analytics'
+      path: '/student-analytics'
+      fullPath: '/teacher/insights/student-analytics'
+      preLoaderRoute: typeof TeacherInsightsStudentAnalyticsRouteImport
+      parentRoute: typeof TeacherInsightsRoute
+    }
+    '/teacher/insights/revenue-analytics': {
+      id: '/teacher/insights/revenue-analytics'
+      path: '/revenue-analytics'
+      fullPath: '/teacher/insights/revenue-analytics'
+      preLoaderRoute: typeof TeacherInsightsRevenueAnalyticsRouteImport
+      parentRoute: typeof TeacherInsightsRoute
+    }
+    '/teacher/insights/reports-center': {
+      id: '/teacher/insights/reports-center'
+      path: '/reports-center'
+      fullPath: '/teacher/insights/reports-center'
+      preLoaderRoute: typeof TeacherInsightsReportsCenterRouteImport
+      parentRoute: typeof TeacherInsightsRoute
+    }
+    '/teacher/insights/predictions': {
+      id: '/teacher/insights/predictions'
+      path: '/predictions'
+      fullPath: '/teacher/insights/predictions'
+      preLoaderRoute: typeof TeacherInsightsPredictionsRouteImport
+      parentRoute: typeof TeacherInsightsRoute
+    }
+    '/teacher/insights/memory-insights': {
+      id: '/teacher/insights/memory-insights'
+      path: '/memory-insights'
+      fullPath: '/teacher/insights/memory-insights'
+      preLoaderRoute: typeof TeacherInsightsMemoryInsightsRouteImport
+      parentRoute: typeof TeacherInsightsRoute
+    }
+    '/teacher/insights/generator-studio': {
+      id: '/teacher/insights/generator-studio'
+      path: '/generator-studio'
+      fullPath: '/teacher/insights/generator-studio'
+      preLoaderRoute: typeof TeacherInsightsGeneratorStudioRouteImport
+      parentRoute: typeof TeacherInsightsRoute
+    }
+    '/teacher/insights/course-analytics': {
+      id: '/teacher/insights/course-analytics'
+      path: '/course-analytics'
+      fullPath: '/teacher/insights/course-analytics'
+      preLoaderRoute: typeof TeacherInsightsCourseAnalyticsRouteImport
+      parentRoute: typeof TeacherInsightsRoute
+    }
+    '/teacher/insights/concept-analytics': {
+      id: '/teacher/insights/concept-analytics'
+      path: '/concept-analytics'
+      fullPath: '/teacher/insights/concept-analytics'
+      preLoaderRoute: typeof TeacherInsightsConceptAnalyticsRouteImport
+      parentRoute: typeof TeacherInsightsRoute
+    }
+    '/teacher/insights/assessment-analytics': {
+      id: '/teacher/insights/assessment-analytics'
+      path: '/assessment-analytics'
+      fullPath: '/teacher/insights/assessment-analytics'
+      preLoaderRoute: typeof TeacherInsightsAssessmentAnalyticsRouteImport
+      parentRoute: typeof TeacherInsightsRoute
+    }
+    '/teacher/insights/ai-insights': {
+      id: '/teacher/insights/ai-insights'
+      path: '/ai-insights'
+      fullPath: '/teacher/insights/ai-insights'
+      preLoaderRoute: typeof TeacherInsightsAiInsightsRouteImport
+      parentRoute: typeof TeacherInsightsRoute
     }
     '/teacher/homework/create': {
       id: '/teacher/homework/create'
@@ -2181,6 +3152,90 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherCoursesCreateRouteImport
       parentRoute: typeof TeacherCoursesRoute
     }
+    '/teacher/business/taxes-invoices': {
+      id: '/teacher/business/taxes-invoices'
+      path: '/taxes-invoices'
+      fullPath: '/teacher/business/taxes-invoices'
+      preLoaderRoute: typeof TeacherBusinessTaxesInvoicesRouteImport
+      parentRoute: typeof TeacherBusinessRoute
+    }
+    '/teacher/business/subscriptions': {
+      id: '/teacher/business/subscriptions'
+      path: '/subscriptions'
+      fullPath: '/teacher/business/subscriptions'
+      preLoaderRoute: typeof TeacherBusinessSubscriptionsRouteImport
+      parentRoute: typeof TeacherBusinessRoute
+    }
+    '/teacher/business/student-payments': {
+      id: '/teacher/business/student-payments'
+      path: '/student-payments'
+      fullPath: '/teacher/business/student-payments'
+      preLoaderRoute: typeof TeacherBusinessStudentPaymentsRouteImport
+      parentRoute: typeof TeacherBusinessRoute
+    }
+    '/teacher/business/sales': {
+      id: '/teacher/business/sales'
+      path: '/sales'
+      fullPath: '/teacher/business/sales'
+      preLoaderRoute: typeof TeacherBusinessSalesRouteImport
+      parentRoute: typeof TeacherBusinessRoute
+    }
+    '/teacher/business/rewards': {
+      id: '/teacher/business/rewards'
+      path: '/rewards'
+      fullPath: '/teacher/business/rewards'
+      preLoaderRoute: typeof TeacherBusinessRewardsRouteImport
+      parentRoute: typeof TeacherBusinessRoute
+    }
+    '/teacher/business/revenue-sharing': {
+      id: '/teacher/business/revenue-sharing'
+      path: '/revenue-sharing'
+      fullPath: '/teacher/business/revenue-sharing'
+      preLoaderRoute: typeof TeacherBusinessRevenueSharingRouteImport
+      parentRoute: typeof TeacherBusinessRoute
+    }
+    '/teacher/business/payouts': {
+      id: '/teacher/business/payouts'
+      path: '/payouts'
+      fullPath: '/teacher/business/payouts'
+      preLoaderRoute: typeof TeacherBusinessPayoutsRouteImport
+      parentRoute: typeof TeacherBusinessRoute
+    }
+    '/teacher/business/orders': {
+      id: '/teacher/business/orders'
+      path: '/orders'
+      fullPath: '/teacher/business/orders'
+      preLoaderRoute: typeof TeacherBusinessOrdersRouteImport
+      parentRoute: typeof TeacherBusinessRoute
+    }
+    '/teacher/business/marketing': {
+      id: '/teacher/business/marketing'
+      path: '/marketing'
+      fullPath: '/teacher/business/marketing'
+      preLoaderRoute: typeof TeacherBusinessMarketingRouteImport
+      parentRoute: typeof TeacherBusinessRoute
+    }
+    '/teacher/business/financial-reports': {
+      id: '/teacher/business/financial-reports'
+      path: '/financial-reports'
+      fullPath: '/teacher/business/financial-reports'
+      preLoaderRoute: typeof TeacherBusinessFinancialReportsRouteImport
+      parentRoute: typeof TeacherBusinessRoute
+    }
+    '/teacher/business/expenses': {
+      id: '/teacher/business/expenses'
+      path: '/expenses'
+      fullPath: '/teacher/business/expenses'
+      preLoaderRoute: typeof TeacherBusinessExpensesRouteImport
+      parentRoute: typeof TeacherBusinessRoute
+    }
+    '/teacher/business/coupons-pricing': {
+      id: '/teacher/business/coupons-pricing'
+      path: '/coupons-pricing'
+      fullPath: '/teacher/business/coupons-pricing'
+      preLoaderRoute: typeof TeacherBusinessCouponsPricingRouteImport
+      parentRoute: typeof TeacherBusinessRoute
+    }
     '/teacher/assessments/create': {
       id: '/teacher/assessments/create'
       path: '/teacher/assessments/create'
@@ -2194,6 +3249,55 @@ declare module '@tanstack/react-router' {
       fullPath: '/teacher/assessments/$assessmentId'
       preLoaderRoute: typeof TeacherAssessmentsAssessmentIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/teacher/assessment/submissions': {
+      id: '/teacher/assessment/submissions'
+      path: '/submissions'
+      fullPath: '/teacher/assessment/submissions'
+      preLoaderRoute: typeof TeacherAssessmentSubmissionsRouteImport
+      parentRoute: typeof TeacherAssessmentRoute
+    }
+    '/teacher/assessment/results': {
+      id: '/teacher/assessment/results'
+      path: '/results'
+      fullPath: '/teacher/assessment/results'
+      preLoaderRoute: typeof TeacherAssessmentResultsRouteImport
+      parentRoute: typeof TeacherAssessmentRoute
+    }
+    '/teacher/assessment/manual-grading': {
+      id: '/teacher/assessment/manual-grading'
+      path: '/manual-grading'
+      fullPath: '/teacher/assessment/manual-grading'
+      preLoaderRoute: typeof TeacherAssessmentManualGradingRouteImport
+      parentRoute: typeof TeacherAssessmentRoute
+    }
+    '/teacher/assessment/grading-queue': {
+      id: '/teacher/assessment/grading-queue'
+      path: '/grading-queue'
+      fullPath: '/teacher/assessment/grading-queue'
+      preLoaderRoute: typeof TeacherAssessmentGradingQueueRouteImport
+      parentRoute: typeof TeacherAssessmentRoute
+    }
+    '/teacher/assessment/gradebook': {
+      id: '/teacher/assessment/gradebook'
+      path: '/gradebook'
+      fullPath: '/teacher/assessment/gradebook'
+      preLoaderRoute: typeof TeacherAssessmentGradebookRouteImport
+      parentRoute: typeof TeacherAssessmentRoute
+    }
+    '/teacher/assessment/analytics': {
+      id: '/teacher/assessment/analytics'
+      path: '/analytics'
+      fullPath: '/teacher/assessment/analytics'
+      preLoaderRoute: typeof TeacherAssessmentAnalyticsRouteImport
+      parentRoute: typeof TeacherAssessmentRoute
+    }
+    '/teacher/assessment/academic-integrity': {
+      id: '/teacher/assessment/academic-integrity'
+      path: '/academic-integrity'
+      fullPath: '/teacher/assessment/academic-integrity'
+      preLoaderRoute: typeof TeacherAssessmentAcademicIntegrityRouteImport
+      parentRoute: typeof TeacherAssessmentRoute
     }
     '/student/quizzes/$quizId': {
       id: '/student/quizzes/$quizId'
@@ -2388,6 +3492,68 @@ const StudentRouteChildren: StudentRouteChildren = {
 const StudentRouteWithChildren =
   StudentRoute._addFileChildren(StudentRouteChildren)
 
+interface TeacherAssessmentRouteChildren {
+  TeacherAssessmentAcademicIntegrityRoute: typeof TeacherAssessmentAcademicIntegrityRoute
+  TeacherAssessmentAnalyticsRoute: typeof TeacherAssessmentAnalyticsRoute
+  TeacherAssessmentGradebookRoute: typeof TeacherAssessmentGradebookRoute
+  TeacherAssessmentGradingQueueRoute: typeof TeacherAssessmentGradingQueueRoute
+  TeacherAssessmentManualGradingRoute: typeof TeacherAssessmentManualGradingRoute
+  TeacherAssessmentResultsRoute: typeof TeacherAssessmentResultsRoute
+  TeacherAssessmentSubmissionsRoute: typeof TeacherAssessmentSubmissionsRoute
+  TeacherAssessmentIndexRoute: typeof TeacherAssessmentIndexRoute
+}
+
+const TeacherAssessmentRouteChildren: TeacherAssessmentRouteChildren = {
+  TeacherAssessmentAcademicIntegrityRoute:
+    TeacherAssessmentAcademicIntegrityRoute,
+  TeacherAssessmentAnalyticsRoute: TeacherAssessmentAnalyticsRoute,
+  TeacherAssessmentGradebookRoute: TeacherAssessmentGradebookRoute,
+  TeacherAssessmentGradingQueueRoute: TeacherAssessmentGradingQueueRoute,
+  TeacherAssessmentManualGradingRoute: TeacherAssessmentManualGradingRoute,
+  TeacherAssessmentResultsRoute: TeacherAssessmentResultsRoute,
+  TeacherAssessmentSubmissionsRoute: TeacherAssessmentSubmissionsRoute,
+  TeacherAssessmentIndexRoute: TeacherAssessmentIndexRoute,
+}
+
+const TeacherAssessmentRouteWithChildren =
+  TeacherAssessmentRoute._addFileChildren(TeacherAssessmentRouteChildren)
+
+interface TeacherBusinessRouteChildren {
+  TeacherBusinessCouponsPricingRoute: typeof TeacherBusinessCouponsPricingRoute
+  TeacherBusinessExpensesRoute: typeof TeacherBusinessExpensesRoute
+  TeacherBusinessFinancialReportsRoute: typeof TeacherBusinessFinancialReportsRoute
+  TeacherBusinessMarketingRoute: typeof TeacherBusinessMarketingRoute
+  TeacherBusinessOrdersRoute: typeof TeacherBusinessOrdersRoute
+  TeacherBusinessPayoutsRoute: typeof TeacherBusinessPayoutsRoute
+  TeacherBusinessRevenueSharingRoute: typeof TeacherBusinessRevenueSharingRoute
+  TeacherBusinessRewardsRoute: typeof TeacherBusinessRewardsRoute
+  TeacherBusinessSalesRoute: typeof TeacherBusinessSalesRoute
+  TeacherBusinessStudentPaymentsRoute: typeof TeacherBusinessStudentPaymentsRoute
+  TeacherBusinessSubscriptionsRoute: typeof TeacherBusinessSubscriptionsRoute
+  TeacherBusinessTaxesInvoicesRoute: typeof TeacherBusinessTaxesInvoicesRoute
+  TeacherBusinessIndexRoute: typeof TeacherBusinessIndexRoute
+}
+
+const TeacherBusinessRouteChildren: TeacherBusinessRouteChildren = {
+  TeacherBusinessCouponsPricingRoute: TeacherBusinessCouponsPricingRoute,
+  TeacherBusinessExpensesRoute: TeacherBusinessExpensesRoute,
+  TeacherBusinessFinancialReportsRoute: TeacherBusinessFinancialReportsRoute,
+  TeacherBusinessMarketingRoute: TeacherBusinessMarketingRoute,
+  TeacherBusinessOrdersRoute: TeacherBusinessOrdersRoute,
+  TeacherBusinessPayoutsRoute: TeacherBusinessPayoutsRoute,
+  TeacherBusinessRevenueSharingRoute: TeacherBusinessRevenueSharingRoute,
+  TeacherBusinessRewardsRoute: TeacherBusinessRewardsRoute,
+  TeacherBusinessSalesRoute: TeacherBusinessSalesRoute,
+  TeacherBusinessStudentPaymentsRoute: TeacherBusinessStudentPaymentsRoute,
+  TeacherBusinessSubscriptionsRoute: TeacherBusinessSubscriptionsRoute,
+  TeacherBusinessTaxesInvoicesRoute: TeacherBusinessTaxesInvoicesRoute,
+  TeacherBusinessIndexRoute: TeacherBusinessIndexRoute,
+}
+
+const TeacherBusinessRouteWithChildren = TeacherBusinessRoute._addFileChildren(
+  TeacherBusinessRouteChildren,
+)
+
 interface TeacherCoursesCourseIdSessionsRouteChildren {
   TeacherCoursesCourseIdSessionsSessionIdRoute: typeof TeacherCoursesCourseIdSessionsSessionIdRoute
 }
@@ -2448,6 +3614,39 @@ const TeacherHomeworkRouteWithChildren = TeacherHomeworkRoute._addFileChildren(
   TeacherHomeworkRouteChildren,
 )
 
+interface TeacherInsightsRouteChildren {
+  TeacherInsightsAiInsightsRoute: typeof TeacherInsightsAiInsightsRoute
+  TeacherInsightsAssessmentAnalyticsRoute: typeof TeacherInsightsAssessmentAnalyticsRoute
+  TeacherInsightsConceptAnalyticsRoute: typeof TeacherInsightsConceptAnalyticsRoute
+  TeacherInsightsCourseAnalyticsRoute: typeof TeacherInsightsCourseAnalyticsRoute
+  TeacherInsightsGeneratorStudioRoute: typeof TeacherInsightsGeneratorStudioRoute
+  TeacherInsightsMemoryInsightsRoute: typeof TeacherInsightsMemoryInsightsRoute
+  TeacherInsightsPredictionsRoute: typeof TeacherInsightsPredictionsRoute
+  TeacherInsightsReportsCenterRoute: typeof TeacherInsightsReportsCenterRoute
+  TeacherInsightsRevenueAnalyticsRoute: typeof TeacherInsightsRevenueAnalyticsRoute
+  TeacherInsightsStudentAnalyticsRoute: typeof TeacherInsightsStudentAnalyticsRoute
+  TeacherInsightsIndexRoute: typeof TeacherInsightsIndexRoute
+}
+
+const TeacherInsightsRouteChildren: TeacherInsightsRouteChildren = {
+  TeacherInsightsAiInsightsRoute: TeacherInsightsAiInsightsRoute,
+  TeacherInsightsAssessmentAnalyticsRoute:
+    TeacherInsightsAssessmentAnalyticsRoute,
+  TeacherInsightsConceptAnalyticsRoute: TeacherInsightsConceptAnalyticsRoute,
+  TeacherInsightsCourseAnalyticsRoute: TeacherInsightsCourseAnalyticsRoute,
+  TeacherInsightsGeneratorStudioRoute: TeacherInsightsGeneratorStudioRoute,
+  TeacherInsightsMemoryInsightsRoute: TeacherInsightsMemoryInsightsRoute,
+  TeacherInsightsPredictionsRoute: TeacherInsightsPredictionsRoute,
+  TeacherInsightsReportsCenterRoute: TeacherInsightsReportsCenterRoute,
+  TeacherInsightsRevenueAnalyticsRoute: TeacherInsightsRevenueAnalyticsRoute,
+  TeacherInsightsStudentAnalyticsRoute: TeacherInsightsStudentAnalyticsRoute,
+  TeacherInsightsIndexRoute: TeacherInsightsIndexRoute,
+}
+
+const TeacherInsightsRouteWithChildren = TeacherInsightsRoute._addFileChildren(
+  TeacherInsightsRouteChildren,
+)
+
 interface TeacherQuestionsRouteChildren {
   TeacherQuestionsCreateRoute: typeof TeacherQuestionsCreateRoute
   TeacherQuestionsIndexRoute: typeof TeacherQuestionsIndexRoute
@@ -2475,6 +3674,68 @@ const TeacherQuizzesRouteChildren: TeacherQuizzesRouteChildren = {
 
 const TeacherQuizzesRouteWithChildren = TeacherQuizzesRoute._addFileChildren(
   TeacherQuizzesRouteChildren,
+)
+
+interface TeacherStudentsRouteChildren {
+  TeacherStudentsAllRoute: typeof TeacherStudentsAllRoute
+  TeacherStudentsAtRiskRoute: typeof TeacherStudentsAtRiskRoute
+  TeacherStudentsCertificatesRoute: typeof TeacherStudentsCertificatesRoute
+  TeacherStudentsMemoryRoute: typeof TeacherStudentsMemoryRoute
+  TeacherStudentsParentsRoute: typeof TeacherStudentsParentsRoute
+  TeacherStudentsPaymentsRoute: typeof TeacherStudentsPaymentsRoute
+  TeacherStudentsPodsRoute: typeof TeacherStudentsPodsRoute
+  TeacherStudentsProgressRoute: typeof TeacherStudentsProgressRoute
+  TeacherStudentsReportsRoute: typeof TeacherStudentsReportsRoute
+  TeacherStudentsWrongQuestionsRoute: typeof TeacherStudentsWrongQuestionsRoute
+  TeacherStudentsIndexRoute: typeof TeacherStudentsIndexRoute
+}
+
+const TeacherStudentsRouteChildren: TeacherStudentsRouteChildren = {
+  TeacherStudentsAllRoute: TeacherStudentsAllRoute,
+  TeacherStudentsAtRiskRoute: TeacherStudentsAtRiskRoute,
+  TeacherStudentsCertificatesRoute: TeacherStudentsCertificatesRoute,
+  TeacherStudentsMemoryRoute: TeacherStudentsMemoryRoute,
+  TeacherStudentsParentsRoute: TeacherStudentsParentsRoute,
+  TeacherStudentsPaymentsRoute: TeacherStudentsPaymentsRoute,
+  TeacherStudentsPodsRoute: TeacherStudentsPodsRoute,
+  TeacherStudentsProgressRoute: TeacherStudentsProgressRoute,
+  TeacherStudentsReportsRoute: TeacherStudentsReportsRoute,
+  TeacherStudentsWrongQuestionsRoute: TeacherStudentsWrongQuestionsRoute,
+  TeacherStudentsIndexRoute: TeacherStudentsIndexRoute,
+}
+
+const TeacherStudentsRouteWithChildren = TeacherStudentsRoute._addFileChildren(
+  TeacherStudentsRouteChildren,
+)
+
+interface TeacherTeamRouteChildren {
+  TeacherTeamActivityLogsRoute: typeof TeacherTeamActivityLogsRoute
+  TeacherTeamApplicationsRoute: typeof TeacherTeamApplicationsRoute
+  TeacherTeamInvitationsRoute: typeof TeacherTeamInvitationsRoute
+  TeacherTeamMembersRoute: typeof TeacherTeamMembersRoute
+  TeacherTeamRecruitmentRoute: typeof TeacherTeamRecruitmentRoute
+  TeacherTeamRevenueSharingRoute: typeof TeacherTeamRevenueSharingRoute
+  TeacherTeamRolesRoute: typeof TeacherTeamRolesRoute
+  TeacherTeamStudentPodsRoute: typeof TeacherTeamStudentPodsRoute
+  TeacherTeamTasksRoute: typeof TeacherTeamTasksRoute
+  TeacherTeamIndexRoute: typeof TeacherTeamIndexRoute
+}
+
+const TeacherTeamRouteChildren: TeacherTeamRouteChildren = {
+  TeacherTeamActivityLogsRoute: TeacherTeamActivityLogsRoute,
+  TeacherTeamApplicationsRoute: TeacherTeamApplicationsRoute,
+  TeacherTeamInvitationsRoute: TeacherTeamInvitationsRoute,
+  TeacherTeamMembersRoute: TeacherTeamMembersRoute,
+  TeacherTeamRecruitmentRoute: TeacherTeamRecruitmentRoute,
+  TeacherTeamRevenueSharingRoute: TeacherTeamRevenueSharingRoute,
+  TeacherTeamRolesRoute: TeacherTeamRolesRoute,
+  TeacherTeamStudentPodsRoute: TeacherTeamStudentPodsRoute,
+  TeacherTeamTasksRoute: TeacherTeamTasksRoute,
+  TeacherTeamIndexRoute: TeacherTeamIndexRoute,
+}
+
+const TeacherTeamRouteWithChildren = TeacherTeamRoute._addFileChildren(
+  TeacherTeamRouteChildren,
 )
 
 interface TeacherAssessmentsAssessmentIdRouteChildren {
@@ -2542,15 +3803,19 @@ const rootRouteChildren: RootRouteChildren = {
   SuperAuditRoute: SuperAuditRoute,
   SuperSystemRoute: SuperSystemRoute,
   TeacherAnalyticsRoute: TeacherAnalyticsRoute,
+  TeacherAssessmentRoute: TeacherAssessmentRouteWithChildren,
   TeacherAssignmentsRoute: TeacherAssignmentsRoute,
+  TeacherBusinessRoute: TeacherBusinessRouteWithChildren,
   TeacherChaptersRoute: TeacherChaptersRoute,
   TeacherChatRoute: TeacherChatRoute,
   TeacherContentStudioRoute: TeacherContentStudioRoute,
   TeacherCoursesRoute: TeacherCoursesRouteWithChildren,
+  TeacherDashboardRoute: TeacherDashboardRoute,
   TeacherExamsRoute: TeacherExamsRouteWithChildren,
   TeacherGeneratorRoute: TeacherGeneratorRoute,
   TeacherGradingRoute: TeacherGradingRoute,
   TeacherHomeworkRoute: TeacherHomeworkRouteWithChildren,
+  TeacherInsightsRoute: TeacherInsightsRouteWithChildren,
   TeacherLessonsRoute: TeacherLessonsRoute,
   TeacherMaterialsRoute: TeacherMaterialsRoute,
   TeacherQuestionsRoute: TeacherQuestionsRouteWithChildren,
@@ -2558,8 +3823,8 @@ const rootRouteChildren: RootRouteChildren = {
   TeacherRevenueRoute: TeacherRevenueRoute,
   TeacherRewardsRoute: TeacherRewardsRoute,
   TeacherSessionsRoute: TeacherSessionsRoute,
-  TeacherStudentsRoute: TeacherStudentsRoute,
-  TeacherTeamRoute: TeacherTeamRoute,
+  TeacherStudentsRoute: TeacherStudentsRouteWithChildren,
+  TeacherTeamRoute: TeacherTeamRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,
   AssistantIndexRoute: AssistantIndexRoute,
   ContentIndexRoute: ContentIndexRoute,

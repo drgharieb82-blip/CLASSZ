@@ -1,5 +1,6 @@
 import { AlertCircle, Bell, ClipboardList, FileWarning, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useApp } from "@/lib/app-context";
 
 interface AttentionItem {
   type: "quiz" | "assignment" | "homework" | "unlock";
@@ -27,6 +28,7 @@ const statusConfig = {
 } as const;
 
 export function AttentionCard({ items }: AttentionCardProps) {
+  const { t } = useApp();
   return (
     <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,24,42,0.96),rgba(10,14,28,0.92))] p-6 shadow-[0_18px_50px_rgba(0,0,0,0.26)] backdrop-blur-xl">
       <div className="mb-5 flex items-start justify-between gap-3">
@@ -35,11 +37,11 @@ export function AttentionCard({ items }: AttentionCardProps) {
             <Bell className="h-4 w-4" />
           </span>
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-rose-300">Attention Needed</h3>
-            <p className="mt-1 text-xs text-slate-400">Important updates</p>
+            <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-rose-300">{t("Attention Needed")}</h3>
+            <p className="mt-1 text-xs text-slate-400">{t("Important updates")}</p>
           </div>
         </div>
-        <button className="text-xs font-medium text-violet-300 transition-colors hover:text-white">View all</button>
+        <button className="text-xs font-medium text-violet-300 transition-colors hover:text-white">{t("common.viewAll")}</button>
       </div>
 
       <div className="space-y-2.5">
@@ -60,7 +62,7 @@ export function AttentionCard({ items }: AttentionCardProps) {
                 <p className="text-sm text-slate-400">{item.course}</p>
               </div>
               <span className={cn("rounded-xl border px-2.5 py-1 text-xs font-semibold", status.className)}>
-                {status.label}
+                {t(status.label)}
               </span>
             </div>
           );

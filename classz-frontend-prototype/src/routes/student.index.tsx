@@ -19,6 +19,7 @@ import { AchievementsCard } from "@/components/student/AchievementsCard";
 import { FavoriteCourseCard } from "@/components/student/FavoriteCourseCard";
 import { SubjectDistributionCard } from "@/components/student/SubjectDistributionCard";
 import { subjectScores } from "@/lib/mock";
+import { useApp } from "@/lib/app-context";
 
 export const Route = createFileRoute("/student/")({
   component: StudentHome,
@@ -28,6 +29,7 @@ const d = studentDashboard;
 const welcomeMsg = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
 
 function StudentHome() {
+  const { t } = useApp();
   const summary = getXPSummary();
   const dailyMissions = generateDailyMissions();
   const missionsComplete = dailyMissions.filter((m) => m.completed).length;
@@ -35,8 +37,8 @@ function StudentHome() {
   return (
     <DashPage
       role="student"
-      title="Good evening, Aya"
-      subtitle="Ready to crush your goals today!"
+      title={`${t("student.goodEvening")}, Aya`}
+      subtitle={t("student.dashboardSubtitle")}
       icon={ROLES.student.icon}
     >
       {/* Welcome + XP Strip */}
@@ -61,9 +63,9 @@ function StudentHome() {
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.4 }}>
         <Card className="flex items-center gap-3 border bg-card px-5 py-3">
           <Zap className="h-4 w-4 text-amber-500 shrink-0" />
-          <span className="text-sm font-medium">Daily Missions</span>
-          <span className="text-xs text-muted-foreground">{missionsComplete}/{dailyMissions.length} complete</span>
-          <div className="ml-auto flex gap-1">
+          <span className="text-sm font-medium">{t("student.dailyMissions")}</span>
+          <span className="text-xs text-muted-foreground">{missionsComplete}/{dailyMissions.length} {t("student.complete")}</span>
+          <div className="ms-auto flex gap-1">
             {dailyMissions.map((m) => (
               <div key={m.id} className={`h-2 w-2 rounded-full ${m.completed ? "bg-emerald-500" : "bg-muted"}`} />
             ))}

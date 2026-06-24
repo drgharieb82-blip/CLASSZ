@@ -13,6 +13,7 @@ import {
   revenueData,
   students,
 } from "@/lib/mock";
+import { useApp } from "@/lib/app-context";
 
 const gradients = ["from-violet-500 to-blue-500", "from-blue-500 to-cyan-500", "from-emerald-500 to-teal-500", "from-amber-500 to-orange-500"];
 const icons: LucideIcon[] = [Users, BookOpen, TrendingUp, Activity, Star, Clock, Award, Zap];
@@ -32,16 +33,18 @@ export interface TableConfig {
 
 /** Reusable, premium data table for dashboard pages. */
 export function DataTable({ title, columns, rows }: TableConfig) {
+  const { t } = useApp();
+
   return (
     <GlowCard>
       <div className="p-5">
-        <h3 className="mb-4 font-semibold">{title}</h3>
+        <h3 className="mb-4 font-semibold">{t(title)}</h3>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b text-start text-xs uppercase tracking-wider text-muted-foreground">
                 {columns.map((c) => (
-                  <th key={c.key} className="py-2.5 pe-4 text-start font-medium">{c.label}</th>
+                  <th key={c.key} className="py-2.5 pe-4 text-start font-medium">{t(c.label)}</th>
                 ))}
               </tr>
             </thead>

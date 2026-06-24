@@ -1,5 +1,6 @@
 import { CalendarDays, ClipboardList, FileText, Radio } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useApp } from "@/lib/app-context";
 
 interface UpcomingEvent {
   type: "quiz" | "assignment" | "live";
@@ -19,6 +20,8 @@ const typeConfig = {
 };
 
 export function UpcomingEventsCard({ items }: UpcomingEventsCardProps) {
+  const { t } = useApp();
+
   return (
     <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(17,24,39,0.96),rgba(10,14,30,0.92))] p-6 shadow-[0_18px_50px_rgba(0,0,0,0.26)] backdrop-blur-xl">
       <div className="mb-5 flex items-start justify-between gap-3">
@@ -27,11 +30,11 @@ export function UpcomingEventsCard({ items }: UpcomingEventsCardProps) {
             <CalendarDays className="h-4 w-4" />
           </span>
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-violet-300">Upcoming Events</h3>
-            <p className="mt-1 text-xs text-slate-400">Don't miss anything</p>
+            <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-violet-300">{t("student.upcomingEvents")}</h3>
+            <p className="mt-1 text-xs text-slate-400">{t("student.dontMissAnything")}</p>
           </div>
         </div>
-        <button className="text-xs font-medium text-violet-300 transition-colors hover:text-white">View all</button>
+        <button className="text-xs font-medium text-violet-300 transition-colors hover:text-white">{t("common.viewAll")}</button>
       </div>
 
       <div className="space-y-3">

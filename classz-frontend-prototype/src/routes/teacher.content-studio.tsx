@@ -1,11 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
-  ArrowDown, ArrowUp, BookOpen, Brain, Calendar, Check, ChevronDown, ChevronUp,
+  ArrowDown, ArrowUp, BarChart3, BookOpen, Bot, Brain, Calendar, Check, ChevronDown, ChevronUp,
   ChevronRight, Clock, Copy, DollarSign, Edit3, Eye, EyeOff, File, FileText,
-  Film, FolderTree, HelpCircle, ClipboardList, Image, Layers, Link2, Lock,
+  Film, FolderTree, Gift, GripVertical, HelpCircle, ClipboardList, Image, Layers, Link2, Lock,
   Pencil, PlayCircle, Plus, ScrollText, Sparkles, StickyNote, Target,
-  Trash2, Unlock, Upload, Users, Video, X, Zap,
+  Trash2, Trophy, Unlock, Upload, Users, Video, X, Zap,
 } from "lucide-react";
 import { DashPage } from "@/components/common/DashPage";
 import { Card } from "@/components/ui/card";
@@ -13,11 +13,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ROLES } from "@/lib/roles";
 import { cn } from "@/lib/utils";
+import { useApp } from "@/lib/app-context";
 import { useTeacherCourseStore } from "@/lib/teacher/teacher-course-store";
 import { useTeacherChapterStore } from "@/lib/teacher/teacher-chapter-store";
-import { useTeacherSessionStore } from "@/lib/teacher/teacher-session-store";
+import { useTeacherSessionStore, type TeacherSession } from "@/lib/teacher/teacher-session-store";
 import {
   useTeacherMaterialStore, type TeacherMaterial, type MaterialType, type CreateMaterialData, type AcademicLink,
 } from "@/lib/teacher/teacher-material-store";
@@ -31,9 +34,11 @@ import {
   type ContentTreeNode,
 } from "@/lib/teacher/content-tree-store";
 import { SESSION_TYPE_META, type SessionWorkspaceType } from "@/lib/teacher/session-workspace-types";
+import { useTeacherAssessmentStore } from "@/lib/teacher/teacher-assessment-store";
 import { FilterBar, type FilterOption } from "@/components/filters/FilterBar";
 import { Pagination } from "@/components/filters/Pagination";
-import { PremiumSessionCard, type SessionStats } from "@/components/session/PremiumSessionCard";
+import { seedTeacherData } from "@/lib/teacher/seed-teacher-data";
+
 import { AssessmentEngineTab as AssessmentEngineWorkspaceTab } from "@/components/teacher/AssessmentEngineTab";
 import {
   TYPE_LABELS as QS_TYPE_LABELS, TYPE_COLORS as QS_TYPE_COLORS,
@@ -59,6 +64,10 @@ function ContentStudioPage() {
   const [selectedCourseId, setSelectedCourseId] = useState("");
   const [activeTab, setActiveTab] = useState(() => sessionStorage.getItem("classz-content-studio-tab") || "materials");
   const selectedCourse = courses.find((c) => c.id === selectedCourseId);
+
+  useEffect(() => {
+    seedTeacherData();
+  }, []);
 
   return (
     <DashPage role="teacher" title="Content Studio" subtitle="Build, organize, reuse, and publish your complete course content" icon={ROLES.teacher.icon}>
@@ -105,7 +114,7 @@ function ContentStudioPage() {
           {activeTab === "materials" && <MaterialsTab courseId={selectedCourseId} />}
           {activeTab === "questions" && <QuestionsTab courseId={selectedCourseId} />}
           {activeTab === "assessments" && <AssessmentEngineTab courseId={selectedCourseId} />}
-          {activeTab === "sessions" && <SessionsTab courseId={selectedCourseId} />}
+          {activeTab === "sessions" && <SessionsBuilderTab courseId={selectedCourseId} />}
         </>
       )}
     </DashPage>
@@ -404,7 +413,134 @@ function ContentTreeTab({ courseId, onSwitchTab }: { courseId: string; onSwitchT
    2. SESSIONS TAB
    ═══════════════════════════════════════════════════════════════ */
 
-function SessionsTab({ courseId }: { courseId: string }) {
+const SESSION_BUILDER_I18N = {
+  "stats.total": { en: "Total sessions", ar: "إجمالي الحصص" },
+  "stats.published": { en: "Published", ar: "منشور" },
+  "stats.drafts": { en: "Drafts", ar: "مسودات" },
+  "stats.paid": { en: "Paid sessions", ar: "حصص مدفوعة" },
+  "stats.free": { en: "Free sessions", ar: "حصص مجانية" },
+  "stats.completion": { en: "Average completion", ar: "متوسط الإكمال" },
+  "stats.revenue": { en: "Total revenue", ar: "إجمالي الإيراد" },
+  "ui.library": { en: "Session Library", ar: "مكتبة الحصص" },
+  "ui.builder": { en: "Learning Experience Builder", ar: "منشئ تجربة التعلم" },
+  "ui.preview": { en: "Student Live Preview", ar: "معاينة الطالب" },
+  "ui.search": { en: "Search learning experiences...", ar: "ابحث في تجارب التعلم..." },
+  "ui.all": { en: "All", ar: "الكل" },
+  "ui.status": { en: "Status", ar: "الحالة" },
+  "ui.pricing": { en: "Pricing", ar: "التسعير" },
+  "ui.publishState": { en: "Publish state", ar: "حالة النشر" },
+  "ui.visible": { en: "Visible", ar: "ظاهر" },
+  "ui.hidden": { en: "Hidden", ar: "مخفي" },
+  "ui.free": { en: "Free", ar: "مجاني" },
+  "ui.paid": { en: "Paid", ar: "مدفوع" },
+  "ui.overview": { en: "Overview", ar: "نظرة عامة" },
+  "ui.blocks": { en: "Blocks", ar: "البلوكات" },
+  "ui.access": { en: "Access", ar: "الوصول" },
+  "ui.concepts": { en: "Concepts", ar: "المفاهيم" },
+  "ui.assessments": { en: "Assessments", ar: "التقييمات" },
+  "ui.analytics": { en: "Analytics", ar: "التحليلات" },
+  "ui.title": { en: "Title", ar: "العنوان" },
+  "ui.chapter": { en: "Chapter", ar: "الفصل" },
+  "ui.description": { en: "Description", ar: "الوصف" },
+  "ui.objectives": { en: "Objectives", ar: "الأهداف" },
+  "ui.thumbnail": { en: "Thumbnail", ar: "الصورة المصغرة" },
+  "ui.price": { en: "Price", ar: "السعر" },
+  "ui.availability": { en: "Availability", ar: "الإتاحة" },
+  "ui.openDate": { en: "Open date", ar: "تاريخ الفتح" },
+  "ui.closeDate": { en: "Close date", ar: "تاريخ الإغلاق" },
+  "ui.publishControls": { en: "Publish controls", ar: "أدوات النشر" },
+  "ui.saveDraft": { en: "Save draft", ar: "حفظ كمسودة" },
+  "ui.publish": { en: "Publish", ar: "نشر" },
+  "ui.archive": { en: "Archive", ar: "أرشفة" },
+  "ui.delete": { en: "Delete", ar: "حذف" },
+  "ui.duplicate": { en: "Duplicate", ar: "نسخ" },
+  "ui.edit": { en: "Edit", ar: "تعديل" },
+  "ui.newSession": { en: "New session", ar: "حصة جديدة" },
+  "ui.noResults": { en: "No sessions match filters", ar: "لا توجد حصص مطابقة" },
+  "empty.kicker": { en: "Learning experiences are your paid product", ar: "تجارب التعلم هي منتجك المدفوع" },
+  "empty.title": { en: "Design your first paid learning experience", ar: "صمم أول تجربة تعلم مدفوعة" },
+  "empty.body": { en: "Create a session that combines video, files, practice, assessments, access rules, rewards, and analytics in one paid learning unit.", ar: "أنشئ حصة تجمع الفيديو والملفات والتدريب والتقييمات وقواعد الوصول والمكافآت والتحليلات في وحدة تعلم مدفوعة واحدة." },
+  "empty.action": { en: "Create premium session", ar: "إنشاء حصة احترافية" },
+  "block.heading": { en: "Learning Blocks", ar: "بلوكات التعلم" },
+  "block.linked": { en: "Linked resource", ar: "المورد المرتبط" },
+  "block.required": { en: "Required", ar: "إجباري" },
+  "block.optional": { en: "Optional", ar: "اختياري" },
+  "block.locked": { en: "Locked", ar: "مقفل" },
+  "block.unlocked": { en: "Unlocked", ar: "مفتوح" },
+  "block.minutes": { en: "min", ar: "دقيقة" },
+  "block.video": { en: "Video", ar: "فيديو" },
+  "block.pdf": { en: "PDF/material", ar: "ملف PDF/مادة" },
+  "block.practice": { en: "Question practice", ar: "تدريب أسئلة" },
+  "block.quiz": { en: "Quiz", ar: "اختبار قصير" },
+  "block.homework": { en: "Homework", ar: "واجب" },
+  "block.exam": { en: "Exam", ar: "امتحان" },
+  "block.notes": { en: "Notes", ar: "ملاحظات" },
+  "block.attachments": { en: "Attachments", ar: "مرفقات" },
+  "block.discussion": { en: "Discussion", ar: "نقاش" },
+  "resource.video": { en: "Core lesson video", ar: "فيديو الدرس الأساسي" },
+  "resource.pdf": { en: "Student material pack", ar: "حزمة مواد الطالب" },
+  "resource.practice": { en: "Adaptive question set", ar: "مجموعة أسئلة تكيفية" },
+  "resource.quiz": { en: "Session quiz", ar: "اختبار الحصة" },
+  "resource.homework": { en: "Homework submission", ar: "تسليم الواجب" },
+  "resource.exam": { en: "Controlled exam", ar: "امتحان مضبوط" },
+  "resource.notes": { en: "Teacher notes", ar: "ملاحظات المعلم" },
+  "resource.attachments": { en: "Downloadable files", ar: "ملفات قابلة للتحميل" },
+  "resource.discussion": { en: "Moderated discussion", ar: "نقاش بإشراف" },
+  "access.heading": { en: "Session Access Rules", ar: "قواعد وصول الحصة" },
+  "access.previous": { en: "Requires previous session completion", ar: "يتطلب إكمال الحصة السابقة" },
+  "access.payment": { en: "Requires payment", ar: "يتطلب الدفع" },
+  "access.replay": { en: "Allow replay", ar: "السماح بالإعادة" },
+  "concept.heading": { en: "Concepts Coverage", ar: "تغطية المفاهيم" },
+  "concept.main": { en: "Main chapter concepts", ar: "مفاهيم الفصل الأساسي" },
+  "concept.atomic": { en: "Atomic concepts", ar: "المفاهيم الذرية" },
+  "concept.cross": { en: "Cross-chapter concepts", ar: "مفاهيم عابرة للفصول" },
+  "concept.coverage": { en: "Coverage percentage", ar: "نسبة التغطية" },
+  "assessment.heading": { en: "Assessment Rules", ar: "قواعد التقييم" },
+  "assessment.completion": { en: "Completion condition", ar: "شرط الإكمال" },
+  "assessment.score": { en: "Minimum quiz score", ar: "أقل درجة للاختبار" },
+  "assessment.retake": { en: "Retake policy", ar: "سياسة الإعادة" },
+  "assessment.answers": { en: "Show answers", ar: "إظهار الإجابات" },
+  "assessment.condition": { en: "All required blocks completed", ar: "إكمال كل البلوكات الإجبارية" },
+  "assessment.policy": { en: "Two retakes, highest score counts", ar: "محاولتان إضافيتان وتحسب أعلى درجة" },
+  "assessment.approval": { en: "After teacher approval", ar: "بعد موافقة المعلم" },
+  "reward.heading": { en: "Rewards", ar: "المكافآت" },
+  "reward.xp": { en: "XP points", ar: "نقاط الخبرة" },
+  "reward.badge": { en: "Badge", ar: "الشارة" },
+  "reward.streak": { en: "Streak bonus", ar: "مكافأة السلسلة" },
+  "reward.badgeName": { en: "Concept Master", ar: "متقن المفهوم" },
+  "analytics.enrolled": { en: "Enrolled students", ar: "الطلاب المسجلون" },
+  "analytics.completion": { en: "Completion rate", ar: "معدل الإكمال" },
+  "analytics.watch": { en: "Average watch time", ar: "متوسط المشاهدة" },
+  "analytics.quiz": { en: "Quiz average", ar: "متوسط الاختبار" },
+  "analytics.revenue": { en: "Revenue", ar: "الإيراد" },
+  "analytics.weak": { en: "Weak concepts detected", ar: "مفاهيم ضعيفة مكتشفة" },
+  "preview.start": { en: "Start learning", ar: "ابدأ التعلم" },
+  "preview.included": { en: "Included blocks", ar: "البلوكات المضمنة" },
+  "preview.rules": { en: "Rules summary", ar: "ملخص القواعد" },
+} as const;
+
+type SessionBuilderI18nKey = keyof typeof SESSION_BUILDER_I18N;
+type SessionBuilderTranslator = (key: SessionBuilderI18nKey) => string;
+type SessionBuilderTabKey = "overview" | "blocks" | "access" | "concepts" | "assessments" | "analytics";
+type BuilderBlockType = "video" | "pdf" | "practice" | "quiz" | "homework" | "exam" | "notes" | "attachments" | "discussion";
+type BuilderBlock = { id: string; type: BuilderBlockType; titleKey: SessionBuilderI18nKey; resource: string; required: boolean; locked: boolean; duration: number };
+type BuilderStats = { videoCount: number; resourceCount: number; questionsCount: number; assessmentCount: number };
+
+const BUILDER_BLOCK_META: Record<BuilderBlockType, { icon: typeof Video; labelKey: SessionBuilderI18nKey; resourceKey: SessionBuilderI18nKey; color: string }> = {
+  video: { icon: Video, labelKey: "block.video", resourceKey: "resource.video", color: "text-blue-500 bg-blue-500/10 border-blue-500/20" },
+  pdf: { icon: FileText, labelKey: "block.pdf", resourceKey: "resource.pdf", color: "text-rose-500 bg-rose-500/10 border-rose-500/20" },
+  practice: { icon: HelpCircle, labelKey: "block.practice", resourceKey: "resource.practice", color: "text-cyan-500 bg-cyan-500/10 border-cyan-500/20" },
+  quiz: { icon: ClipboardList, labelKey: "block.quiz", resourceKey: "resource.quiz", color: "text-violet-500 bg-violet-500/10 border-violet-500/20" },
+  homework: { icon: Pencil, labelKey: "block.homework", resourceKey: "resource.homework", color: "text-orange-500 bg-orange-500/10 border-orange-500/20" },
+  exam: { icon: ScrollText, labelKey: "block.exam", resourceKey: "resource.exam", color: "text-red-500 bg-red-500/10 border-red-500/20" },
+  notes: { icon: StickyNote, labelKey: "block.notes", resourceKey: "resource.notes", color: "text-amber-500 bg-amber-500/10 border-amber-500/20" },
+  attachments: { icon: File, labelKey: "block.attachments", resourceKey: "resource.attachments", color: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20" },
+  discussion: { icon: Users, labelKey: "block.discussion", resourceKey: "resource.discussion", color: "text-primary bg-primary/10 border-primary/20" },
+};
+
+function SessionsBuilderTab({ courseId }: { courseId: string }) {
+  const { lang } = useApp();
+  const sb: SessionBuilderTranslator = (key) => SESSION_BUILDER_I18N[key][lang];
   const rawSessions = useTeacherSessionStore((s) => s.sessions);
   const createSession = useTeacherSessionStore((s) => s.createSession);
   const deleteSession = useTeacherSessionStore((s) => s.deleteSession);
@@ -419,6 +555,278 @@ function SessionsTab({ courseId }: { courseId: string }) {
   const allQuizzes = useTeacherQuizStore((s) => s.quizzes);
   const allExams = useTeacherExamStore((s) => s.exams);
   const allHomework = useTeacherHomeworkStore((s) => s.items);
+  const allAssessments = useTeacherAssessmentStore((s) => s.assessments);
+  const allTreeNodes = useContentTreeStore((s) => s.nodes);
+
+  const sessions = useMemo(() => rawSessions.filter((session) => session.courseId === courseId).sort((a, b) => a.order - b.order), [rawSessions, courseId]);
+  const chapters = useMemo(() => rawChapters.filter((chapter) => chapter.courseId === courseId).sort((a, b) => a.order - b.order), [rawChapters, courseId]);
+  const treeNodes = useMemo(() => allTreeNodes.filter((node) => node.courseId === courseId), [allTreeNodes, courseId]);
+  const chapterMap = useMemo(() => new Map(chapters.map((chapter) => [chapter.id, chapter.title])), [chapters]);
+  const [selectedId, setSelectedId] = useState("");
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [pricingFilter, setPricingFilter] = useState("");
+  const [publishFilter, setPublishFilter] = useState("");
+  const [tab, setTab] = useState<SessionBuilderTabKey>("overview");
+
+  useEffect(() => {
+    if (sessions.length === 0) setSelectedId("");
+    else if (!selectedId || !sessions.some((session) => session.id === selectedId)) setSelectedId(sessions[0].id);
+  }, [sessions, selectedId]);
+
+  const statsMap = useMemo(() => {
+    const map = new Map<string, BuilderStats>();
+    for (const session of sessions) {
+      const materials = allMaterials.filter((material) => material.sessionId === session.id || material.linkedSessionIds?.includes(session.id));
+      const assessmentCount = allQuizzes.filter((quiz) => quiz.sessionIds?.includes(session.id)).length + allExams.filter((exam) => exam.sessionIds?.includes(session.id)).length + allHomework.filter((item) => item.sessionIds?.includes(session.id)).length + allAssessments.filter((assessment) => assessment.sessionIds?.includes(session.id)).length;
+      map.set(session.id, {
+        videoCount: materials.filter((material) => material.type === "video").length,
+        resourceCount: materials.filter((material) => material.type !== "video").length,
+        questionsCount: allQuestions.filter((question) => question.sessionId === session.id || question.sessionIds?.includes(session.id)).length,
+        assessmentCount,
+      });
+    }
+    return map;
+  }, [sessions, allMaterials, allQuestions, allQuizzes, allExams, allHomework, allAssessments]);
+
+  const filtered = useMemo(() => {
+    let result = sessions;
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      result = result.filter((session) => session.title.toLowerCase().includes(q) || session.publicCode.toLowerCase().includes(q));
+    }
+    if (statusFilter) result = result.filter((session) => session.status === statusFilter);
+    if (pricingFilter === "free") result = result.filter((session) => session.price === 0 || session.isFreePreview);
+    if (pricingFilter === "paid") result = result.filter((session) => session.price > 0 && !session.isFreePreview);
+    if (publishFilter === "visible") result = result.filter((session) => session.accessStatus !== "locked");
+    if (publishFilter === "hidden") result = result.filter((session) => session.accessStatus === "locked");
+    return result;
+  }, [sessions, search, statusFilter, pricingFilter, publishFilter]);
+
+  const selected = sessions.find((session) => session.id === selectedId) || sessions[0];
+  const blocks = useMemo(() => selected ? buildBuilderBlocks(selected, sb, allMaterials, allQuestions, allQuizzes, allExams, allHomework, allAssessments) : [], [selected, allMaterials, allQuestions, allQuizzes, allExams, allHomework, allAssessments, lang]);
+  const revenue = sessions.reduce((sum, session, index) => sum + session.price * (90 + index * 19), 0);
+  const topStats = [
+    { label: sb("stats.total"), value: sessions.length, icon: Layers, cls: "text-blue-500" },
+    { label: sb("stats.published"), value: sessions.filter((session) => session.status === "published").length, icon: Eye, cls: "text-emerald-500" },
+    { label: sb("stats.drafts"), value: sessions.filter((session) => session.status === "draft").length, icon: Clock, cls: "text-amber-500" },
+    { label: sb("stats.paid"), value: sessions.filter((session) => session.price > 0 && !session.isFreePreview).length, icon: DollarSign, cls: "text-primary" },
+    { label: sb("stats.free"), value: sessions.filter((session) => session.price === 0 || session.isFreePreview).length, icon: Gift, cls: "text-green-500" },
+    { label: sb("stats.completion"), value: `${sessions.length ? Math.round(sessions.reduce((sum, session, index) => sum + builderCompletion(session, index), 0) / sessions.length) : 0}%`, icon: Target, cls: "text-violet-500" },
+    { label: sb("stats.revenue"), value: `$${Math.round(revenue).toLocaleString()}`, icon: BarChart3, cls: "text-cyan-500" },
+  ];
+
+  const createPremiumSession = () => {
+    const chapterId = chapters[0]?.id;
+    if (!chapterId) return;
+    const session = createSession({ courseId, chapterId, title: `${sb("ui.newSession")} ${sessions.length + 1}`, description: sb("empty.body"), price: 25, currency: "USD", durationMinutes: 75, sessionType: "mixed", status: "draft", accessStatus: "locked" });
+    setSelectedId(session.id);
+    setTab("overview");
+  };
+
+  if (sessions.length === 0) {
+    return (
+      <Card className="overflow-hidden border bg-card">
+        <div className="grid gap-0 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="space-y-5 p-8 sm:p-10">
+            <Badge className="w-fit rounded-full border-0 bg-primary/10 text-primary">{sb("empty.kicker")}</Badge>
+            <div className="space-y-2"><h2 className="text-2xl font-bold tracking-tight">{sb("empty.title")}</h2><p className="max-w-xl text-sm leading-6 text-muted-foreground">{sb("empty.body")}</p></div>
+            <Button onClick={createPremiumSession} disabled={chapters.length === 0} className="rounded-xl gradient-brand border-0 text-white"><Plus className="me-1.5 h-4 w-4" />{sb("empty.action")}</Button>
+          </div>
+          <div className="border-t bg-gradient-to-br from-primary/10 via-background to-violet-500/10 p-8 lg:border-s"><div className="grid gap-3">{(Object.keys(BUILDER_BLOCK_META) as BuilderBlockType[]).map((type) => { const meta = BUILDER_BLOCK_META[type]; return <BuilderBlockShell key={type} icon={meta.icon} color={meta.color} title={sb(meta.labelKey)} subtitle={sb(meta.resourceKey)} />; })}</div></div>
+        </div>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-5">
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-7">
+        {topStats.map((item) => (
+          <Card key={item.label} className="border bg-card p-3"><div className="flex items-center gap-2"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-muted"><item.icon className={cn("h-4 w-4", item.cls)} /></span><div className="min-w-0"><p className="truncate text-lg font-bold leading-tight">{item.value}</p><p className="truncate text-[11px] text-muted-foreground">{item.label}</p></div></div></Card>
+        ))}
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-[300px_minmax(0,1fr)_320px]">
+        <Card className="overflow-hidden border bg-card">
+          <div className="border-b p-4">
+            <div className="mb-3 flex items-center justify-between gap-3"><div><h3 className="text-sm font-semibold">{sb("ui.library")}</h3><p className="text-xs text-muted-foreground">{filtered.length} / {sessions.length}</p></div><Button size="icon" variant="outline" className="h-8 w-8 rounded-lg" onClick={createPremiumSession} disabled={chapters.length === 0} title={sb("ui.newSession")}><Plus className="h-4 w-4" /></Button></div>
+            <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={sb("ui.search")} className="h-9 rounded-xl text-sm" />
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              <BuilderSelect label={sb("ui.status")} value={statusFilter} onChange={setStatusFilter} options={[["", sb("ui.all")], ["draft", sb("stats.drafts")], ["published", sb("stats.published")], ["archived", sb("ui.archive")]]} />
+              <BuilderSelect label={sb("ui.pricing")} value={pricingFilter} onChange={setPricingFilter} options={[["", sb("ui.all")], ["free", sb("ui.free")], ["paid", sb("ui.paid")]]} />
+              <BuilderSelect label={sb("ui.publishState")} value={publishFilter} onChange={setPublishFilter} options={[["", sb("ui.all")], ["visible", sb("ui.visible")], ["hidden", sb("ui.hidden")]]} />
+            </div>
+          </div>
+          <div className="max-h-[44rem] overflow-y-auto p-2">
+            {filtered.length === 0 ? <div className="p-8 text-center text-sm text-muted-foreground">{sb("ui.noResults")}</div> : filtered.map((session, index) => <BuilderSessionItem key={session.id} session={session} stats={statsMap.get(session.id)} chapterName={chapterMap.get(session.chapterId)} selected={session.id === selected?.id} completion={builderCompletion(session, index)} sb={sb} onSelect={() => setSelectedId(session.id)} />)}
+          </div>
+        </Card>
+
+        <Card className="overflow-hidden border bg-card">
+          {selected && (
+            <>
+              <div className="border-b bg-muted/20 p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0"><div className="mb-1 flex flex-wrap items-center gap-2"><Badge className={cn("rounded-full border-0 text-[10px]", builderTypeColor(selected))}>{builderTypeLabel(selected)}</Badge><span className="font-mono text-[10px] text-muted-foreground">{selected.publicCode}</span><BuilderStatusBadge session={selected} sb={sb} /></div><h3 className="truncate text-lg font-semibold">{selected.title}</h3><p className="text-xs text-muted-foreground">{chapterMap.get(selected.chapterId) || sb("ui.chapter")}</p></div>
+                  <div className="flex flex-wrap gap-2"><Button variant="outline" size="sm" className="h-8 rounded-lg" onClick={() => updateSession(selected.id, { status: "draft" })}>{sb("ui.saveDraft")}</Button><Button size="sm" className="h-8 rounded-lg gradient-brand border-0 text-white" onClick={() => publishSession(selected.id)}><Upload className="me-1.5 h-3.5 w-3.5" />{sb("ui.publish")}</Button><Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-amber-500" onClick={() => archiveSession(selected.id)} title={sb("ui.archive")}><EyeOff className="h-4 w-4" /></Button><Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-destructive" onClick={() => deleteSession(selected.id)} title={sb("ui.delete")}><Trash2 className="h-4 w-4" /></Button></div>
+                </div>
+              </div>
+              <Tabs value={tab} onValueChange={(value) => setTab(value as SessionBuilderTabKey)} className="p-4">
+                <TabsList className="h-auto w-full justify-start overflow-x-auto rounded-xl bg-muted/70 p-1">{(["overview", "blocks", "access", "concepts", "assessments", "analytics"] as SessionBuilderTabKey[]).map((tabKey) => <TabsTrigger key={tabKey} value={tabKey} className="rounded-lg px-3 py-1.5 text-xs">{sb(`ui.${tabKey}` as SessionBuilderI18nKey)}</TabsTrigger>)}</TabsList>
+                <TabsContent value="overview" className="mt-4"><BuilderOverview session={selected} chapters={chapters} sb={sb} updateSession={updateSession} /></TabsContent>
+                <TabsContent value="blocks" className="mt-4"><BuilderBlocks blocks={blocks} sb={sb} /></TabsContent>
+                <TabsContent value="access" className="mt-4"><BuilderAccess session={selected} sb={sb} updateSession={updateSession} lockSession={lockSession} unlockSession={unlockSession} /></TabsContent>
+                <TabsContent value="concepts" className="mt-4"><BuilderConcepts session={selected} chapterName={chapterMap.get(selected.chapterId)} treeNodes={treeNodes} blocks={blocks} sb={sb} /></TabsContent>
+                <TabsContent value="assessments" className="mt-4"><BuilderAssessments session={selected} sb={sb} /></TabsContent>
+                <TabsContent value="analytics" className="mt-4"><BuilderAnalytics analytics={builderAnalytics(selected, sessions.indexOf(selected))} sb={sb} /></TabsContent>
+              </Tabs>
+            </>
+          )}
+        </Card>
+
+        <Card className="overflow-hidden border bg-card">{selected && <BuilderPreview session={selected} chapterName={chapterMap.get(selected.chapterId)} blocks={blocks} stats={statsMap.get(selected.id)} sb={sb} />}</Card>
+      </div>
+    </div>
+  );
+}
+
+function BuilderSelect({ label, value, options, onChange }: { label: string; value: string; options: [string, string][]; onChange: (value: string) => void }) {
+  return <label className="space-y-1"><span className="block truncate text-[10px] font-medium text-muted-foreground">{label}</span><select value={value} onChange={(event) => onChange(event.target.value)} className="h-8 w-full rounded-lg border bg-background px-2 text-[11px]">{options.map(([optionValue, optionLabel]) => <option key={optionValue || "all"} value={optionValue}>{optionLabel}</option>)}</select></label>;
+}
+
+function BuilderBlockShell({ icon: Icon, color, title, subtitle }: { icon: typeof Video; color: string; title: string; subtitle: string }) {
+  return <div className="flex items-center gap-3 rounded-xl border bg-background/80 p-3 shadow-sm"><span className={cn("grid h-9 w-9 place-items-center rounded-lg border", color)}><Icon className="h-4 w-4" /></span><div><p className="text-sm font-semibold">{title}</p><p className="text-xs text-muted-foreground">{subtitle}</p></div></div>;
+}
+
+function BuilderSessionItem({ session, stats, chapterName, selected, completion, sb, onSelect }: { session: TeacherSession; stats?: BuilderStats; chapterName?: string; selected: boolean; completion: number; sb: SessionBuilderTranslator; onSelect: () => void }) {
+  const paid = session.price > 0 && !session.isFreePreview;
+  return <button onClick={onSelect} className={cn("mb-2 w-full rounded-xl border p-3 text-start transition-colors", selected ? "border-primary/40 bg-primary/10" : "bg-background hover:bg-accent/40")}><div className="flex items-start justify-between gap-2"><div className="min-w-0"><p className="line-clamp-2 text-sm font-semibold">{session.title}</p><p className="mt-0.5 truncate text-[11px] text-muted-foreground">{chapterName || session.publicCode}</p></div><Badge variant="outline" className={cn("rounded-full text-[10px]", paid ? "border-primary/30 text-primary" : "border-emerald-300 text-emerald-600")}>{paid ? `${session.price} ${session.currency}` : sb("ui.free")}</Badge></div><div className="mt-3 flex flex-wrap items-center gap-1.5 text-[10px] text-muted-foreground"><BuilderStatusBadge session={session} sb={sb} /><span className="rounded-full bg-muted px-2 py-0.5">{stats?.videoCount || 0} {sb("block.video")}</span><span className="rounded-full bg-muted px-2 py-0.5">{stats?.assessmentCount || 0} {sb("ui.assessments")}</span></div><div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary" style={{ width: `${completion}%` }} /></div></button>;
+}
+
+function BuilderStatusBadge({ session, sb }: { session: TeacherSession; sb: SessionBuilderTranslator }) {
+  const label = session.status === "published" ? sb("stats.published") : session.status === "draft" ? sb("stats.drafts") : sb("ui.archive");
+  return <Badge variant="outline" className={cn("rounded-full text-[10px]", session.status === "published" ? "border-emerald-300 text-emerald-600" : session.status === "draft" ? "border-amber-300 text-amber-600" : "border-slate-300 text-slate-500")}>{label}</Badge>;
+}
+
+function BuilderOverview({ session, chapters, sb, updateSession }: { session: TeacherSession; chapters: { id: string; title: string }[]; sb: SessionBuilderTranslator; updateSession: (sessionId: string, data: Partial<TeacherSession>) => void }) {
+  return <div className="grid gap-4 lg:grid-cols-[1fr_220px]"><div className="space-y-4"><div className="grid gap-3 sm:grid-cols-2"><BuilderField label={sb("ui.title")}><Input value={session.title} onChange={(event) => updateSession(session.id, { title: event.target.value })} className="rounded-xl" /></BuilderField><BuilderField label={sb("ui.chapter")}><select value={session.chapterId} onChange={(event) => updateSession(session.id, { chapterId: event.target.value, chapterIds: [event.target.value] })} className="h-10 w-full rounded-xl border bg-background px-3 text-sm">{chapters.map((chapter) => <option key={chapter.id} value={chapter.id}>{chapter.title}</option>)}</select></BuilderField></div><BuilderField label={sb("ui.description")}><textarea value={session.description} onChange={(event) => updateSession(session.id, { description: event.target.value })} rows={4} className="w-full resize-none rounded-xl border bg-background px-3 py-2 text-sm" /></BuilderField><BuilderField label={sb("ui.objectives")}><div className="grid gap-2 sm:grid-cols-3">{["assessment.condition", "assessment.score", "concept.coverage"].map((key) => <div key={key} className="rounded-xl border bg-muted/30 p-3 text-xs font-medium">{sb(key as SessionBuilderI18nKey)}</div>)}</div></BuilderField><div className="grid gap-3 sm:grid-cols-3"><BuilderField label={sb("ui.price")}><Input type="number" min="0" value={session.price} onChange={(event) => updateSession(session.id, { price: Number(event.target.value) || 0, isFreePreview: Number(event.target.value) === 0 })} className="rounded-xl" /></BuilderField><BuilderField label={sb("ui.openDate")}><Input type="datetime-local" value={session.openAt.slice(0, 16)} onChange={(event) => updateSession(session.id, { openAt: event.target.value })} className="rounded-xl" /></BuilderField><BuilderField label={sb("ui.closeDate")}><Input type="datetime-local" value={session.closeAt.slice(0, 16)} onChange={(event) => updateSession(session.id, { closeAt: event.target.value })} className="rounded-xl" /></BuilderField></div></div><div className="space-y-3"><BuilderField label={sb("ui.thumbnail")}><div className="grid aspect-video place-items-center rounded-xl border bg-gradient-to-br from-primary/20 via-background to-violet-500/20"><PlayCircle className="h-10 w-10 text-primary" /></div></BuilderField><Card className="border bg-muted/20 p-3"><p className="mb-2 text-xs font-semibold">{sb("ui.publishControls")}</p><div className="grid gap-2 text-xs"><BuilderToggle label={sb("ui.visible")} checked={session.accessStatus !== "locked"} onCheckedChange={(checked) => updateSession(session.id, { accessStatus: checked ? "unlocked" : "locked" })} /><BuilderToggle label={sb("access.replay")} checked /><BuilderToggle label={sb("access.payment")} checked={session.price > 0} /></div></Card></div></div>;
+}
+
+function BuilderBlocks({ blocks, sb }: { blocks: BuilderBlock[]; sb: SessionBuilderTranslator }) {
+  return <div className="space-y-3"><div className="flex items-center justify-between gap-3"><div><h4 className="font-semibold">{sb("block.heading")}</h4><p className="text-xs text-muted-foreground">{sb("ui.builder")}</p></div><Badge variant="outline" className="rounded-full">{blocks.length}</Badge></div><div className="space-y-2">{blocks.map((block, index) => <BuilderBlockCard key={block.id} block={block} index={index} sb={sb} />)}</div></div>;
+}
+
+function BuilderBlockCard({ block, index, sb }: { block: BuilderBlock; index: number; sb: SessionBuilderTranslator }) {
+  const meta = BUILDER_BLOCK_META[block.type];
+  return <div className="grid gap-3 rounded-xl border bg-background p-3 md:grid-cols-[auto_1fr_auto] md:items-center"><div className="flex items-center gap-2"><GripVertical className="h-4 w-4 text-muted-foreground" /><span className="grid h-9 w-9 place-items-center rounded-lg border bg-card text-xs font-semibold">{index + 1}</span><span className={cn("grid h-9 w-9 place-items-center rounded-lg border", meta.color)}><meta.icon className="h-4 w-4" /></span></div><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><p className="font-semibold">{sb(block.titleKey)}</p><Badge variant="outline" className="rounded-full text-[10px]">{sb(meta.labelKey)}</Badge></div><p className="mt-1 truncate text-xs text-muted-foreground">{sb("block.linked")}: {block.resource}</p><div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground"><BuilderToggle compact label={block.required ? sb("block.required") : sb("block.optional")} checked={block.required} /><Badge variant="outline" className={cn("rounded-full text-[10px]", block.locked ? "border-slate-300 text-slate-500" : "border-emerald-300 text-emerald-600")}>{block.locked ? <Lock className="me-1 h-3 w-3" /> : <Unlock className="me-1 h-3 w-3" />}{block.locked ? sb("block.locked") : sb("block.unlocked")}</Badge><span className="flex items-center gap-1"><Clock className="h-3 w-3" />{block.duration} {sb("block.minutes")}</span></div></div><div className="flex items-center justify-end gap-1"><Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" title={sb("ui.edit")}><Edit3 className="h-3.5 w-3.5" /></Button><Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" title={sb("ui.duplicate")}><Copy className="h-3.5 w-3.5" /></Button><Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-destructive" title={sb("ui.delete")}><Trash2 className="h-3.5 w-3.5" /></Button></div></div>;
+}
+
+function BuilderAccess({ session, sb, updateSession, lockSession, unlockSession }: { session: TeacherSession; sb: SessionBuilderTranslator; updateSession: (sessionId: string, data: Partial<TeacherSession>) => void; lockSession: (sessionId: string) => void; unlockSession: (sessionId: string) => void }) {
+  const paid = session.price > 0 && !session.isFreePreview;
+  return <div className="grid gap-4 lg:grid-cols-2"><Card className="border bg-background p-4"><h4 className="mb-3 font-semibold">{sb("access.heading")}</h4><div className="grid gap-3"><BuilderToggle label={sb("ui.free")} checked={!paid} onCheckedChange={(checked) => updateSession(session.id, { price: checked ? 0 : Math.max(session.price, 25), isFreePreview: checked })} /><BuilderField label={sb("ui.price")}><Input type="number" value={session.price} onChange={(event) => updateSession(session.id, { price: Number(event.target.value) || 0 })} className="rounded-xl" /></BuilderField><BuilderToggle label={sb("access.previous")} checked={session.order > 1} /><BuilderToggle label={sb("access.payment")} checked={paid} /><BuilderToggle label={sb("access.replay")} checked /><BuilderToggle label={sb("ui.visible")} checked={session.accessStatus !== "locked"} onCheckedChange={(checked) => checked ? unlockSession(session.id) : lockSession(session.id)} /></div></Card><Card className="border bg-background p-4"><h4 className="mb-3 font-semibold">{sb("ui.availability")}</h4><div className="grid gap-3"><BuilderField label={sb("ui.openDate")}><Input type="datetime-local" value={session.openAt.slice(0, 16)} onChange={(event) => updateSession(session.id, { openAt: event.target.value })} className="rounded-xl" /></BuilderField><BuilderField label={sb("ui.closeDate")}><Input type="datetime-local" value={session.closeAt.slice(0, 16)} onChange={(event) => updateSession(session.id, { closeAt: event.target.value })} className="rounded-xl" /></BuilderField><div className="rounded-xl border bg-muted/30 p-3 text-xs text-muted-foreground">{paid ? sb("access.payment") : sb("ui.free")}</div></div></Card></div>;
+}
+
+function BuilderConcepts({ session, chapterName, treeNodes, blocks, sb }: { session: TeacherSession; chapterName?: string; treeNodes: ContentTreeNode[]; blocks: BuilderBlock[]; sb: SessionBuilderTranslator }) {
+  const concepts = treeNodes.filter((node) => node.type === "concept");
+  const atomics = treeNodes.filter((node) => node.type === "atomic_concept");
+  const coverage = Math.min(100, 48 + blocks.length * 4 + (session.conceptIds?.length || 0) * 8 + (session.atomicConceptIds?.length || 0) * 5);
+  return <div className="grid gap-4 lg:grid-cols-[220px_1fr]"><Card className="border bg-background p-4 text-center"><p className="text-4xl font-bold text-primary">{coverage}%</p><p className="mt-1 text-xs text-muted-foreground">{sb("concept.coverage")}</p><div className="mt-4 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary" style={{ width: `${coverage}%` }} /></div></Card><div className="grid gap-3"><BuilderConceptGroup title={sb("concept.main")} subtitle={chapterName || sb("ui.chapter")} concepts={concepts.slice(0, 6).map((node) => node.title)} /><BuilderConceptGroup title={sb("concept.atomic")} subtitle={sb("concept.heading")} concepts={atomics.slice(0, 8).map((node) => node.title)} /><BuilderConceptGroup title={sb("concept.cross")} subtitle={sb("concept.heading")} concepts={concepts.slice(6, 11).map((node) => node.title)} /></div></div>;
+}
+
+function BuilderConceptGroup({ title, subtitle, concepts }: { title: string; subtitle: string; concepts: string[] }) {
+  return <Card className="border bg-background p-4"><div className="mb-2 flex items-center justify-between gap-3"><h4 className="text-sm font-semibold">{title}</h4><span className="text-[11px] text-muted-foreground">{subtitle}</span></div><div className="flex flex-wrap gap-1.5">{concepts.map((concept) => <Badge key={concept} variant="outline" className="rounded-full text-[10px]">{concept}</Badge>)}</div></Card>;
+}
+
+function BuilderAssessments({ session, sb }: { session: TeacherSession; sb: SessionBuilderTranslator }) {
+  return <div className="grid gap-4 lg:grid-cols-2"><Card className="border bg-background p-4"><h4 className="mb-3 font-semibold">{sb("assessment.heading")}</h4><div className="space-y-3 text-sm"><BuilderInfo label={sb("assessment.completion")} value={sb("assessment.condition")} /><BuilderInfo label={sb("assessment.score")} value={`${session.hasExam ? 75 : 70}%`} /><BuilderInfo label={sb("assessment.retake")} value={sb("assessment.policy")} /><BuilderInfo label={sb("assessment.answers")} value={sb("assessment.approval")} /></div></Card><Card className="border bg-background p-4"><h4 className="mb-3 font-semibold">{sb("reward.heading")}</h4><div className="grid gap-3 sm:grid-cols-3"><BuilderReward icon={Zap} label={sb("reward.xp")} value={String(80 + session.order * 10)} /><BuilderReward icon={Trophy} label={sb("reward.badge")} value={sb("reward.badgeName")} /><BuilderReward icon={Sparkles} label={sb("reward.streak")} value={`+${session.order * 5}%`} /></div></Card></div>;
+}
+
+function BuilderAnalytics({ analytics, sb }: { analytics: ReturnType<typeof builderAnalytics>; sb: SessionBuilderTranslator }) {
+  return <div className="space-y-4"><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5"><BuilderMetric label={sb("analytics.enrolled")} value={analytics.enrolledStudents} /><BuilderMetric label={sb("analytics.completion")} value={`${analytics.completionRate}%`} /><BuilderMetric label={sb("analytics.watch")} value={`${analytics.averageWatchTime}m`} /><BuilderMetric label={sb("analytics.quiz")} value={`${analytics.quizAverage}%`} /><BuilderMetric label={sb("analytics.revenue")} value={`$${analytics.revenue.toLocaleString()}`} /></div><Card className="border bg-background p-4"><h4 className="mb-3 font-semibold">{sb("analytics.weak")}</h4><div className="grid gap-2 sm:grid-cols-3">{analytics.weakConcepts.map((concept) => <div key={concept.name} className="rounded-xl border bg-muted/20 p-3"><div className="mb-2 flex items-center justify-between text-xs"><span className="font-medium">{concept.name}</span><span className="text-destructive">{concept.score}%</span></div><div className="h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-destructive" style={{ width: `${concept.score}%` }} /></div></div>)}</div></Card></div>;
+}
+
+function BuilderPreview({ session, chapterName, blocks, stats, sb }: { session: TeacherSession; chapterName?: string; blocks: BuilderBlock[]; stats?: BuilderStats; sb: SessionBuilderTranslator }) {
+  const paid = session.price > 0 && !session.isFreePreview;
+  return <div><div className="border-b bg-gradient-to-br from-primary/15 via-background to-violet-500/10 p-4"><p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{sb("ui.preview")}</p><div className="grid aspect-video place-items-center rounded-xl border bg-background/80"><PlayCircle className="h-12 w-12 text-primary" /></div><h3 className="mt-4 text-lg font-bold">{session.title}</h3><p className="mt-1 text-xs text-muted-foreground">{chapterName}</p><div className="mt-3 flex flex-wrap gap-2"><Badge className="rounded-full border-0 bg-primary text-primary-foreground">{paid ? `${session.price} ${session.currency}` : sb("ui.free")}</Badge><Badge variant="outline" className="rounded-full">{session.durationMinutes || blocks.reduce((sum, block) => sum + block.duration, 0)} {sb("block.minutes")}</Badge></div></div><div className="space-y-4 p-4"><div><h4 className="mb-2 text-sm font-semibold">{sb("preview.included")}</h4><div className="space-y-2">{blocks.slice(0, 6).map((block) => { const meta = BUILDER_BLOCK_META[block.type]; return <div key={block.id} className="flex items-center gap-2 rounded-lg border bg-background px-3 py-2 text-xs"><meta.icon className={cn("h-3.5 w-3.5", meta.color.split(" ")[0])} /><span className="min-w-0 flex-1 truncate">{sb(block.titleKey)}</span>{block.required ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Eye className="h-3.5 w-3.5 text-muted-foreground" />}</div>; })}</div></div><Card className="border bg-muted/20 p-3"><h4 className="mb-2 text-sm font-semibold">{sb("preview.rules")}</h4><div className="grid gap-2 text-xs text-muted-foreground"><span>{sb("assessment.completion")}: {sb("assessment.condition")}</span><span>{sb("assessment.score")}: 70%</span><span>{sb("reward.heading")}: {80 + session.order * 10} {sb("reward.xp")}</span></div></Card><Button className="w-full rounded-xl gradient-brand border-0 text-white">{sb("preview.start")}</Button><div className="grid grid-cols-3 gap-2 text-center text-xs"><BuilderMini value={stats?.videoCount || 1} label={sb("block.video")} /><BuilderMini value={stats?.resourceCount || 2} label={sb("block.pdf")} /><BuilderMini value={stats?.assessmentCount || 2} label={sb("ui.assessments")} /></div></div></div>;
+}
+
+function BuilderField({ label, children }: { label: string; children: React.ReactNode }) {
+  return <label className="block space-y-1.5"><span className="text-xs font-medium text-muted-foreground">{label}</span>{children}</label>;
+}
+
+function BuilderToggle({ label, checked, compact = false, onCheckedChange }: { label: string; checked: boolean; compact?: boolean; onCheckedChange?: (checked: boolean) => void }) {
+  return <div className={cn("flex items-center justify-between gap-2", compact && "justify-start")}><span className={cn("text-xs", compact && "text-[11px]")}>{label}</span><Switch checked={checked} onCheckedChange={onCheckedChange || (() => undefined)} className={compact ? "scale-75" : undefined} /></div>;
+}
+
+function BuilderInfo({ label, value }: { label: string; value: string }) {
+  return <div className="flex items-start justify-between gap-3 rounded-xl border bg-muted/20 px-3 py-2"><span className="text-muted-foreground">{label}</span><span className="text-end font-medium">{value}</span></div>;
+}
+
+function BuilderReward({ icon: Icon, label, value }: { icon: typeof Trophy; label: string; value: string }) {
+  return <div className="rounded-xl border bg-muted/20 p-3 text-center"><Icon className="mx-auto mb-2 h-4 w-4 text-primary" /><p className="text-sm font-bold">{value}</p><p className="mt-1 text-[11px] text-muted-foreground">{label}</p></div>;
+}
+
+function BuilderMetric({ label, value }: { label: string; value: string | number }) {
+  return <Card className="border bg-background p-3"><p className="text-xl font-bold">{value}</p><p className="text-[11px] text-muted-foreground">{label}</p></Card>;
+}
+
+function BuilderMini({ value, label }: { value: string | number; label: string }) {
+  return <div className="rounded-lg border bg-muted/20 p-2"><p className="font-bold">{value}</p><p className="truncate text-[10px] text-muted-foreground">{label}</p></div>;
+}
+
+function buildBuilderBlocks(session: TeacherSession, sb: SessionBuilderTranslator, allMaterials: TeacherMaterial[], allQuestions: TeacherQuestion[], allQuizzes: { id: string; title: string; sessionIds?: string[] }[], allExams: { id: string; title: string; sessionIds?: string[] }[], allHomework: { id: string; title: string; sessionIds?: string[] }[], allAssessments: { id: string; title: string; sessionIds?: string[] }[]): BuilderBlock[] {
+  const materials = allMaterials.filter((material) => material.sessionId === session.id || material.linkedSessionIds?.includes(session.id));
+  const video = materials.find((material) => material.type === "video");
+  const pdf = materials.find((material) => material.type === "pdf") || materials.find((material) => material.type !== "video");
+  const practiceCount = allQuestions.filter((question) => question.sessionId === session.id || question.sessionIds?.includes(session.id)).length;
+  const quiz = allQuizzes.find((item) => item.sessionIds?.includes(session.id));
+  const exam = allExams.find((item) => item.sessionIds?.includes(session.id));
+  const homework = allHomework.find((item) => item.sessionIds?.includes(session.id));
+  const assessment = allAssessments.find((item) => item.sessionIds?.includes(session.id));
+  const durations = [35, 12, 18, 10, 25, 40, 6, 4, 8];
+  return (Object.keys(BUILDER_BLOCK_META) as BuilderBlockType[]).map((type, index) => {
+    const meta = BUILDER_BLOCK_META[type];
+    const resource = type === "video" && video ? video.title : type === "pdf" && pdf ? pdf.title : type === "practice" && practiceCount > 0 ? `${practiceCount} ${sb("block.practice")}` : type === "quiz" && quiz ? quiz.title : type === "homework" && homework ? homework.title : type === "exam" && exam ? exam.title : type === "quiz" && assessment ? assessment.title : sb(meta.resourceKey);
+    return { id: `${session.id}-${type}`, type, titleKey: meta.labelKey, resource, required: index < 6, locked: session.accessStatus === "locked" && index > 1, duration: durations[index] };
+  });
+}
+
+function builderAnalytics(session: TeacherSession, index: number) {
+  return { enrolledStudents: 118 + index * 43, completionRate: builderCompletion(session, index), averageWatchTime: 34 + index * 3, quizAverage: 71 + (index % 5) * 4, revenue: session.price * (82 + index * 19), weakConcepts: [{ name: "Chain Rule", score: 42 + index }, { name: "Implicit Differentiation", score: 36 + index * 2 }, { name: "Limit Laws", score: 48 + index }] };
+}
+
+function builderTypeLabel(session: TeacherSession) {
+  return (SESSION_TYPE_META[session.sessionType as SessionWorkspaceType] || SESSION_TYPE_META.lesson).label;
+}
+
+function builderTypeColor(session: TeacherSession) {
+  return (SESSION_TYPE_META[session.sessionType as SessionWorkspaceType] || SESSION_TYPE_META.lesson).color;
+}
+
+function builderCompletion(session: TeacherSession, index: number) {
+  if (session.status === "draft") return 38 + (index % 4) * 7;
+  if (session.status === "archived") return 52;
+  return Math.min(96, 68 + (index % 6) * 5);
+}
+
+function SessionsTab({ courseId }: { courseId: string }) {
+  const rawSessions = useTeacherSessionStore((s) => s.sessions);
+  const createSession = useTeacherSessionStore((s) => s.createSession);
+  const deleteSession = useTeacherSessionStore((s) => s.deleteSession);
+  const publishSession = useTeacherSessionStore((s) => s.publishSession);
+  const archiveSession = useTeacherSessionStore((s) => s.archiveSession);
+  const lockSession = useTeacherSessionStore((s) => s.lockSession);
+  const unlockSession = useTeacherSessionStore((s) => s.unlockSession);
+  const updateSession = useTeacherSessionStore((s) => s.updateSession);
+  const duplicateSession = useTeacherSessionStore((s) => s.createSession);
+  const rawChapters = useTeacherChapterStore((s) => s.chapters);
+  const allMaterials = useTeacherMaterialStore((s) => s.materials);
+  const allQuestions = useTeacherQuestionStore((s) => s.questions);
+  const allQuizzes = useTeacherQuizStore((s) => s.quizzes);
+  const allExams = useTeacherExamStore((s) => s.exams);
+  const allHomework = useTeacherHomeworkStore((s) => s.items);
+  const allAssessments = useTeacherAssessmentStore((s) => s.assessments);
   const allTreeNodes = useContentTreeStore((s) => s.nodes);
 
   const allSessions = useMemo(() => rawSessions.filter((ses) => ses.courseId === courseId).sort((a, b) => a.order - b.order), [rawSessions, courseId]);
@@ -429,6 +837,7 @@ function SessionsTab({ courseId }: { courseId: string }) {
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [page, setPage] = useState(1);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [title, setTitle] = useState("");
   const [chapterId, setChapterId] = useState(() => {
@@ -440,36 +849,61 @@ function SessionsTab({ courseId }: { courseId: string }) {
 
   const filterOptions = useMemo<FilterOption[]>(() => [
     { key: "chapter", label: "Chapter", options: chapters.map((c) => ({ value: c.id, label: c.title })) },
+    { key: "sessionType", label: "Type", options: [{ value: "lesson", label: "Lesson" }, { value: "revision", label: "Revision" }, { value: "practice", label: "Practice" }, { value: "mixed", label: "Mixed" }, { value: "quiz", label: "Quiz" }, { value: "exam", label: "Exam" }, { value: "homework", label: "Homework" }] },
     { key: "status", label: "Status", options: [{ value: "draft", label: "Draft" }, { value: "published", label: "Published" }, { value: "archived", label: "Archived" }] },
-    { key: "access", label: "Access", options: [{ value: "locked", label: "Locked" }, { value: "unlocked", label: "Unlocked" }] },
+    { key: "pricing", label: "Pricing", options: [{ value: "free", label: "Free" }, { value: "paid", label: "Paid" }] },
+    { key: "content", label: "Content", options: [{ value: "has_video", label: "Has Video" }, { value: "has_assessment", label: "Has Assessment" }, { value: "has_quiz", label: "Has Quiz" }, { value: "has_homework", label: "Has Homework" }] },
   ], [chapters]);
+
+  type SesStats = { materialsCount: number; videoCount: number; resourceCount: number; questionsCount: number; quizzesCount: number; examsCount: number; homeworkCount: number; assessmentCount: number };
+
+  const sessionStatsMap = useMemo(() => {
+    const map = new Map<string, SesStats>();
+    for (const s of allSessions) {
+      const mats = allMaterials.filter((m) => m.sessionId === s.id || m.linkedSessionIds?.includes(s.id));
+      const qs = allQuizzes.filter((q) => q.sessionIds?.includes(s.id));
+      const es = allExams.filter((e) => e.sessionIds?.includes(s.id));
+      const hs = allHomework.filter((h) => h.sessionIds?.includes(s.id));
+      const asmts = allAssessments.filter((a) => a.sessionIds?.includes(s.id));
+      map.set(s.id, {
+        materialsCount: mats.length,
+        videoCount: mats.filter((m) => m.type === "video").length,
+        resourceCount: mats.filter((m) => m.type !== "video").length,
+        questionsCount: allQuestions.filter((q) => q.sessionId === s.id || q.sessionIds?.includes(s.id)).length,
+        quizzesCount: qs.length,
+        examsCount: es.length,
+        homeworkCount: hs.length,
+        assessmentCount: asmts.length + qs.length + es.length + hs.length,
+      });
+    }
+    return map;
+  }, [allSessions, allMaterials, allQuestions, allQuizzes, allExams, allHomework, allAssessments]);
 
   const filtered = useMemo(() => {
     let r = [...allSessions];
     if (search) { const q = search.toLowerCase(); r = r.filter((s) => s.title.toLowerCase().includes(q) || s.publicCode.includes(q)); }
     if (filters.chapter) r = r.filter((s) => s.chapterId === filters.chapter);
+    if (filters.sessionType) r = r.filter((s) => s.sessionType === filters.sessionType);
     if (filters.status) r = r.filter((s) => s.status === filters.status);
-    if (filters.access) r = r.filter((s) => s.accessStatus === filters.access);
+    if (filters.pricing === "free") r = r.filter((s) => s.price === 0 || s.isFreePreview);
+    if (filters.pricing === "paid") r = r.filter((s) => s.price > 0 && !s.isFreePreview);
+    if (filters.content) {
+      r = r.filter((s) => {
+        const st = sessionStatsMap.get(s.id);
+        if (!st) return false;
+        if (filters.content === "has_video") return st.videoCount > 0;
+        if (filters.content === "has_assessment") return st.assessmentCount > 0;
+        if (filters.content === "has_quiz") return st.quizzesCount > 0;
+        if (filters.content === "has_homework") return st.homeworkCount > 0;
+        return true;
+      });
+    }
     return r;
-  }, [allSessions, search, filters]);
+  }, [allSessions, search, filters, sessionStatsMap]);
 
   const total = filtered.length;
   const paginated = filtered.slice((page - 1) * 10, page * 10);
   const chapterMap = useMemo(() => new Map(chapters.map((c) => [c.id, c.title])), [chapters]);
-
-  const sessionStatsMap = useMemo(() => {
-    const map = new Map<string, SessionStats>();
-    for (const s of paginated) {
-      map.set(s.id, {
-        materialsCount: allMaterials.filter((m) => m.sessionId === s.id || m.linkedSessionIds?.includes(s.id)).length,
-        questionsCount: allQuestions.filter((q) => q.sessionId === s.id || q.sessionIds?.includes(s.id)).length,
-        quizzesCount: allQuizzes.filter((q) => q.sessionIds?.includes(s.id)).length,
-        examsCount: allExams.filter((e) => e.sessionIds?.includes(s.id)).length,
-        homeworkCount: allHomework.filter((h) => h.sessionIds?.includes(s.id)).length,
-      });
-    }
-    return map;
-  }, [paginated, allMaterials, allQuestions, allQuizzes, allExams, allHomework]);
 
   const handleCreate = () => {
     if (!title.trim() || !chapterId) return;
@@ -479,24 +913,33 @@ function SessionsTab({ courseId }: { courseId: string }) {
   };
 
   const handleDuplicate = (s: typeof allSessions[0]) => {
-    createSession({ courseId, chapterId: s.chapterId, title: `${s.title} (Copy)`, description: s.description, price: s.price, currency: s.currency, sessionType: s.sessionType, isFreePreview: s.isFreePreview });
+    duplicateSession({ courseId, chapterId: s.chapterId, title: `${s.title} (Copy)`, description: s.description, price: s.price, currency: s.currency, sessionType: s.sessionType, isFreePreview: s.isFreePreview });
   };
 
   const published = allSessions.filter((s) => s.status === "published").length;
   const draft = allSessions.filter((s) => s.status === "draft").length;
+  const paid = allSessions.filter((s) => s.price > 0 && !s.isFreePreview).length;
+  const free = allSessions.length - paid;
+  const totalVideos = [...sessionStatsMap.values()].reduce((a, s) => a + s.videoCount, 0);
+  const totalAssessments = [...sessionStatsMap.values()].reduce((a, s) => a + s.assessmentCount, 0);
 
   return (
     <div className="space-y-5">
-      <div className="grid gap-3 sm:grid-cols-4">
+      {/* Stats */}
+      <div className="flex flex-wrap gap-3">
         {[
-          { label: "Total", value: allSessions.length, icon: Layers, cls: "text-blue-500", bg: "from-blue-500/10 to-blue-600/5" },
-          { label: "Published", value: published, icon: Eye, cls: "text-emerald-500", bg: "from-emerald-500/10 to-emerald-600/5" },
-          { label: "Drafts", value: draft, icon: Clock, cls: "text-amber-500", bg: "from-amber-500/10 to-amber-600/5" },
-          { label: "Revenue", value: `$${allSessions.reduce((a, s) => a + s.price, 0)}`, icon: DollarSign, cls: "text-primary", bg: "from-primary/10 to-primary/5" },
+          { label: "Total", value: allSessions.length, icon: Layers, cls: "text-blue-500" },
+          { label: "Published", value: published, icon: Eye, cls: "text-emerald-500" },
+          { label: "Drafts", value: draft, icon: Clock, cls: "text-amber-500" },
+          { label: "Paid", value: paid, icon: DollarSign, cls: "text-primary" },
+          { label: "Free", value: free, icon: Gift, cls: "text-green-500" },
+          { label: "Videos", value: totalVideos, icon: Video, cls: "text-blue-400" },
+          { label: "Assessments", value: totalAssessments, icon: ClipboardList, cls: "text-cyan-500" },
         ].map((s) => (
-          <Card key={s.label} className={cn("flex items-center gap-3 border bg-gradient-to-br p-3", s.bg)}>
-            <s.icon className={cn("h-5 w-5 shrink-0", s.cls)} />
-            <div><p className="text-lg font-bold">{s.value}</p><p className="text-[11px] text-muted-foreground">{s.label}</p></div>
+          <Card key={s.label} className="flex items-center gap-2 border bg-card px-3 py-2">
+            <s.icon className={cn("h-4 w-4 shrink-0", s.cls)} />
+            <span className="text-sm font-bold">{s.value}</span>
+            <span className="text-xs text-muted-foreground">{s.label}</span>
           </Card>
         ))}
       </div>
@@ -540,23 +983,226 @@ function SessionsTab({ courseId }: { courseId: string }) {
       )}
 
       {total === 0 ? (
-        <Card className="flex flex-col items-center gap-4 border bg-card p-12 text-center">
-          <PlayCircle className="h-12 w-12 text-muted-foreground" />
-          <h2 className="text-lg font-semibold">{allSessions.length === 0 ? "No sessions yet" : "No sessions match"}</h2>
-          <p className="text-sm text-muted-foreground">{chapters.length === 0 ? "Create chapters first." : "Add sessions to start."}</p>
+        <Card className="flex flex-col items-center gap-5 border bg-card p-16 text-center">
+          <div className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-primary/10 to-violet-500/10">
+            <Sparkles className="h-8 w-8 text-primary" />
+          </div>
+          <h2 className="text-lg font-semibold">{allSessions.length === 0 ? "Build your first learning experience" : "No sessions match your filters"}</h2>
+          <p className="text-sm text-muted-foreground max-w-md">
+            {allSessions.length === 0
+              ? "Sessions combine videos, resources, assessments, rules and rewards into what students actually learn."
+              : "Try adjusting your filters or search to find sessions."}
+          </p>
+          {allSessions.length === 0 && (
+            <Button onClick={() => setShowCreate(true)} className="rounded-xl gradient-brand border-0 text-white" size="sm">
+              <Plus className="me-1.5 h-4 w-4" />Create Session
+            </Button>
+          )}
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {paginated.map((session) => (
-            <PremiumSessionCard key={session.id} session={session} courseId={courseId} chapterName={chapterMap.get(session.chapterId)}
-              stats={sessionStatsMap.get(session.id) || { materialsCount: 0, questionsCount: 0, quizzesCount: 0, examsCount: 0, homeworkCount: 0 }}
-              onPublish={() => publishSession(session.id)} onArchive={() => archiveSession(session.id)}
-              onDuplicate={() => handleDuplicate(session)} onDelete={() => deleteSession(session.id)}
-              onToggleLock={() => session.accessStatus === "locked" ? unlockSession(session.id) : lockSession(session.id)} />
-          ))}
+        <div className="space-y-2">
+          {paginated.map((session) => {
+            const isOpen = expandedId === session.id;
+            const st = sessionStatsMap.get(session.id);
+            const typeMeta = SESSION_TYPE_META[session.sessionType as SessionWorkspaceType] || SESSION_TYPE_META.lesson;
+            const isFree = session.price === 0 || session.isFreePreview;
+            const blocksCount = (st?.videoCount || 0) + (st?.resourceCount || 0) + (st?.assessmentCount || 0);
+
+            return (
+              <Card key={session.id} className={cn("border bg-card overflow-hidden transition-colors", isOpen && "border-primary/20")}>
+                {/* Collapsed card header */}
+                <div className="flex items-start gap-3 px-5 py-4">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge className={cn("rounded-full text-[10px] border-0 px-1.5 py-0", typeMeta.color)}>{typeMeta.label}</Badge>
+                      <span className="text-[10px] font-mono text-muted-foreground">{session.publicCode}</span>
+                    </div>
+                    <p className="text-sm font-semibold line-clamp-1">{session.title}</p>
+                    <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                      {chapterMap.get(session.chapterId) && <span>{chapterMap.get(session.chapterId)}</span>}
+                      <span className="flex items-center gap-1"><Video className="h-3 w-3" />{st?.videoCount || 0}</span>
+                      <span className="flex items-center gap-1"><ClipboardList className="h-3 w-3" />{st?.assessmentCount || 0}</span>
+                      <span className="flex items-center gap-1"><FileText className="h-3 w-3" />{st?.resourceCount || 0}</span>
+                      {blocksCount > 0 && <span>{blocksCount} blocks</span>}
+                      {isFree ? <span className="text-green-600 font-medium">Free</span> : <span className="font-medium">${session.price} {session.currency}</span>}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Badge variant="outline" className={cn("rounded-full text-[10px] px-2 py-0", session.status === "published" ? "border-emerald-300 text-emerald-600" : session.status === "archived" ? "border-slate-300 text-slate-500" : "border-amber-300 text-amber-600")}>{session.status}</Badge>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" title={isOpen ? "Collapse" : "Preview"} onClick={() => setExpandedId(isOpen ? null : session.id)}>
+                      {isOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                    </Button>
+                    <Button asChild variant="ghost" size="sm" className="h-7 rounded-lg text-[11px] px-2">
+                      <Link to="/teacher/courses/$courseId/sessions/$sessionId" params={{ courseId, sessionId: session.id }}>
+                        <Edit3 className="me-1 h-3 w-3" />Edit
+                      </Link>
+                    </Button>
+                    {session.status === "draft" && <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => publishSession(session.id)} title="Publish"><Upload className="h-3.5 w-3.5 text-emerald-600" /></Button>}
+                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => handleDuplicate(session)} title="Duplicate"><Copy className="h-3.5 w-3.5" /></Button>
+                    {session.status !== "archived" && <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => archiveSession(session.id)} title="Archive"><EyeOff className="h-3.5 w-3.5 text-amber-500" /></Button>}
+                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-destructive" onClick={() => deleteSession(session.id)} title="Delete"><Trash2 className="h-3.5 w-3.5" /></Button>
+                  </div>
+                </div>
+
+                {/* Expanded preview */}
+                <div className={cn("grid transition-all duration-300 ease-in-out", isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]")}>
+                  <div className="overflow-hidden">
+                    <div className="border-t px-5 py-4 space-y-4">
+                      <SessionExpandedPreview session={session} stats={st} chapterName={chapterMap.get(session.chapterId)} allMaterials={allMaterials} allQuizzes={allQuizzes} allExams={allExams} allHomework={allHomework} allAssessments={allAssessments} />
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
         </div>
       )}
       <Pagination page={page} pageSize={10} total={total} onPageChange={setPage} />
+    </div>
+  );
+}
+
+function SessionExpandedPreview({ session, stats, chapterName, allMaterials, allQuizzes, allExams, allHomework, allAssessments }: {
+  session: { id: string; title: string; description: string; sessionType: string; price: number; currency: string; isFreePreview: boolean; accessStatus: string; openAt: string; closeAt: string; durationMinutes: number; createdAt: string; updatedAt: string };
+  stats?: { materialsCount: number; videoCount: number; resourceCount: number; questionsCount: number; quizzesCount: number; examsCount: number; homeworkCount: number; assessmentCount: number };
+  chapterName?: string;
+  allMaterials: { id: string; title: string; type: string; sessionId?: string; linkedSessionIds?: string[]; videoDuration?: string; fileSize?: string }[];
+  allQuizzes: { id: string; title: string; questionIds: string[]; durationMinutes: number; sessionIds?: string[] }[];
+  allExams: { id: string; title: string; questionIds: string[]; durationMinutes: number; sessionIds?: string[] }[];
+  allHomework: { id: string; title: string; homeworkType: string; sessionIds?: string[] }[];
+  allAssessments: { id: string; title: string; assessmentType: string; sessionIds?: string[] }[];
+}) {
+  const mats = allMaterials.filter((m) => m.sessionId === session.id || m.linkedSessionIds?.includes(session.id));
+  const videos = mats.filter((m) => m.type === "video");
+  const resources = mats.filter((m) => m.type !== "video");
+  const quizzes = allQuizzes.filter((q) => q.sessionIds?.includes(session.id));
+  const exams = allExams.filter((e) => e.sessionIds?.includes(session.id));
+  const homework = allHomework.filter((h) => h.sessionIds?.includes(session.id));
+  const assessments = allAssessments.filter((a) => a.sessionIds?.includes(session.id));
+
+  const isFree = session.price === 0 || session.isFreePreview;
+  const typeMeta = SESSION_TYPE_META[session.sessionType as SessionWorkspaceType] || SESSION_TYPE_META.lesson;
+
+  const SectionHead = ({ children }: { children: React.ReactNode }) => (
+    <h4 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{children}</h4>
+  );
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-2">
+      {/* Left */}
+      <div className="space-y-4">
+        {/* Description */}
+        <div>
+          <SectionHead>Description</SectionHead>
+          <p className="text-xs text-muted-foreground">{session.description || "No description yet"}</p>
+        </div>
+
+        {/* Video Playlist */}
+        <div>
+          <SectionHead>Video Playlist ({videos.length})</SectionHead>
+          {videos.length > 0 ? (
+            <div className="space-y-1">
+              {videos.map((v) => (
+                <div key={v.id} className="flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs">
+                  <Video className="h-3 w-3 text-blue-500 shrink-0" />
+                  <span className="truncate flex-1">{v.title}</span>
+                  {v.videoDuration && <span className="text-muted-foreground shrink-0">{v.videoDuration}</span>}
+                </div>
+              ))}
+            </div>
+          ) : <p className="text-xs text-muted-foreground italic">No videos linked</p>}
+        </div>
+
+        {/* Resources */}
+        <div>
+          <SectionHead>Resources ({resources.length})</SectionHead>
+          {resources.length > 0 ? (
+            <div className="space-y-1">
+              {resources.map((r) => (
+                <div key={r.id} className="flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs">
+                  <FileText className="h-3 w-3 text-rose-500 shrink-0" />
+                  <span className="truncate flex-1">{r.title}</span>
+                  {r.fileSize && <span className="text-muted-foreground shrink-0">{r.fileSize}</span>}
+                </div>
+              ))}
+            </div>
+          ) : <p className="text-xs text-muted-foreground italic">No resources linked</p>}
+        </div>
+
+        {/* Assessments */}
+        <div>
+          <SectionHead>Assessments ({quizzes.length + exams.length + homework.length + assessments.length})</SectionHead>
+          {(quizzes.length + exams.length + homework.length + assessments.length) > 0 ? (
+            <div className="space-y-1">
+              {quizzes.map((q) => (
+                <div key={q.id} className="flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs">
+                  <ClipboardList className="h-3 w-3 text-cyan-500 shrink-0" />
+                  <span className="truncate flex-1">{q.title}</span>
+                  <span className="text-muted-foreground shrink-0">{q.questionIds.length}Q · {q.durationMinutes}m</span>
+                </div>
+              ))}
+              {exams.map((e) => (
+                <div key={e.id} className="flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs">
+                  <ScrollText className="h-3 w-3 text-rose-500 shrink-0" />
+                  <span className="truncate flex-1">{e.title}</span>
+                  <span className="text-muted-foreground shrink-0">{e.questionIds.length}Q · {e.durationMinutes}m</span>
+                </div>
+              ))}
+              {homework.map((h) => (
+                <div key={h.id} className="flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs">
+                  <Pencil className="h-3 w-3 text-orange-500 shrink-0" />
+                  <span className="truncate flex-1">{h.title}</span>
+                  <Badge variant="outline" className="text-[9px] px-1 py-0 rounded shrink-0">{h.homeworkType}</Badge>
+                </div>
+              ))}
+              {assessments.map((a) => (
+                <div key={a.id} className="flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs">
+                  <Target className="h-3 w-3 text-violet-500 shrink-0" />
+                  <span className="truncate flex-1">{a.title}</span>
+                  <Badge variant="outline" className="text-[9px] px-1 py-0 rounded shrink-0">{a.assessmentType.replace(/_/g, " ")}</Badge>
+                </div>
+              ))}
+            </div>
+          ) : <p className="text-xs text-muted-foreground italic">No assessments linked</p>}
+        </div>
+      </div>
+
+      {/* Right */}
+      <div className="space-y-4">
+        {/* Access & Pricing */}
+        <div>
+          <SectionHead>Access & Pricing</SectionHead>
+          <div className="space-y-1 text-xs">
+            <div className="flex items-baseline gap-2"><span className="text-muted-foreground w-24 shrink-0">Access Model</span><span className="font-medium">{isFree ? "Free" : "Paid"}{session.isFreePreview ? " (Free Preview)" : ""}</span></div>
+            {!isFree && <div className="flex items-baseline gap-2"><span className="text-muted-foreground w-24 shrink-0">Price</span><span className="font-medium">${session.price} {session.currency}</span></div>}
+            <div className="flex items-baseline gap-2"><span className="text-muted-foreground w-24 shrink-0">Lock Status</span><span className="font-medium">{session.accessStatus}</span></div>
+            {session.durationMinutes > 0 && <div className="flex items-baseline gap-2"><span className="text-muted-foreground w-24 shrink-0">Duration</span><span className="font-medium">{session.durationMinutes} min</span></div>}
+          </div>
+        </div>
+
+        {/* Schedule */}
+        {(session.openAt || session.closeAt) && (
+          <div>
+            <SectionHead>Schedule</SectionHead>
+            <div className="space-y-1 text-xs">
+              {session.openAt && <div className="flex items-baseline gap-2"><span className="text-muted-foreground w-24 shrink-0">Opens</span><span className="font-medium">{new Date(session.openAt).toLocaleString()}</span></div>}
+              {session.closeAt && <div className="flex items-baseline gap-2"><span className="text-muted-foreground w-24 shrink-0">Closes</span><span className="font-medium">{new Date(session.closeAt).toLocaleString()}</span></div>}
+            </div>
+          </div>
+        )}
+
+        {/* Metadata */}
+        <div>
+          <SectionHead>Metadata</SectionHead>
+          <div className="space-y-1 text-xs">
+            <div className="flex items-baseline gap-2"><span className="text-muted-foreground w-24 shrink-0">Type</span><Badge className={cn("rounded-full text-[10px] border-0 px-1.5 py-0", typeMeta.color)}>{typeMeta.label}</Badge></div>
+            <div className="flex items-baseline gap-2"><span className="text-muted-foreground w-24 shrink-0">Chapter</span><span className="font-medium">{chapterName || "—"}</span></div>
+            <div className="flex items-baseline gap-2"><span className="text-muted-foreground w-24 shrink-0">Questions</span><span className="font-medium">{stats?.questionsCount || 0}</span></div>
+            <div className="flex items-baseline gap-2"><span className="text-muted-foreground w-24 shrink-0">Created</span><span className="font-medium">{new Date(session.createdAt).toLocaleString()}</span></div>
+            {session.updatedAt !== session.createdAt && <div className="flex items-baseline gap-2"><span className="text-muted-foreground w-24 shrink-0">Updated</span><span className="font-medium">{new Date(session.updatedAt).toLocaleString()}</span></div>}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

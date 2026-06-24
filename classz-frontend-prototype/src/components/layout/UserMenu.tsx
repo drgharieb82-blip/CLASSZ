@@ -30,7 +30,7 @@ export function UserMenu({ role }: { role: Role }) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex items-center gap-2 rounded-xl border bg-card p-1.5 pr-2.5 text-sm transition-colors hover:bg-accent">
+      <DropdownMenuTrigger className="flex items-center gap-2 rounded-xl border bg-card p-1.5 pe-2.5 text-sm transition-colors hover:bg-accent">
         <Avatar className="h-7 w-7">
           <AvatarFallback className="gradient-brand text-xs font-bold text-white">{initials}</AvatarFallback>
         </Avatar>
