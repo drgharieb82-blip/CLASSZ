@@ -1,4 +1,42 @@
-‣祐桴湯弊灟捹捡敨彟ਯ⸪祰捛摯੝瀮瑹獥彴慣档⽥⸊畲晦损捡敨ਯ洮灹役慣档⽥⸊敶癮ਯ敶癮ਯ⌊丠摯੥潮敤浟摯汵獥ਯ楤瑳ਯ瘮瑩⽥⨊琮扳極摬湩潦ਊ‣獕牥甭汰慯敤⁤楦敬⁳氨捯污搠獩⁫瑳牯条⥥愠摮䐠⁂慢正灵⁳‭敮敶⁲潣浭瑩整੤慢正湥⽤灵潬摡⽳戊捡敫摮搯形慢正灵⽳ਊ‣湅楶潲浮湥ੴ攮癮⸊湥⹶ਪ⸡湥⹶硥浡汰੥⌊䔠楤潴獲愠摮传੓䐮当瑓牯੥桔浵獢搮੢classz-frontend-prototype/.qa-chrome-profile/
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# Node
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+
+# User-uploaded files and backups
+backend/uploads/
+backend/db_backups/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Editors and OS
+.DS_Store
+Thumbs.db
+
+# Local browser profiles
+classz-frontend-prototype/.qa-chrome-profile/
+
 # Local verification artifacts
 image/
 verification-screenshots/
+
+# Playwright
+playwright-report/
+test-results/
+
+# IDE
+.vscode/
+.idea/
