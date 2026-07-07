@@ -3,21 +3,21 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.modules.lessons.schemas import LessonDetails
+from app.modules.atomic_concepts.schemas import AtomicConceptRead
 
 
-class ChapterBase(BaseModel):
-    course_id: UUID
+class ConceptBase(BaseModel):
+    lesson_id: UUID
     title: str = Field(min_length=1, max_length=200)
     position: int = Field(ge=0)
 
 
-class ChapterCreate(BaseModel):
-    course_id: UUID
+class ConceptCreate(BaseModel):
+    lesson_id: UUID
     title: str = Field(min_length=1, max_length=200)
 
 
-class ChapterRead(ChapterBase):
+class ConceptRead(ConceptBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID
@@ -25,5 +25,5 @@ class ChapterRead(ChapterBase):
     created_at: datetime
 
 
-class ChapterDetails(ChapterRead):
-    lessons: list[LessonDetails] = Field(default_factory=list)
+class ConceptDetails(ConceptRead):
+    atomic_concepts: list[AtomicConceptRead] = Field(default_factory=list)

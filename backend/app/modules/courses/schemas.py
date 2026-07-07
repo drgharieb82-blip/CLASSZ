@@ -4,6 +4,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
 from app.modules.chapters.schemas import ChapterDetails
+from app.modules.sessions.schemas import SessionRead
 
 
 class CourseBase(BaseModel):
@@ -25,6 +26,7 @@ class CourseRead(CourseBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID
+    public_code: str
     thumbnail_url: str | None = None
     created_at: datetime
     updated_at: datetime
@@ -32,3 +34,4 @@ class CourseRead(CourseBase):
 
 class CourseDetails(CourseRead):
     chapters: list[ChapterDetails] = Field(default_factory=list)
+    sessions: list[SessionRead] = Field(default_factory=list)

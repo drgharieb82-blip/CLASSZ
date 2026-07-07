@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db_session
@@ -11,8 +11,17 @@ router = APIRouter(prefix="/courses", tags=["courses"])
 
 
 @router.get("", response_model=list[CourseRead])
-async def list_courses(session: AsyncSession = Depends(get_db_session)) -> list[CourseRead]:
-    return await service.list_courses(session)
+async def list_courses(
+    teacher_id: str | None = Query(default=None),
+    session: AsyncSession = Depends(get_db_session),
+) -> list[CourseRead]:
+    parsed_id: UUID | None = None
+    if teacher_id:
+        try:
+            parsed_id = UUID(teacher_id)
+        except ValueError:
+            return []
+    return await service.list_courses(session, teacher_id=parsed_id)
 
 
 @router.get("/{course_id}", response_model=CourseDetails)

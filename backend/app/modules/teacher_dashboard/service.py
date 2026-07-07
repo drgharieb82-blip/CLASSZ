@@ -5,11 +5,10 @@ from sqlalchemy.orm import selectinload
 from app.db import migrations  # noqa: F401
 from app.models import Role, User
 from app.modules.assignments.models import Assignment, AssignmentSubmission
-from app.modules.chapters.models import Chapter
 from app.modules.courses.models import Course
 from app.modules.grading import service as grading_service
 from app.modules.grading.models import ManualGrade
-from app.modules.lessons.models import Lesson
+from app.modules.sessions.models import Session
 from app.modules.quizzes.models import Quiz
 from app.modules.teacher_dashboard.schemas import (
     TeacherActivityItem,
@@ -26,7 +25,7 @@ async def get_summary(session: AsyncSession) -> TeacherDashboardSummary:
 
     return TeacherDashboardSummary(
         total_courses=await _count(session, Course),
-        total_lessons=await _count(session, Lesson),
+        total_sessions=await _count(session, Session),
         total_students=await _count_students(session),
         pending_grading_count=len(pending_tasks),
         assignments_count=await _count(session, Assignment),
@@ -100,7 +99,7 @@ async def _recent_assignments(session: AsyncSession) -> list[TeacherActivityItem
 async def _course_overview(session: AsyncSession) -> list[TeacherCourseOverviewItem]:
     result = await session.execute(
         select(Course)
-        .options(selectinload(Course.chapters).selectinload(Chapter.lessons))
+        .options(selectinload(Course.sessions))
         .order_by(Course.updated_at.desc())
         .limit(6)
     )
@@ -108,7 +107,7 @@ async def _course_overview(session: AsyncSession) -> list[TeacherCourseOverviewI
     overview: list[TeacherCourseOverviewItem] = []
 
     for course in courses:
-        lessons_count = sum(len(chapter.lessons) for chapter in course.chapters)
+        sessions_count = len(course.sessions)
         quizzes_count = await _course_count(session, Quiz, course.id)
         assignments_count = await _course_count(session, Assignment, course.id)
         overview.append(
@@ -118,7 +117,7 @@ async def _course_overview(session: AsyncSession) -> list[TeacherCourseOverviewI
                 subject=course.subject,
                 grade=course.grade,
                 is_published=course.is_published,
-                lessons_count=lessons_count,
+                sessions_count=sessions_count,
                 quizzes_count=quizzes_count,
                 assignments_count=assignments_count,
             )

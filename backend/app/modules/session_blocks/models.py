@@ -18,14 +18,14 @@ class BlockType(str, enum.Enum):
     ATTACHMENT = "ATTACHMENT"
 
 
-class LessonBlock(Base):
-    __tablename__ = "lesson_blocks"
-    __table_args__ = (UniqueConstraint("lesson_id", "position", name="uq_lesson_blocks_lesson_position"),)
+class SessionBlock(Base):
+    __tablename__ = "session_blocks"
+    __table_args__ = (UniqueConstraint("session_id", "position", name="uq_session_blocks_session_position"),)
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    lesson_id: Mapped[uuid.UUID] = mapped_column(
+    session_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("lessons.id", ondelete="CASCADE"),
+        ForeignKey("sessions.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -45,10 +45,10 @@ class LessonBlock(Base):
         nullable=False,
     )
 
-    lesson: Mapped["Lesson"] = relationship("Lesson", back_populates="blocks")
+    session: Mapped["Session"] = relationship("Session", back_populates="blocks")
     video: Mapped["Video | None"] = relationship(
         "Video",
-        back_populates="lesson_block",
+        back_populates="session_block",
         cascade="all, delete-orphan",
         uselist=False,
     )

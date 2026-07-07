@@ -26,7 +26,6 @@ def upgrade() -> None:
         "parent",
         name="role_enum",
     )
-    role_enum.create(op.get_bind(), checkfirst=True)
 
     op.create_table(
         "users",

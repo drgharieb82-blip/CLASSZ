@@ -6,47 +6,47 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db_session
 from app.modules.progress import service
 from app.modules.progress.schemas import (
-    LessonProgressComplete,
-    LessonProgressRead,
-    LessonProgressStart,
-    LessonProgressUpdate,
+    SessionProgressComplete,
+    SessionProgressRead,
+    SessionProgressStart,
+    SessionProgressUpdate,
 )
 
 router = APIRouter(prefix="/progress", tags=["progress"])
 
 
-@router.post("/start", response_model=LessonProgressRead, status_code=status.HTTP_201_CREATED)
+@router.post("/start", response_model=SessionProgressRead, status_code=status.HTTP_201_CREATED)
 async def start_progress(
-    payload: LessonProgressStart,
+    payload: SessionProgressStart,
     session: AsyncSession = Depends(get_db_session),
-) -> LessonProgressRead:
-    return await service.start_lesson_progress(session, payload)
+) -> SessionProgressRead:
+    return await service.start_session_progress(session, payload)
 
 
-@router.post("/update", response_model=LessonProgressRead)
+@router.post("/update", response_model=SessionProgressRead)
 async def update_progress(
-    payload: LessonProgressUpdate,
+    payload: SessionProgressUpdate,
     session: AsyncSession = Depends(get_db_session),
-) -> LessonProgressRead:
-    return await service.update_lesson_progress(session, payload)
+) -> SessionProgressRead:
+    return await service.update_session_progress(session, payload)
 
 
-@router.post("/complete", response_model=LessonProgressRead)
+@router.post("/complete", response_model=SessionProgressRead)
 async def complete_progress(
-    payload: LessonProgressComplete,
+    payload: SessionProgressComplete,
     session: AsyncSession = Depends(get_db_session),
-) -> LessonProgressRead:
-    return await service.complete_lesson_progress(session, payload)
+) -> SessionProgressRead:
+    return await service.complete_session_progress(session, payload)
 
 
-@router.get("/{lesson_id}", response_model=LessonProgressRead)
+@router.get("/{session_id}", response_model=SessionProgressRead)
 async def get_progress(
-    lesson_id: UUID,
+    session_id: UUID,
     student_id: UUID = Query(...),
     session: AsyncSession = Depends(get_db_session),
-) -> LessonProgressRead:
-    progress = await service.get_lesson_progress(session, lesson_id, student_id)
+) -> SessionProgressRead:
+    progress = await service.get_session_progress(session, session_id, student_id)
     if progress is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lesson progress not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Session progress not found")
 
     return progress

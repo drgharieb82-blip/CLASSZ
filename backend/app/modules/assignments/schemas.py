@@ -50,7 +50,7 @@ class AssignmentBase(BaseModel):
     description: str | None = None
     course_id: UUID
     chapter_id: UUID | None = None
-    lesson_id: UUID | None = None
+    session_id: UUID | None = None
     deadline_at: datetime | None = None
     max_points: int = Field(default=100, ge=0)
     allow_multiple_submissions: bool = False

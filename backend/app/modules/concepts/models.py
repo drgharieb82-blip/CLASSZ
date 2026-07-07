@@ -6,18 +6,21 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
-from app.modules.sessions.models import session_chapter_links
+from app.modules.sessions.models import session_concept_links
 
 
-class Chapter(Base):
-    __tablename__ = "chapters"
-    __table_args__ = (UniqueConstraint("course_id", "position", name="uq_chapters_course_position"),)
+class Concept(Base):
+    """Academic Domain: Course -> Chapter -> Lesson -> Concept -> Atomic
+    Concept. Structurally owned by a Lesson."""
+
+    __tablename__ = "concepts"
+    __table_args__ = (UniqueConstraint("lesson_id", "position", name="uq_concepts_lesson_position"),)
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     public_code: Mapped[str] = mapped_column(String(20), unique=True, nullable=False)
-    course_id: Mapped[uuid.UUID] = mapped_column(
+    lesson_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("courses.id", ondelete="CASCADE"),
+        ForeignKey("lessons.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -29,15 +32,15 @@ class Chapter(Base):
         nullable=False,
     )
 
-    course: Mapped["Course"] = relationship("Course", back_populates="chapters")
-    lessons: Mapped[list["Lesson"]] = relationship(
-        "Lesson",
-        back_populates="chapter",
+    lesson: Mapped["Lesson"] = relationship("Lesson", back_populates="concepts")
+    atomic_concepts: Mapped[list["AtomicConcept"]] = relationship(
+        "AtomicConcept",
+        back_populates="concept",
         cascade="all, delete-orphan",
-        order_by="Lesson.position",
+        order_by="AtomicConcept.position",
     )
     sessions: Mapped[list["Session"]] = relationship(
         "Session",
-        secondary=session_chapter_links,
-        back_populates="chapters",
+        secondary=session_concept_links,
+        back_populates="concepts",
     )

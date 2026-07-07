@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 class TeacherDashboardSummary(BaseModel):
     total_courses: int
-    total_lessons: int
+    total_sessions: int
     total_students: int
     pending_grading_count: int
     assignments_count: int
@@ -19,7 +19,7 @@ class TeacherCourseOverviewItem(BaseModel):
     subject: str
     grade: str
     is_published: bool
-    lessons_count: int
+    sessions_count: int
     quizzes_count: int
     assignments_count: int
 

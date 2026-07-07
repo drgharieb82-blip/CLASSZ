@@ -4,7 +4,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from app.modules.lesson_blocks.models import BlockType
+from app.modules.session_blocks.models import BlockType
 
 SUPPORTED_PHASE_TWO_A_BLOCK_TYPES = {
     BlockType.TEXT,
@@ -41,8 +41,8 @@ BLOCK_DATA_SCHEMAS: dict[BlockType, type[BaseModel]] = {
 }
 
 
-class LessonBlockBase(BaseModel):
-    lesson_id: UUID
+class SessionBlockBase(BaseModel):
+    session_id: UUID
     block_type: BlockType
     position: int = Field(ge=0)
     data_json: dict[str, Any] = Field(default_factory=dict)
@@ -56,17 +56,17 @@ class LessonBlockBase(BaseModel):
         return block_type
 
     @model_validator(mode="after")
-    def validate_data_json_for_block_type(self) -> "LessonBlockBase":
+    def validate_data_json_for_block_type(self) -> "SessionBlockBase":
         data_schema = BLOCK_DATA_SCHEMAS[self.block_type]
         self.data_json = data_schema.model_validate(self.data_json).model_dump()
         return self
 
 
-class LessonBlockCreate(LessonBlockBase):
+class SessionBlockCreate(SessionBlockBase):
     pass
 
 
-class LessonBlockRead(LessonBlockBase):
+class SessionBlockRead(SessionBlockBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID

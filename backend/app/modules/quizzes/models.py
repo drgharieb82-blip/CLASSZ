@@ -26,9 +26,9 @@ class Quiz(Base):
         nullable=True,
         index=True,
     )
-    lesson_id: Mapped[uuid.UUID | None] = mapped_column(
+    session_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("lessons.id", ondelete="SET NULL"),
+        ForeignKey("sessions.id", ondelete="SET NULL"),
         nullable=True,
         index=True,
     )
