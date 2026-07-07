@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo, useEffect } from "react";
+import { toast } from "sonner";
 import {
   ArrowDown, ArrowUp, BarChart3, BookOpen, Bot, Brain, Calendar, Check, ChevronDown, ChevronUp,
   ChevronRight, Clock, Copy, DollarSign, Edit3, Eye, EyeOff, File, FileText,
@@ -40,6 +41,7 @@ import { Pagination } from "@/components/filters/Pagination";
 import { seedTeacherData } from "@/lib/teacher/seed-teacher-data";
 
 import { AssessmentEngineTab as AssessmentEngineWorkspaceTab } from "@/components/teacher/AssessmentEngineTab";
+import { QuestionBuilder } from "@/components/question/QuestionBuilder";
 import {
   TYPE_LABELS as QS_TYPE_LABELS, TYPE_COLORS as QS_TYPE_COLORS,
   DIFF_COLORS as QS_DIFF_COLORS, CATEGORY_MAP as QS_CATEGORY_MAP,
@@ -460,7 +462,7 @@ const SESSION_BUILDER_I18N = {
   "empty.kicker": { en: "Learning experiences are your paid product", ar: "تجارب التعلم هي منتجك المدفوع" },
   "empty.title": { en: "Design your first paid learning experience", ar: "صمم أول تجربة تعلم مدفوعة" },
   "empty.body": { en: "Create a session that combines video, files, practice, assessments, access rules, rewards, and analytics in one paid learning unit.", ar: "أنشئ حصة تجمع الفيديو والملفات والتدريب والتقييمات وقواعد الوصول والمكافآت والتحليلات في وحدة تعلم مدفوعة واحدة." },
-  "empty.action": { en: "Create premium session", ar: "إنشاء حصة احترافية" },
+  "empty.action": { en: "Build Session", ar: "بناء حصة" },
   "block.heading": { en: "Learning Blocks", ar: "بلوكات التعلم" },
   "block.linked": { en: "Linked resource", ar: "المورد المرتبط" },
   "block.required": { en: "Required", ar: "إجباري" },
@@ -543,6 +545,7 @@ function SessionsBuilderTab({ courseId }: { courseId: string }) {
   const sb: SessionBuilderTranslator = (key) => SESSION_BUILDER_I18N[key][lang];
   const rawSessions = useTeacherSessionStore((s) => s.sessions);
   const createSession = useTeacherSessionStore((s) => s.createSession);
+  const loadSessions = useTeacherSessionStore((s) => s.loadSessions);
   const deleteSession = useTeacherSessionStore((s) => s.deleteSession);
   const publishSession = useTeacherSessionStore((s) => s.publishSession);
   const archiveSession = useTeacherSessionStore((s) => s.archiveSession);
@@ -550,6 +553,7 @@ function SessionsBuilderTab({ courseId }: { courseId: string }) {
   const unlockSession = useTeacherSessionStore((s) => s.unlockSession);
   const updateSession = useTeacherSessionStore((s) => s.updateSession);
   const rawChapters = useTeacherChapterStore((s) => s.chapters);
+  const loadChapters = useTeacherChapterStore((s) => s.loadChapters);
   const allMaterials = useTeacherMaterialStore((s) => s.materials);
   const allQuestions = useTeacherQuestionStore((s) => s.questions);
   const allQuizzes = useTeacherQuizStore((s) => s.quizzes);
@@ -573,6 +577,17 @@ function SessionsBuilderTab({ courseId }: { courseId: string }) {
     if (sessions.length === 0) setSelectedId("");
     else if (!selectedId || !sessions.some((session) => session.id === selectedId)) setSelectedId(sessions[0].id);
   }, [sessions, selectedId]);
+
+  // Content Studio never routed through the dedicated Chapters/Sessions pages that
+  // normally trigger these backend loads - fetch them here so Build Session works
+  // regardless of navigation history.
+  useEffect(() => {
+    if (courseId) loadChapters(courseId);
+  }, [courseId]);
+
+  useEffect(() => {
+    if (courseId) loadSessions(courseId);
+  }, [courseId]);
 
   const statsMap = useMemo(() => {
     const map = new Map<string, BuilderStats>();
@@ -616,12 +631,21 @@ function SessionsBuilderTab({ courseId }: { courseId: string }) {
     { label: sb("stats.revenue"), value: `$${Math.round(revenue).toLocaleString()}`, icon: BarChart3, cls: "text-cyan-500" },
   ];
 
-  const createPremiumSession = () => {
-    const chapterId = chapters[0]?.id;
-    if (!chapterId) return;
-    const session = createSession({ courseId, chapterId, title: `${sb("ui.newSession")} ${sessions.length + 1}`, description: sb("empty.body"), price: 25, currency: "USD", durationMinutes: 75, sessionType: "mixed", status: "draft", accessStatus: "locked" });
-    setSelectedId(session.id);
-    setTab("overview");
+  const [buildingSession, setBuildingSession] = useState(false);
+
+  const buildSession = async () => {
+    if (buildingSession) return;
+    setBuildingSession(true);
+    try {
+      const now = new Date().toISOString();
+      const closeAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+      const session = await createSession({ courseId, title: `${sb("ui.newSession")} ${sessions.length + 1}`, description: "", price: 25, currency: "USD", durationMinutes: 75, sessionType: "mixed", status: "draft", accessStatus: "locked", openAt: now, closeAt });
+      if (!session) { toast.error("Could not create the session. Check your connection and try again."); return; }
+      setSelectedId(session.id);
+      setTab("overview");
+    } finally {
+      setBuildingSession(false);
+    }
   };
 
   if (sessions.length === 0) {
@@ -631,7 +655,7 @@ function SessionsBuilderTab({ courseId }: { courseId: string }) {
           <div className="space-y-5 p-8 sm:p-10">
             <Badge className="w-fit rounded-full border-0 bg-primary/10 text-primary">{sb("empty.kicker")}</Badge>
             <div className="space-y-2"><h2 className="text-2xl font-bold tracking-tight">{sb("empty.title")}</h2><p className="max-w-xl text-sm leading-6 text-muted-foreground">{sb("empty.body")}</p></div>
-            <Button onClick={createPremiumSession} disabled={chapters.length === 0} className="rounded-xl gradient-brand border-0 text-white"><Plus className="me-1.5 h-4 w-4" />{sb("empty.action")}</Button>
+            <Button onClick={buildSession} disabled={buildingSession} className="rounded-xl gradient-brand border-0 text-white"><Plus className="me-1.5 h-4 w-4" />{buildingSession ? "Building…" : sb("empty.action")}</Button>
           </div>
           <div className="border-t bg-gradient-to-br from-primary/10 via-background to-violet-500/10 p-8 lg:border-s"><div className="grid gap-3">{(Object.keys(BUILDER_BLOCK_META) as BuilderBlockType[]).map((type) => { const meta = BUILDER_BLOCK_META[type]; return <BuilderBlockShell key={type} icon={meta.icon} color={meta.color} title={sb(meta.labelKey)} subtitle={sb(meta.resourceKey)} />; })}</div></div>
         </div>
@@ -650,7 +674,7 @@ function SessionsBuilderTab({ courseId }: { courseId: string }) {
       <div className="grid gap-4 xl:grid-cols-[300px_minmax(0,1fr)_320px]">
         <Card className="overflow-hidden border bg-card">
           <div className="border-b p-4">
-            <div className="mb-3 flex items-center justify-between gap-3"><div><h3 className="text-sm font-semibold">{sb("ui.library")}</h3><p className="text-xs text-muted-foreground">{filtered.length} / {sessions.length}</p></div><Button size="icon" variant="outline" className="h-8 w-8 rounded-lg" onClick={createPremiumSession} disabled={chapters.length === 0} title={sb("ui.newSession")}><Plus className="h-4 w-4" /></Button></div>
+            <div className="mb-3 flex items-center justify-between gap-3"><div><h3 className="text-sm font-semibold">{sb("ui.library")}</h3><p className="text-xs text-muted-foreground">{filtered.length} / {sessions.length}</p></div><Button size="icon" variant="outline" className="h-8 w-8 rounded-lg" onClick={buildSession} disabled={buildingSession} title={sb("ui.newSession")}><Plus className="h-4 w-4" /></Button></div>
             <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={sb("ui.search")} className="h-9 rounded-xl text-sm" />
             <div className="mt-3 grid grid-cols-3 gap-2">
               <BuilderSelect label={sb("ui.status")} value={statusFilter} onChange={setStatusFilter} options={[["", sb("ui.all")], ["draft", sb("stats.drafts")], ["published", sb("stats.published")], ["archived", sb("ui.archive")]]} />
@@ -907,13 +931,13 @@ function SessionsTab({ courseId }: { courseId: string }) {
 
   const handleCreate = () => {
     if (!title.trim() || !chapterId) return;
-    const ses = createSession({ courseId, chapterId, title: title.trim(), description: "", price: Number(price), currency: "USD" });
+    const ses = createSession({ courseId, chapterIds: [chapterId], title: title.trim(), description: "", price: Number(price), currency: "USD" });
     if (sesConceptIds.length > 0) updateSession(ses.id, { conceptIds: sesConceptIds });
     setTitle(""); setPrice("0"); setSesConceptIds([]); setShowCreate(false);
   };
 
   const handleDuplicate = (s: typeof allSessions[0]) => {
-    duplicateSession({ courseId, chapterId: s.chapterId, title: `${s.title} (Copy)`, description: s.description, price: s.price, currency: s.currency, sessionType: s.sessionType, isFreePreview: s.isFreePreview });
+    duplicateSession({ courseId, chapterIds: s.chapterId ? [s.chapterId] : [], title: `${s.title} (Copy)`, description: s.description, price: s.price, currency: s.currency, sessionType: s.sessionType, isFreePreview: s.isFreePreview });
   };
 
   const published = allSessions.filter((s) => s.status === "published").length;
@@ -1557,6 +1581,7 @@ function QuestionsTab({ courseId }: { courseId: string }) {
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [page, setPage] = useState(1);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [builderView, setBuilderView] = useState<{ mode: "list" } | { mode: "create" } | { mode: "edit"; questionId: string }>({ mode: "list" });
 
   const courseMap = useMemo(() => new Map(courses.map((c) => [c.id, c.title])), [courses]);
   const treeChapters = useMemo(() => { const m = new Map<string, string>(); for (const n of allTreeNodes) if (n.type === "chapter") m.set(n.id, n.title); return m; }, [allTreeNodes]);
@@ -1588,14 +1613,25 @@ function QuestionsTab({ courseId }: { courseId: string }) {
   const paginated = filtered.slice((page - 1) * 15, page * 15);
   const published = questions.filter((q) => q.status === "published").length;
 
+  if (builderView.mode !== "list") {
+    return (
+      <QuestionBuilder
+        mode={builderView.mode}
+        questionId={builderView.mode === "edit" ? builderView.questionId : undefined}
+        defaultCourseId={courseId}
+        onExit={() => setBuilderView({ mode: "list" })}
+      />
+    );
+  }
+
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center gap-3">
         <Badge variant="outline" className="rounded-full">{questions.length} total</Badge>
         <Badge variant="outline" className="rounded-full border-emerald-300 text-emerald-600">{published} published</Badge>
         <Badge variant="outline" className="rounded-full border-amber-300 text-amber-600">{questions.length - published} drafts</Badge>
-        <Button asChild className="rounded-xl gradient-brand border-0 text-white ms-auto" size="sm">
-          <Link to="/teacher/questions/create"><Plus className="me-1.5 h-4 w-4" /> Create Question</Link>
+        <Button className="rounded-xl gradient-brand border-0 text-white ms-auto" size="sm" onClick={() => setBuilderView({ mode: "create" })}>
+          <Plus className="me-1.5 h-4 w-4" /> Create Question
         </Button>
       </div>
       <FilterBar search={search} onSearchChange={(v) => { setSearch(v); setPage(1); }} filters={csQFilterOptions} activeFilters={filters} onFilterChange={(k, v) => { setFilters((f) => ({ ...f, [k]: v })); setPage(1); }} onClearFilters={() => { setFilters({}); setPage(1); }} totalResults={total} placeholder="Search by text, concept, or code..." />
@@ -1603,7 +1639,7 @@ function QuestionsTab({ courseId }: { courseId: string }) {
         <Card className="flex flex-col items-center gap-4 border bg-card p-12 text-center">
           <HelpCircle className="h-12 w-12 text-muted-foreground" />
           <h2 className="text-lg font-semibold">{questions.length === 0 ? "No questions for this course" : "No match"}</h2>
-          <Button asChild className="rounded-xl gradient-brand border-0 text-white"><Link to="/teacher/questions/create"><Plus className="me-1.5 h-4 w-4" />Create Question</Link></Button>
+          <Button className="rounded-xl gradient-brand border-0 text-white" onClick={() => setBuilderView({ mode: "create" })}><Plus className="me-1.5 h-4 w-4" />Create Question</Button>
         </Card>
       ) : (
         <div className="space-y-2">
@@ -1626,7 +1662,7 @@ function QuestionsTab({ courseId }: { courseId: string }) {
                     <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" title={isOpen ? "Collapse" : "Preview"} onClick={() => setExpandedId(isOpen ? null : q.id)}>
                       {isOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
                     </Button>
-                    <Button asChild variant="ghost" size="icon" className="h-7 w-7 rounded-lg" title="Edit"><Link to="/teacher/questions/$questionId/edit" params={{ questionId: q.id }}><Edit3 className="h-3.5 w-3.5" /></Link></Button>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" title="Edit" onClick={() => setBuilderView({ mode: "edit", questionId: q.id })}><Edit3 className="h-3.5 w-3.5" /></Button>
                     {q.status === "draft" && <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => publishQuestion(q.id)}><Upload className="h-3.5 w-3.5 text-emerald-600" /></Button>}
                     <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => duplicateQuestion(q.id)}><Copy className="h-3.5 w-3.5" /></Button>
                     <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-destructive" onClick={() => deleteQuestion(q.id)}><Trash2 className="h-3.5 w-3.5" /></Button>

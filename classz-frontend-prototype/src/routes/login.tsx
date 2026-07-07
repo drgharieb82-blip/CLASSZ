@@ -134,42 +134,58 @@ function LoginPage() {
   );
 }
 
-const mockUsers = [
-  { label: "Student (16y)", role: "student" as const, age: 16, name: "Aya Mansour", code: "CLS-26-000001", home: "/student" },
-  { label: "Teacher", role: "teacher" as const, age: 35, name: "Dr. Layla Hassan", code: "TCH-26-0001", home: "/teacher" },
-  { label: "Parent", role: "parent" as const, age: 42, name: "Mohamed Mansour", code: "PRT-26-0001", home: "/parent" },
-  { label: "Admin", role: "admin" as const, age: 30, name: "System Admin", code: "ADM-26-0001", home: "/admin" },
+// Dev Quick Access signs in with the real seeded launch accounts via the real
+// /api/auth/login endpoint - no fake tokens, no fake user.id assignments.
+// There is no seeded "parent" launch account (only admin/teacher/student were
+// seeded, per the launch database reset), so no parent button is offered here.
+const QUICK_ACCESS_ACCOUNTS = [
+  { label: "Student", role: "student" as const, age: 16, email: "student@classz-launch.dev", password: "LaunchStudent123!" },
+  { label: "Teacher", role: "teacher" as const, age: 35, email: "teacher@classz-launch.dev", password: "LaunchTeacher123!" },
+  { label: "Admin", role: "admin" as const, age: 30, email: "admin@classz-launch.dev", password: "LaunchAdmin123!" },
 ] as const;
 
 function DevQuickAccess() {
   const navigate = useNavigate();
   const login = useAuthStore((s) => s.login);
   const setAge = useVisualModeStore((s) => s.setAge);
+  const [loadingRole, setLoadingRole] = useState<string | null>(null);
+  const [error, setError] = useState("");
 
-  const handleQuickLogin = (user: (typeof mockUsers)[number]) => {
-    login("dev-token-" + user.role, {
-      id: user.code,
-      public_code: user.code,
-      email: `${user.role}@classz.dev`,
-      full_name: user.name,
-      role: user.role,
-      is_active: true,
-    });
-    setAge(user.age);
-    navigate({ to: user.home });
+  const handleQuickLogin = async (account: (typeof QUICK_ACCESS_ACCOUNTS)[number]) => {
+    setError("");
+    setLoadingRole(account.role);
+    try {
+      const res = await loginApi(account.email, account.password);
+      login(res.access_token, res.user);
+      setAge(account.age);
+      navigate({ to: ROLES[res.user.role]?.home || "/" });
+    } catch (err) {
+      setError(
+        err instanceof ApiError && typeof err.body === "object" && err.body !== null && "detail" in err.body
+          ? String((err.body as { detail: string }).detail)
+          : "Dev Quick Access failed - is the backend running?",
+      );
+    } finally {
+      setLoadingRole(null);
+    }
   };
 
   return (
     <div className="mt-6 rounded-xl border border-dashed border-amber-500/40 bg-amber-500/5 p-4">
-      <p className="mb-3 text-center text-xs font-semibold uppercase tracking-wide text-amber-600">Dev Quick Access</p>
+      <p className="mb-1 text-center text-xs font-semibold uppercase tracking-wide text-amber-600">Dev Quick Access</p>
+      <p className="mb-3 text-center text-[11px] text-muted-foreground">Signs in with the real seeded launch accounts.</p>
+      {error && (
+        <p className="mb-3 rounded-lg bg-destructive/10 px-3 py-2 text-xs text-destructive">{error}</p>
+      )}
       <div className="grid grid-cols-2 gap-2">
-        {mockUsers.map((user) => (
+        {QUICK_ACCESS_ACCOUNTS.map((account) => (
           <button
-            key={user.role}
-            onClick={() => handleQuickLogin(user)}
-            className="rounded-lg border bg-card px-3 py-2 text-center text-xs font-medium transition-colors hover:bg-accent"
+            key={account.role}
+            onClick={() => handleQuickLogin(account)}
+            disabled={loadingRole !== null}
+            className="rounded-lg border bg-card px-3 py-2 text-center text-xs font-medium transition-colors hover:bg-accent disabled:opacity-50"
           >
-            {user.label}
+            {loadingRole === account.role ? "Signing in…" : account.label}
           </button>
         ))}
         <Link

@@ -64,3 +64,33 @@ export const api = {
 
   delete: <T>(path: string) => request<T>(path, { method: "DELETE" }),
 };
+
+// Separate from `api` above: file uploads need multipart/form-data (the browser
+// sets its own Content-Type with boundary) rather than the JSON body every
+// other call in this client sends - reuses the same base URL / auth-token /
+// 401-handling logic as `request()`, just without forcing a JSON content type.
+export async function uploadFile<T>(path: string, formData: FormData): Promise<T> {
+  const token = localStorage.getItem("classz-auth-token");
+  const headers: Record<string, string> = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "POST",
+    headers,
+    body: formData,
+  });
+
+  if (res.status === 401) {
+    localStorage.removeItem("classz-auth-token");
+    localStorage.removeItem("classz-auth");
+    window.location.href = "/login";
+    throw new ApiError(res.status, res.statusText, null);
+  }
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new ApiError(res.status, res.statusText, body);
+  }
+
+  return res.json();
+}

@@ -24,7 +24,10 @@ import { cn } from "@/lib/utils";
 import { getCourseById } from "@/lib/teacher/teacher-course-store";
 import { useTeacherSessionStore, getSessionById } from "@/lib/teacher/teacher-session-store";
 import { getChapterById, listChapters } from "@/lib/teacher/teacher-chapter-store";
-import { useTeacherMaterialStore, type TeacherMaterial } from "@/lib/teacher/teacher-material-store";
+import {
+  useTeacherMaterialStore, linkSegmentToSession, unlinkSegmentFromSession,
+  type TeacherMaterial, type VideoSegment,
+} from "@/lib/teacher/teacher-material-store";
 import { useTeacherQuestionStore, type TeacherQuestion } from "@/lib/teacher/teacher-question-store";
 import { useTeacherQuizStore } from "@/lib/teacher/teacher-quiz-store";
 import { useTeacherExamStore } from "@/lib/teacher/teacher-exam-store";
@@ -47,6 +50,19 @@ interface CanvasBlock {
   title: string;
   entityId?: string;
   meta?: string;
+  parentId?: string; // for segment blocks: the id of the Material the segment belongs to
+  durationMinutes?: number; // known real duration (e.g. a video segment's clip length), overrides the Timeline tab's heuristic estimate
+}
+
+function formatSeconds(sec: number): string {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
+function estimateBlockMinutes(block: CanvasBlock): number {
+  if (block.durationMinutes != null) return block.durationMinutes;
+  return block.type === "video" ? 20 : block.type === "quiz_block" || block.type === "exam_block" ? 15 : 10;
 }
 
 function SessionBuilderPage() {
@@ -65,6 +81,21 @@ function SessionBuilderPage() {
   const createMaterial = useTeacherMaterialStore((s) => s.createMaterial);
   const deleteMaterial = useTeacherMaterialStore((s) => s.deleteMaterial);
   const reorderMaterials = useTeacherMaterialStore((s) => s.reorderMaterials);
+  const linkSegment = (materialId: string, segmentId: string) => linkSegmentToSession(materialId, segmentId, sessionId);
+  const unlinkSegment = (materialId: string, segmentId: string) => unlinkSegmentFromSession(materialId, segmentId, sessionId);
+
+  // Segments referencing this session, from ANY material in the library — a segment can be used
+  // by a session without the whole parent Material being linked to it (no video is duplicated;
+  // this only reads material.segments, it never copies them).
+  const linkedSegments = useMemo(() => {
+    const result: { material: TeacherMaterial; segment: VideoSegment }[] = [];
+    for (const m of allLibraryMaterials) {
+      for (const seg of m.segments || []) {
+        if (seg.linkedSessionIds?.includes(sessionId)) result.push({ material: m, segment: seg });
+      }
+    }
+    return result;
+  }, [allLibraryMaterials, sessionId]);
 
   const questions = useTeacherQuestionStore((s) =>
     s.questions.filter((q) => q.sessionId === sessionId || q.sessionIds?.includes(sessionId)),
@@ -73,10 +104,18 @@ function SessionBuilderPage() {
 
   const quizzes = useTeacherQuizStore((s) => s.quizzes.filter((q) => q.sessionIds?.includes(sessionId)));
   const allQuizzes = useTeacherQuizStore((s) => s.quizzes.filter((q) => q.courseId === courseId));
+  const attachQuizToSession = useTeacherQuizStore((s) => s.attachQuizToSession);
+  const detachQuizFromSession = useTeacherQuizStore((s) => s.detachQuizFromSession);
+
   const exams = useTeacherExamStore((s) => s.exams.filter((e) => e.sessionIds?.includes(sessionId)));
   const allExams = useTeacherExamStore((s) => s.exams.filter((e) => e.courseId === courseId));
+  const attachExamToSession = useTeacherExamStore((s) => s.attachToSession);
+  const detachExamFromSession = useTeacherExamStore((s) => s.detachFromSession);
+
   const homework = useTeacherHomeworkStore((s) => s.items.filter((h) => h.sessionIds?.includes(sessionId)));
   const allHomework = useTeacherHomeworkStore((s) => s.items.filter((h) => h.courseId === courseId));
+  const attachHomeworkToSession = useTeacherHomeworkStore((s) => s.attachToSession);
+  const detachHomeworkFromSession = useTeacherHomeworkStore((s) => s.detachFromSession);
 
   const treeNodes = useContentTreeStore((s) => s.nodes.filter((n) => n.courseId === courseId));
 
@@ -104,8 +143,19 @@ function SessionBuilderPage() {
     homework.forEach((h) => {
       blocks.push({ id: `hw-${h.id}`, type: "homework_block", title: h.title, entityId: h.id, meta: h.homeworkType });
     });
+    linkedSegments.forEach(({ material, segment }) => {
+      blocks.push({
+        id: `seg-${material.id}-${segment.id}`,
+        type: "video_playlist",
+        title: segment.title || `${material.title} clip`,
+        entityId: segment.id,
+        parentId: material.id,
+        meta: `${material.title} · ${formatSeconds(segment.startTime)}–${formatSeconds(segment.endTime)}`,
+        durationMinutes: Math.max(1, Math.round((segment.endTime - segment.startTime) / 60)),
+      });
+    });
     return blocks;
-  }, [materials, questions, quizzes, exams, homework]);
+  }, [materials, questions, quizzes, exams, homework, linkedSegments]);
 
   const coverageSummary = useMemo(() => getCoverageSummary(courseId), [courseId, treeNodes]);
 
@@ -129,12 +179,25 @@ function SessionBuilderPage() {
     setEditingTitle(false);
   };
 
+  const isMaterialBlock = (block: CanvasBlock) => block.id.startsWith("mat-");
+
   const moveBlock = (index: number, direction: -1 | 1) => {
+    // Canvas ordering is only meaningful within the Materials group today —
+    // quiz/exam/homework blocks have no shared position field to reorder against.
     const matIds = materials.map((m) => m.id);
     const target = index + direction;
     if (target < 0 || target >= matIds.length) return;
     [matIds[index], matIds[target]] = [matIds[target], matIds[index]];
     reorderMaterials(sessionId, matIds);
+  };
+
+  const removeBlock = (block: CanvasBlock) => {
+    if (!block.entityId) return;
+    if (block.type === "quiz_block") detachQuizFromSession(block.entityId, sessionId);
+    else if (block.type === "exam_block") detachExamFromSession(block.entityId, sessionId);
+    else if (block.type === "homework_block") detachHomeworkFromSession(block.entityId, sessionId);
+    else if (block.id.startsWith("seg-") && block.parentId) unlinkSegment(block.parentId, block.entityId);
+    else deleteMaterial(block.entityId);
   };
 
   return (
@@ -260,7 +323,14 @@ function SessionBuilderPage() {
                             <p className="text-xs text-muted-foreground px-1">No materials yet.</p>
                           ) : (
                             allLibraryMaterials.slice(0, 30).map((m) => (
-                              <LibraryItem key={m.id} material={m} isLinked={materials.some((mat) => mat.id === m.id)} />
+                              <LibraryItem
+                                key={m.id}
+                                material={m}
+                                isLinked={materials.some((mat) => mat.id === m.id)}
+                                sessionId={sessionId}
+                                onLinkSegment={linkSegment}
+                                onUnlinkSegment={unlinkSegment}
+                              />
                             ))
                           )}
                         </>
@@ -287,37 +357,61 @@ function SessionBuilderPage() {
                           {allQuizzes.length === 0 ? (
                             <p className="text-xs text-muted-foreground px-1 mb-3">No quizzes.</p>
                           ) : (
-                            allQuizzes.map((q) => (
-                              <div key={q.id} className="flex items-center gap-2 rounded-lg border px-2.5 py-2 text-xs mb-1 hover:bg-accent/50 transition-colors">
-                                <ClipboardList className="h-3 w-3 text-cyan-500 shrink-0" />
-                                <span className="truncate flex-1">{q.title}</span>
-                                <Badge variant="outline" className="text-[9px] px-1 py-0 rounded shrink-0">{q.questionIds.length}Q</Badge>
-                              </div>
-                            ))
+                            allQuizzes.map((q) => {
+                              const isLinked = quizzes.some((qq) => qq.id === q.id);
+                              return (
+                                <button
+                                  key={q.id}
+                                  onClick={() => (isLinked ? detachQuizFromSession(q.id, sessionId) : attachQuizToSession(q.id, sessionId))}
+                                  className={cn("flex items-center gap-2 rounded-lg border px-2.5 py-2 text-xs mb-1 w-full text-start transition-colors", isLinked ? "border-primary/30 bg-primary/5" : "hover:bg-accent/50")}
+                                >
+                                  <ClipboardList className="h-3 w-3 text-cyan-500 shrink-0" />
+                                  <span className="truncate flex-1">{q.title}</span>
+                                  {isLinked && <Check className="h-3 w-3 text-primary shrink-0" />}
+                                  <Badge variant="outline" className="text-[9px] px-1 py-0 rounded shrink-0">{q.questionIds.length}Q</Badge>
+                                </button>
+                              );
+                            })
                           )}
                           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-1 mb-2 mt-4">Exams</p>
                           {allExams.length === 0 ? (
                             <p className="text-xs text-muted-foreground px-1 mb-3">No exams.</p>
                           ) : (
-                            allExams.map((e) => (
-                              <div key={e.id} className="flex items-center gap-2 rounded-lg border px-2.5 py-2 text-xs mb-1 hover:bg-accent/50 transition-colors">
-                                <BookOpen className="h-3 w-3 text-rose-500 shrink-0" />
-                                <span className="truncate flex-1">{e.title}</span>
-                                <Badge variant="outline" className="text-[9px] px-1 py-0 rounded shrink-0">{e.questionIds.length}Q</Badge>
-                              </div>
-                            ))
+                            allExams.map((e) => {
+                              const isLinked = exams.some((ee) => ee.id === e.id);
+                              return (
+                                <button
+                                  key={e.id}
+                                  onClick={() => (isLinked ? detachExamFromSession(e.id, sessionId) : attachExamToSession(e.id, sessionId))}
+                                  className={cn("flex items-center gap-2 rounded-lg border px-2.5 py-2 text-xs mb-1 w-full text-start transition-colors", isLinked ? "border-primary/30 bg-primary/5" : "hover:bg-accent/50")}
+                                >
+                                  <BookOpen className="h-3 w-3 text-rose-500 shrink-0" />
+                                  <span className="truncate flex-1">{e.title}</span>
+                                  {isLinked && <Check className="h-3 w-3 text-primary shrink-0" />}
+                                  <Badge variant="outline" className="text-[9px] px-1 py-0 rounded shrink-0">{e.questionIds.length}Q</Badge>
+                                </button>
+                              );
+                            })
                           )}
                           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-1 mb-2 mt-4">Homework</p>
                           {allHomework.length === 0 ? (
                             <p className="text-xs text-muted-foreground px-1">No homework.</p>
                           ) : (
-                            allHomework.map((h) => (
-                              <div key={h.id} className="flex items-center gap-2 rounded-lg border px-2.5 py-2 text-xs mb-1 hover:bg-accent/50 transition-colors">
-                                <Pencil className="h-3 w-3 text-orange-500 shrink-0" />
-                                <span className="truncate flex-1">{h.title}</span>
-                                <Badge variant="outline" className="text-[9px] px-1 py-0 rounded shrink-0">{h.homeworkType}</Badge>
-                              </div>
-                            ))
+                            allHomework.map((h) => {
+                              const isLinked = homework.some((hh) => hh.id === h.id);
+                              return (
+                                <button
+                                  key={h.id}
+                                  onClick={() => (isLinked ? detachHomeworkFromSession(h.id, sessionId) : attachHomeworkToSession(h.id, sessionId))}
+                                  className={cn("flex items-center gap-2 rounded-lg border px-2.5 py-2 text-xs mb-1 w-full text-start transition-colors", isLinked ? "border-primary/30 bg-primary/5" : "hover:bg-accent/50")}
+                                >
+                                  <Pencil className="h-3 w-3 text-orange-500 shrink-0" />
+                                  <span className="truncate flex-1">{h.title}</span>
+                                  {isLinked && <Check className="h-3 w-3 text-primary shrink-0" />}
+                                  <Badge variant="outline" className="text-[9px] px-1 py-0 rounded shrink-0">{h.homeworkType}</Badge>
+                                </button>
+                              );
+                            })
                           )}
                         </>
                       )}
@@ -402,13 +496,17 @@ function SessionBuilderPage() {
                               <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                                 {block.entityId && block.type !== "question_block" && (
                                   <>
-                                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => moveBlock(index, -1)}>
-                                      <ArrowUp className="h-3 w-3" />
-                                    </Button>
-                                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => moveBlock(index, 1)}>
-                                      <ArrowDown className="h-3 w-3" />
-                                    </Button>
-                                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-destructive" onClick={() => deleteMaterial(block.entityId!)}>
+                                    {isMaterialBlock(block) && (
+                                      <>
+                                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => moveBlock(index, -1)}>
+                                          <ArrowUp className="h-3 w-3" />
+                                        </Button>
+                                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => moveBlock(index, 1)}>
+                                          <ArrowDown className="h-3 w-3" />
+                                        </Button>
+                                      </>
+                                    )}
+                                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-destructive" onClick={() => removeBlock(block)}>
                                       <Trash2 className="h-3 w-3" />
                                     </Button>
                                   </>
@@ -627,7 +725,7 @@ function SessionBuilderPage() {
 
                   {canvasBlocks.map((block, index) => {
                     const meta = BLOCK_META[block.type];
-                    const estimatedMin = block.type === "video" ? 20 : block.type === "quiz_block" || block.type === "exam_block" ? 15 : 10;
+                    const estimatedMin = estimateBlockMinutes(block);
                     return (
                       <div key={block.id} className="relative pb-6 last:pb-0">
                         {/* Timeline dot */}
@@ -654,7 +752,7 @@ function SessionBuilderPage() {
                     <div className="flex items-center gap-2 pt-1">
                       <p className="text-sm font-semibold">Session Complete</p>
                       <Badge className="rounded-full bg-primary/10 text-primary border-0 text-[10px]">
-                        ~{canvasBlocks.reduce((a, b) => a + (b.type === "video" ? 20 : b.type === "quiz_block" || b.type === "exam_block" ? 15 : 10), 0)} min total
+                        ~{canvasBlocks.reduce((a, b) => a + estimateBlockMinutes(b), 0)} min total
                       </Badge>
                     </div>
                   </div>
@@ -923,16 +1021,61 @@ function CoverageChip({ status }: { status: string }) {
   );
 }
 
-function LibraryItem({ material, isLinked }: { material: TeacherMaterial; isLinked: boolean }) {
+function LibraryItem({
+  material, isLinked, sessionId, onLinkSegment, onUnlinkSegment,
+}: {
+  material: TeacherMaterial; isLinked: boolean; sessionId: string;
+  onLinkSegment: (materialId: string, segmentId: string) => void;
+  onUnlinkSegment: (materialId: string, segmentId: string) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
   const icons: Record<string, typeof Video> = { video: Video, pdf: FileText, image: Image, attachment: FileText, notes: StickyNote };
   const Icon = icons[material.type] || FileText;
   const colors: Record<string, string> = { video: "text-blue-500", pdf: "text-rose-500", image: "text-emerald-500", attachment: "text-amber-500", notes: "text-violet-500" };
+  const segments = material.type === "video" ? material.segments || [] : [];
+  const hasSegments = segments.length > 0;
+
   return (
-    <div className={cn("flex items-center gap-2 rounded-lg border px-2.5 py-2 text-xs mb-1 transition-colors", isLinked ? "border-primary/30 bg-primary/5" : "hover:bg-accent/50")}>
-      <Icon className={cn("h-3 w-3 shrink-0", colors[material.type])} />
-      <span className="truncate flex-1">{material.title}</span>
-      {isLinked && <Check className="h-3 w-3 text-primary shrink-0" />}
-      {material.videoDuration && <span className="text-[10px] text-muted-foreground shrink-0">{material.videoDuration}</span>}
+    <div className="mb-1">
+      <div className={cn("flex items-center gap-2 rounded-lg border px-2.5 py-2 text-xs transition-colors", isLinked ? "border-primary/30 bg-primary/5" : "hover:bg-accent/50")}>
+        <Icon className={cn("h-3 w-3 shrink-0", colors[material.type])} />
+        <span className="truncate flex-1">{material.title}</span>
+        {isLinked && <Check className="h-3 w-3 text-primary shrink-0" />}
+        {material.videoDuration && <span className="text-[10px] text-muted-foreground shrink-0">{material.videoDuration}</span>}
+        {hasSegments && (
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="shrink-0 rounded p-0.5 hover:bg-accent transition-colors"
+            title={`${segments.length} segment${segments.length === 1 ? "" : "s"}`}
+          >
+            {expanded ? <ChevronDown className="h-3 w-3 text-muted-foreground" /> : <ChevronRight className="h-3 w-3 text-muted-foreground" />}
+          </button>
+        )}
+      </div>
+      {hasSegments && expanded && (
+        <div className="ms-4 mt-1 space-y-1">
+          {segments.map((seg) => {
+            const segLinked = seg.linkedSessionIds?.includes(sessionId) ?? false;
+            return (
+              <button
+                key={seg.id}
+                type="button"
+                onClick={() => (segLinked ? onUnlinkSegment(material.id, seg.id) : onLinkSegment(material.id, seg.id))}
+                className={cn(
+                  "flex items-center gap-1.5 w-full rounded-md border px-2 py-1 text-[11px] text-start transition-colors",
+                  segLinked ? "border-primary/30 bg-primary/5" : "hover:bg-accent/50",
+                )}
+              >
+                <Play className="h-2.5 w-2.5 text-blue-400 shrink-0" />
+                <span className="truncate flex-1">{seg.title || "Untitled segment"}</span>
+                {segLinked && <Check className="h-2.5 w-2.5 text-primary shrink-0" />}
+                <span className="text-muted-foreground shrink-0">{formatSeconds(seg.startTime)}–{formatSeconds(seg.endTime)}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

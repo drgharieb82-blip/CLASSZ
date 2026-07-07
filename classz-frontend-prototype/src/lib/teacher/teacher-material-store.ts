@@ -28,6 +28,9 @@ export interface VideoSegment {
   conceptIds: string[];
   atomicConceptIds: string[];
   notes?: string;
+  // Which sessions reference this segment directly (mirrors TeacherMaterial.linkedSessionIds,
+  // but at segment granularity — a session can use one clip of a video without linking the whole material).
+  linkedSessionIds?: string[];
 }
 
 export interface TeacherMaterial {
@@ -235,4 +238,29 @@ export function linkMaterialToSession(materialId: string, sessionId: string): vo
       reuseCount: (mat.reuseCount || 0) + 1,
     });
   }
+}
+
+export function linkSegmentToSession(materialId: string, segmentId: string, sessionId: string): void {
+  const store = useTeacherMaterialStore.getState();
+  const mat = store.materials.find((m) => m.id === materialId);
+  const segment = mat?.segments?.find((s) => s.id === segmentId);
+  if (!mat || !segment) return;
+  const linked = segment.linkedSessionIds || [];
+  if (linked.includes(sessionId)) return;
+  store.updateMaterial(materialId, {
+    segments: mat.segments!.map((s) => (s.id === segmentId ? { ...s, linkedSessionIds: [...linked, sessionId] } : s)),
+    reuseCount: (mat.reuseCount || 0) + 1,
+  });
+}
+
+export function unlinkSegmentFromSession(materialId: string, segmentId: string, sessionId: string): void {
+  const store = useTeacherMaterialStore.getState();
+  const mat = store.materials.find((m) => m.id === materialId);
+  const segment = mat?.segments?.find((s) => s.id === segmentId);
+  if (!mat || !segment) return;
+  store.updateMaterial(materialId, {
+    segments: mat.segments!.map((s) =>
+      s.id === segmentId ? { ...s, linkedSessionIds: (s.linkedSessionIds || []).filter((id) => id !== sessionId) } : s,
+    ),
+  });
 }

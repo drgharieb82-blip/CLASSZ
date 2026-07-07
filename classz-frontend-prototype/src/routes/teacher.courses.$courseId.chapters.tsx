@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, FolderTree, Lock, Pencil, Plus, Trash2, Unlock, Upload } from "lucide-react";
 import { DashPage } from "@/components/common/DashPage";
 import { Card } from "@/components/ui/card";
@@ -22,6 +22,8 @@ function ChaptersPage() {
   const course = getCourseById(courseId);
   const chapters = useTeacherChapterStore((s) => s.chapters.filter((c) => c.courseId === courseId).sort((a, b) => a.order - b.order));
   const createChapter = useTeacherChapterStore((s) => s.createChapter);
+  const loadChapters = useTeacherChapterStore((s) => s.loadChapters);
+  const isLoading = useTeacherChapterStore((s) => s.isLoading);
   const deleteChapter = useTeacherChapterStore((s) => s.deleteChapter);
   const publishChapter = useTeacherChapterStore((s) => s.publishChapter);
   const archiveChapter = useTeacherChapterStore((s) => s.archiveChapter);
@@ -31,10 +33,17 @@ function ChaptersPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  const handleCreate = () => {
+  useEffect(() => {
+    loadChapters(courseId);
+  }, [courseId]);
+
+  const handleCreate = async () => {
     if (!title.trim()) return;
-    createChapter({ courseId, title: title.trim(), description: description.trim() });
+    setSaving(true);
+    await createChapter({ courseId, title: title.trim(), description: description.trim() });
+    setSaving(false);
     setTitle("");
     setDescription("");
     setShowCreate(false);
@@ -86,8 +95,8 @@ function ChaptersPage() {
             <Input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Brief description..." className="rounded-xl" />
           </div>
           <div className="flex gap-2">
-            <Button onClick={editId ? handleSaveEdit : handleCreate} className="rounded-xl gradient-brand border-0 text-white" size="sm">
-              {editId ? "Save" : "Create Chapter"}
+            <Button onClick={editId ? handleSaveEdit : handleCreate} disabled={saving} className="rounded-xl gradient-brand border-0 text-white" size="sm">
+              {editId ? "Save" : saving ? "Creating…" : "Create Chapter"}
             </Button>
             <Button variant="ghost" size="sm" className="rounded-xl" onClick={() => { setShowCreate(false); setEditId(null); }}>Cancel</Button>
           </div>
@@ -95,7 +104,12 @@ function ChaptersPage() {
       )}
 
       {/* Chapter List */}
-      {chapters.length === 0 ? (
+      {isLoading ? (
+        <Card className="flex flex-col items-center gap-4 border bg-card p-12 text-center">
+          <div className="h-12 w-12 rounded-full bg-muted animate-pulse" />
+          <p className="text-sm text-muted-foreground">Loading chapters…</p>
+        </Card>
+      ) : chapters.length === 0 ? (
         <Card className="flex flex-col items-center gap-4 border bg-card p-12 text-center">
           <FolderTree className="h-12 w-12 text-muted-foreground" />
           <h2 className="text-lg font-semibold">No chapters yet</h2>

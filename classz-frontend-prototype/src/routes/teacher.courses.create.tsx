@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { toast } from "sonner";
 import { ArrowLeft, ImagePlus, Plus, Save, Upload, X } from "lucide-react";
 import { DashPage } from "@/components/common/DashPage";
 import { Card } from "@/components/ui/card";
@@ -10,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { ROLES } from "@/lib/roles";
 import { cn } from "@/lib/utils";
 import { useTeacherCourseStore, type CountryPrice, type CourseCategory, type PricingModel, type SocialLinks } from "@/lib/teacher/teacher-course-store";
+import { useAuthStore } from "@/lib/stores/auth-store";
 import { COUNTRIES } from "@/lib/i18n/countries";
 import { teacherTeam } from "@/lib/teacherMock";
 
@@ -46,8 +48,10 @@ function ListEditor({ items, onChange, placeholder }: { items: string[]; onChang
 function CreateCoursePage() {
   const navigate = useNavigate();
   const createCourse = useTeacherCourseStore((s) => s.createCourse);
+  const user = useAuthStore((s) => s.user);
   const [tab, setTab] = useState(0);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
 
   // Basic
   const [title, setTitle] = useState("");
@@ -116,10 +120,16 @@ function CreateCoursePage() {
     return true;
   };
 
-  const handleSave = (publish: boolean) => {
+  const handleSave = async (publish: boolean) => {
     if (!validate()) return;
-    createCourse({
-      title: title.trim(), category, subject: finalSubject, customSubject, grade: finalGrade, customGrade,
+    if (!user?.id) {
+      toast.error("You must be logged in as a teacher to save a course.");
+      return;
+    }
+    setSaving(true);
+    const result = await createCourse({
+      title: title.trim(), category, subject: finalSubject, customSubject,
+      grade: finalGrade || "All Levels", customGrade,
       language, description: description.trim(), shortDescription: shortDesc.trim(),
       coverEmoji: emoji, coverColor: color, coverImageUrl, promoVideoUrl: promoVideo,
       teacherBio, teacherHeadline, socialLinks: social,
@@ -133,8 +143,15 @@ function CreateCoursePage() {
       accessDuration, refundPolicy, metaTitle, metaDescription: metaDesc, tags,
       assignedAssistant: assistant, assignedContentManager: contentManager,
       isFeatured, status: publish ? "published" : "draft",
+      teacherId: user?.id,
     });
-    navigate({ to: "/teacher/courses" });
+    setSaving(false);
+    if (result) {
+      toast.success(publish ? "Course published." : "Course saved as draft.");
+      navigate({ to: "/teacher/courses" });
+    } else {
+      toast.error("Could not save the course. Check your connection and try again.");
+    }
   };
 
   return (
@@ -371,8 +388,8 @@ function CreateCoursePage() {
         {/* Sidebar */}
         <div className="space-y-4">
           <Card className="border bg-card p-5 space-y-3">
-            <Button onClick={() => handleSave(true)} className="w-full rounded-xl gradient-brand border-0 text-white"><Upload className="me-1.5 h-4 w-4" /> Publish Course</Button>
-            <Button onClick={() => handleSave(false)} variant="outline" className="w-full rounded-xl"><Save className="me-1.5 h-4 w-4" /> Save Draft</Button>
+            <Button onClick={() => handleSave(true)} disabled={saving} className="w-full rounded-xl gradient-brand border-0 text-white"><Upload className="me-1.5 h-4 w-4" /> {saving ? "Saving…" : "Publish Course"}</Button>
+            <Button onClick={() => handleSave(false)} disabled={saving} variant="outline" className="w-full rounded-xl"><Save className="me-1.5 h-4 w-4" /> {saving ? "Saving…" : "Save Draft"}</Button>
             <Button asChild variant="ghost" className="w-full rounded-xl"><Link to="/teacher/courses">Cancel</Link></Button>
           </Card>
           <Card className="border bg-card p-4">

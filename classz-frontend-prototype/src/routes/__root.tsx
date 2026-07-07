@@ -95,12 +95,16 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   useEffect(() => {
-    const { token, logout, setUser } = useAuthStore.getState();
+    const { token, logout, login } = useAuthStore.getState();
     if (!token) return;
 
+    // getMeApi() returns the raw backend shape (snake_case public_code, no
+    // internalUUID). Route it through login() - the same normalization a
+    // fresh sign-in uses - instead of setUser(), which stores the raw
+    // response as-is and silently drops/mismaps fields like publicCode.
     import("../lib/api/auth").then(({ getMeApi }) =>
       getMeApi()
-        .then((user) => setUser(user))
+        .then((user) => login(token, user))
         .catch(() => logout()),
     );
   }, []);

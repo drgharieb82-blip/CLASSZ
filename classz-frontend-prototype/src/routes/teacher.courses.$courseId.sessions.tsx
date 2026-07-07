@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   ArrowLeft, Calendar, DollarSign, Eye, LayoutGrid, List,
   Lock, Plus, Sparkles, Unlock,
@@ -43,6 +43,8 @@ function SessionsPage() {
   const chapters = listChapters(courseId);
   const allSessions = useTeacherSessionStore((s) => s.sessions.filter((ses) => ses.courseId === courseId).sort((a, b) => a.order - b.order));
   const createSession = useTeacherSessionStore((s) => s.createSession);
+  const loadSessions = useTeacherSessionStore((s) => s.loadSessions);
+  const isLoading = useTeacherSessionStore((s) => s.isLoading);
   const deleteSession = useTeacherSessionStore((s) => s.deleteSession);
   const publishSession = useTeacherSessionStore((s) => s.publishSession);
   const archiveSession = useTeacherSessionStore((s) => s.archiveSession);
@@ -64,6 +66,11 @@ function SessionsPage() {
   const [price, setPrice] = useState("0");
   const [isFree, setIsFree] = useState(false);
   const [sessionType, setSessionType] = useState<string>("lesson");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    loadSessions(courseId);
+  }, [courseId]);
 
   const filterOptions: FilterOption[] = [
     { key: "chapter", label: "Chapter", options: chapters.map((c) => ({ value: c.id, label: c.title })) },
@@ -119,11 +126,12 @@ function SessionsPage() {
     return map;
   }, [paginated, allMaterials, allQuestions, allQuizzes, allExams, allHomework]);
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!title.trim() || !chapterId) return;
-    createSession({
+    setSaving(true);
+    await createSession({
       courseId,
-      chapterId,
+      chapterIds: [chapterId],
       title: title.trim(),
       description: "",
       price: isFree ? 0 : Number(price),
@@ -131,6 +139,7 @@ function SessionsPage() {
       isFreePreview: isFree,
       sessionType: sessionType as any,
     });
+    setSaving(false);
     setTitle("");
     setPrice("0");
     setIsFree(false);
@@ -138,9 +147,9 @@ function SessionsPage() {
   };
 
   const handleDuplicate = (session: typeof allSessions[0]) => {
-    createSession({
+    void createSession({
       courseId,
-      chapterId: session.chapterId,
+      chapterIds: session.chapterId ? [session.chapterId] : [],
       title: `${session.title} (Copy)`,
       description: session.description,
       price: session.price,
@@ -231,7 +240,9 @@ function SessionsPage() {
             </div>
           </div>
           <div className="flex gap-2 pt-1">
-            <Button onClick={handleCreate} disabled={!title.trim() || !chapterId} className="rounded-xl gradient-brand border-0 text-white" size="sm">Create Session</Button>
+            <Button onClick={handleCreate} disabled={!title.trim() || !chapterId || saving} className="rounded-xl gradient-brand border-0 text-white" size="sm">
+              {saving ? "Creating…" : "Create Session"}
+            </Button>
             <Button variant="ghost" size="sm" className="rounded-xl" onClick={() => setShowCreate(false)}>Cancel</Button>
           </div>
         </Card>
@@ -262,7 +273,12 @@ function SessionsPage() {
       </div>
 
       {/* Session Cards/List */}
-      {total === 0 ? (
+      {isLoading ? (
+        <Card className="flex flex-col items-center gap-4 border bg-card p-12 text-center">
+          <div className="h-12 w-12 rounded-full bg-muted animate-pulse" />
+          <p className="text-sm text-muted-foreground">Loading sessions…</p>
+        </Card>
+      ) : total === 0 ? (
         <Card className="flex flex-col items-center gap-4 border bg-gradient-to-br from-primary/5 via-card to-violet-500/5 p-16 text-center">
           <Calendar className="h-12 w-12 text-muted-foreground" />
           <h2 className="text-lg font-semibold">{allSessions.length === 0 ? "No sessions yet" : "No sessions match filters"}</h2>

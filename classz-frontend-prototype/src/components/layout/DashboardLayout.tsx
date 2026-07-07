@@ -12,7 +12,9 @@ import { ROLES, type Role, type NavItem } from "@/lib/roles";
 import { useApp } from "@/lib/app-context";
 
 function CollapsibleNavItem({ item, pathname, onNav, labelFor }: { item: NavItem; pathname: string; onNav?: () => void; labelFor: (label: string) => string }) {
-  const parentActive = pathname === item.to || pathname.startsWith(item.to + "/");
+  const parentActive = item.children
+    ? item.children.some((c) => c.to === item.to ? pathname === c.to : pathname === c.to || pathname.startsWith(c.to + "/"))
+    : pathname === item.to || pathname.startsWith(item.to + "/");
   const [open, setOpen] = useState(parentActive);
 
   return (

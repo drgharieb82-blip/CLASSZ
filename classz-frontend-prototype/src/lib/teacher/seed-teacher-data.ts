@@ -19,6 +19,8 @@ import { useContentTreeStore } from "./content-tree-store";
 const SEED_KEY = "classz-teacher-seeded-v2";
 
 export function seedTeacherData() {
+  // Seeding disabled — data now persists to PostgreSQL via the API
+  return;
   if (localStorage.getItem(SEED_KEY)) return;
   if (useTeacherCourseStore.getState().courses.length > 0) { localStorage.setItem(SEED_KEY, "1"); return; }
 
@@ -49,7 +51,7 @@ export function seedTeacherData() {
 
   const courseIds: string[] = [];
   for (const c of courses) {
-    const created = cs.createCourse({ ...c, pricingModel: (c as any).category === "training" ? "one_time" : "one_time" });
+    const created = cs.createCourse({ ...c, pricingModel: (c as any).category === "training" ? "one_time" : "one_time" }) as unknown as { id: string };
     if (c.enrollCount) cs.updateCourse(created.id, { enrollmentCount: c.enrollCount, revenue: c.enrollCount * c.price * 0.85, rating: 4.5 + Math.random() * 0.4, reviewsCount: Math.floor(c.enrollCount * 0.08) });
     if (c.status === "published") cs.publishCourse(created.id);
     if (c.status === "archived") cs.archiveCourse(created.id);

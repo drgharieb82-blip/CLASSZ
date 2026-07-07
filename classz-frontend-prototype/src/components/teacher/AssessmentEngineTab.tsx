@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useMemo, useState, type ReactNode } from "react";
 import {
   ChevronDown,
@@ -29,6 +29,7 @@ import { useTeacherLessonStore } from "@/lib/teacher/teacher-lesson-store";
 import { useTeacherQuestionStore, type TeacherQuestion } from "@/lib/teacher/teacher-question-store";
 import { useTeacherSessionStore } from "@/lib/teacher/teacher-session-store";
 import { cn } from "@/lib/utils";
+import { AssessmentWorkspace } from "@/components/teacher/AssessmentWorkspace";
 
 const TYPE_OPTIONS = Object.entries(ASSESSMENT_TYPE_LABELS).map(([value, label]) => ({ value, label }));
 const STATUS_OPTIONS = [
@@ -54,7 +55,6 @@ const TEMPLATE_PRESETS: Array<{ key: string; label: string; description: string;
 ];
 
 export function AssessmentEngineTab({ courseId }: { courseId: string }) {
-  const navigate = useNavigate();
   const allAssessments = useTeacherAssessmentStore((state) => state.assessments);
   const createAssessment = useTeacherAssessmentStore((state) => state.createAssessment);
   const deleteAssessment = useTeacherAssessmentStore((state) => state.deleteAssessment);
@@ -78,6 +78,7 @@ export function AssessmentEngineTab({ courseId }: { courseId: string }) {
   const [page, setPage] = useState(1);
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [builderView, setBuilderView] = useState<{ mode: "list" } | { mode: "create" } | { mode: "edit"; assessmentId: string }>({ mode: "list" });
 
   const filterOptions: FilterOption[] = [
     { key: "type", label: "Type", options: TYPE_OPTIONS },
@@ -159,8 +160,7 @@ export function AssessmentEngineTab({ courseId }: { courseId: string }) {
       createdBy: "Teacher",
     });
     toast.success(`${label} template created.`);
-    sessionStorage.setItem("classz-content-studio-tab", "assessments");
-    navigate({ to: "/teacher/assessments/$assessmentId/edit", params: { assessmentId: draft.id } });
+    setBuilderView({ mode: "edit", assessmentId: draft.id });
   };
 
   const togglePublish = (assessment: TeacherAssessment) => {
@@ -172,6 +172,17 @@ export function AssessmentEngineTab({ courseId }: { courseId: string }) {
     publishAssessment(assessment.id);
     toast.success("Assessment published.");
   };
+
+  if (builderView.mode !== "list") {
+    return (
+      <AssessmentWorkspace
+        embedded
+        assessmentId={builderView.mode === "edit" ? builderView.assessmentId : undefined}
+        defaultCourseId={courseId}
+        onExit={() => setBuilderView({ mode: "list" })}
+      />
+    );
+  }
 
   return (
     <div className="space-y-5">
@@ -186,8 +197,8 @@ export function AssessmentEngineTab({ courseId }: { courseId: string }) {
             <button onClick={() => setViewMode("cards")} className={cn("px-2.5 py-1.5 text-xs font-medium transition-colors", viewMode === "cards" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent")}>Cards</button>
             <button onClick={() => setViewMode("table")} className={cn("border-s px-2.5 py-1.5 text-xs font-medium transition-colors", viewMode === "table" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent")}>Table</button>
           </div>
-          <Button asChild className="rounded-xl gradient-brand border-0 text-white" size="sm">
-            <Link to="/teacher/assessments/create"><Plus className="me-1.5 h-4 w-4" />Create Assessment</Link>
+          <Button className="rounded-xl gradient-brand border-0 text-white" size="sm" onClick={() => setBuilderView({ mode: "create" })}>
+            <Plus className="me-1.5 h-4 w-4" />Create Assessment
           </Button>
         </div>
       </div>
@@ -244,8 +255,8 @@ export function AssessmentEngineTab({ courseId }: { courseId: string }) {
           <h2 className="text-lg font-semibold">No assessments yet</h2>
           <p className="max-w-md text-sm text-muted-foreground">Create quizzes, homework, exams, assignments, and assessment drafts from one premium workspace.</p>
           <div className="flex flex-wrap gap-3">
-            <Button asChild className="rounded-xl gradient-brand border-0 text-white">
-              <Link to="/teacher/assessments/create"><Plus className="me-1.5 h-4 w-4" />Create Assessment</Link>
+            <Button className="rounded-xl gradient-brand border-0 text-white" onClick={() => setBuilderView({ mode: "create" })}>
+              <Plus className="me-1.5 h-4 w-4" />Create Assessment
             </Button>
             <Button type="button" variant="outline" className="rounded-xl" onClick={() => createFromTemplate("practice_quiz", "Chapter Quiz")}>Create From Template</Button>
           </div>
@@ -296,7 +307,7 @@ export function AssessmentEngineTab({ courseId }: { courseId: string }) {
                     <td className="px-4 py-3 text-end">
                       <div className="flex items-center justify-end gap-1">
                         <Button asChild variant="ghost" size="icon" className="h-8 w-8 rounded-lg" title="Preview"><Link to="/teacher/assessments/$assessmentId" params={{ assessmentId: assessment.id }}><ChevronDown className="h-4 w-4" /></Link></Button>
-                        <Button asChild variant="ghost" size="icon" className="h-8 w-8 rounded-lg" title="Edit"><Link to="/teacher/assessments/$assessmentId/edit" params={{ assessmentId: assessment.id }}><Edit3 className="h-4 w-4" /></Link></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" title="Edit" onClick={() => setBuilderView({ mode: "edit", assessmentId: assessment.id })}><Edit3 className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" title="Duplicate" onClick={() => { const duplicated = duplicateAssessment(assessment.id); if (duplicated) toast.success("Assessment duplicated as draft."); }}><Copy className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" title={assessment.status === "published" ? "Unpublish" : "Publish"} onClick={() => togglePublish(assessment)}>{assessment.status === "published" ? <EyeOff className="h-4 w-4 text-amber-600" /> : <Upload className="h-4 w-4 text-emerald-600" />}</Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" title="Archive" onClick={() => { archiveAssessment(assessment.id); toast.success("Assessment archived."); }}><Trash2 className="h-4 w-4 text-slate-500" /></Button>
@@ -316,6 +327,7 @@ export function AssessmentEngineTab({ courseId }: { courseId: string }) {
               assessment={assessment}
               expanded={expandedId === assessment.id}
               onToggle={() => setExpandedId((current) => current === assessment.id ? null : assessment.id)}
+              onEdit={() => setBuilderView({ mode: "edit", assessmentId: assessment.id })}
               onPublishToggle={() => togglePublish(assessment)}
               onDuplicate={() => { const duplicated = duplicateAssessment(assessment.id); if (duplicated) toast.success("Assessment duplicated as draft."); }}
               onArchive={() => { archiveAssessment(assessment.id); toast.success("Assessment archived."); }}
@@ -340,6 +352,7 @@ function AssessmentCard({
   assessment,
   expanded,
   onToggle,
+  onEdit,
   onPublishToggle,
   onDuplicate,
   onArchive,
@@ -354,6 +367,7 @@ function AssessmentCard({
   assessment: TeacherAssessment;
   expanded: boolean;
   onToggle: () => void;
+  onEdit: () => void;
   onPublishToggle: () => void;
   onDuplicate: () => void;
   onArchive: () => void;
@@ -414,7 +428,7 @@ function AssessmentCard({
           </div>
           <div className="flex flex-wrap items-center gap-1">
             <Button asChild variant="ghost" size="sm" className="rounded-xl"><Link to="/teacher/assessments/$assessmentId" params={{ assessmentId: assessment.id }}>Preview</Link></Button>
-            <Button asChild variant="ghost" size="sm" className="rounded-xl"><Link to="/teacher/assessments/$assessmentId/edit" params={{ assessmentId: assessment.id }}>Edit</Link></Button>
+            <Button variant="ghost" size="sm" className="rounded-xl" onClick={onEdit}>Edit</Button>
             <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={onDuplicate} title="Duplicate"><Copy className="h-4 w-4" /></Button>
             <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={onPublishToggle} title={assessment.status === "published" ? "Unpublish" : "Publish"}>{assessment.status === "published" ? <EyeOff className="h-4 w-4 text-amber-600" /> : <Upload className="h-4 w-4 text-emerald-600" />}</Button>
             <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={onArchive} title="Archive"><Trash2 className="h-4 w-4 text-slate-500" /></Button>

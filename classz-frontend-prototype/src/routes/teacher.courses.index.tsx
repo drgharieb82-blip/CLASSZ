@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { BookOpen, DollarSign, FolderTree, HelpCircle, Pencil, PlayCircle, Plus, Star, Trash2, Upload, Users, UserCog } from "lucide-react";
 import { DashPage } from "@/components/common/DashPage";
 import { Card } from "@/components/ui/card";
@@ -10,7 +10,8 @@ import { cn } from "@/lib/utils";
 import { FilterBar, type FilterOption } from "@/components/filters/FilterBar";
 import { Pagination } from "@/components/filters/Pagination";
 import { useTeacherCourseStore, type TeacherCourse } from "@/lib/teacher/teacher-course-store";
-import { listChapters } from "@/lib/teacher/teacher-chapter-store";
+import { useAuthStore } from "@/lib/stores/auth-store";
+import { useTeacherChapterStore, listChapters } from "@/lib/teacher/teacher-chapter-store";
 import { listSessions } from "@/lib/teacher/teacher-session-store";
 import { teacherTeam } from "@/lib/teacherMock";
 
@@ -56,10 +57,22 @@ const statusColors: Record<string, string> = {
 
 function TeacherCoursesPage() {
   const courses = useTeacherCourseStore((s) => s.courses);
+  const isLoading = useTeacherCourseStore((s) => s.isLoading);
+  const loadCourses = useTeacherCourseStore((s) => s.loadCourses);
   const publishCourse = useTeacherCourseStore((s) => s.publishCourse);
   const unpublishCourse = useTeacherCourseStore((s) => s.unpublishCourse);
   const deleteCourse = useTeacherCourseStore((s) => s.deleteCourse);
   const archiveCourse = useTeacherCourseStore((s) => s.archiveCourse);
+  const loadChapters = useTeacherChapterStore((s) => s.loadChapters);
+  const user = useAuthStore((s) => s.user);
+
+  useEffect(() => {
+    if (user?.id) {
+      loadCourses(user.id).then(() => {
+        useTeacherCourseStore.getState().courses.forEach((c) => loadChapters(c.id));
+      });
+    }
+  }, [user?.id]);
 
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<Record<string, string>>({});
@@ -113,7 +126,11 @@ function TeacherCoursesPage() {
         placeholder="Search by title or course code..."
       />
 
-      {total === 0 && courses.length === 0 ? (
+      {isLoading ? (
+        <Card className="flex flex-col items-center gap-4 border bg-card p-12 text-center">
+          <p className="text-sm text-muted-foreground">Loading your courses…</p>
+        </Card>
+      ) : total === 0 && courses.length === 0 ? (
         <Card className="flex flex-col items-center gap-4 border bg-card p-12 text-center">
           <BookOpen className="h-12 w-12 text-muted-foreground" />
           <h2 className="text-lg font-semibold">No courses yet</h2>

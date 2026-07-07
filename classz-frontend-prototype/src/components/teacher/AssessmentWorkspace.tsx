@@ -1,8 +1,9 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { ChevronRight, ClipboardList } from "lucide-react";
 import { toast } from "sonner";
 import { DashPage } from "@/components/common/DashPage";
+import { TeacherQuestionBankWorkspace } from "@/components/question/TeacherQuestionBankWorkspace";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -25,12 +26,7 @@ import { useTeacherChapterStore } from "@/lib/teacher/teacher-chapter-store";
 import { useContentTreeStore } from "@/lib/teacher/content-tree-store";
 import { useTeacherCourseStore } from "@/lib/teacher/teacher-course-store";
 import { useTeacherLessonStore } from "@/lib/teacher/teacher-lesson-store";
-import {
-  useTeacherQuestionStore,
-  type QuestionDifficulty,
-  type QuestionStatus,
-  type QuestionType,
-} from "@/lib/teacher/teacher-question-store";
+import { useTeacherQuestionStore } from "@/lib/teacher/teacher-question-store";
 import { useTeacherSessionStore } from "@/lib/teacher/teacher-session-store";
 
 const ASSESSMENT_CREATE_STEPS = [
@@ -140,7 +136,7 @@ type AcademicLinkRow = {
   sessionId: string;
 };
 
-const createEmptyDraft = (): AssessmentDraft => ({
+const createEmptyDraft = (defaultCourseId?: string): AssessmentDraft => ({
   assessmentType: null,
   title: "",
   subtitle: "",
@@ -149,7 +145,7 @@ const createEmptyDraft = (): AssessmentDraft => ({
   thumbnail: "",
   tags: "",
   questionIds: [],
-  courseIds: [],
+  courseIds: defaultCourseId ? [defaultCourseId] : [],
   chapterIds: [],
   lessonIds: [],
   conceptIds: [],
@@ -182,12 +178,12 @@ function buildDraftFromAssessment(assessment: TeacherAssessment): AssessmentDraf
   };
 }
 
-function buildTemplateDraft(templateKey?: AssessmentTemplateKey): AssessmentDraft {
-  if (!templateKey) return createEmptyDraft();
+function buildTemplateDraft(templateKey?: AssessmentTemplateKey, defaultCourseId?: string): AssessmentDraft {
+  if (!templateKey) return createEmptyDraft(defaultCourseId);
   const template = TEMPLATE_CONFIG[templateKey];
   const preset = createAssessmentPreset(template.type);
   return {
-    ...createEmptyDraft(),
+    ...createEmptyDraft(defaultCourseId),
     assessmentType: template.type,
     title: template.label,
     description: template.description,
@@ -229,18 +225,38 @@ function SummaryRow({ label, value, mono }: { label: string; value?: string | nu
   );
 }
 
+function PageChrome({ embedded, title, subtitle, icon, children }: {
+  embedded: boolean; title: string; subtitle: string; icon: typeof ClipboardList; children: ReactNode;
+}) {
+  if (embedded) return <>{children}</>;
+  return <DashPage role="teacher" title={title} subtitle={subtitle} icon={icon}>{children}</DashPage>;
+}
+
 export function AssessmentWorkspace({
   assessmentId,
   template,
+  defaultCourseId,
+  embedded = false,
+  onExit,
 }: {
   assessmentId?: string;
   template?: AssessmentTemplateKey;
+  defaultCourseId?: string;
+  embedded?: boolean;
+  onExit?: () => void;
 }) {
   const navigate = useNavigate();
+  const exit = () => {
+    sessionStorage.setItem("classz-content-studio-tab", "assessments");
+    if (onExit) onExit();
+    else navigate({ to: "/teacher/content-studio" });
+  };
   const assessments = useTeacherAssessmentStore((state) => state.assessments);
   const createAssessment = useTeacherAssessmentStore((state) => state.createAssessment);
   const updateAssessment = useTeacherAssessmentStore((state) => state.updateAssessment);
   const questions = useTeacherQuestionStore((state) => state.questions);
+  const linkQuestionToAssessment = useTeacherQuestionStore((state) => state.linkQuestionToAssessment);
+  const unlinkQuestionFromAssessment = useTeacherQuestionStore((state) => state.unlinkQuestionFromAssessment);
   const courses = useTeacherCourseStore((state) => state.courses);
   const chapters = useTeacherChapterStore((state) => state.chapters);
   const lessons = useTeacherLessonStore((state) => state.lessons);
@@ -250,14 +266,14 @@ export function AssessmentWorkspace({
 
   const [activeStep, setActiveStep] = useState<(typeof ASSESSMENT_CREATE_STEPS)[number]>("Type");
   const [draft, setDraft] = useState<AssessmentDraft>(() =>
-    existingAssessment ? buildDraftFromAssessment(existingAssessment) : buildTemplateDraft(template),
+    existingAssessment ? buildDraftFromAssessment(existingAssessment) : buildTemplateDraft(template, defaultCourseId),
   );
   const [questionSearch, setQuestionSearch] = useState("");
-  const [questionTypeFilter, setQuestionTypeFilter] = useState<QuestionType | "all">("all");
-  const [questionDifficultyFilter, setQuestionDifficultyFilter] = useState<QuestionDifficulty | "all">("all");
-  const [questionStatusFilter, setQuestionStatusFilter] = useState<QuestionStatus | "all">("all");
+  const [questionTypeFilter, setQuestionTypeFilter] = useState<string>("all");
+  const [questionDifficultyFilter, setQuestionDifficultyFilter] = useState<string>("all");
+  const [questionStatusFilter, setQuestionStatusFilter] = useState<string>("all");
   const [academicRows, setAcademicRows] = useState<AcademicLinkRow[]>(() =>
-    buildAcademicRowsFromDraft(existingAssessment ? buildDraftFromAssessment(existingAssessment) : buildTemplateDraft(template)),
+    buildAcademicRowsFromDraft(existingAssessment ? buildDraftFromAssessment(existingAssessment) : buildTemplateDraft(template, defaultCourseId)),
   );
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -270,11 +286,11 @@ export function AssessmentWorkspace({
     }
 
     if (!assessmentId) {
-      const nextDraft = buildTemplateDraft(template);
+      const nextDraft = buildTemplateDraft(template, defaultCourseId);
       setDraft(nextDraft);
       setAcademicRows(buildAcademicRowsFromDraft(nextDraft));
     }
-  }, [assessmentId, existingAssessment, template]);
+  }, [assessmentId, existingAssessment, template, defaultCourseId]);
 
   const pageTitle = assessmentId ? "Edit Assessment" : "Create Assessment";
   const pageSubtitle = assessmentId
@@ -470,65 +486,92 @@ export function AssessmentWorkspace({
       status,
     };
 
+    const previousQuestionIds = existingAssessment?.questionIds || [];
+    let savedAssessmentId = existingAssessment?.id;
+
     if (existingAssessment) {
       updateAssessment(existingAssessment.id, payload);
+      savedAssessmentId = existingAssessment.id;
       toast.success(status === "published" ? "Assessment published." : "Draft updated.");
     } else {
-      createAssessment({
+      const createdAssessment = createAssessment({
         ...payload,
         createdBy: "Teacher",
       });
+      savedAssessmentId = createdAssessment.id;
       toast.success(status === "published" ? "Assessment published." : "Draft saved.");
     }
 
+    if (savedAssessmentId) {
+      const removedQuestionIds = previousQuestionIds.filter((questionId) => !payload.questionIds.includes(questionId));
+      const addedQuestionIds = payload.questionIds.filter((questionId) => !previousQuestionIds.includes(questionId));
+
+      for (const questionId of removedQuestionIds) {
+        unlinkQuestionFromAssessment(questionId, savedAssessmentId);
+      }
+      for (const questionId of addedQuestionIds) {
+        linkQuestionToAssessment(questionId, savedAssessmentId);
+      }
+    }
+
     setSubmitError(null);
-    sessionStorage.setItem("classz-content-studio-tab", "assessments");
-    navigate({ to: "/teacher/content-studio" });
+    exit();
   };
 
   if (assessmentId && !existingAssessment) {
     return (
-      <DashPage
-        role="teacher"
-        title="Assessment Not Found"
-        subtitle="The requested assessment could not be loaded."
-        icon={ClipboardList}
-      >
+      <PageChrome embedded={embedded} title="Assessment Not Found" subtitle="The requested assessment could not be loaded." icon={ClipboardList}>
         <Card className="flex flex-col items-center gap-4 border bg-card p-12 text-center">
           <p className="text-sm text-muted-foreground">
             Choose another assessment from the Assessment Engine.
           </p>
-          <Button asChild>
-            <Link to="/teacher/content-studio">Back to Content Studio</Link>
-          </Button>
+          {embedded ? (
+            <Button onClick={exit}>Back to Content Studio</Button>
+          ) : (
+            <Button asChild>
+              <Link to="/teacher/content-studio">Back to Content Studio</Link>
+            </Button>
+          )}
         </Card>
-      </DashPage>
+      </PageChrome>
     );
   }
 
   return (
-    <DashPage role="teacher" title={pageTitle} subtitle={pageSubtitle} icon={ClipboardList}>
-      <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-        <Link
-          to="/teacher/content-studio"
-          className="font-medium text-foreground transition-colors hover:text-primary"
-          onClick={() => sessionStorage.setItem("classz-content-studio-tab", "assessments")}
+    <PageChrome embedded={embedded} title={pageTitle} subtitle={pageSubtitle} icon={ClipboardList}>
+      {embedded ? (
+        <button
+          type="button"
+          onClick={exit}
+          className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
-          Content Studio
-        </Link>
-        <ChevronRight className="h-4 w-4" />
-        <span>Assessment Engine</span>
-        <ChevronRight className="h-4 w-4" />
-        <span className="text-foreground">{pageTitle}</span>
-      </div>
+          ← Back to Assessment Engine
+        </button>
+      ) : (
+        <>
+          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+            <Link
+              to="/teacher/content-studio"
+              className="font-medium text-foreground transition-colors hover:text-primary"
+              onClick={() => sessionStorage.setItem("classz-content-studio-tab", "assessments")}
+            >
+              Content Studio
+            </Link>
+            <ChevronRight className="h-4 w-4" />
+            <span>Assessment Engine</span>
+            <ChevronRight className="h-4 w-4" />
+            <span className="text-foreground">{pageTitle}</span>
+          </div>
 
-      <Link
-        to="/teacher/content-studio"
-        className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-        onClick={() => sessionStorage.setItem("classz-content-studio-tab", "assessments")}
-      >
-        ← Back to Assessment Engine
-      </Link>
+          <Link
+            to="/teacher/content-studio"
+            className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            onClick={() => sessionStorage.setItem("classz-content-studio-tab", "assessments")}
+          >
+            ← Back to Assessment Engine
+          </Link>
+        </>
+      )}
 
       {existingAssessment?.status === "published" ? (
         <Card className="border-amber-300 bg-amber-500/5 p-4 text-sm text-amber-700">
@@ -536,56 +579,105 @@ export function AssessmentWorkspace({
         </Card>
       ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)_340px]">
-        <Card className="border bg-card p-5">
-          <div className="space-y-4">
-            <div>
-              <h2 className="text-sm font-semibold">Build flow</h2>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Move step by step and fill each section when ready.
-              </p>
-            </div>
+      <div className="grid gap-6 xl:grid-cols-[220px_minmax(0,1fr)]">
+        <div className="space-y-6">
+          <Card className="border bg-card p-4">
+            <div className="space-y-4">
+              <div>
+                <h2 className="text-sm font-semibold">Build flow</h2>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Move step by step and fill each section when ready.
+                </p>
+              </div>
 
-            <div className="space-y-2">
-              {ASSESSMENT_CREATE_STEPS.map((step, index) => {
-                const isActive = step === activeStep;
-                const hasIssue = step === "Publish"
-                  && publishValidationMessages.some((message) => !message.includes("optional"));
+              <div className="space-y-2">
+                {ASSESSMENT_CREATE_STEPS.map((step, index) => {
+                  const isActive = step === activeStep;
+                  const hasIssue = step === "Publish"
+                    && publishValidationMessages.some((message) => !message.includes("optional"));
 
-                return (
-                  <button
-                    key={step}
-                    type="button"
-                    onClick={() => setActiveStep(step)}
-                    className={cn(
-                      "flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition-colors",
-                      isActive
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border text-muted-foreground hover:bg-accent hover:text-foreground",
-                    )}
-                  >
-                    <span
+                  return (
+                    <button
+                      key={step}
+                      type="button"
+                      onClick={() => setActiveStep(step)}
                       className={cn(
-                        "grid h-7 w-7 shrink-0 place-items-center rounded-full border text-xs font-semibold",
+                        "flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition-colors",
                         isActive
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border bg-muted text-muted-foreground",
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-muted-foreground hover:bg-accent hover:text-foreground",
                       )}
                     >
-                      {index + 1}
-                    </span>
-                    <span className="flex-1 text-sm font-medium">{step}</span>
-                    {hasIssue ? (
-                      <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] text-destructive">
-                        Warn
+                      <span
+                        className={cn(
+                          "grid h-7 w-7 shrink-0 place-items-center rounded-full border text-xs font-semibold",
+                          isActive
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border bg-muted text-muted-foreground",
+                        )}
+                      >
+                        {index + 1}
                       </span>
-                    ) : null}
-                  </button>
-                );
-              })}
+                      <span className="flex-1 text-sm font-medium">{step}</span>
+                      {hasIssue ? (
+                        <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] text-destructive">
+                          Warn
+                        </span>
+                      ) : null}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        </Card>
+          </Card>
+
+          <Card className="border bg-card p-4">
+            <div className="space-y-4">
+              <h2 className="text-sm font-semibold">Assessment summary</h2>
+              <div className="space-y-3 text-sm">
+                <SummaryRow label="Type" value={draft.assessmentType ? ASSESSMENT_TYPE_LABELS[draft.assessmentType] : "Not selected yet"} />
+                <SummaryRow label="Name" value={draft.title || "Untitled assessment"} />
+                <SummaryRow label="Questions" value={`${draft.questionIds.length} selected`} />
+                <SummaryRow label="Duration" value={draft.settings.durationMinutes ? `${draft.settings.durationMinutes} minutes` : "Not set"} />
+                <SummaryRow label="Attempts" value={draft.settings.attemptLimit ?? "Not set"} />
+                <SummaryRow label="Total score" value={draft.settings.totalScore ?? "Not set"} />
+                <SummaryRow label="XP reward" value={draft.rewards.xpReward ?? "Not set"} />
+                <SummaryRow label="Visibility" value={draft.visibility.replace(/_/g, " ")} />
+                <SummaryRow label="Academic links" value={academicLinkCount} />
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">Description</p>
+                  <p className="mt-1 text-muted-foreground">
+                    {draft.description || "Add a description to explain the assessment scope."}
+                  </p>
+                </div>
+                {draft.tags ? (
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground">Tags</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {draft.tags
+                        .split(",")
+                        .map((tag) => tag.trim())
+                        .filter(Boolean)
+                        .map((tag) => (
+                          <Badge key={tag} variant="outline" className="rounded-full">
+                            {tag}
+                          </Badge>
+                        ))}
+                    </div>
+                  </div>
+                ) : null}
+                <div className="flex flex-wrap gap-2 pt-2">
+                  <Button type="button" size="sm" onClick={() => saveAssessment("draft")}>
+                    {existingAssessment ? "Update Draft" : "Save Draft"}
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" onClick={() => saveAssessment("published")}>
+                    Publish
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
 
         <Card className="border bg-card p-5">
           {activeStep === "Type" ? (
@@ -602,7 +694,7 @@ export function AssessmentWorkspace({
                   <button
                     key={key}
                     type="button"
-                    onClick={() => setDraft(buildTemplateDraft(key as AssessmentTemplateKey))}
+                    onClick={() => setDraft(buildTemplateDraft(key as AssessmentTemplateKey, defaultCourseId))}
                     className="rounded-2xl border p-4 text-left transition-colors hover:bg-accent"
                   >
                     <p className="text-sm font-semibold">{config.label}</p>
@@ -702,72 +794,20 @@ export function AssessmentWorkspace({
           ) : activeStep === "Questions" ? (
             <div className="space-y-5">
               <div>
-                <h2 className="text-sm font-semibold">Manual question selection</h2>
+                <h2 className="text-sm font-semibold">Question bank workspace</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Search your question bank and attach only question IDs to this assessment.
+                  Reuse the full Question Bank to search, filter, preview, bulk select, and attach questions at scale.
                 </p>
               </div>
 
-              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                <div className="space-y-2 xl:col-span-4">
-                  <Label htmlFor="question-search">Search</Label>
-                  <Input
-                    id="question-search"
-                    value={questionSearch}
-                    onChange={(event) => setQuestionSearch(event.target.value)}
-                    placeholder="Search by text, concept, title, or code"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="question-type-filter">Type</Label>
-                  <select
-                    id="question-type-filter"
-                    value={questionTypeFilter}
-                    onChange={(event) => setQuestionTypeFilter(event.target.value as QuestionType | "all")}
-                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                  >
-                    <option value="all">All types</option>
-                    {Array.from(new Set(questions.map((question) => question.type))).map((questionType) => (
-                      <option key={questionType} value={questionType}>
-                        {questionType.replace(/_/g, " ")}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="question-difficulty-filter">Difficulty</Label>
-                  <select
-                    id="question-difficulty-filter"
-                    value={questionDifficultyFilter}
-                    onChange={(event) => setQuestionDifficultyFilter(event.target.value as QuestionDifficulty | "all")}
-                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                  >
-                    <option value="all">All difficulties</option>
-                    {["easy", "medium", "hard", "advanced"].map((difficulty) => (
-                      <option key={difficulty} value={difficulty}>
-                        {difficulty}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="question-status-filter">Status</Label>
-                  <select
-                    id="question-status-filter"
-                    value={questionStatusFilter}
-                    onChange={(event) => setQuestionStatusFilter(event.target.value as QuestionStatus | "all")}
-                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                  >
-                    <option value="all">All statuses</option>
-                    {["draft", "published", "archived"].map((status) => (
-                      <option key={status} value={status}>
-                        {status}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+              <TeacherQuestionBankWorkspace
+                mode="picker"
+                showInsights={false}
+                attachedQuestionIds={draft.questionIds}
+                onAttachedQuestionIdsChange={(questionIds) => updateDraftField("questionIds", questionIds)}
+              />
 
+              {false ? (
               <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
@@ -858,6 +898,7 @@ export function AssessmentWorkspace({
                   </div>
                 </Card>
               </div>
+              ) : null}
             </div>
           ) : activeStep === "Settings" ? (
             <div className="space-y-5">
@@ -1298,53 +1339,7 @@ export function AssessmentWorkspace({
           )}
         </Card>
 
-        <Card className="border bg-card p-5">
-          <div className="space-y-4">
-            <h2 className="text-sm font-semibold">Assessment summary</h2>
-            <div className="space-y-3 text-sm">
-              <SummaryRow label="Type" value={draft.assessmentType ? ASSESSMENT_TYPE_LABELS[draft.assessmentType] : "Not selected yet"} />
-              <SummaryRow label="Name" value={draft.title || "Untitled assessment"} />
-              <SummaryRow label="Questions" value={`${draft.questionIds.length} selected`} />
-              <SummaryRow label="Duration" value={draft.settings.durationMinutes ? `${draft.settings.durationMinutes} minutes` : "Not set"} />
-              <SummaryRow label="Attempts" value={draft.settings.attemptLimit ?? "Not set"} />
-              <SummaryRow label="Total score" value={draft.settings.totalScore ?? "Not set"} />
-              <SummaryRow label="XP reward" value={draft.rewards.xpReward ?? "Not set"} />
-              <SummaryRow label="Visibility" value={draft.visibility.replace(/_/g, " ")} />
-              <SummaryRow label="Academic links" value={academicLinkCount} />
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">Description</p>
-                <p className="mt-1 text-muted-foreground">
-                  {draft.description || "Add a description to explain the assessment scope."}
-                </p>
-              </div>
-              {draft.tags ? (
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground">Tags</p>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {draft.tags
-                      .split(",")
-                      .map((tag) => tag.trim())
-                      .filter(Boolean)
-                      .map((tag) => (
-                        <Badge key={tag} variant="outline" className="rounded-full">
-                          {tag}
-                        </Badge>
-                      ))}
-                  </div>
-                </div>
-              ) : null}
-              <div className="flex flex-wrap gap-2 pt-2">
-                <Button type="button" size="sm" onClick={() => saveAssessment("draft")}>
-                  {existingAssessment ? "Update Draft" : "Save Draft"}
-                </Button>
-                <Button type="button" size="sm" variant="outline" onClick={() => saveAssessment("published")}>
-                  Publish
-                </Button>
-              </div>
-            </div>
-          </div>
-        </Card>
       </div>
-    </DashPage>
+    </PageChrome>
   );
 }

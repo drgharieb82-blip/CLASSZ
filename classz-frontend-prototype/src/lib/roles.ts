@@ -11,12 +11,15 @@ import {
   ShieldAlert, AlertTriangle, TrendingUp, Store, ShoppingCart, BadgeDollarSign,
   Tags, RefreshCw, Banknote, ReceiptText, Gift, FileSpreadsheet, Calculator,
   Megaphone as MegaphoneIcon, Lightbulb, BrainCog, Target, Telescope, FileOutput,
-  Wand2,
+  Wand2, Building2, ArrowDownToLine, HandCoins, Scale, Landmark, FileClock,
+  Headphones, TicketCheck, HeartPulse, Lock, UserCheck,
+  ClipboardCheck, CalendarCheck, Star, Gauge, Import, Send,
+  Hash, Workflow,
 } from "lucide-react";
 
 export type Role =
   | "student" | "teacher" | "assistant" | "parent" | "admin"
-  | "developer" | "content" | "finance" | "superadmin";
+  | "developer" | "content" | "finance" | "superadmin" | "assistant_teacher";
 
 export interface NavItem {
   label: string;
@@ -202,18 +205,19 @@ export const ROLES: Record<Role, RoleConfig> = {
     ],
   },
   content: {
-    key: "content", name: "Content Manager", tagline: "Curate content", color: "from-pink-500 to-rose-500",
+    key: "content", name: "cm.roleName", tagline: "cm.roleTagline", color: "from-pink-500 to-rose-500",
     icon: Layers, home: "/content",
     nav: [
-      { group: "Content", items: [
-        { label: "Dashboard", to: "/content", icon: LayoutDashboard },
-        { label: "Curriculum", to: "/content/curriculum", icon: FolderTree },
-        { label: "Lesson Review", to: "/content/lesson-review", icon: FileText },
-        { label: "Question Review", to: "/content/question-review", icon: ListChecks },
+      { group: "cm.content", items: [
+        { label: "cm.dashboard", to: "/content", icon: LayoutDashboard },
+        { label: "cm.questionReview", to: "/content/question-review", icon: ListChecks },
+        { label: "cm.importJobs", to: "/content/import", icon: Upload },
+        { label: "cm.mediaLibrary", to: "/content/media", icon: Image },
       ]},
-      { group: "Media", items: [
-        { label: "Media Library", to: "/content/media", icon: Image },
-        { label: "Import Content", to: "/content/import", icon: Upload },
+      { group: "cm.manage", items: [
+        { label: "cm.tagsConcepts", to: "/content/tags-concepts", icon: Hash },
+        { label: "cm.publishingQueue", to: "/content/publishing-queue", icon: Send },
+        { label: "cm.reports", to: "/content/reports", icon: FileBarChart },
       ]},
     ],
   },
@@ -233,14 +237,49 @@ export const ROLES: Record<Role, RoleConfig> = {
   },
   superadmin: {
     key: "superadmin", name: "Super Admin", tagline: "Total control", color: "from-violet-600 to-fuchsia-600",
-    icon: Globe, home: "/super",
+    icon: Globe, home: "/admin",
     nav: [
-      { group: "Control", items: [
-        { label: "Dashboard", to: "/super", icon: LayoutDashboard },
-        { label: "Global Analytics", to: "/super/analytics", icon: BarChart3 },
-        { label: "System Control", to: "/super/system", icon: SlidersHorizontal },
-        { label: "Audit Logs", to: "/super/audit", icon: ScrollText },
-        { label: "Role Access Matrix", to: "/super/access-matrix", icon: Grid3x3 },
+      { group: "", items: [
+        { label: "sa.platform", to: "/admin", icon: LayoutDashboard, children: [
+          { label: "sa.dashboard", to: "/admin", icon: LayoutDashboard },
+          { label: "sa.academies", to: "/admin/academies", icon: Building2 },
+          { label: "sa.teachers", to: "/admin/teachers", icon: PencilRuler },
+          { label: "sa.students", to: "/admin/students", icon: GraduationCap },
+          { label: "sa.courses", to: "/admin/courses", icon: BookOpen },
+        ]},
+        { label: "sa.finance", to: "/admin/finance", icon: Landmark, children: [
+          { label: "pf.revenue", to: "/admin/finance", icon: DollarSign },
+          { label: "pf.withdrawals", to: "/admin/finance/withdrawals", icon: ArrowDownToLine },
+          { label: "pf.subscriptions", to: "/admin/finance/subscriptions", icon: RefreshCw },
+        ]},
+        { label: "sa.operations", to: "/admin/support", icon: Headphones, children: [
+          { label: "sa.supportTickets", to: "/admin/support/tickets", icon: TicketCheck },
+          { label: "sa.reports", to: "/admin/support/reports", icon: FileBarChart },
+        ]},
+        { label: "sa.system", to: "/admin/settings", icon: Settings, children: [
+          { label: "sa.settings", to: "/admin/settings", icon: Settings },
+          { label: "sa.adminUsers", to: "/admin/admin-users", icon: Users },
+          { label: "sa.auditLogs", to: "/admin/audit-logs", icon: ScrollText },
+        ]},
+      ]},
+    ],
+  },
+  assistant_teacher: {
+    key: "assistant_teacher", name: "at.roleName", tagline: "at.roleTagline", color: "from-teal-500 to-cyan-500",
+    icon: UserCheck, home: "/assistant-teacher",
+    nav: [
+      { group: "at.main", items: [
+        { label: "at.dashboard", to: "/assistant-teacher", icon: LayoutDashboard },
+        { label: "at.studentPods", to: "/assistant-teacher/student-pods", icon: UsersRound },
+        { label: "at.gradingQueue", to: "/assistant-teacher/grading-queue", icon: Inbox },
+        { label: "at.messages", to: "/assistant-teacher/messages", icon: MessageSquare },
+        { label: "at.followUp", to: "/assistant-teacher/follow-up", icon: AlertTriangle },
+      ]},
+      { group: "at.work", items: [
+        { label: "at.tasks", to: "/assistant-teacher/tasks", icon: KanbanSquare },
+        { label: "at.notes", to: "/assistant-teacher/notes", icon: StickyNote },
+        { label: "at.schedule", to: "/assistant-teacher/schedule", icon: CalendarDays },
+        { label: "at.performance", to: "/assistant-teacher/performance", icon: BarChart3 },
       ]},
     ],
   },

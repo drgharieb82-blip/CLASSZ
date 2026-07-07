@@ -1,5 +1,9 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import {
+  createChapter as createChapterApi,
+  listChapters as listChaptersApi,
+  type ChapterRead,
+} from "@/lib/api/chapters";
 
 export type ChapterStatus = "draft" | "published" | "archived";
 
@@ -23,7 +27,9 @@ export type CreateChapterData = Pick<TeacherChapter, "courseId" | "title"> & {
 
 interface ChapterState {
   chapters: TeacherChapter[];
-  createChapter: (data: CreateChapterData) => TeacherChapter;
+  isLoading: boolean;
+  createChapter: (data: CreateChapterData) => Promise<TeacherChapter | null>;
+  loadChapters: (courseId: string) => Promise<void>;
   updateChapter: (chapterId: string, data: Partial<TeacherChapter>) => void;
   deleteChapter: (chapterId: string) => void;
   publishChapter: (chapterId: string) => void;
@@ -31,74 +37,86 @@ interface ChapterState {
   reorderChapters: (courseId: string, orderedIds: string[]) => void;
 }
 
-let codeCounter = 0;
-
-function generateId(): string {
-  return `ch-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+function toChapter(r: ChapterRead): TeacherChapter {
+  return {
+    id: r.id,
+    publicCode: r.public_code,
+    courseId: r.course_id,
+    title: r.title,
+    description: "",
+    order: r.position + 1,
+    status: "draft",
+    isLocked: false,
+    createdAt: r.created_at,
+    updatedAt: r.created_at,
+  };
 }
 
-function generateCode(): string {
-  codeCounter++;
-  return `CHP-26-${codeCounter.toString().padStart(4, "0")}`;
-}
+export const useTeacherChapterStore = create<ChapterState>()((set, get) => ({
+  chapters: [],
+  isLoading: false,
 
-export const useTeacherChapterStore = create<ChapterState>()(
-  persist(
-    (set, get) => ({
-      chapters: [],
+  createChapter: async (data) => {
+    const payload = {
+      course_id: data.courseId,
+      title: data.title,
+    };
+    try {
+      const chapterRead = await createChapterApi(payload);
+      const chapter = toChapter(chapterRead);
+      set((state) => ({ chapters: [...state.chapters, chapter] }));
+      return chapter;
+    } catch {
+      return null;
+    }
+  },
 
-      createChapter: (data) => {
-        const courseChapters = get().chapters.filter((c) => c.courseId === data.courseId);
-        const now = new Date().toISOString();
-        const chapter: TeacherChapter = {
-          id: generateId(),
-          publicCode: generateCode(),
-          courseId: data.courseId,
-          title: data.title,
-          description: data.description || "",
-          order: courseChapters.length + 1,
-          status: data.status || "draft",
-          isLocked: false,
-          createdAt: now,
-          updatedAt: now,
-        };
-        set((state) => ({ chapters: [...state.chapters, chapter] }));
-        return chapter;
-      },
+  loadChapters: async (courseId) => {
+    set({ isLoading: true });
+    try {
+      const apiChapters = await listChaptersApi(courseId);
+      set((state) => ({
+        chapters: [
+          ...state.chapters.filter((c) => c.courseId !== courseId),
+          ...apiChapters.map(toChapter),
+        ],
+        isLoading: false,
+      }));
+    } catch {
+      set({ isLoading: false });
+    }
+  },
 
-      updateChapter: (chapterId, data) => {
-        set((state) => ({
-          chapters: state.chapters.map((c) =>
-            c.id === chapterId ? { ...c, ...data, updatedAt: new Date().toISOString() } : c,
-          ),
-        }));
-      },
+  updateChapter: (chapterId, data) => {
+    set((state) => ({
+      chapters: state.chapters.map((c) =>
+        c.id === chapterId ? { ...c, ...data, updatedAt: new Date().toISOString() } : c,
+      ),
+    }));
+  },
 
-      deleteChapter: (chapterId) => {
-        set((state) => ({ chapters: state.chapters.filter((c) => c.id !== chapterId) }));
-      },
+  deleteChapter: (chapterId) => {
+    set((state) => ({ chapters: state.chapters.filter((c) => c.id !== chapterId) }));
+  },
 
-      publishChapter: (chapterId) => {
-        get().updateChapter(chapterId, { status: "published" });
-      },
+  publishChapter: (chapterId) => {
+    get().updateChapter(chapterId, { status: "published" });
+  },
 
-      archiveChapter: (chapterId) => {
-        get().updateChapter(chapterId, { status: "archived" });
-      },
+  archiveChapter: (chapterId) => {
+    get().updateChapter(chapterId, { status: "archived" });
+  },
 
-      reorderChapters: (courseId, orderedIds) => {
-        set((state) => ({
-          chapters: state.chapters.map((c) => {
-            if (c.courseId !== courseId) return c;
-            const idx = orderedIds.indexOf(c.id);
-            return idx >= 0 ? { ...c, order: idx + 1 } : c;
-          }),
-        }));
-      },
-    }),
-    { name: "classz-teacher-chapters" },
-  ),
-);
+  reorderChapters: (courseId, orderedIds) => {
+    set((state) => ({
+      chapters: state.chapters.map((c) => {
+        if (c.courseId !== courseId) return c;
+        const idx = orderedIds.indexOf(c.id);
+        return idx >= 0 ? { ...c, order: idx + 1 } : c;
+      }),
+    }));
+  },
+}));
 
 export function listChapters(courseId: string): TeacherChapter[] {
   return useTeacherChapterStore.getState().chapters

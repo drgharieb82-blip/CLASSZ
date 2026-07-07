@@ -1,5 +1,9 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import {
+  createSession as createSessionApi,
+  listSessions as listSessionsApi,
+  type SessionRead as ApiSessionRead,
+} from "@/lib/api/sessions";
 
 export type SessionStatus = "draft" | "published" | "archived";
 export type AccessStatus = "locked" | "unlocked" | "scheduled";
@@ -10,6 +14,9 @@ export interface TeacherSession {
   id: string;
   publicCode: string;
   courseId: string;
+  /** Convenience/display value derived from chapterIds[0]. A Session is not owned by
+   * one Chapter (it belongs directly to a Course) - it may reference several chapters,
+   * e.g. a revision session spanning multiple chapters. Use chapterIds for the real list. */
   chapterId: string;
   title: string;
   description: string;
@@ -42,8 +49,9 @@ export interface TeacherSession {
 }
 
 export type CreateSessionData = Pick<TeacherSession,
-  "courseId" | "chapterId" | "title" | "description" | "price" | "currency"
+  "courseId" | "title" | "description" | "price" | "currency"
 > & {
+  chapterIds?: string[];
   status?: SessionStatus;
   accessStatus?: AccessStatus;
   isFreePreview?: boolean;
@@ -55,7 +63,9 @@ export type CreateSessionData = Pick<TeacherSession,
 
 interface SessionState {
   sessions: TeacherSession[];
-  createSession: (data: CreateSessionData) => TeacherSession;
+  isLoading: boolean;
+  createSession: (data: CreateSessionData) => Promise<TeacherSession | null>;
+  loadSessions: (courseId: string) => Promise<void>;
   updateSession: (sessionId: string, data: Partial<TeacherSession>) => void;
   deleteSession: (sessionId: string) => void;
   publishSession: (sessionId: string) => void;
@@ -65,107 +75,126 @@ interface SessionState {
   reorderSessions: (chapterId: string, orderedIds: string[]) => void;
 }
 
-let codeCounter = 0;
-
-function generateId(): string {
-  return `ses-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+function toSession(r: ApiSessionRead): TeacherSession {
+  const chapterIds = r.chapters.map((c) => c.id);
+  return {
+    id: r.id,
+    publicCode: r.public_code,
+    courseId: r.course_id,
+    chapterId: chapterIds[0] || "",
+    title: r.title,
+    description: r.description || "",
+    order: r.position + 1,
+    price: 0,
+    currency: "USD",
+    status: "draft",
+    accessStatus: r.is_locked ? "locked" : "unlocked",
+    openAt: r.release_at || "",
+    closeAt: r.hide_at || "",
+    durationMinutes: 0,
+    isFreePreview: r.is_free_preview,
+    createdAt: r.created_at,
+    updatedAt: r.created_at,
+    sessionType: "lesson",
+    chapterIds,
+    lessonIds: [],
+    conceptIds: [],
+    atomicConceptIds: [],
+    materialIds: [],
+    questionIds: [],
+    quizIds: [],
+    examIds: [],
+    homeworkIds: [],
+    hasQuiz: false,
+    hasExam: false,
+    hasHomework: false,
+    hasPractice: false,
+  };
 }
 
-function generateCode(): string {
-  codeCounter++;
-  return `SES-26-${codeCounter.toString().padStart(4, "0")}`;
-}
+export const useTeacherSessionStore = create<SessionState>()((set, get) => ({
+  sessions: [],
+  isLoading: false,
 
-export const useTeacherSessionStore = create<SessionState>()(
-  persist(
-    (set, get) => ({
-      sessions: [],
+  createSession: async (data) => {
+    const payload = {
+      course_id: data.courseId,
+      title: data.title,
+      description: data.description || null,
+      is_free_preview: data.isFreePreview || false,
+      release_at: data.openAt || null,
+      hide_at: data.closeAt || null,
+      is_locked: data.accessStatus === "locked",
+      chapter_ids: data.chapterIds || [],
+    };
+    try {
+      const sessionRead = await createSessionApi(payload);
+      const session = toSession(sessionRead);
+      set((state) => ({ sessions: [...state.sessions, session] }));
+      return session;
+    } catch {
+      return null;
+    }
+  },
 
-      createSession: (data) => {
-        const chapterSessions = get().sessions.filter((s) => s.chapterId === data.chapterId);
-        const now = new Date().toISOString();
-        const session: TeacherSession = {
-          id: generateId(),
-          publicCode: generateCode(),
-          courseId: data.courseId,
-          chapterId: data.chapterId,
-          title: data.title,
-          description: data.description || "",
-          order: chapterSessions.length + 1,
-          price: data.price ?? 0,
-          currency: data.currency || "USD",
-          status: data.status || "draft",
-          accessStatus: data.accessStatus || "locked",
-          openAt: data.openAt || "",
-          closeAt: data.closeAt || "",
-          durationMinutes: data.durationMinutes || 0,
-          isFreePreview: data.isFreePreview || false,
-          createdAt: now,
-          updatedAt: now,
-          sessionType: data.sessionType || "lesson",
-          chapterIds: data.chapterId ? [data.chapterId] : [],
-          lessonIds: [],
-          conceptIds: [],
-          atomicConceptIds: [],
-          materialIds: [],
-          questionIds: [],
-          quizIds: [],
-          examIds: [],
-          homeworkIds: [],
-          hasQuiz: false,
-          hasExam: false,
-          hasHomework: false,
-          hasPractice: false,
-        };
-        set((state) => ({ sessions: [...state.sessions, session] }));
-        return session;
-      },
+  loadSessions: async (courseId) => {
+    set({ isLoading: true });
+    try {
+      const apiSessions = await listSessionsApi(courseId);
+      set((state) => ({
+        sessions: [
+          ...state.sessions.filter((s) => s.courseId !== courseId),
+          ...apiSessions.map((r) => toSession(r)),
+        ],
+        isLoading: false,
+      }));
+    } catch {
+      set({ isLoading: false });
+    }
+  },
 
-      updateSession: (sessionId, data) => {
-        set((state) => ({
-          sessions: state.sessions.map((s) =>
-            s.id === sessionId ? { ...s, ...data, updatedAt: new Date().toISOString() } : s,
-          ),
-        }));
-      },
+  updateSession: (sessionId, data) => {
+    set((state) => ({
+      sessions: state.sessions.map((s) =>
+        s.id === sessionId ? { ...s, ...data, updatedAt: new Date().toISOString() } : s,
+      ),
+    }));
+  },
 
-      deleteSession: (sessionId) => {
-        set((state) => ({ sessions: state.sessions.filter((s) => s.id !== sessionId) }));
-      },
+  deleteSession: (sessionId) => {
+    set((state) => ({ sessions: state.sessions.filter((s) => s.id !== sessionId) }));
+  },
 
-      publishSession: (sessionId) => {
-        get().updateSession(sessionId, { status: "published" });
-      },
+  publishSession: (sessionId) => {
+    get().updateSession(sessionId, { status: "published" });
+  },
 
-      lockSession: (sessionId) => {
-        get().updateSession(sessionId, { accessStatus: "locked" });
-      },
+  lockSession: (sessionId) => {
+    get().updateSession(sessionId, { accessStatus: "locked" });
+  },
 
-      unlockSession: (sessionId) => {
-        get().updateSession(sessionId, { accessStatus: "unlocked" });
-      },
+  unlockSession: (sessionId) => {
+    get().updateSession(sessionId, { accessStatus: "unlocked" });
+  },
 
-      archiveSession: (sessionId) => {
-        get().updateSession(sessionId, { status: "archived" });
-      },
+  archiveSession: (sessionId) => {
+    get().updateSession(sessionId, { status: "archived" });
+  },
 
-      reorderSessions: (chapterId, orderedIds) => {
-        set((state) => ({
-          sessions: state.sessions.map((s) => {
-            if (s.chapterId !== chapterId) return s;
-            const idx = orderedIds.indexOf(s.id);
-            return idx >= 0 ? { ...s, order: idx + 1 } : s;
-          }),
-        }));
-      },
-    }),
-    { name: "classz-teacher-sessions" },
-  ),
-);
+  reorderSessions: (chapterId, orderedIds) => {
+    set((state) => ({
+      sessions: state.sessions.map((s) => {
+        if (s.chapterId !== chapterId) return s;
+        const idx = orderedIds.indexOf(s.id);
+        return idx >= 0 ? { ...s, order: idx + 1 } : s;
+      }),
+    }));
+  },
+}));
 
 export function listSessions(courseId: string, chapterId?: string): TeacherSession[] {
   return useTeacherSessionStore.getState().sessions
-    .filter((s) => s.courseId === courseId && (!chapterId || s.chapterId === chapterId))
+    .filter((s) => s.courseId === courseId && (!chapterId || s.chapterIds.includes(chapterId)))
     .sort((a, b) => a.order - b.order);
 }
 

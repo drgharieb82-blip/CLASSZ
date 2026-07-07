@@ -402,6 +402,8 @@ interface QuestionState {
   unlinkQuestionFromHomework: (questionId: string, homeworkId: string) => void;
   linkQuestionToAssignment: (questionId: string, assignmentId: string) => void;
   unlinkQuestionFromAssignment: (questionId: string, assignmentId: string) => void;
+  linkQuestionToAssessment: (questionId: string, assessmentId: string) => void;
+  unlinkQuestionFromAssessment: (questionId: string, assessmentId: string) => void;
   incrementQuestionUse: (questionId: string, usageType: string, usageId: string) => void;
 }
 
@@ -557,6 +559,14 @@ export const useTeacherQuestionStore = create<QuestionState>()(
         const q = get().questions.find((x) => x.id === questionId);
         if (q) get().updateQuestion(questionId, { assignmentIds: unlinkArray(q.assignmentIds, assignmentId) });
       },
+      linkQuestionToAssessment: (questionId, assessmentId) => {
+        const q = get().questions.find((x) => x.id === questionId);
+        if (q) get().updateQuestion(questionId, { assessmentIds: linkArray(q.assessmentIds, assessmentId) });
+      },
+      unlinkQuestionFromAssessment: (questionId, assessmentId) => {
+        const q = get().questions.find((x) => x.id === questionId);
+        if (q) get().updateQuestion(questionId, { assessmentIds: unlinkArray(q.assessmentIds, assessmentId) });
+      },
 
       incrementQuestionUse: (questionId, usageType, usageId) => {
         const q = get().questions.find((x) => x.id === questionId);
@@ -567,6 +577,7 @@ export const useTeacherQuestionStore = create<QuestionState>()(
         else if (usageType === "homework") patch.homeworkIds = linkArray(q.homeworkIds, usageId);
         else if (usageType === "session") patch.sessionIds = linkArray(q.sessionIds, usageId);
         else if (usageType === "assignment") patch.assignmentIds = linkArray(q.assignmentIds, usageId);
+        else if (usageType === "assessment") patch.assessmentIds = linkArray(q.assessmentIds, usageId);
         get().updateQuestion(questionId, patch);
       },
     }),
