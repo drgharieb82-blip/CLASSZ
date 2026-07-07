@@ -12,6 +12,9 @@ import { ModulePlaceholderPage } from "../modules/dashboard/ModulePlaceholderPag
 import { GradeDetailsPage, ManualGradingPage } from "../modules/grading";
 import { LessonBuilderPage } from "../modules/lesson-builder";
 import { LessonPage } from "../modules/lessons/LessonPage";
+import { ParentAuthPage } from "../modules/parent/ParentAuthPage";
+import { ParentDashboardRedesignPage } from "../modules/parent/ParentDashboardRedesignPage";
+import { ParentSettingsPage } from "../modules/parent/ParentSettingsPage";
 import { QuestionBankPage, QuestionDetailsPage } from "../modules/question-bank";
 import { QuizPlayerPage } from "../modules/quiz-player";
 import { QuizBuilderPage } from "../modules/quizzes";
@@ -58,7 +61,13 @@ export const router = createBrowserRouter([
   {
     path: "/parent",
     element: <ParentLayout />,
-    children: [{ index: true, element: <DashboardPage /> }],
+    children: [
+      { index: true, element: <Navigate to="dashboard" replace /> },
+      { path: "dashboard", element: <ParentDashboardRedesignPage /> },
+      { path: "settings", element: <ParentSettingsPage /> },
+    ],
   },
+  { path: "/parent/login", element: <ParentAuthPage mode="login" /> },
+  { path: "/parent/register", element: <ParentAuthPage mode="register" /> },
   { path: "*", element: <Navigate to="/" replace /> },
 ]);

@@ -9,7 +9,8 @@
     "dashboard": "Dashboard",
     "courses": "Courses",
     "people": "People",
-    "learning": "Learning"
+    "learning": "Learning",
+    "settings": "Settings"
   },
   "roles": {
     "adminWorkspace": "Admin Workspace",
@@ -252,6 +253,249 @@
       "pending": "Pending",
       "graded": "Graded",
       "returned": "Returned"
+    }
+  },
+  "parentPortal": {
+    "header": {
+      "eyebrow": "Family overview",
+      "greeting": "Welcome back, {{parentName}}",
+      "description": "See every child clearly from one premium page: status, alerts, progress, payments, teacher notes, and printable family reporting.",
+      "childSelector": "Child selector"
+    },
+    "view": {
+      "selectedChild": "View selected child",
+      "allChildren": "View all children summary"
+    },
+    "actions": {
+      "addChild": "Add Child",
+      "exportPdf": "Export PDF",
+      "contactTeacher": "Contact Teacher",
+      "payNow": "Pay Now"
+    },
+    "childCards": {
+      "mainCourse": "Main course",
+      "status": "Overall status",
+      "progress": "Progress",
+      "alerts": "alerts"
+    },
+    "family": {
+      "totalChildren": "Children",
+      "totalChildrenHelper": "Linked to this parent account",
+      "averageProgress": "Average Progress",
+      "averageProgressHelper": "Across all linked children",
+      "openAlerts": "Open Alerts",
+      "openAlertsHelper": "Family pending amount: {{amount}}"
+    },
+    "allChildren": {
+      "eyebrow": "All children summary",
+      "title": "Compare every child at a glance",
+      "description": "See status, progress, score, missing work, attendance, payments, and the latest teacher note for each child.",
+      "latestTeacherNote": "Latest teacher note"
+    },
+    "smartSummary": {
+      "eyebrow": "Smart parent summary",
+      "title": "{{name}} this week",
+      "description": "A parent-friendly explanation of what is going well, what needs attention, and what to do next.",
+      "doingWell": "Is the child doing well?",
+      "mainProblem": "What is the main problem?",
+      "actionThisWeek": "What should the parent do this week?"
+    },
+    "summaryCards": {
+      "overallStatus": "Overall Status",
+      "overallStatusHelper": "{{name}} current learning health",
+      "courseProgress": "Course Progress",
+      "courseProgressHelper": "Across active classes",
+      "averageScore": "Average Score",
+      "averageScoreHelper": "Latest graded work",
+      "attendance": "Attendance",
+      "attendanceHelper": "Live session attendance",
+      "missingHomework": "Missing Homework",
+      "missingHomeworkHelper": "Needs follow-up",
+      "upcomingExams": "Upcoming Exams",
+      "upcomingExamsHelper": "Scheduled soon",
+      "paymentStatus": "Payment Status",
+      "paymentStatusHelper": "Current billing state"
+    },
+    "progress": {
+      "eyebrow": "Progress by course",
+      "title": "Progress across enrolled courses",
+      "description": "Each course shows only the information a parent needs: progress, watch time, and last activity.",
+      "watchTime": "Watch time",
+      "lastActivity": "Last activity"
+    },
+    "results": {
+      "eyebrow": "Recent results",
+      "title": "Quizzes, homework, and exams",
+      "description": "A single parent-readable table for recent assessment outcomes and pending items.",
+      "type": "Type",
+      "titleLabel": "Title",
+      "date": "Date",
+      "score": "Score / Status",
+      "note": "Teacher note"
+    },
+    "alerts": {
+      "eyebrow": "Alerts center",
+      "title": "What needs attention",
+      "description": "Missing homework, no login, score drops, upcoming exams, payment reminders, and teacher notes.",
+      "severity": {
+        "critical": "Critical",
+        "warning": "Warning",
+        "info": "Info",
+        "positive": "Positive"
+      }
+    },
+    "attendance": {
+      "eyebrow": "Attendance",
+      "title": "Attendance overview",
+      "description": "Attendance is simplified into present, absent, late, and overall attendance rate.",
+      "present": "Present",
+      "absent": "Absent",
+      "late": "Late",
+      "rate": "Attendance %"
+    },
+    "weaknesses": {
+      "eyebrow": "Weaknesses",
+      "title": "Parent-friendly support plan",
+      "description": "Weak chapter, weak topic, recommended action, and extra practice suggestions.",
+      "weakTopic": "Weak topic",
+      "recommendedAction": "Recommended action",
+      "extraPractice": "Extra practice suggestion"
+    },
+    "payments": {
+      "eyebrow": "Payments",
+      "title": "Courses, invoices, and balances",
+      "description": "Track course expiry, pending amount, wallet balance, and quick pay or renew actions.",
+      "walletBalance": "Wallet balance",
+      "downloadInvoice": "Download invoice",
+      "payButton": "Pay",
+      "renewButton": "Renew",
+      "pendingAmount": "Pending amount"
+    },
+    "messages": {
+      "eyebrow": "Teacher messages",
+      "title": "Teacher and assistant notes",
+      "description": "Messages are shown as clear teacher notes with a simple reply action.",
+      "reply": "Reply",
+      "sendMessage": "Send message",
+      "placeholder": "Write a short message to the teacher team...",
+      "send": "Send",
+      "sent": "Mock message sent."
+    },
+    "timeline": {
+      "eyebrow": "Timeline",
+      "title": "Recent child activity",
+      "description": "Sessions watched, quizzes solved, missed homework, teacher notes, and payment events."
+    },
+    "report": {
+      "title": "PDF report",
+      "familyTitle": "Family summary report",
+      "familyDescription": "This export collects the top comparison details for every linked child.",
+      "alerts": "Alerts",
+      "teacherNotes": "Teacher notes",
+      "print": "Print",
+      "downloadPdf": "Download PDF",
+      "downloadMocked": "Mock PDF download prepared."
+    },
+    "linking": {
+      "registrationEyebrow": "Linking during student registration",
+      "registrationTitle": "Automatic link by verified WhatsApp",
+      "registrationDescription": "Student registration can link a verified parent account by matching WhatsApp, or create a pending profile and activation invite.",
+      "selfEyebrow": "Parent self registration",
+      "selfTitle": "Secure child linking by code",
+      "selfDescription": "Parents register later and link children only through a temporary Student Link Code.",
+      "dialogTitle": "Add child securely",
+      "dialogDescription": "Enter the temporary Student Link Code shared to the student's verified WhatsApp or shown in the student account.",
+      "linkCodeInput": "Student Link Code",
+      "linkCodePlaceholder": "Enter temporary link code",
+      "codeSentAction": "Code sent state",
+      "verifyCode": "Verify Code",
+      "demoCodes": "Demo codes",
+      "status": {
+        "idle": "Waiting for code",
+        "codeSent": "Code sent",
+        "invalid": "Invalid code",
+        "expired": "Code expired",
+        "success": "Child linked successfully"
+      },
+      "statusDescriptions": {
+        "idle": "Parents cannot search by student name. Linking only works with a temporary code.",
+        "codeSent": "A temporary Student Link Code was sent to the student's verified WhatsApp and is also visible inside the student account.",
+        "invalid": "This code does not match an available child. Ask the student to share the current temporary code.",
+        "expired": "This code expired. Request a fresh temporary Student Link Code from the student account.",
+        "success": "{{name}} is now linked and appears in the child selector."
+      }
+    },
+    "contactModal": {
+      "title": "Contact teacher",
+      "familyModeTitle": "Family contact view",
+      "familyModeDescription": "Use this mode when you want to message the teacher team about more than one child.",
+      "openWhatsApp": "Open WhatsApp"
+    },
+    "payModal": {
+      "title": "Pay now",
+      "familyTitle": "Family payment summary",
+      "familyDescription": "Current pending amount across linked children: {{amount}}",
+      "childDescription": "Current pending amount for this child: {{amount}}",
+      "paymentRequested": "Mock payment flow opened."
+    },
+    "settings": {
+      "eyebrow": "Parent settings",
+      "title": "Family account settings",
+      "description": "Review the linked WhatsApp number, alert preferences, and account-linking rules for the parent role.",
+      "whatsAppTitle": "Verified WhatsApp",
+      "whatsAppDescription": "This parent account is linked to {{whatsapp}} for invites and child-linking codes.",
+      "alertsTitle": "Alert preferences",
+      "alertsDescription": "Parents receive critical, warning, info, and positive updates inside the portal and through WhatsApp notifications.",
+      "securityTitle": "Linking security",
+      "securityDescription": "Children can only be linked through verified WhatsApp matching or a temporary Student Link Code."
+    },
+    "auth": {
+      "eyebrow": "Parent access",
+      "loginTitle": "Parent login",
+      "loginDescription": "Sign in with the verified WhatsApp number connected to your family account.",
+      "registerTitle": "Register as Parent",
+      "registerDescription": "Create a parent account later and add children securely using temporary Student Link Codes.",
+      "featureWhatsApp": "Verified WhatsApp matching keeps student linking secure.",
+      "featureCodes": "Temporary Student Link Codes expire and cannot be guessed by name.",
+      "featureChildren": "One parent account can manage multiple children from one dashboard.",
+      "whatsAppLabel": "Parent WhatsApp",
+      "whatsAppPlaceholder": "Enter verified WhatsApp number",
+      "passwordLabel": "Password",
+      "linkCodeLabel": "Optional Student Link Code",
+      "linkCodePlaceholder": "Add a child during registration",
+      "loginButton": "Login as Parent",
+      "registerButton": "Register as Parent",
+      "demoEntry": "Open dashboard demo"
+    },
+    "values": {
+      "onTrack": "On Track",
+      "needsSupport": "Needs Support",
+      "watchClosely": "Watch Closely",
+      "gettingStarted": "Getting Started",
+      "paid": "Paid",
+      "paymentDue": "Payment due",
+      "pendingFirstInstallment": "Pending first installment",
+      "renewSoon": "Renew soon",
+      "active": "Active",
+      "trialAccess": "Trial access",
+      "teacher": "Teacher",
+      "assistantTeacher": "Assistant Teacher",
+      "quiz": "Quiz",
+      "homework": "Homework",
+      "exam": "Exam",
+      "watchedSession": "Watched session",
+      "solvedQuiz": "Solved quiz",
+      "missedHomework": "Missed homework",
+      "teacherNote": "Teacher note",
+      "paymentCompleted": "Payment completed",
+      "missingHomeworkAlert": "Missing homework",
+      "upcomingExamAlert": "Upcoming exam",
+      "paymentDueAlert": "Payment due",
+      "scoreDroppedAlert": "Score dropped",
+      "noLoginAlert": "No login",
+      "missing": "Missing",
+      "submitted": "Submitted",
+      "upcoming": "Upcoming"
     }
   }
 }
