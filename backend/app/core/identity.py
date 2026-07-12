@@ -27,11 +27,9 @@ class EntityType(str, Enum):
     PARENT = "parent"
     ASSISTANT = "assistant"
     DEVELOPER = "developer"
-    CONTENT_MANAGER = "content_manager"
     FINANCE = "finance"
     ADMIN = "admin"
     SUPER_ADMIN = "super_admin"
-    CONTENT_AUTHOR = "content_author"
 
     # Academic / Content Studio
     SUBJECT = "subject"
@@ -53,6 +51,10 @@ class EntityType(str, Enum):
     CERTIFICATE = "certificate"
     PAYMENT = "payment"
     WALLET_TRANSACTION = "wallet_transaction"
+    NOTIFICATION = "notification"
+    INVOICE = "invoice"
+    COUPON = "coupon"
+    PAYOUT = "payout"
 
     # Support & AI
     SUPPORT_TICKET = "support_ticket"
@@ -71,11 +73,9 @@ CODE_FORMATS: dict[EntityType, CodeFormat] = {
     EntityType.PARENT: CodeFormat("PRT", 4),
     EntityType.ASSISTANT: CodeFormat("AST", 4),
     EntityType.DEVELOPER: CodeFormat("DEV", 4),
-    EntityType.CONTENT_MANAGER: CodeFormat("CNT", 4),
     EntityType.FINANCE: CodeFormat("FIN", 4),
     EntityType.ADMIN: CodeFormat("ADM", 4),
     EntityType.SUPER_ADMIN: CodeFormat("SUP", 4),
-    EntityType.CONTENT_AUTHOR: CodeFormat("AUT", 4),
 
     # Academic / Content Studio
     EntityType.SUBJECT: CodeFormat("SUB", 6),
@@ -97,6 +97,10 @@ CODE_FORMATS: dict[EntityType, CodeFormat] = {
     EntityType.CERTIFICATE: CodeFormat("CERT", 6),
     EntityType.PAYMENT: CodeFormat("PAY", 6),
     EntityType.WALLET_TRANSACTION: CodeFormat("WLT", 6),
+    EntityType.NOTIFICATION: CodeFormat("NTF", 6),
+    EntityType.INVOICE: CodeFormat("INV", 6),
+    EntityType.COUPON: CodeFormat("CPN", 4),
+    EntityType.PAYOUT: CodeFormat("PYT", 6),
 
     # Support & AI (6-digit for AI requests)
     EntityType.SUPPORT_TICKET: CodeFormat("TKT", 4),
@@ -224,9 +228,6 @@ class CodeGeneratorService:
     def generate_developer_code(self) -> str:
         return self.generate(EntityType.DEVELOPER)
 
-    def generate_content_manager_code(self) -> str:
-        return self.generate(EntityType.CONTENT_MANAGER)
-
     def generate_finance_code(self) -> str:
         return self.generate(EntityType.FINANCE)
 
@@ -235,9 +236,6 @@ class CodeGeneratorService:
 
     def generate_super_admin_code(self) -> str:
         return self.generate(EntityType.SUPER_ADMIN)
-
-    def generate_content_author_code(self) -> str:
-        return self.generate(EntityType.CONTENT_AUTHOR)
 
     def generate_course_code(self) -> str:
         return self.generate(EntityType.COURSE)
@@ -265,6 +263,15 @@ class CodeGeneratorService:
 
     def generate_wallet_transaction_code(self) -> str:
         return self.generate(EntityType.WALLET_TRANSACTION)
+
+    def generate_invoice_code(self) -> str:
+        return self.generate(EntityType.INVOICE)
+
+    def generate_coupon_code(self) -> str:
+        return self.generate(EntityType.COUPON)
+
+    def generate_payout_code(self) -> str:
+        return self.generate(EntityType.PAYOUT)
 
     def generate_support_ticket_code(self) -> str:
         return self.generate(EntityType.SUPPORT_TICKET)

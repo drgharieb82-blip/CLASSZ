@@ -7,7 +7,7 @@ RUN npm install
 FROM dependencies AS development
 
 COPY . .
-EXPOSE 5173
+EXPOSE 5180
 CMD ["npm", "run", "dev"]
 
 FROM dependencies AS build

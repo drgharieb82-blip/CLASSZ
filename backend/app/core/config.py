@@ -28,9 +28,13 @@ class Settings(BaseSettings):
     )
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
+    refresh_token_expire_days: int = 30
+
+    platform_fee_percent: float = 15.0
+    tax_rate_percent: float = 15.0
 
     cors_origins_raw: str = Field(
-        default="http://localhost:5173,http://127.0.0.1:5173",
+        default="http://localhost:5180,http://127.0.0.1:5180",
         alias="CORS_ORIGINS",
     )
 
@@ -68,3 +72,17 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+_DEFAULT_JWT_SECRET = "change-me-in-production"
+_LOCAL_ENVIRONMENTS = {"local", "development", "test"}
+
+
+def guard_against_insecure_defaults() -> None:
+    """Refuses to boot with a placeholder JWT secret outside local/dev/test —
+    that secret signs every access/refresh token, so leaving it at the
+    checked-in default in a real deployment lets anyone forge sessions."""
+    if settings.environment not in _LOCAL_ENVIRONMENTS and settings.jwt_secret_key == _DEFAULT_JWT_SECRET:
+        raise RuntimeError(
+            "Refusing to start: JWT_SECRET_KEY is still the default placeholder value "
+            f"while ENVIRONMENT='{settings.environment}'. Set a strong, unique JWT_SECRET_KEY."
+        )

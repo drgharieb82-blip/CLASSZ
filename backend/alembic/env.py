@@ -8,13 +8,17 @@ from app.db.base import Base
 from app.models import user  # noqa: F401
 from app.modules.anti_cheating import models as anti_cheating_models  # noqa: F401
 from app.modules.assignments import models as assignment_models  # noqa: F401
+from app.modules.assistants import models as assistant_models  # noqa: F401
 from app.modules.atomic_concepts import models as atomic_concept_models  # noqa: F401
 from app.modules.chapters import models as chapter_models  # noqa: F401
 from app.modules.concepts import models as concept_models  # noqa: F401
 from app.modules.courses import models as course_models  # noqa: F401
+from app.modules.enrollments import models as enrollment_models  # noqa: F401
 from app.modules.grading import models as grading_models  # noqa: F401
 from app.modules.lessons import models as lesson_models  # noqa: F401
+from app.modules.parents import models as parent_models  # noqa: F401
 from app.modules.session_blocks import models as session_block_models  # noqa: F401
+from app.modules.students import models as student_models  # noqa: F401
 from app.modules.sessions import models as session_models  # noqa: F401
 from app.modules.progress import models as progress_models  # noqa: F401
 from app.modules.quiz_attempts import models as quiz_attempt_models  # noqa: F401
