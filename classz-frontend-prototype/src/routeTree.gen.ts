@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TeacherRouteImport } from './routes/teacher'
 import { Route as StudentRouteImport } from './routes/student'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as LoginRouteImport } from './routes/login'
@@ -27,7 +28,6 @@ import { Route as ParentIndexRouteImport } from './routes/parent.index'
 import { Route as FinanceIndexRouteImport } from './routes/finance.index'
 import { Route as DeveloperIndexRouteImport } from './routes/developer.index'
 import { Route as CoursesIndexRouteImport } from './routes/courses.index'
-import { Route as ContentIndexRouteImport } from './routes/content.index'
 import { Route as AssistantIndexRouteImport } from './routes/assistant.index'
 import { Route as AssistantTeacherIndexRouteImport } from './routes/assistant-teacher.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
@@ -60,20 +60,26 @@ import { Route as SuperAnalyticsRouteImport } from './routes/super.analytics'
 import { Route as SuperAccessMatrixRouteImport } from './routes/super.access-matrix'
 import { Route as StudentWrongQuestionsRouteImport } from './routes/student.wrong-questions'
 import { Route as StudentWalletRouteImport } from './routes/student.wallet'
+import { Route as StudentSettingsRouteImport } from './routes/student.settings'
 import { Route as StudentRevisionRouteImport } from './routes/student.revision'
 import { Route as StudentProgressRouteImport } from './routes/student.progress'
+import { Route as StudentProfileRouteImport } from './routes/student.profile'
 import { Route as StudentNotificationsRouteImport } from './routes/student.notifications'
 import { Route as StudentNotesRouteImport } from './routes/student.notes'
 import { Route as StudentLessonRouteImport } from './routes/student.lesson'
 import { Route as StudentLeaderboardRouteImport } from './routes/student.leaderboard'
 import { Route as StudentCourseDetailsRouteImport } from './routes/student.course-details'
 import { Route as StudentCertificatesRouteImport } from './routes/student.certificates'
+import { Route as StudentAssignmentsRouteImport } from './routes/student.assignments'
 import { Route as StudentAchievementsRouteImport } from './routes/student.achievements'
 import { Route as RegisterTeacherRouteImport } from './routes/register_.teacher'
 import { Route as QuizStartRouteImport } from './routes/quiz.start'
 import { Route as QuestionsWrongRouteImport } from './routes/questions.wrong'
+import { Route as ParentSettingsRouteImport } from './routes/parent.settings'
 import { Route as ParentProgressRouteImport } from './routes/parent.progress'
+import { Route as ParentNotificationsRouteImport } from './routes/parent.notifications'
 import { Route as ParentMessagesRouteImport } from './routes/parent.messages'
+import { Route as ParentLinkChildRouteImport } from './routes/parent.link-child'
 import { Route as ParentHomeworkRouteImport } from './routes/parent.homework'
 import { Route as ParentAttendanceRouteImport } from './routes/parent.attendance'
 import { Route as FinanceSubscriptionsRouteImport } from './routes/finance.subscriptions'
@@ -89,14 +95,6 @@ import { Route as DeveloperDeploymentsRouteImport } from './routes/developer.dep
 import { Route as DeveloperBackendRouteImport } from './routes/developer.backend'
 import { Route as DeveloperApiHealthRouteImport } from './routes/developer.api-health'
 import { Route as CoursesCourseIdRouteImport } from './routes/courses.$courseId'
-import { Route as ContentTagsConceptsRouteImport } from './routes/content.tags-concepts'
-import { Route as ContentReportsRouteImport } from './routes/content.reports'
-import { Route as ContentQuestionReviewRouteImport } from './routes/content.question-review'
-import { Route as ContentPublishingQueueRouteImport } from './routes/content.publishing-queue'
-import { Route as ContentMediaRouteImport } from './routes/content.media'
-import { Route as ContentLessonReviewRouteImport } from './routes/content.lesson-review'
-import { Route as ContentImportRouteImport } from './routes/content.import'
-import { Route as ContentCurriculumRouteImport } from './routes/content.curriculum'
 import { Route as AssistantStudyPlanRouteImport } from './routes/assistant.study-plan'
 import { Route as AssistantSolveRouteImport } from './routes/assistant.solve'
 import { Route as AssistantExplainRouteImport } from './routes/assistant.explain'
@@ -107,6 +105,7 @@ import { Route as AssistantTeacherScheduleRouteImport } from './routes/assistant
 import { Route as AssistantTeacherPerformanceRouteImport } from './routes/assistant-teacher.performance'
 import { Route as AssistantTeacherNotesRouteImport } from './routes/assistant-teacher.notes'
 import { Route as AssistantTeacherMessagesRouteImport } from './routes/assistant-teacher.messages'
+import { Route as AssistantTeacherInvitationsRouteImport } from './routes/assistant-teacher.invitations'
 import { Route as AssistantTeacherGradingQueueRouteImport } from './routes/assistant-teacher.grading-queue'
 import { Route as AssistantTeacherFollowUpRouteImport } from './routes/assistant-teacher.follow-up'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
@@ -228,6 +227,11 @@ const StudentRoute = StudentRouteImport.update({
   path: '/student',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -307,11 +311,6 @@ const CoursesIndexRoute = CoursesIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => CoursesRoute,
-} as any)
-const ContentIndexRoute = ContentIndexRouteImport.update({
-  id: '/content/',
-  path: '/content/',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const AssistantIndexRoute = AssistantIndexRouteImport.update({
   id: '/assistant/',
@@ -473,6 +472,11 @@ const StudentWalletRoute = StudentWalletRouteImport.update({
   path: '/wallet',
   getParentRoute: () => StudentRoute,
 } as any)
+const StudentSettingsRoute = StudentSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => StudentRoute,
+} as any)
 const StudentRevisionRoute = StudentRevisionRouteImport.update({
   id: '/revision',
   path: '/revision',
@@ -481,6 +485,11 @@ const StudentRevisionRoute = StudentRevisionRouteImport.update({
 const StudentProgressRoute = StudentProgressRouteImport.update({
   id: '/progress',
   path: '/progress',
+  getParentRoute: () => StudentRoute,
+} as any)
+const StudentProfileRoute = StudentProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => StudentRoute,
 } as any)
 const StudentNotificationsRoute = StudentNotificationsRouteImport.update({
@@ -513,6 +522,11 @@ const StudentCertificatesRoute = StudentCertificatesRouteImport.update({
   path: '/certificates',
   getParentRoute: () => StudentRoute,
 } as any)
+const StudentAssignmentsRoute = StudentAssignmentsRouteImport.update({
+  id: '/assignments',
+  path: '/assignments',
+  getParentRoute: () => StudentRoute,
+} as any)
 const StudentAchievementsRoute = StudentAchievementsRouteImport.update({
   id: '/achievements',
   path: '/achievements',
@@ -533,14 +547,29 @@ const QuestionsWrongRoute = QuestionsWrongRouteImport.update({
   path: '/questions/wrong',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ParentSettingsRoute = ParentSettingsRouteImport.update({
+  id: '/parent/settings',
+  path: '/parent/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ParentProgressRoute = ParentProgressRouteImport.update({
   id: '/parent/progress',
   path: '/parent/progress',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ParentNotificationsRoute = ParentNotificationsRouteImport.update({
+  id: '/parent/notifications',
+  path: '/parent/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ParentMessagesRoute = ParentMessagesRouteImport.update({
   id: '/parent/messages',
   path: '/parent/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParentLinkChildRoute = ParentLinkChildRouteImport.update({
+  id: '/parent/link-child',
+  path: '/parent/link-child',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ParentHomeworkRoute = ParentHomeworkRouteImport.update({
@@ -618,46 +647,6 @@ const CoursesCourseIdRoute = CoursesCourseIdRouteImport.update({
   path: '/$courseId',
   getParentRoute: () => CoursesRoute,
 } as any)
-const ContentTagsConceptsRoute = ContentTagsConceptsRouteImport.update({
-  id: '/content/tags-concepts',
-  path: '/content/tags-concepts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContentReportsRoute = ContentReportsRouteImport.update({
-  id: '/content/reports',
-  path: '/content/reports',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContentQuestionReviewRoute = ContentQuestionReviewRouteImport.update({
-  id: '/content/question-review',
-  path: '/content/question-review',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContentPublishingQueueRoute = ContentPublishingQueueRouteImport.update({
-  id: '/content/publishing-queue',
-  path: '/content/publishing-queue',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContentMediaRoute = ContentMediaRouteImport.update({
-  id: '/content/media',
-  path: '/content/media',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContentLessonReviewRoute = ContentLessonReviewRouteImport.update({
-  id: '/content/lesson-review',
-  path: '/content/lesson-review',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContentImportRoute = ContentImportRouteImport.update({
-  id: '/content/import',
-  path: '/content/import',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContentCurriculumRoute = ContentCurriculumRouteImport.update({
-  id: '/content/curriculum',
-  path: '/content/curriculum',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AssistantStudyPlanRoute = AssistantStudyPlanRouteImport.update({
   id: '/assistant/study-plan',
   path: '/assistant/study-plan',
@@ -710,6 +699,12 @@ const AssistantTeacherMessagesRoute =
   AssistantTeacherMessagesRouteImport.update({
     id: '/assistant-teacher/messages',
     path: '/assistant-teacher/messages',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AssistantTeacherInvitationsRoute =
+  AssistantTeacherInvitationsRouteImport.update({
+    id: '/assistant-teacher/invitations',
+    path: '/assistant-teacher/invitations',
     getParentRoute: () => rootRouteImport,
   } as any)
 const AssistantTeacherGradingQueueRoute =
@@ -1322,6 +1317,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/student': typeof StudentRouteWithChildren
   '/teacher': typeof TeacherRouteWithChildren
   '/admin/academies': typeof AdminAcademiesRoute
@@ -1339,6 +1335,7 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AdminUsersRoute
   '/assistant-teacher/follow-up': typeof AssistantTeacherFollowUpRoute
   '/assistant-teacher/grading-queue': typeof AssistantTeacherGradingQueueRoute
+  '/assistant-teacher/invitations': typeof AssistantTeacherInvitationsRoute
   '/assistant-teacher/messages': typeof AssistantTeacherMessagesRoute
   '/assistant-teacher/notes': typeof AssistantTeacherNotesRoute
   '/assistant-teacher/performance': typeof AssistantTeacherPerformanceRoute
@@ -1349,14 +1346,6 @@ export interface FileRoutesByFullPath {
   '/assistant/explain': typeof AssistantExplainRoute
   '/assistant/solve': typeof AssistantSolveRoute
   '/assistant/study-plan': typeof AssistantStudyPlanRoute
-  '/content/curriculum': typeof ContentCurriculumRoute
-  '/content/import': typeof ContentImportRoute
-  '/content/lesson-review': typeof ContentLessonReviewRoute
-  '/content/media': typeof ContentMediaRoute
-  '/content/publishing-queue': typeof ContentPublishingQueueRoute
-  '/content/question-review': typeof ContentQuestionReviewRoute
-  '/content/reports': typeof ContentReportsRoute
-  '/content/tags-concepts': typeof ContentTagsConceptsRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
   '/developer/api-health': typeof DeveloperApiHealthRoute
   '/developer/backend': typeof DeveloperBackendRoute
@@ -1372,20 +1361,26 @@ export interface FileRoutesByFullPath {
   '/finance/subscriptions': typeof FinanceSubscriptionsRoute
   '/parent/attendance': typeof ParentAttendanceRoute
   '/parent/homework': typeof ParentHomeworkRoute
+  '/parent/link-child': typeof ParentLinkChildRoute
   '/parent/messages': typeof ParentMessagesRoute
+  '/parent/notifications': typeof ParentNotificationsRoute
   '/parent/progress': typeof ParentProgressRoute
+  '/parent/settings': typeof ParentSettingsRoute
   '/questions/wrong': typeof QuestionsWrongRoute
   '/quiz/start': typeof QuizStartRoute
   '/register/teacher': typeof RegisterTeacherRoute
   '/student/achievements': typeof StudentAchievementsRoute
+  '/student/assignments': typeof StudentAssignmentsRoute
   '/student/certificates': typeof StudentCertificatesRouteWithChildren
   '/student/course-details': typeof StudentCourseDetailsRoute
   '/student/leaderboard': typeof StudentLeaderboardRoute
   '/student/lesson': typeof StudentLessonRoute
   '/student/notes': typeof StudentNotesRoute
   '/student/notifications': typeof StudentNotificationsRoute
+  '/student/profile': typeof StudentProfileRoute
   '/student/progress': typeof StudentProgressRoute
   '/student/revision': typeof StudentRevisionRoute
+  '/student/settings': typeof StudentSettingsRoute
   '/student/wallet': typeof StudentWalletRoute
   '/student/wrong-questions': typeof StudentWrongQuestionsRoute
   '/super/access-matrix': typeof SuperAccessMatrixRoute
@@ -1418,7 +1413,6 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/assistant-teacher/': typeof AssistantTeacherIndexRoute
   '/assistant/': typeof AssistantIndexRoute
-  '/content/': typeof ContentIndexRoute
   '/courses/': typeof CoursesIndexRoute
   '/developer/': typeof DeveloperIndexRoute
   '/finance/': typeof FinanceIndexRoute
@@ -1531,6 +1525,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/admin/academies': typeof AdminAcademiesRoute
   '/admin/admin-users': typeof AdminAdminUsersRoute
   '/admin/audit-logs': typeof AdminAuditLogsRoute
@@ -1544,6 +1539,7 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AdminUsersRoute
   '/assistant-teacher/follow-up': typeof AssistantTeacherFollowUpRoute
   '/assistant-teacher/grading-queue': typeof AssistantTeacherGradingQueueRoute
+  '/assistant-teacher/invitations': typeof AssistantTeacherInvitationsRoute
   '/assistant-teacher/messages': typeof AssistantTeacherMessagesRoute
   '/assistant-teacher/notes': typeof AssistantTeacherNotesRoute
   '/assistant-teacher/performance': typeof AssistantTeacherPerformanceRoute
@@ -1554,14 +1550,6 @@ export interface FileRoutesByTo {
   '/assistant/explain': typeof AssistantExplainRoute
   '/assistant/solve': typeof AssistantSolveRoute
   '/assistant/study-plan': typeof AssistantStudyPlanRoute
-  '/content/curriculum': typeof ContentCurriculumRoute
-  '/content/import': typeof ContentImportRoute
-  '/content/lesson-review': typeof ContentLessonReviewRoute
-  '/content/media': typeof ContentMediaRoute
-  '/content/publishing-queue': typeof ContentPublishingQueueRoute
-  '/content/question-review': typeof ContentQuestionReviewRoute
-  '/content/reports': typeof ContentReportsRoute
-  '/content/tags-concepts': typeof ContentTagsConceptsRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
   '/developer/api-health': typeof DeveloperApiHealthRoute
   '/developer/backend': typeof DeveloperBackendRoute
@@ -1577,20 +1565,26 @@ export interface FileRoutesByTo {
   '/finance/subscriptions': typeof FinanceSubscriptionsRoute
   '/parent/attendance': typeof ParentAttendanceRoute
   '/parent/homework': typeof ParentHomeworkRoute
+  '/parent/link-child': typeof ParentLinkChildRoute
   '/parent/messages': typeof ParentMessagesRoute
+  '/parent/notifications': typeof ParentNotificationsRoute
   '/parent/progress': typeof ParentProgressRoute
+  '/parent/settings': typeof ParentSettingsRoute
   '/questions/wrong': typeof QuestionsWrongRoute
   '/quiz/start': typeof QuizStartRoute
   '/register/teacher': typeof RegisterTeacherRoute
   '/student/achievements': typeof StudentAchievementsRoute
+  '/student/assignments': typeof StudentAssignmentsRoute
   '/student/certificates': typeof StudentCertificatesRouteWithChildren
   '/student/course-details': typeof StudentCourseDetailsRoute
   '/student/leaderboard': typeof StudentLeaderboardRoute
   '/student/lesson': typeof StudentLessonRoute
   '/student/notes': typeof StudentNotesRoute
   '/student/notifications': typeof StudentNotificationsRoute
+  '/student/profile': typeof StudentProfileRoute
   '/student/progress': typeof StudentProgressRoute
   '/student/revision': typeof StudentRevisionRoute
+  '/student/settings': typeof StudentSettingsRoute
   '/student/wallet': typeof StudentWalletRoute
   '/student/wrong-questions': typeof StudentWrongQuestionsRoute
   '/super/access-matrix': typeof SuperAccessMatrixRoute
@@ -1616,7 +1610,6 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/assistant-teacher': typeof AssistantTeacherIndexRoute
   '/assistant': typeof AssistantIndexRoute
-  '/content': typeof ContentIndexRoute
   '/courses': typeof CoursesIndexRoute
   '/developer': typeof DeveloperIndexRoute
   '/finance': typeof FinanceIndexRoute
@@ -1730,6 +1723,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/student': typeof StudentRouteWithChildren
   '/teacher': typeof TeacherRouteWithChildren
   '/admin/academies': typeof AdminAcademiesRoute
@@ -1747,6 +1741,7 @@ export interface FileRoutesById {
   '/admin/users': typeof AdminUsersRoute
   '/assistant-teacher/follow-up': typeof AssistantTeacherFollowUpRoute
   '/assistant-teacher/grading-queue': typeof AssistantTeacherGradingQueueRoute
+  '/assistant-teacher/invitations': typeof AssistantTeacherInvitationsRoute
   '/assistant-teacher/messages': typeof AssistantTeacherMessagesRoute
   '/assistant-teacher/notes': typeof AssistantTeacherNotesRoute
   '/assistant-teacher/performance': typeof AssistantTeacherPerformanceRoute
@@ -1757,14 +1752,6 @@ export interface FileRoutesById {
   '/assistant/explain': typeof AssistantExplainRoute
   '/assistant/solve': typeof AssistantSolveRoute
   '/assistant/study-plan': typeof AssistantStudyPlanRoute
-  '/content/curriculum': typeof ContentCurriculumRoute
-  '/content/import': typeof ContentImportRoute
-  '/content/lesson-review': typeof ContentLessonReviewRoute
-  '/content/media': typeof ContentMediaRoute
-  '/content/publishing-queue': typeof ContentPublishingQueueRoute
-  '/content/question-review': typeof ContentQuestionReviewRoute
-  '/content/reports': typeof ContentReportsRoute
-  '/content/tags-concepts': typeof ContentTagsConceptsRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
   '/developer/api-health': typeof DeveloperApiHealthRoute
   '/developer/backend': typeof DeveloperBackendRoute
@@ -1780,20 +1767,26 @@ export interface FileRoutesById {
   '/finance/subscriptions': typeof FinanceSubscriptionsRoute
   '/parent/attendance': typeof ParentAttendanceRoute
   '/parent/homework': typeof ParentHomeworkRoute
+  '/parent/link-child': typeof ParentLinkChildRoute
   '/parent/messages': typeof ParentMessagesRoute
+  '/parent/notifications': typeof ParentNotificationsRoute
   '/parent/progress': typeof ParentProgressRoute
+  '/parent/settings': typeof ParentSettingsRoute
   '/questions/wrong': typeof QuestionsWrongRoute
   '/quiz/start': typeof QuizStartRoute
   '/register_/teacher': typeof RegisterTeacherRoute
   '/student/achievements': typeof StudentAchievementsRoute
+  '/student/assignments': typeof StudentAssignmentsRoute
   '/student/certificates': typeof StudentCertificatesRouteWithChildren
   '/student/course-details': typeof StudentCourseDetailsRoute
   '/student/leaderboard': typeof StudentLeaderboardRoute
   '/student/lesson': typeof StudentLessonRoute
   '/student/notes': typeof StudentNotesRoute
   '/student/notifications': typeof StudentNotificationsRoute
+  '/student/profile': typeof StudentProfileRoute
   '/student/progress': typeof StudentProgressRoute
   '/student/revision': typeof StudentRevisionRoute
+  '/student/settings': typeof StudentSettingsRoute
   '/student/wallet': typeof StudentWalletRoute
   '/student/wrong-questions': typeof StudentWrongQuestionsRoute
   '/super/access-matrix': typeof SuperAccessMatrixRoute
@@ -1826,7 +1819,6 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/assistant-teacher/': typeof AssistantTeacherIndexRoute
   '/assistant/': typeof AssistantIndexRoute
-  '/content/': typeof ContentIndexRoute
   '/courses/': typeof CoursesIndexRoute
   '/developer/': typeof DeveloperIndexRoute
   '/finance/': typeof FinanceIndexRoute
@@ -1942,6 +1934,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/pricing'
     | '/register'
+    | '/reset-password'
     | '/student'
     | '/teacher'
     | '/admin/academies'
@@ -1959,6 +1952,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/assistant-teacher/follow-up'
     | '/assistant-teacher/grading-queue'
+    | '/assistant-teacher/invitations'
     | '/assistant-teacher/messages'
     | '/assistant-teacher/notes'
     | '/assistant-teacher/performance'
@@ -1969,14 +1963,6 @@ export interface FileRouteTypes {
     | '/assistant/explain'
     | '/assistant/solve'
     | '/assistant/study-plan'
-    | '/content/curriculum'
-    | '/content/import'
-    | '/content/lesson-review'
-    | '/content/media'
-    | '/content/publishing-queue'
-    | '/content/question-review'
-    | '/content/reports'
-    | '/content/tags-concepts'
     | '/courses/$courseId'
     | '/developer/api-health'
     | '/developer/backend'
@@ -1992,20 +1978,26 @@ export interface FileRouteTypes {
     | '/finance/subscriptions'
     | '/parent/attendance'
     | '/parent/homework'
+    | '/parent/link-child'
     | '/parent/messages'
+    | '/parent/notifications'
     | '/parent/progress'
+    | '/parent/settings'
     | '/questions/wrong'
     | '/quiz/start'
     | '/register/teacher'
     | '/student/achievements'
+    | '/student/assignments'
     | '/student/certificates'
     | '/student/course-details'
     | '/student/leaderboard'
     | '/student/lesson'
     | '/student/notes'
     | '/student/notifications'
+    | '/student/profile'
     | '/student/progress'
     | '/student/revision'
+    | '/student/settings'
     | '/student/wallet'
     | '/student/wrong-questions'
     | '/super/access-matrix'
@@ -2038,7 +2030,6 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/assistant-teacher/'
     | '/assistant/'
-    | '/content/'
     | '/courses/'
     | '/developer/'
     | '/finance/'
@@ -2151,6 +2142,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/pricing'
     | '/register'
+    | '/reset-password'
     | '/admin/academies'
     | '/admin/admin-users'
     | '/admin/audit-logs'
@@ -2164,6 +2156,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/assistant-teacher/follow-up'
     | '/assistant-teacher/grading-queue'
+    | '/assistant-teacher/invitations'
     | '/assistant-teacher/messages'
     | '/assistant-teacher/notes'
     | '/assistant-teacher/performance'
@@ -2174,14 +2167,6 @@ export interface FileRouteTypes {
     | '/assistant/explain'
     | '/assistant/solve'
     | '/assistant/study-plan'
-    | '/content/curriculum'
-    | '/content/import'
-    | '/content/lesson-review'
-    | '/content/media'
-    | '/content/publishing-queue'
-    | '/content/question-review'
-    | '/content/reports'
-    | '/content/tags-concepts'
     | '/courses/$courseId'
     | '/developer/api-health'
     | '/developer/backend'
@@ -2197,20 +2182,26 @@ export interface FileRouteTypes {
     | '/finance/subscriptions'
     | '/parent/attendance'
     | '/parent/homework'
+    | '/parent/link-child'
     | '/parent/messages'
+    | '/parent/notifications'
     | '/parent/progress'
+    | '/parent/settings'
     | '/questions/wrong'
     | '/quiz/start'
     | '/register/teacher'
     | '/student/achievements'
+    | '/student/assignments'
     | '/student/certificates'
     | '/student/course-details'
     | '/student/leaderboard'
     | '/student/lesson'
     | '/student/notes'
     | '/student/notifications'
+    | '/student/profile'
     | '/student/progress'
     | '/student/revision'
+    | '/student/settings'
     | '/student/wallet'
     | '/student/wrong-questions'
     | '/super/access-matrix'
@@ -2236,7 +2227,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/assistant-teacher'
     | '/assistant'
-    | '/content'
     | '/courses'
     | '/developer'
     | '/finance'
@@ -2349,6 +2339,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/pricing'
     | '/register'
+    | '/reset-password'
     | '/student'
     | '/teacher'
     | '/admin/academies'
@@ -2366,6 +2357,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/assistant-teacher/follow-up'
     | '/assistant-teacher/grading-queue'
+    | '/assistant-teacher/invitations'
     | '/assistant-teacher/messages'
     | '/assistant-teacher/notes'
     | '/assistant-teacher/performance'
@@ -2376,14 +2368,6 @@ export interface FileRouteTypes {
     | '/assistant/explain'
     | '/assistant/solve'
     | '/assistant/study-plan'
-    | '/content/curriculum'
-    | '/content/import'
-    | '/content/lesson-review'
-    | '/content/media'
-    | '/content/publishing-queue'
-    | '/content/question-review'
-    | '/content/reports'
-    | '/content/tags-concepts'
     | '/courses/$courseId'
     | '/developer/api-health'
     | '/developer/backend'
@@ -2399,20 +2383,26 @@ export interface FileRouteTypes {
     | '/finance/subscriptions'
     | '/parent/attendance'
     | '/parent/homework'
+    | '/parent/link-child'
     | '/parent/messages'
+    | '/parent/notifications'
     | '/parent/progress'
+    | '/parent/settings'
     | '/questions/wrong'
     | '/quiz/start'
     | '/register_/teacher'
     | '/student/achievements'
+    | '/student/assignments'
     | '/student/certificates'
     | '/student/course-details'
     | '/student/leaderboard'
     | '/student/lesson'
     | '/student/notes'
     | '/student/notifications'
+    | '/student/profile'
     | '/student/progress'
     | '/student/revision'
+    | '/student/settings'
     | '/student/wallet'
     | '/student/wrong-questions'
     | '/super/access-matrix'
@@ -2445,7 +2435,6 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/assistant-teacher/'
     | '/assistant/'
-    | '/content/'
     | '/courses/'
     | '/developer/'
     | '/finance/'
@@ -2560,6 +2549,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   PricingRoute: typeof PricingRoute
   RegisterRoute: typeof RegisterRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   StudentRoute: typeof StudentRouteWithChildren
   TeacherRoute: typeof TeacherRouteWithChildren
   AdminAcademiesRoute: typeof AdminAcademiesRoute
@@ -2577,6 +2567,7 @@ export interface RootRouteChildren {
   AdminUsersRoute: typeof AdminUsersRoute
   AssistantTeacherFollowUpRoute: typeof AssistantTeacherFollowUpRoute
   AssistantTeacherGradingQueueRoute: typeof AssistantTeacherGradingQueueRoute
+  AssistantTeacherInvitationsRoute: typeof AssistantTeacherInvitationsRoute
   AssistantTeacherMessagesRoute: typeof AssistantTeacherMessagesRoute
   AssistantTeacherNotesRoute: typeof AssistantTeacherNotesRoute
   AssistantTeacherPerformanceRoute: typeof AssistantTeacherPerformanceRoute
@@ -2587,14 +2578,6 @@ export interface RootRouteChildren {
   AssistantExplainRoute: typeof AssistantExplainRoute
   AssistantSolveRoute: typeof AssistantSolveRoute
   AssistantStudyPlanRoute: typeof AssistantStudyPlanRoute
-  ContentCurriculumRoute: typeof ContentCurriculumRoute
-  ContentImportRoute: typeof ContentImportRoute
-  ContentLessonReviewRoute: typeof ContentLessonReviewRoute
-  ContentMediaRoute: typeof ContentMediaRoute
-  ContentPublishingQueueRoute: typeof ContentPublishingQueueRoute
-  ContentQuestionReviewRoute: typeof ContentQuestionReviewRoute
-  ContentReportsRoute: typeof ContentReportsRoute
-  ContentTagsConceptsRoute: typeof ContentTagsConceptsRoute
   DeveloperApiHealthRoute: typeof DeveloperApiHealthRoute
   DeveloperBackendRoute: typeof DeveloperBackendRoute
   DeveloperDeploymentsRoute: typeof DeveloperDeploymentsRoute
@@ -2609,8 +2592,11 @@ export interface RootRouteChildren {
   FinanceSubscriptionsRoute: typeof FinanceSubscriptionsRoute
   ParentAttendanceRoute: typeof ParentAttendanceRoute
   ParentHomeworkRoute: typeof ParentHomeworkRoute
+  ParentLinkChildRoute: typeof ParentLinkChildRoute
   ParentMessagesRoute: typeof ParentMessagesRoute
+  ParentNotificationsRoute: typeof ParentNotificationsRoute
   ParentProgressRoute: typeof ParentProgressRoute
+  ParentSettingsRoute: typeof ParentSettingsRoute
   QuestionsWrongRoute: typeof QuestionsWrongRoute
   QuizStartRoute: typeof QuizStartRoute
   RegisterTeacherRoute: typeof RegisterTeacherRoute
@@ -2621,7 +2607,6 @@ export interface RootRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   AssistantTeacherIndexRoute: typeof AssistantTeacherIndexRoute
   AssistantIndexRoute: typeof AssistantIndexRoute
-  ContentIndexRoute: typeof ContentIndexRoute
   DeveloperIndexRoute: typeof DeveloperIndexRoute
   FinanceIndexRoute: typeof FinanceIndexRoute
   ParentIndexRoute: typeof ParentIndexRoute
@@ -2643,6 +2628,13 @@ declare module '@tanstack/react-router' {
       path: '/student'
       fullPath: '/student'
       preLoaderRoute: typeof StudentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -2756,13 +2748,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/courses/'
       preLoaderRoute: typeof CoursesIndexRouteImport
       parentRoute: typeof CoursesRoute
-    }
-    '/content/': {
-      id: '/content/'
-      path: '/content'
-      fullPath: '/content/'
-      preLoaderRoute: typeof ContentIndexRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/assistant/': {
       id: '/assistant/'
@@ -2988,6 +2973,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentWalletRouteImport
       parentRoute: typeof StudentRoute
     }
+    '/student/settings': {
+      id: '/student/settings'
+      path: '/settings'
+      fullPath: '/student/settings'
+      preLoaderRoute: typeof StudentSettingsRouteImport
+      parentRoute: typeof StudentRoute
+    }
     '/student/revision': {
       id: '/student/revision'
       path: '/revision'
@@ -3000,6 +2992,13 @@ declare module '@tanstack/react-router' {
       path: '/progress'
       fullPath: '/student/progress'
       preLoaderRoute: typeof StudentProgressRouteImport
+      parentRoute: typeof StudentRoute
+    }
+    '/student/profile': {
+      id: '/student/profile'
+      path: '/profile'
+      fullPath: '/student/profile'
+      preLoaderRoute: typeof StudentProfileRouteImport
       parentRoute: typeof StudentRoute
     }
     '/student/notifications': {
@@ -3044,6 +3043,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentCertificatesRouteImport
       parentRoute: typeof StudentRoute
     }
+    '/student/assignments': {
+      id: '/student/assignments'
+      path: '/assignments'
+      fullPath: '/student/assignments'
+      preLoaderRoute: typeof StudentAssignmentsRouteImport
+      parentRoute: typeof StudentRoute
+    }
     '/student/achievements': {
       id: '/student/achievements'
       path: '/achievements'
@@ -3072,6 +3078,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QuestionsWrongRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/parent/settings': {
+      id: '/parent/settings'
+      path: '/parent/settings'
+      fullPath: '/parent/settings'
+      preLoaderRoute: typeof ParentSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/parent/progress': {
       id: '/parent/progress'
       path: '/parent/progress'
@@ -3079,11 +3092,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ParentProgressRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/parent/notifications': {
+      id: '/parent/notifications'
+      path: '/parent/notifications'
+      fullPath: '/parent/notifications'
+      preLoaderRoute: typeof ParentNotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/parent/messages': {
       id: '/parent/messages'
       path: '/parent/messages'
       fullPath: '/parent/messages'
       preLoaderRoute: typeof ParentMessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parent/link-child': {
+      id: '/parent/link-child'
+      path: '/parent/link-child'
+      fullPath: '/parent/link-child'
+      preLoaderRoute: typeof ParentLinkChildRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/parent/homework': {
@@ -3191,62 +3218,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoursesCourseIdRouteImport
       parentRoute: typeof CoursesRoute
     }
-    '/content/tags-concepts': {
-      id: '/content/tags-concepts'
-      path: '/content/tags-concepts'
-      fullPath: '/content/tags-concepts'
-      preLoaderRoute: typeof ContentTagsConceptsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/content/reports': {
-      id: '/content/reports'
-      path: '/content/reports'
-      fullPath: '/content/reports'
-      preLoaderRoute: typeof ContentReportsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/content/question-review': {
-      id: '/content/question-review'
-      path: '/content/question-review'
-      fullPath: '/content/question-review'
-      preLoaderRoute: typeof ContentQuestionReviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/content/publishing-queue': {
-      id: '/content/publishing-queue'
-      path: '/content/publishing-queue'
-      fullPath: '/content/publishing-queue'
-      preLoaderRoute: typeof ContentPublishingQueueRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/content/media': {
-      id: '/content/media'
-      path: '/content/media'
-      fullPath: '/content/media'
-      preLoaderRoute: typeof ContentMediaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/content/lesson-review': {
-      id: '/content/lesson-review'
-      path: '/content/lesson-review'
-      fullPath: '/content/lesson-review'
-      preLoaderRoute: typeof ContentLessonReviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/content/import': {
-      id: '/content/import'
-      path: '/content/import'
-      fullPath: '/content/import'
-      preLoaderRoute: typeof ContentImportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/content/curriculum': {
-      id: '/content/curriculum'
-      path: '/content/curriculum'
-      fullPath: '/content/curriculum'
-      preLoaderRoute: typeof ContentCurriculumRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/assistant/study-plan': {
       id: '/assistant/study-plan'
       path: '/assistant/study-plan'
@@ -3315,6 +3286,13 @@ declare module '@tanstack/react-router' {
       path: '/assistant-teacher/messages'
       fullPath: '/assistant-teacher/messages'
       preLoaderRoute: typeof AssistantTeacherMessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/assistant-teacher/invitations': {
+      id: '/assistant-teacher/invitations'
+      path: '/assistant-teacher/invitations'
+      fullPath: '/assistant-teacher/invitations'
+      preLoaderRoute: typeof AssistantTeacherInvitationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/assistant-teacher/grading-queue': {
@@ -4138,14 +4116,17 @@ const StudentCoursesCourseIdRouteWithChildren =
 
 interface StudentRouteChildren {
   StudentAchievementsRoute: typeof StudentAchievementsRoute
+  StudentAssignmentsRoute: typeof StudentAssignmentsRoute
   StudentCertificatesRoute: typeof StudentCertificatesRouteWithChildren
   StudentCourseDetailsRoute: typeof StudentCourseDetailsRoute
   StudentLeaderboardRoute: typeof StudentLeaderboardRoute
   StudentLessonRoute: typeof StudentLessonRoute
   StudentNotesRoute: typeof StudentNotesRoute
   StudentNotificationsRoute: typeof StudentNotificationsRoute
+  StudentProfileRoute: typeof StudentProfileRoute
   StudentProgressRoute: typeof StudentProgressRoute
   StudentRevisionRoute: typeof StudentRevisionRoute
+  StudentSettingsRoute: typeof StudentSettingsRoute
   StudentWalletRoute: typeof StudentWalletRoute
   StudentWrongQuestionsRoute: typeof StudentWrongQuestionsRoute
   StudentIndexRoute: typeof StudentIndexRoute
@@ -4156,14 +4137,17 @@ interface StudentRouteChildren {
 
 const StudentRouteChildren: StudentRouteChildren = {
   StudentAchievementsRoute: StudentAchievementsRoute,
+  StudentAssignmentsRoute: StudentAssignmentsRoute,
   StudentCertificatesRoute: StudentCertificatesRouteWithChildren,
   StudentCourseDetailsRoute: StudentCourseDetailsRoute,
   StudentLeaderboardRoute: StudentLeaderboardRoute,
   StudentLessonRoute: StudentLessonRoute,
   StudentNotesRoute: StudentNotesRoute,
   StudentNotificationsRoute: StudentNotificationsRoute,
+  StudentProfileRoute: StudentProfileRoute,
   StudentProgressRoute: StudentProgressRoute,
   StudentRevisionRoute: StudentRevisionRoute,
+  StudentSettingsRoute: StudentSettingsRoute,
   StudentWalletRoute: StudentWalletRoute,
   StudentWrongQuestionsRoute: StudentWrongQuestionsRoute,
   StudentIndexRoute: StudentIndexRoute,
@@ -4561,6 +4545,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   PricingRoute: PricingRoute,
   RegisterRoute: RegisterRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   StudentRoute: StudentRouteWithChildren,
   TeacherRoute: TeacherRouteWithChildren,
   AdminAcademiesRoute: AdminAcademiesRoute,
@@ -4578,6 +4563,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminUsersRoute: AdminUsersRoute,
   AssistantTeacherFollowUpRoute: AssistantTeacherFollowUpRoute,
   AssistantTeacherGradingQueueRoute: AssistantTeacherGradingQueueRoute,
+  AssistantTeacherInvitationsRoute: AssistantTeacherInvitationsRoute,
   AssistantTeacherMessagesRoute: AssistantTeacherMessagesRoute,
   AssistantTeacherNotesRoute: AssistantTeacherNotesRoute,
   AssistantTeacherPerformanceRoute: AssistantTeacherPerformanceRoute,
@@ -4588,14 +4574,6 @@ const rootRouteChildren: RootRouteChildren = {
   AssistantExplainRoute: AssistantExplainRoute,
   AssistantSolveRoute: AssistantSolveRoute,
   AssistantStudyPlanRoute: AssistantStudyPlanRoute,
-  ContentCurriculumRoute: ContentCurriculumRoute,
-  ContentImportRoute: ContentImportRoute,
-  ContentLessonReviewRoute: ContentLessonReviewRoute,
-  ContentMediaRoute: ContentMediaRoute,
-  ContentPublishingQueueRoute: ContentPublishingQueueRoute,
-  ContentQuestionReviewRoute: ContentQuestionReviewRoute,
-  ContentReportsRoute: ContentReportsRoute,
-  ContentTagsConceptsRoute: ContentTagsConceptsRoute,
   DeveloperApiHealthRoute: DeveloperApiHealthRoute,
   DeveloperBackendRoute: DeveloperBackendRoute,
   DeveloperDeploymentsRoute: DeveloperDeploymentsRoute,
@@ -4610,8 +4588,11 @@ const rootRouteChildren: RootRouteChildren = {
   FinanceSubscriptionsRoute: FinanceSubscriptionsRoute,
   ParentAttendanceRoute: ParentAttendanceRoute,
   ParentHomeworkRoute: ParentHomeworkRoute,
+  ParentLinkChildRoute: ParentLinkChildRoute,
   ParentMessagesRoute: ParentMessagesRoute,
+  ParentNotificationsRoute: ParentNotificationsRoute,
   ParentProgressRoute: ParentProgressRoute,
+  ParentSettingsRoute: ParentSettingsRoute,
   QuestionsWrongRoute: QuestionsWrongRoute,
   QuizStartRoute: QuizStartRoute,
   RegisterTeacherRoute: RegisterTeacherRoute,
@@ -4622,7 +4603,6 @@ const rootRouteChildren: RootRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   AssistantTeacherIndexRoute: AssistantTeacherIndexRoute,
   AssistantIndexRoute: AssistantIndexRoute,
-  ContentIndexRoute: ContentIndexRoute,
   DeveloperIndexRoute: DeveloperIndexRoute,
   FinanceIndexRoute: FinanceIndexRoute,
   ParentIndexRoute: ParentIndexRoute,

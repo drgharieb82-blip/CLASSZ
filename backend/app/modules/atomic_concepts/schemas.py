@@ -15,6 +15,10 @@ class AtomicConceptCreate(BaseModel):
     title: str = Field(min_length=1, max_length=200)
 
 
+class AtomicConceptUpdate(BaseModel):
+    title: str | None = Field(default=None, min_length=1, max_length=200)
+
+
 class AtomicConceptRead(AtomicConceptBase):
     model_config = ConfigDict(from_attributes=True)
 

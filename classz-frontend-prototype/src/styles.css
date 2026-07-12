@@ -164,6 +164,59 @@
   --glass-border: oklch(1 0 0 / 0.08);
 }
 
+.game {
+  --background: oklch(0.14 0.03 280);
+  --foreground: oklch(0.98 0.01 270);
+
+  --card: oklch(0.18 0.05 282);
+  --card-foreground: oklch(0.98 0.01 270);
+  --popover: oklch(0.18 0.05 282);
+  --popover-foreground: oklch(0.98 0.01 270);
+
+  --primary: oklch(0.78 0.22 320);
+  --primary-foreground: oklch(0.12 0.03 280);
+  --secondary: oklch(0.24 0.05 292);
+  --secondary-foreground: oklch(0.96 0.02 270);
+  --muted: oklch(0.22 0.04 286);
+  --muted-foreground: oklch(0.76 0.07 275);
+  --accent: oklch(0.28 0.14 320);
+  --accent-foreground: oklch(0.99 0.01 270);
+
+  --destructive: oklch(0.68 0.24 20);
+  --destructive-foreground: oklch(0.99 0.01 270);
+  --success: oklch(0.74 0.16 160);
+  --success-foreground: oklch(0.12 0.03 280);
+  --warning: oklch(0.86 0.18 90);
+  --warning-foreground: oklch(0.12 0.03 280);
+
+  --border: oklch(1 0 0 / 0.12);
+  --input: oklch(1 0 0 / 0.14);
+  --ring: oklch(0.78 0.22 320);
+
+  --brand: oklch(0.78 0.22 320);
+  --brand-2: oklch(0.72 0.2 190);
+
+  --chart-1: oklch(0.78 0.22 320);
+  --chart-2: oklch(0.72 0.2 190);
+  --chart-3: oklch(0.82 0.18 145);
+  --chart-4: oklch(0.88 0.17 85);
+  --chart-5: oklch(0.7 0.2 250);
+
+  --sidebar: oklch(0.17 0.04 282);
+  --sidebar-foreground: oklch(0.98 0.01 270);
+  --sidebar-primary: oklch(0.78 0.22 320);
+  --sidebar-primary-foreground: oklch(0.12 0.03 280);
+  --sidebar-accent: oklch(0.24 0.06 292);
+  --sidebar-accent-foreground: oklch(0.98 0.01 270);
+  --sidebar-border: oklch(1 0 0 / 0.1);
+  --sidebar-ring: oklch(0.78 0.22 320);
+
+  --gradient-brand: linear-gradient(135deg, oklch(0.78 0.22 320), oklch(0.72 0.2 190));
+  --gradient-brand-soft: linear-gradient(135deg, oklch(0.78 0.22 320 / 0.18), oklch(0.72 0.2 190 / 0.18));
+  --glass-bg: oklch(0.18 0.05 282 / 0.66);
+  --glass-border: oklch(1 0 0 / 0.12);
+}
+
 @layer base {
   * {
     border-color: var(--color-border);

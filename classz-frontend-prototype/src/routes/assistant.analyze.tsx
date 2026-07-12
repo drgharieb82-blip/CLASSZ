@@ -9,7 +9,7 @@ export const Route = createFileRoute("/assistant/analyze")({
 
 function Page() {
   return (
-    <DashPage role="assistant" title="Analyze Mistakes" subtitle="Understand where you went wrong" icon={ROLES.assistant.icon}>
+    <DashPage role="student" title="Analyze Mistakes" subtitle="Understand where you went wrong" icon={ROLES.student.icon}>
       <GenericDashboard chartA="area" chartB="donut" />
     </DashPage>
   );

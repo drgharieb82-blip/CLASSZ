@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
-import { ThemeToggle, LangSwitcher } from "@/components/brand/Toggles";
+import { ThemeToggle, LangSwitcher, SoundToggle } from "@/components/brand/Toggles";
 import { Button } from "@/components/ui/button";
 import { useApp } from "@/lib/app-context";
 
@@ -28,12 +28,14 @@ export function PublicNav() {
           ))}
         </nav>
         <div className="hidden items-center gap-1 lg:flex">
+          <SoundToggle />
           <LangSwitcher />
           <ThemeToggle />
           <Button asChild variant="ghost" className="rounded-xl"><Link to="/login">{t("nav.login")}</Link></Button>
           <Button asChild className="rounded-xl gradient-brand text-white border-0"><Link to="/register">{t("nav.register")}</Link></Button>
         </div>
         <div className="flex items-center gap-1 lg:hidden">
+          <SoundToggle />
           <ThemeToggle />
           <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => setOpen((o) => !o)}>
             {open ? <X /> : <Menu />}
@@ -48,6 +50,7 @@ export function PublicNav() {
                 className="rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-accent">{t(l.key)}</Link>
             ))}
             <div className="mt-2 flex items-center gap-2">
+              <SoundToggle />
               <LangSwitcher />
               <Button asChild variant="outline" className="flex-1 rounded-xl"><Link to="/login">{t("nav.login")}</Link></Button>
               <Button asChild className="flex-1 rounded-xl gradient-brand text-white border-0"><Link to="/register">{t("nav.register")}</Link></Button>

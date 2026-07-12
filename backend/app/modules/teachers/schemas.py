@@ -59,6 +59,7 @@ class TeacherProfileRead(BaseModel):
 
 class TeacherRegisterResponse(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str = "bearer"
     user: UserRead
     teacher: TeacherProfileRead

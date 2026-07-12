@@ -1,164 +1,244 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { Plus, Check, X, Shield, Edit2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Check, Loader2, X } from "lucide-react";
 import { DashPage } from "@/components/common/DashPage";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ROLES } from "@/lib/roles";
-import { useApp } from "@/lib/app-context";
-import { permissionMatrix, builtInRoles, teamMembers } from "@/lib/team-mock-data";
+import { ApiError } from "@/lib/api/client";
+import {
+  getAssistantPermissions,
+  listMyAssistants,
+  updateAssistantPermissions,
+  type AssistantAction,
+  type AssistantLinkRead,
+  type AssistantResource,
+} from "@/lib/api/assistants";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/teacher/team/roles")({
   component: RolesPage,
 });
 
-const roleColors: Record<string, string> = {
-  Teacher: "bg-blue-500/10 text-blue-600",
-  "Assistant Teacher": "bg-emerald-500/10 text-emerald-600",
-  "Content Manager": "bg-violet-500/10 text-violet-600",
-  Moderator: "bg-amber-500/10 text-amber-600",
-  Finance: "bg-pink-500/10 text-pink-600",
-  Developer: "bg-slate-500/10 text-slate-600",
-  Admin: "bg-rose-500/10 text-rose-600",
+const RESOURCE_LABELS: Record<AssistantResource, string> = {
+  chapters_lessons: "Chapters & Lessons",
+  materials: "Materials",
+  sessions: "Sessions & Videos",
+  questions: "Content Studio (Questions)",
+  quizzes: "Quizzes",
+  homework: "Homework",
+  grading: "Grading",
+  students_data: "Student Data (view)",
+  pods: "Student Pods",
+  parent_contacts: "Parent Contacts",
+  anti_cheating: "Anti-Cheating Events (view)",
+  quiz_submissions: "Quiz Submissions",
 };
 
-function RolesPage() {
-  const { t } = useApp();
-  const [addRoleOpen, setAddRoleOpen] = useState(false);
-  const permissions = Object.keys(permissionMatrix);
-  const roles = [...builtInRoles];
+const ACTIONS: AssistantAction[] = ["view", "create", "edit", "delete", "grade"];
 
-  const roleMemberCounts = roles.reduce<Record<string, number>>((acc, role) => {
-    acc[role] = teamMembers.filter((m) => m.roles.includes(role)).length;
-    return acc;
-  }, {});
+// Actions that don't have a real backing endpoint for a given resource yet
+// (e.g. no edit/delete-question endpoint exists) are hidden from the grid.
+const APPLICABLE_ACTIONS: Record<AssistantResource, AssistantAction[]> = {
+  chapters_lessons: ["create", "edit", "delete"],
+  materials: ["create", "edit", "delete"],
+  sessions: ["create", "edit", "delete", "view"],
+  questions: ["create", "edit", "view"],
+  quizzes: ["create", "view"],
+  homework: ["create", "view"],
+  grading: ["view", "grade"],
+  students_data: ["view"],
+  pods: ["create", "edit", "delete", "view"],
+  parent_contacts: ["create", "edit", "delete", "view"],
+  anti_cheating: ["view"],
+  quiz_submissions: ["view", "grade"],
+};
+
+const RESOURCES = Object.keys(RESOURCE_LABELS) as AssistantResource[];
+
+interface GrantKey {
+  resource: AssistantResource;
+  action: AssistantAction;
+}
+
+function key(g: GrantKey): string {
+  return `${g.resource}:${g.action}`;
+}
+
+function RolesPage() {
+  const [assistants, setAssistants] = useState<AssistantLinkRead[]>([]);
+  const [selectedLinkId, setSelectedLinkId] = useState("");
+  const [grants, setGrants] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    void (async () => {
+      setLoading(true);
+      try {
+        const list = await listMyAssistants();
+        const active = list.filter((a) => a.status === "active");
+        setAssistants(active);
+        if (active.length > 0) setSelectedLinkId(active[0].link_id);
+        setError("");
+      } catch (err) {
+        setError(extractDetail(err));
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedLinkId) {
+      setGrants(new Set());
+      return;
+    }
+    void getAssistantPermissions(selectedLinkId).then((list) => {
+      setGrants(new Set(list.map((g) => key(g))));
+    });
+  }, [selectedLinkId]);
+
+  const toggle = (resource: AssistantResource, action: AssistantAction) => {
+    const k = key({ resource, action });
+    setGrants((prev) => {
+      const next = new Set(prev);
+      if (next.has(k)) next.delete(k);
+      else next.add(k);
+      return next;
+    });
+  };
+
+  const save = async () => {
+    if (!selectedLinkId) return;
+    setSaving(true);
+    try {
+      const grantList = Array.from(grants).map((k) => {
+        const [resource, action] = k.split(":") as [AssistantResource, AssistantAction];
+        return { resource, action };
+      });
+      await updateAssistantPermissions(selectedLinkId, grantList);
+    } catch (err) {
+      setError(extractDetail(err));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const selectedAssistant = useMemo(
+    () => assistants.find((a) => a.link_id === selectedLinkId),
+    [assistants, selectedLinkId],
+  );
 
   return (
-    <DashPage role="teacher" title={t("team.roles")} subtitle={t("team.permissionMatrix")} icon={ROLES.teacher.icon}
-      actions={
-        <Button className="rounded-xl gradient-brand border-0 text-white" size="sm" onClick={() => setAddRoleOpen(true)}>
-          <Plus className="me-1.5 h-4 w-4" /> {t("team.customRole")}
-        </Button>
-      }
+    <DashPage
+      role="teacher"
+      title="Assistant Permissions"
+      subtitle="Grant a specific assistant exactly the actions they need — nothing more."
+      icon={ROLES.teacher.icon}
     >
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
-        {roles.map((role) => (
-          <Card key={role} className="flex items-center gap-3 border bg-card p-3">
-            <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-lg", roleColors[role] || "bg-primary/10 text-primary")}>
-              <Shield className="h-4 w-4" />
-            </span>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold truncate">{role}</p>
-              <p className="text-xs text-muted-foreground">{roleMemberCounts[role] || 0} members</p>
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      <Card className="border bg-card overflow-hidden">
-        <div className="p-4 border-b">
-          <h3 className="font-semibold">{t("team.permissionMatrix")}</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">Configure what each role can access</p>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/30">
-                <th className="text-start px-4 py-3 font-semibold text-muted-foreground min-w-[200px] sticky start-0 bg-muted/30 z-10">
-                  {t("team.permissions")}
-                </th>
-                {roles.map((role) => (
-                  <th key={role} className="px-3 py-3 text-center min-w-[100px]">
-                    <div className="flex flex-col items-center gap-1">
-                      <Badge className={cn("rounded-full border-0 text-[10px] px-2", roleColors[role] || "bg-primary/10 text-primary")}>{role}</Badge>
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {permissions.map((perm, i) => (
-                <tr key={perm} className={cn("border-b transition-colors hover:bg-accent/30", i % 2 === 0 && "bg-muted/10")}>
-                  <td className="px-4 py-3 font-medium sticky start-0 bg-inherit z-10">
-                    {perm}
-                  </td>
-                  {roles.map((role) => {
-                    const allowed = permissionMatrix[perm]?.[role] ?? false;
-                    return (
-                      <td key={role} className="px-3 py-3 text-center">
-                        <button className={cn(
-                          "inline-flex h-7 w-7 items-center justify-center rounded-lg transition-colors",
-                          allowed ? "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20" : "bg-muted/50 text-muted-foreground/40 hover:bg-muted"
-                        )}>
-                          {allowed ? <Check className="h-4 w-4" /> : <X className="h-3.5 w-3.5" />}
-                        </button>
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-
-      <Card className="border bg-card p-5">
-        <h3 className="font-semibold mb-3">Members by Role</h3>
-        <div className="space-y-3">
-          {roles.filter((r) => (roleMemberCounts[r] || 0) > 0).map((role) => {
-            const members = teamMembers.filter((m) => m.roles.includes(role));
-            return (
-              <div key={role} className="flex items-center gap-3 rounded-xl border p-3">
-                <Badge className={cn("rounded-full border-0 text-xs px-2.5 py-0.5 shrink-0", roleColors[role] || "bg-primary/10 text-primary")}>{role}</Badge>
-                <div className="flex flex-wrap gap-1.5 flex-1">
-                  {members.map((m) => (
-                    <span key={m.id} className="rounded-md bg-muted px-2 py-0.5 text-xs font-medium">{m.name}</span>
-                  ))}
-                </div>
-                <span className="text-xs text-muted-foreground shrink-0">{members.length} members</span>
-              </div>
-            );
-          })}
-        </div>
-      </Card>
-
-      <Dialog open={addRoleOpen} onOpenChange={setAddRoleOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>{t("team.customRole")}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-1.5">
-              <Label>Role Name</Label>
-              <Input placeholder="e.g. Video Editor" className="rounded-xl" />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Description</Label>
-              <Input placeholder="Brief description of this role" className="rounded-xl" />
-            </div>
-            <div className="space-y-2">
-              <Label>{t("team.permissions")}</Label>
-              <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
-                {permissions.map((perm) => (
-                  <label key={perm} className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-accent cursor-pointer">
-                    <input type="checkbox" className="rounded" />
-                    <span className="text-sm">{perm}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
+      {loading ? (
+        <Card className="border bg-card p-8 text-sm text-muted-foreground">Loading...</Card>
+      ) : assistants.length === 0 ? (
+        <Card className="border bg-card p-8 text-sm text-muted-foreground">
+          No active assistants yet. Invite one from Team &gt; Invitations.
+        </Card>
+      ) : (
+        <>
+          <div className="flex flex-wrap gap-2">
+            {assistants.map((a) => (
+              <button
+                key={a.link_id}
+                onClick={() => setSelectedLinkId(a.link_id)}
+                className={cn(
+                  "rounded-full border px-4 py-2 text-sm font-medium transition-colors",
+                  selectedLinkId === a.link_id
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-card text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {a.full_name}
+              </button>
+            ))}
           </div>
-          <DialogFooter>
-            <Button variant="outline" className="rounded-xl" onClick={() => setAddRoleOpen(false)}>{t("team.cancel")}</Button>
-            <Button className="rounded-xl gradient-brand border-0 text-white" onClick={() => setAddRoleOpen(false)}>{t("team.save")}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+          {selectedAssistant && (
+            <Card className="border bg-card overflow-hidden">
+              <div className="flex items-center justify-between border-b p-4">
+                <div>
+                  <h3 className="font-semibold">{selectedAssistant.full_name}</h3>
+                  <p className="text-xs text-muted-foreground">{selectedAssistant.public_code}</p>
+                </div>
+                <button
+                  onClick={() => void save()}
+                  disabled={saving}
+                  className="inline-flex items-center gap-1.5 rounded-xl gradient-brand border-0 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                >
+                  {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  Save permissions
+                </button>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b bg-muted/30">
+                      <th className="sticky start-0 z-10 min-w-[220px] bg-muted/30 px-4 py-3 text-start font-semibold text-muted-foreground">
+                        Resource
+                      </th>
+                      {ACTIONS.map((action) => (
+                        <th key={action} className="px-3 py-3 text-center capitalize">
+                          <Badge variant="outline" className="rounded-full text-[10px]">{action}</Badge>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {RESOURCES.map((resource, i) => (
+                      <tr key={resource} className={cn("border-b hover:bg-accent/30", i % 2 === 0 && "bg-muted/10")}>
+                        <td className="sticky start-0 z-10 bg-inherit px-4 py-3 font-medium">
+                          {RESOURCE_LABELS[resource]}
+                        </td>
+                        {ACTIONS.map((action) => {
+                          const applicable = APPLICABLE_ACTIONS[resource].includes(action);
+                          if (!applicable) {
+                            return <td key={action} className="px-3 py-3 text-center text-muted-foreground/20">—</td>;
+                          }
+                          const allowed = grants.has(key({ resource, action }));
+                          return (
+                            <td key={action} className="px-3 py-3 text-center">
+                              <button
+                                onClick={() => toggle(resource, action)}
+                                className={cn(
+                                  "inline-flex h-7 w-7 items-center justify-center rounded-lg transition-colors",
+                                  allowed
+                                    ? "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20"
+                                    : "bg-muted/50 text-muted-foreground/40 hover:bg-muted",
+                                )}
+                              >
+                                {allowed ? <Check className="h-4 w-4" /> : <X className="h-3.5 w-3.5" />}
+                              </button>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          )}
+        </>
+      )}
+
+      {error && <p className="text-sm text-destructive">{error}</p>}
     </DashPage>
   );
+}
+
+function extractDetail(error: unknown): string {
+  if (error instanceof ApiError && typeof error.body === "object" && error.body !== null && "detail" in error.body) {
+    return String((error.body as { detail: string }).detail);
+  }
+  return "Something went wrong.";
 }

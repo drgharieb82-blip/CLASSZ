@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.identity import EntityType, format_public_code
 from app.core.security import create_access_token, hash_password
 from app.models.user import Role, User
+from app.modules.auth.service import issue_refresh_token
 from app.modules.teachers.models import Teacher
 from app.modules.teachers.schemas import RegisterTeacherRequest
 
@@ -23,7 +24,7 @@ async def _next_teacher_public_code(session: AsyncSession) -> str:
     return format_public_code(EntityType.TEACHER, sequence)
 
 
-async def register_teacher(data: RegisterTeacherRequest, session: AsyncSession) -> tuple[User, Teacher, str]:
+async def register_teacher(data: RegisterTeacherRequest, session: AsyncSession) -> tuple[User, Teacher, str, str]:
     existing = await session.execute(select(User).where(User.email == data.email))
     if existing.scalar_one_or_none() is not None:
         raise EmailAlreadyRegisteredError(data.email)
@@ -64,4 +65,5 @@ async def register_teacher(data: RegisterTeacherRequest, session: AsyncSession) 
     await session.refresh(teacher)
 
     token = create_access_token(subject=str(user.id), claims={"role": user.role.value})
-    return user, teacher, token
+    refresh_token = await issue_refresh_token(session, user.id)
+    return user, teacher, token, refresh_token

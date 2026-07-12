@@ -11,8 +11,10 @@ from app.modules.quiz_attempts.models import QuizAttempt, QuizAttemptStatus
 from app.modules.quiz_attempts.service import get_attempt
 
 
-async def create_event(session: AsyncSession, payload: AntiCheatingEventCreate) -> AntiCheatingEvent | None:
-    attempt = await get_attempt(session, payload.attempt_id)
+async def create_event(
+    session: AsyncSession, payload: AntiCheatingEventCreate, student_id: UUID
+) -> AntiCheatingEvent | None:
+    attempt = await get_attempt(session, payload.attempt_id, student_id)
     if attempt is None:
         return None
 
@@ -42,8 +44,10 @@ async def list_attempt_events(session: AsyncSession, attempt_id: UUID) -> list[A
     return list(result.scalars().all())
 
 
-async def auto_submit_attempt(session: AsyncSession, attempt_id: UUID) -> tuple[AntiCheatingEvent, QuizAttempt] | None:
-    attempt = await get_attempt(session, attempt_id)
+async def auto_submit_attempt(
+    session: AsyncSession, attempt_id: UUID, student_id: UUID
+) -> tuple[AntiCheatingEvent, QuizAttempt] | None:
+    attempt = await get_attempt(session, attempt_id, student_id)
     if attempt is None:
         return None
 

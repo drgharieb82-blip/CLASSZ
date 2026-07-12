@@ -1,17 +1,23 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
-type Theme = "light" | "dark";
+type Theme = "light" | "dark" | "game";
 type Lang = "en" | "ar";
 
 interface AppState {
   theme: Theme;
   toggleTheme: () => void;
   setTheme: (t: Theme) => void;
+  uiSoundsEnabled: boolean;
+  toggleUiSounds: () => void;
+  setUiSoundsEnabled: (enabled: boolean) => void;
+  cinematicLoginMotionEnabled: boolean;
+  toggleCinematicLoginMotion: () => void;
+  setCinematicLoginMotionEnabled: (enabled: boolean) => void;
   lang: Lang;
   setLang: (l: Lang) => void;
   toggleLang: () => void;
   dir: "ltr" | "rtl";
-  t: (key: string) => string;
+  t: (key: string, params?: Record<string, string | number>) => string;
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -56,6 +62,7 @@ const dict: Record<string, { en: string; ar: string }> = {
   "student.smartRevision": { en: "Smart Revision", ar: "مراجعة ذكية" },
   "student.myNotes": { en: "My Notes", ar: "ملاحظاتي" },
   "student.progress": { en: "Progress", ar: "التقدم" },
+  "student.assignments": { en: "Assignments", ar: "الواجبات" },
   "student.questionBank": { en: "Question Bank", ar: "بنك الأسئلة" },
   "student.wrongQuestions": { en: "Wrong Questions", ar: "الأسئلة الخاطئة" },
   "student.trophyRoom": { en: "Trophy Room", ar: "غرفة الإنجازات" },
@@ -352,6 +359,7 @@ const dict: Record<string, { en: string; ar: string }> = {
   // Assessment Module
   "assess.title": { en: "Assessment", ar: "التقييم" },
   "assess.overview": { en: "Overview", ar: "نظرة عامة" },
+  "assess.assignments": { en: "Assignments", ar: "الواجبات" },
   "assess.gradingQueue": { en: "Grading Queue", ar: "قائمة التصحيح" },
   "assess.manualGrading": { en: "Manual Grading", ar: "تصحيح يدوي" },
   "assess.submissions": { en: "Submissions", ar: "التسليمات" },
@@ -736,7 +744,6 @@ const dict: Record<string, { en: string; ar: string }> = {
   "pf.exportPDF": { en: "Export PDF", ar: "تصدير PDF" },
   "pf.source": { en: "Source", ar: "المصدر" },
   "pf.percentage": { en: "Percentage", ar: "النسبة" },
-  "pf.revenue": { en: "Revenue", ar: "الإيراد" },
   "pf.fee": { en: "Fee", ar: "الرسوم" },
   "pf.revenue": { en: "Revenue", ar: "الإيرادات" },
 
@@ -1114,6 +1121,34 @@ const dict: Record<string, { en: string; ar: string }> = {
   "at.weakStudents": { en: "Weak Students", ar: "طلاب ضعاف" },
   "at.weeklyGradingOutput": { en: "Weekly Grading Output", ar: "ناتج التصحيح الأسبوعي" },
   "at.yourReply": { en: "Your Reply", ar: "ردك" },
+  "at.createPod": { en: "Create Pod", ar: "إنشاء مجموعة" },
+  "at.noPodAccess": { en: "No teacher has granted you pod access yet.", ar: "لم يمنحك أي معلم صلاحية الوصول للمجموعات بعد." },
+  "at.selectCourse": { en: "Select course", ar: "اختر الدورة" },
+  "at.noPodsYet": { en: "No pods created for this course yet.", ar: "لم يتم إنشاء أي مجموعات لهذه الدورة بعد." },
+  "at.members": { en: "Members", ar: "الأعضاء" },
+  "at.editPod": { en: "Edit Pod", ar: "تعديل المجموعة" },
+  "at.podName": { en: "Pod name", ar: "اسم المجموعة" },
+  "at.podDescription": { en: "Description", ar: "الوصف" },
+  "at.save": { en: "Save", ar: "حفظ" },
+  "at.deletePod": { en: "Delete Pod", ar: "حذف المجموعة" },
+  "at.deletePodConfirm": { en: "Are you sure you want to delete \"{name}\"? This cannot be undone.", ar: "هل أنت متأكد من حذف \"{name}\"؟ لا يمكن التراجع عن هذا الإجراء." },
+  "at.delete": { en: "Delete", ar: "حذف" },
+  "at.noMembersYet": { en: "No members in this pod yet.", ar: "لا يوجد أعضاء في هذه المجموعة بعد." },
+  "at.addMember": { en: "Add member", ar: "إضافة عضو" },
+  "at.noStudentsToAdd": { en: "No more students to add.", ar: "لا يوجد طلاب إضافيون لإضافتهم." },
+  "at.close": { en: "Close", ar: "إغلاق" },
+  "at.maxScore": { en: "Max score", ar: "الدرجة القصوى" },
+  "at.noStudentsDataAccess": { en: "No teacher has granted you student-data access yet.", ar: "لم يمنحك أي معلم صلاحية الوصول لبيانات الطلاب بعد." },
+  "at.low": { en: "Low", ar: "منخفض" },
+  "at.totalStudents": { en: "Total Students", ar: "إجمالي الطلاب" },
+  "at.avgQuizScore": { en: "Avg Quiz Score", ar: "متوسط درجة الاختبار" },
+  "at.certificatesIssued": { en: "Certificates Issued", ar: "الشهادات الصادرة" },
+  "at.studentProgress": { en: "Student Progress", ar: "تقدم الطلاب" },
+  "at.noAccessYet": { en: "No teacher has granted you access to any module yet.", ar: "لم يمنحك أي معلم صلاحية الوصول لأي وحدة بعد." },
+  "at.viewInvitations": { en: "View invitations", ar: "عرض الدعوات" },
+  "at.futureModuleTitle": { en: "Coming soon", ar: "قريباً" },
+  "at.futureModuleDesc": { en: "This module isn't available yet in this release. It'll appear here once it's built.", ar: "هذه الوحدة غير متاحة بعد في هذا الإصدار. ستظهر هنا بمجرد بنائها." },
+  "common.loading": { en: "Loading...", ar: "جارٍ التحميل..." },
 
   // Content Manager extras
   "cm.actions": { en: "Actions", ar: "الإجراءات" },
@@ -1207,17 +1242,20 @@ const dict: Record<string, { en: string; ar: string }> = {
   "sup.unreadMessages": { en: "Unread Messages", ar: "رسائل غير مقروءة" },
 };
 
-const translate = (key: string, lang: Lang) => {
+const translate = (key: string, lang: Lang, params?: Record<string, string | number>) => {
   const direct = dict[key]?.[lang];
-  if (direct) return direct;
-  const byEnglish = Object.values(dict).find((entry) => entry.en === key);
-  return byEnglish?.[lang] ?? key;
+  const resolved = direct ?? Object.values(dict).find((entry) => entry.en === key)?.[lang] ?? key;
+  if (!params) return resolved;
+  return Object.entries(params).reduce(
+    (text, [paramKey, paramValue]) => text.replaceAll(`{${paramKey}}`, String(paramValue)),
+    resolved,
+  );
 };
 
 const getStoredTheme = (): Theme => {
   if (typeof window === "undefined") return "dark";
   const stored = window.localStorage.getItem("classz-theme");
-  return stored === "light" || stored === "dark" ? stored : "dark";
+  return stored === "light" || stored === "dark" || stored === "game" ? stored : "dark";
 };
 
 const getStoredLang = (): Lang => {
@@ -1226,13 +1264,30 @@ const getStoredLang = (): Lang => {
   return stored === "ar" || stored === "en" ? stored : "en";
 };
 
+const getStoredUiSoundsEnabled = (): boolean => {
+  if (typeof window === "undefined") return true;
+  const stored = window.localStorage.getItem("classz-ui-sounds");
+  return stored === null ? true : stored === "true";
+};
+
+const getStoredCinematicLoginMotionEnabled = (): boolean => {
+  if (typeof window === "undefined") return true;
+  const stored = window.localStorage.getItem("classz-cinematic-login-motion");
+  return stored === null ? true : stored === "true";
+};
+
 export function AppProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(getStoredTheme);
   const [lang, setLangState] = useState<Lang>(getStoredLang);
+  const [uiSoundsEnabled, setUiSoundsEnabledState] = useState<boolean>(getStoredUiSoundsEnabled);
+  const [cinematicLoginMotionEnabled, setCinematicLoginMotionEnabledState] = useState<boolean>(
+    getStoredCinematicLoginMotionEnabled,
+  );
 
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.toggle("dark", theme === "dark");
+    root.classList.toggle("dark", theme !== "light");
+    root.classList.toggle("game", theme === "game");
     localStorage.setItem("classz-theme", theme);
   }, [theme]);
 
@@ -1248,15 +1303,54 @@ export function AppProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("classz-lang", lang);
   }, [lang]);
 
+  useEffect(() => {
+    localStorage.setItem("classz-ui-sounds", String(uiSoundsEnabled));
+  }, [uiSoundsEnabled]);
+
+  useEffect(() => {
+    localStorage.setItem("classz-cinematic-login-motion", String(cinematicLoginMotionEnabled));
+  }, [cinematicLoginMotionEnabled]);
+
+  useEffect(() => {
+    const handleStorage = (event: StorageEvent) => {
+      if (event.storageArea !== window.localStorage || !event.key) return;
+      if (event.key === "classz-theme") {
+        const nextTheme = event.newValue === "light" || event.newValue === "dark" || event.newValue === "game"
+          ? event.newValue
+          : "dark";
+        setThemeState(nextTheme);
+      }
+      if (event.key === "classz-lang") {
+        const nextLang = event.newValue === "ar" || event.newValue === "en" ? event.newValue : "en";
+        setLangState(nextLang);
+      }
+      if (event.key === "classz-ui-sounds") {
+        setUiSoundsEnabledState(event.newValue === null ? true : event.newValue === "true");
+      }
+      if (event.key === "classz-cinematic-login-motion") {
+        setCinematicLoginMotionEnabledState(event.newValue === null ? true : event.newValue === "true");
+      }
+    };
+
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
   const value: AppState = {
     theme,
     setTheme: setThemeState,
-    toggleTheme: () => setThemeState((p) => (p === "dark" ? "light" : "dark")),
+    toggleTheme: () => setThemeState((p) => (p === "light" ? "dark" : p === "dark" ? "game" : "light")),
+    uiSoundsEnabled,
+    setUiSoundsEnabled: setUiSoundsEnabledState,
+    toggleUiSounds: () => setUiSoundsEnabledState((current) => !current),
+    cinematicLoginMotionEnabled,
+    setCinematicLoginMotionEnabled: setCinematicLoginMotionEnabledState,
+    toggleCinematicLoginMotion: () => setCinematicLoginMotionEnabledState((current) => !current),
     lang,
     setLang: setLangState,
     toggleLang: () => setLangState((p) => (p === "en" ? "ar" : "en")),
     dir: lang === "ar" ? "rtl" : "ltr",
-    t: (key) => translate(key, lang),
+    t: (key, params) => translate(key, lang, params),
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -31,19 +31,74 @@ def _attempt_options():
         .selectinload(Quiz.questions)
         .selectinload(QuizQuestion.question)
         .selectinload(Question.tags),
+        selectinload(QuizAttempt.quiz)
+        .selectinload(Quiz.questions)
+        .selectinload(QuizQuestion.question)
+        .selectinload(Question.chapters),
+        selectinload(QuizAttempt.quiz)
+        .selectinload(Quiz.questions)
+        .selectinload(QuizQuestion.question)
+        .selectinload(Question.lessons),
+        selectinload(QuizAttempt.quiz)
+        .selectinload(Quiz.questions)
+        .selectinload(QuizQuestion.question)
+        .selectinload(Question.concepts),
+        selectinload(QuizAttempt.quiz)
+        .selectinload(Quiz.questions)
+        .selectinload(QuizQuestion.question)
+        .selectinload(Question.atomic_concepts),
     )
 
 
-async def get_attempt(session: AsyncSession, attempt_id: UUID) -> QuizAttempt | None:
+async def get_attempt(
+    session: AsyncSession,
+    attempt_id: UUID,
+    student_id: UUID | None = None,
+) -> QuizAttempt | None:
+    query = select(QuizAttempt).where(QuizAttempt.id == attempt_id)
+    if student_id is not None:
+        query = query.where(QuizAttempt.student_id == student_id)
+
+    result = await session.execute(query.options(*_attempt_options()))
+    return result.scalar_one_or_none()
+
+
+async def list_attempts_for_quiz(
+    session: AsyncSession,
+    quiz_id: UUID,
+) -> list[QuizAttempt]:
     result = await session.execute(
         select(QuizAttempt)
-        .where(QuizAttempt.id == attempt_id)
+        .where(QuizAttempt.quiz_id == quiz_id)
+        .order_by(QuizAttempt.started_at.desc())
+        .options(*_attempt_options())
+    )
+    return list(result.scalars().all())
+
+
+async def get_latest_attempt_for_quiz(
+    session: AsyncSession,
+    quiz_id: UUID,
+    student_id: UUID,
+) -> QuizAttempt | None:
+    result = await session.execute(
+        select(QuizAttempt)
+        .where(
+            QuizAttempt.quiz_id == quiz_id,
+            QuizAttempt.student_id == student_id,
+        )
+        .order_by(QuizAttempt.started_at.desc())
+        .limit(1)
         .options(*_attempt_options())
     )
     return result.scalar_one_or_none()
 
 
-async def start_attempt(session: AsyncSession, payload: QuizAttemptStart) -> QuizAttempt:
+async def start_attempt(
+    session: AsyncSession,
+    student_id: UUID,
+    payload: QuizAttemptStart,
+) -> QuizAttempt:
     quiz_result = await session.execute(select(Quiz).where(Quiz.id == payload.quiz_id))
     quiz = quiz_result.scalar_one_or_none()
     time_limit_minutes = payload.time_limit_minutes or (quiz.duration_minutes if quiz is not None else None)
@@ -51,14 +106,14 @@ async def start_attempt(session: AsyncSession, payload: QuizAttemptStart) -> Qui
     attempt_count_result = await session.execute(
         select(func.count(QuizAttempt.id)).where(
             QuizAttempt.quiz_id == payload.quiz_id,
-            QuizAttempt.student_id == payload.student_id,
+            QuizAttempt.student_id == student_id,
         )
     )
     attempt_number = int(attempt_count_result.scalar_one() or 0) + 1
 
     attempt = QuizAttempt(
         quiz_id=payload.quiz_id,
-        student_id=payload.student_id,
+        student_id=student_id,
         started_at=started_at,
         expires_at=started_at + timedelta(minutes=time_limit_minutes) if time_limit_minutes else None,
         time_limit_minutes=time_limit_minutes,
@@ -76,11 +131,14 @@ async def start_attempt(session: AsyncSession, payload: QuizAttemptStart) -> Qui
 async def answer_question(
     session: AsyncSession,
     attempt_id: UUID,
+    student_id: UUID,
     payload: QuizAnswerSubmit,
 ) -> QuizAnswer | None:
-    attempt = await get_attempt(session, attempt_id)
+    attempt = await get_attempt(session, attempt_id, student_id)
     if attempt is None:
         return None
+    if attempt.status == QuizAttemptStatus.SUBMITTED:
+        raise ValueError("Attempt already submitted")
 
     result = await session.execute(
         select(QuizAnswer).where(
@@ -104,12 +162,21 @@ async def answer_question(
     return answer
 
 
-async def submit_attempt(session: AsyncSession, attempt_id: UUID) -> QuizAttempt | None:
-    attempt = await get_attempt(session, attempt_id)
+async def submit_attempt(
+    session: AsyncSession,
+    attempt_id: UUID,
+    student_id: UUID,
+) -> QuizAttempt | None:
+    attempt = await get_attempt(session, attempt_id, student_id)
     if attempt is None:
         return None
+    if attempt.status == QuizAttemptStatus.SUBMITTED:
+        return attempt
 
     attempt.status = QuizAttemptStatus.SUBMITTED
     attempt.submitted_at = datetime.now(UTC)
     await session.commit()
-    return await get_attempt(session, attempt_id)
+    from app.modules.results import service as results_service
+
+    await results_service.grade_attempt(session, attempt_id)
+    return await get_attempt(session, attempt_id, student_id)

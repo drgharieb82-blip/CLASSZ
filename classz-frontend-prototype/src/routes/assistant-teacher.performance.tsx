@@ -1,191 +1,158 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BarChart3, Clock, Star, CheckCircle2, TrendingUp, Zap } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Users, TrendingUp, GraduationCap, AlertTriangle, Award } from "lucide-react";
 import { DashPage } from "@/components/common/DashPage";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
 import { ROLES } from "@/lib/roles";
-import { cn } from "@/lib/utils";
 import { useApp } from "@/lib/app-context";
-import { atPerformance } from "@/lib/assistant-teacher-mock-data";
+import { useAssistantScopedCourses, extractErrorDetail } from "@/hooks/use-assistant-scope";
+import { getReportSummary, getProgress, type CourseReportSummary, type StudentProgressEntry } from "@/lib/api/students";
 
 export const Route = createFileRoute("/assistant-teacher/performance")({ component: PerformancePage });
 
-const weeklyGrading = [
-  { day: "Mon", count: 12 },
-  { day: "Tue", count: 8 },
-  { day: "Wed", count: 15 },
-  { day: "Thu", count: 6 },
-  { day: "Fri", count: 10 },
-  { day: "Sat", count: 3 },
-  { day: "Sun", count: 0 },
-];
-
-const maxCount = Math.max(...weeklyGrading.map((d) => d.count));
-
 function PerformancePage() {
   const { t } = useApp();
+  const { courses, loading: coursesLoading, error: coursesError } = useAssistantScopedCourses("students_data", "view");
+  const [courseId, setCourseId] = useState("");
+  const [summary, setSummary] = useState<CourseReportSummary | null>(null);
+  const [progress, setProgress] = useState<StudentProgressEntry[]>([]);
+  const [dataLoading, setDataLoading] = useState(false);
+  const [dataError, setDataError] = useState("");
+
+  useEffect(() => {
+    if (!courseId && courses.length > 0) setCourseId(courses[0].course.id);
+  }, [courses, courseId]);
+
+  useEffect(() => {
+    if (!courseId) return;
+    setDataLoading(true);
+    setDataError("");
+    Promise.all([getReportSummary(courseId), getProgress(courseId)])
+      .then(([s, p]) => {
+        setSummary(s);
+        setProgress(p);
+      })
+      .catch((err) => setDataError(extractErrorDetail(err)))
+      .finally(() => setDataLoading(false));
+  }, [courseId]);
 
   return (
-    <DashPage role="assistant_teacher" title="at.performance" subtitle="at.performanceSubtitle" icon={ROLES.assistant_teacher.icon}>
-      {/* Main stat cards */}
-      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        <Card className="border bg-card p-4 space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-500/10">
-              <CheckCircle2 className="h-5 w-5 text-teal-500" />
-            </div>
-            <Badge variant="outline" className="rounded-full text-[10px] px-1.5 py-0 border-teal-400/40 text-teal-400 bg-teal-500/10">
-              {t("at.allTime")}
-            </Badge>
-          </div>
-          <div>
-            <p className="text-3xl font-bold">{atPerformance.gradedSubmissions}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">{t("at.gradedSubmissions")}</p>
-          </div>
-        </Card>
+    <DashPage role="assistant" title="at.performance" subtitle="at.performanceSubtitle" icon={ROLES.assistant.icon}>
+      {coursesLoading ? (
+        <Card className="border bg-card p-8 text-center text-sm text-muted-foreground">{t("common.loading")}</Card>
+      ) : coursesError ? (
+        <Card className="border border-destructive/40 bg-destructive/5 p-8 text-center text-sm text-destructive">{coursesError}</Card>
+      ) : courses.length === 0 ? (
+        <Card className="border bg-card p-8 text-center text-sm text-muted-foreground">{t("at.noStudentsDataAccess")}</Card>
+      ) : (
+        <>
+          <Select value={courseId} onValueChange={setCourseId}>
+            <SelectTrigger className="w-[260px] h-9 text-sm bg-muted/30 border">
+              <SelectValue placeholder={t("at.selectCourse")} />
+            </SelectTrigger>
+            <SelectContent>
+              {courses.map(({ course }) => (
+                <SelectItem key={course.id} value={course.id}>{course.title}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-        <Card className="border bg-card p-4 space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/10">
-              <Clock className="h-5 w-5 text-blue-500" />
-            </div>
-            <Badge variant="outline" className="rounded-full text-[10px] px-1.5 py-0 border-blue-400/40 text-blue-400 bg-blue-500/10">
-              {t("at.average")}
-            </Badge>
-          </div>
-          <div>
-            <p className="text-3xl font-bold">{atPerformance.avgResponseTime}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">{t("at.avgResponseTime")}</p>
-          </div>
-        </Card>
-
-        <Card className="border bg-card p-4 space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
-              <Star className="h-5 w-5 text-amber-500" />
-            </div>
-            <Badge variant="outline" className="rounded-full text-[10px] px-1.5 py-0 border-amber-400/40 text-amber-400 bg-amber-500/10">
-              /5
-            </Badge>
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <p className="text-3xl font-bold">{atPerformance.studentSatisfaction}</p>
-              <div className="flex gap-0.5">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    className={cn(
-                      "h-3.5 w-3.5",
-                      star <= Math.floor(atPerformance.studentSatisfaction)
-                        ? "text-amber-500 fill-amber-500"
-                        : star <= atPerformance.studentSatisfaction
-                          ? "text-amber-500 fill-amber-500/50"
-                          : "text-muted-foreground/30"
-                    )}
-                  />
-                ))}
+          {dataLoading ? (
+            <Card className="border bg-card p-8 text-center text-sm text-muted-foreground">{t("common.loading")}</Card>
+          ) : dataError ? (
+            <Card className="border border-destructive/40 bg-destructive/5 p-8 text-center text-sm text-destructive">{dataError}</Card>
+          ) : summary && (
+            <>
+              <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+                <Card className="border bg-card p-4 space-y-2">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10">
+                    <Users className="h-5 w-5 text-blue-500" />
+                  </div>
+                  <div>
+                    <p className="text-3xl font-bold">{summary.total_students}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{t("at.totalStudents")}</p>
+                  </div>
+                </Card>
+                <Card className="border bg-card p-4 space-y-2">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10">
+                    <TrendingUp className="h-5 w-5 text-emerald-500" />
+                  </div>
+                  <div>
+                    <p className="text-3xl font-bold">{summary.average_progress_percent}%</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{t("at.avgCompletion")}</p>
+                  </div>
+                </Card>
+                <Card className="border bg-card p-4 space-y-2">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10">
+                    <GraduationCap className="h-5 w-5 text-amber-500" />
+                  </div>
+                  <div>
+                    <p className="text-3xl font-bold">{summary.average_quiz_score ?? "—"}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{t("at.avgQuizScore")}</p>
+                  </div>
+                </Card>
+                <Card className="border bg-card p-4 space-y-2">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-500/10">
+                    <AlertTriangle className="h-5 w-5 text-rose-500" />
+                  </div>
+                  <div>
+                    <p className="text-3xl font-bold">{summary.at_risk_count}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{t("at.atRiskStudents")}</p>
+                  </div>
+                </Card>
               </div>
-            </div>
-            <p className="text-xs text-muted-foreground mt-0.5">{t("at.studentSatisfaction")}</p>
-          </div>
-        </Card>
 
-        <Card className="border bg-card p-4 space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
-              <TrendingUp className="h-5 w-5 text-emerald-500" />
-            </div>
-            <Badge variant="outline" className="rounded-full text-[10px] px-1.5 py-0 border-emerald-400/40 text-emerald-400 bg-emerald-500/10">
-              {t("at.allTime")}
-            </Badge>
-          </div>
-          <div>
-            <p className="text-3xl font-bold">{atPerformance.completedTasks}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">{t("at.completedTasks")}</p>
-          </div>
-        </Card>
-      </div>
+              <Card className="border bg-card p-4 space-y-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-500/10">
+                    <Award className="h-4.5 w-4.5 text-violet-500" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold">{summary.certificates_issued}</p>
+                    <p className="text-xs text-muted-foreground">{t("at.certificatesIssued")}</p>
+                  </div>
+                </div>
+              </Card>
 
-      {/* Secondary metrics */}
-      <div className="grid gap-3 grid-cols-2">
-        <Card className="border bg-card p-4 space-y-3">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-500/10">
-              <Zap className="h-4.5 w-4.5 text-violet-500" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{atPerformance.gradedThisWeek}</p>
-              <p className="text-xs text-muted-foreground">{t("at.gradedThisWeek")}</p>
-            </div>
-          </div>
-        </Card>
-        <Card className="border bg-card p-4 space-y-3">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-cyan-500/10">
-              <BarChart3 className="h-4.5 w-4.5 text-cyan-500" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{atPerformance.responseRate}%</p>
-              <p className="text-xs text-muted-foreground">{t("at.responseRate")}</p>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Progress bars for satisfaction and response rate */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Card className="border bg-card p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold">{t("at.studentSatisfaction")}</h3>
-            <span className="text-sm font-bold text-amber-500">{atPerformance.studentSatisfaction}/5</span>
-          </div>
-          <div className="h-3 rounded-full bg-muted overflow-hidden">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-amber-500 to-yellow-400 transition-all duration-700"
-              style={{ width: `${(atPerformance.studentSatisfaction / 5) * 100}%` }}
-            />
-          </div>
-          <p className="text-[10px] text-muted-foreground">{t("at.satisfactionDesc")}</p>
-        </Card>
-        <Card className="border bg-card p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold">{t("at.responseRate")}</h3>
-            <span className="text-sm font-bold text-cyan-500">{atPerformance.responseRate}%</span>
-          </div>
-          <div className="h-3 rounded-full bg-muted overflow-hidden">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-teal-400 transition-all duration-700"
-              style={{ width: `${atPerformance.responseRate}%` }}
-            />
-          </div>
-          <p className="text-[10px] text-muted-foreground">{t("at.responseRateDesc")}</p>
-        </Card>
-      </div>
-
-      {/* Weekly Grading Chart */}
-      <Card className="border bg-card p-4 space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold">{t("at.weeklyGradingOutput")}</h3>
-          <Badge variant="outline" className="rounded-full text-xs border-teal-400/40 text-teal-400 bg-teal-500/10">
-            {t("at.thisWeek")}
-          </Badge>
-        </div>
-        <div className="flex items-end gap-2 h-40">
-          {weeklyGrading.map((day) => (
-            <div key={day.day} className="flex-1 flex flex-col items-center gap-1.5">
-              <span className="text-xs font-semibold text-foreground">{day.count}</span>
-              <div className="w-full relative rounded-t-md overflow-hidden bg-muted" style={{ height: "100%" }}>
-                <div
-                  className="absolute bottom-0 w-full rounded-t-md bg-gradient-to-t from-teal-600 to-cyan-500 transition-all duration-500"
-                  style={{ height: maxCount > 0 ? `${(day.count / maxCount) * 100}%` : "0%" }}
-                />
-              </div>
-              <span className="text-[10px] text-muted-foreground font-medium">{day.day}</span>
-            </div>
-          ))}
-        </div>
-      </Card>
+              <Card className="border bg-card overflow-hidden">
+                <div className="p-4 pb-0">
+                  <h3 className="text-sm font-semibold">{t("at.studentProgress")}</h3>
+                </div>
+                {progress.length === 0 ? (
+                  <p className="p-8 text-center text-sm text-muted-foreground">{t("at.noStudentsFound")}</p>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="hover:bg-transparent">
+                        <TableHead className="text-xs">{t("at.name")}</TableHead>
+                        <TableHead className="text-xs">{t("at.completion")}</TableHead>
+                        <TableHead className="text-xs">{t("at.gradedSubmissions")}</TableHead>
+                        <TableHead className="text-xs text-end">{t("at.sessions2")}</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {progress.map((p) => (
+                        <TableRow key={p.student_id} className="hover:bg-muted/30">
+                          <TableCell className="text-sm font-medium">{p.full_name}</TableCell>
+                          <TableCell className="text-xs text-muted-foreground">{p.progress_percent}%</TableCell>
+                          <TableCell className="text-xs text-muted-foreground">{p.quiz_average ?? "—"}</TableCell>
+                          <TableCell className="text-xs text-muted-foreground text-end">{p.sessions_completed}/{p.sessions_total}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </Card>
+            </>
+          )}
+        </>
+      )}
     </DashPage>
   );
 }

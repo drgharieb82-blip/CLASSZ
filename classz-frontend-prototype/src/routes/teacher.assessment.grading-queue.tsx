@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState, useMemo, useEffect } from "react";
 import {
   ClipboardCheck, FileText, BookOpen, Upload, RefreshCw, Sparkles,
   RotateCcw, UserPlus, Clock, CheckCircle2, Loader2, Search,
@@ -15,12 +15,52 @@ import {
 } from "@/components/ui/table";
 import { ROLES } from "@/lib/roles";
 import { useApp } from "@/lib/app-context";
-import { gradingQueue } from "@/lib/assessment-mock-data";
+import { listPendingGrades, type ManualGradeRead } from "@/lib/api/grading";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/teacher/assessment/grading-queue")({
   component: GradingQueuePage,
 });
+
+interface GradingRow {
+  id: string;
+  studentName: string;
+  studentId: string;
+  course: string;
+  assessment: string;
+  type: "essay" | "homework" | "file_upload" | "manual_review";
+  submittedAt: string;
+  assignedTo: string | null;
+  priority: "high" | "medium" | "low";
+  status: "pending" | "in_progress" | "graded" | "returned";
+  maxScore: number;
+}
+
+/** The backend ManualGrade record has no student name/course/assessment
+ * title — those live behind endpoints this UI doesn't have (a
+ * teacher-scoped user lookup, and a title resolved across two different
+ * source tables). Rendered with the identifiers we do have until that
+ * exists. */
+function toRow(grade: ManualGradeRead): GradingRow {
+  const isAssignment = grade.assignment_submission !== null;
+  return {
+    id: grade.id,
+    studentName: `Student ${grade.student_id.slice(0, 8)}`,
+    studentId: grade.student_id,
+    course: "—",
+    assessment: isAssignment
+      ? "Assignment submission"
+      : grade.question_result
+        ? "Essay question"
+        : "Submission",
+    type: isAssignment ? "homework" : "essay",
+    submittedAt: grade.assignment_submission?.submitted_at ?? "—",
+    assignedTo: null,
+    priority: "medium",
+    status: grade.status.toLowerCase() as GradingRow["status"],
+    maxScore: grade.max_score,
+  };
+}
 
 const priorityColors: Record<string, string> = {
   high: "border-rose-300 text-rose-600 bg-rose-500/10",
@@ -49,8 +89,18 @@ const typeIcons: Record<string, typeof FileText> = {
 
 function GradingQueuePage() {
   const { t } = useApp();
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  const [gradingQueue, setGradingQueue] = useState<GradingRow[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    listPendingGrades()
+      .then((grades) => setGradingQueue(grades.map(toRow)))
+      .catch(() => setGradingQueue([]))
+      .finally(() => setLoading(false));
+  }, []);
 
   const filtered = useMemo(() => {
     let items = [...gradingQueue];
@@ -66,7 +116,7 @@ function GradingQueuePage() {
       );
     }
     return items;
-  }, [search, activeTab]);
+  }, [gradingQueue, search, activeTab]);
 
   const tabCounts = useMemo(() => ({
     all: gradingQueue.length,
@@ -74,7 +124,7 @@ function GradingQueuePage() {
     homework: gradingQueue.filter((i) => i.type === "homework").length,
     file_upload: gradingQueue.filter((i) => i.type === "file_upload").length,
     manual_review: gradingQueue.filter((i) => i.type === "manual_review").length,
-  }), []);
+  }), [gradingQueue]);
 
   return (
     <DashPage role="teacher" title={t("assess.gradingQueue")} subtitle="Review and grade pending student submissions" icon={ROLES.teacher.icon}>
@@ -145,7 +195,16 @@ function GradingQueuePage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filtered.length === 0 ? (
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={9} className="text-center py-12">
+                        <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                          <Loader2 className="h-6 w-6 animate-spin" />
+                          <p className="text-sm">Loading grading queue...</p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : filtered.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={9} className="text-center py-12">
                         <div className="flex flex-col items-center gap-2 text-muted-foreground">
@@ -189,7 +248,12 @@ function GradingQueuePage() {
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center justify-end gap-1">
-                              <Button variant="default" size="sm" className="rounded-lg text-xs h-7 gradient-brand text-white">
+                              <Button
+                                variant="default"
+                                size="sm"
+                                className="rounded-lg text-xs h-7 gradient-brand text-white"
+                                onClick={() => navigate({ to: "/teacher/assessment/manual-grading", search: { gradeId: item.id } })}
+                              >
                                 {t("assess.gradeAction")}
                               </Button>
                               <Button variant="outline" size="sm" className="rounded-lg text-xs h-7" title={t("assess.assignToAssistant")}>

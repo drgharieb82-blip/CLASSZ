@@ -30,7 +30,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { useTeacherQuestionStore, type AnswerData, type TeacherQuestion } from "@/lib/teacher/teacher-question-store";
 import { useTeacherCourseStore } from "@/lib/teacher/teacher-course-store";
-import { useContentTreeStore } from "@/lib/teacher/content-tree-store";
+import { useTeacherChapterStore } from "@/lib/teacher/teacher-chapter-store";
+import { useTeacherLessonStore } from "@/lib/teacher/teacher-lesson-store";
+import { useTeacherConceptStore } from "@/lib/teacher/teacher-concept-store";
+import { useTeacherAtomicConceptStore } from "@/lib/teacher/teacher-atomic-concept-store";
 import {
   ALL_TYPE_OPTIONS,
   CATEGORY_MAP,
@@ -135,7 +138,16 @@ export function TeacherQuestionBankWorkspace({
   const duplicateQuestion = useTeacherQuestionStore((state) => state.duplicateQuestion);
   const deleteQuestion = useTeacherQuestionStore((state) => state.deleteQuestion);
   const courses = useTeacherCourseStore((state) => state.courses);
-  const treeNodes = useContentTreeStore((state) => state.nodes);
+  const allChapters = useTeacherChapterStore((state) => state.chapters);
+  const allLessons = useTeacherLessonStore((state) => state.lessons);
+  const allConcepts = useTeacherConceptStore((state) => state.concepts);
+  const allAtomicConcepts = useTeacherAtomicConceptStore((state) => state.atomicConcepts);
+  const treeNodes = useMemo(() => [
+    ...allChapters.map((c) => ({ id: c.id, type: "chapter" as const, title: c.title })),
+    ...allLessons.map((l) => ({ id: l.id, type: "lesson" as const, title: l.title })),
+    ...allConcepts.map((c) => ({ id: c.id, type: "concept" as const, title: c.title })),
+    ...allAtomicConcepts.map((a) => ({ id: a.id, type: "atomic_concept" as const, title: a.title })),
+  ], [allChapters, allLessons, allConcepts, allAtomicConcepts]);
 
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<Record<string, string>>({});
@@ -678,30 +690,6 @@ export function TeacherQuestionBankWorkspace({
                 <div className="p-4">
                   {activePreviewQuestion ? (
                     <div className="space-y-4">
-                      {mode === "picker" ? (
-                        <div className="flex items-center gap-2">
-                          {attachedQuestionIds.includes(activePreviewQuestion.id) ? (
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              className="rounded-xl"
-                              onClick={() => detachQuestions([activePreviewQuestion.id])}
-                            >
-                              Remove from assessment
-                            </Button>
-                          ) : (
-                            <Button
-                              type="button"
-                              size="sm"
-                              className="rounded-xl"
-                              onClick={() => attachQuestions([activePreviewQuestion.id])}
-                            >
-                              Attach to assessment
-                            </Button>
-                          )}
-                        </div>
-                      ) : null}
                       <QuestionPreview
                         question={activePreviewQuestion}
                         courseName={courseMap.get(activePreviewQuestion.courseId)}

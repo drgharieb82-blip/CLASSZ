@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
 import {
-  AlertTriangle, Phone, Bell, UserPlus, BookOpen, TrendingDown,
-  ArrowUpRight, MessageSquare, Clock, Users,
+  AlertTriangle, Bell, BookOpen, TrendingDown,
+  MessageSquare, Clock, Users,
 } from "lucide-react";
 import { DashPage } from "@/components/common/DashPage";
 import { Card } from "@/components/ui/card";
@@ -13,7 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { ROLES } from "@/lib/roles";
 import { useApp } from "@/lib/app-context";
-import { mockStudents } from "@/lib/students-mock-data";
+import { useTeacherStudentsStore, useLoadTeacherStudentsData, getMergedStudents, relativeTime, formatWatchTime } from "@/lib/teacher/teacher-students-store";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/teacher/students/at-risk")({
@@ -36,10 +36,17 @@ const riskReasonIcons: Record<string, typeof AlertTriangle> = {
 
 function AtRiskPage() {
   const { t } = useApp();
+  useLoadTeacherStudentsData();
+  const roster = useTeacherStudentsStore((s) => s.roster);
+  const progress = useTeacherStudentsStore((s) => s.progress);
+  const atRisk = useTeacherStudentsStore((s) => s.atRisk);
+  const parents = useTeacherStudentsStore((s) => s.parents);
+  const transactions = useTeacherStudentsStore((s) => s.transactions);
+  const mockStudents = useMemo(() => getMergedStudents(), [roster, progress, atRisk, parents, transactions]);
 
   const atRiskStudents = useMemo(
     () => mockStudents.filter((s) => s.riskLevel !== "none"),
-    []
+    [mockStudents]
   );
 
   const highCount = atRiskStudents.filter((s) => s.riskLevel === "high").length;
@@ -92,7 +99,7 @@ function AtRiskPage() {
       <div className="space-y-4">
         {atRiskStudents
           .sort((a, b) => {
-            const order = { high: 0, medium: 1, low: 2, none: 3 };
+            const order: Record<string, number> = { high: 0, medium: 1, low: 2, none: 3 };
             return order[a.riskLevel] - order[b.riskLevel];
           })
           .map((student) => (
@@ -117,15 +124,15 @@ function AtRiskPage() {
                     <Badge variant="outline" className={cn("rounded-full text-xs", riskColorMap[student.riskLevel])}>
                       {t(`stu.${student.riskLevel}`)} Risk
                     </Badge>
-                    <Badge variant="outline" className="rounded-full text-xs">{student.grade}</Badge>
+                    <Badge variant="outline" className="rounded-full text-xs">{student.grade || "—"}</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground mt-0.5">
-                    {student.id} &middot; {student.courses.join(", ")} &middot; Assistant: {student.assistantTeacher}
+                    {student.id.slice(0, 8)} &middot; {student.courses.join(", ")}
                   </p>
                 </div>
                 <div className="text-end shrink-0">
                   <p className="text-xs text-muted-foreground">{t("stu.lastLogin")}</p>
-                  <p className="text-sm font-medium">{student.lastLogin}</p>
+                  <p className="text-sm font-medium">{relativeTime(student.lastActivityAt)}</p>
                 </div>
               </div>
 
@@ -174,7 +181,7 @@ function AtRiskPage() {
                 </div>
                 <div className="space-y-1">
                   <p className="text-xs text-muted-foreground">Watch Time</p>
-                  <p className="text-lg font-bold">{student.watchTime}</p>
+                  <p className="text-lg font-bold">{formatWatchTime(student.watchTimeMinutes)}</p>
                 </div>
               </div>
 
@@ -189,13 +196,7 @@ function AtRiskPage() {
                   <Bell className="h-3.5 w-3.5" /> {t("stu.notifyParent")}
                 </Button>
                 <Button variant="outline" size="sm" className="rounded-xl gap-1.5">
-                  <UserPlus className="h-3.5 w-3.5" /> {t("stu.assignAssistant")}
-                </Button>
-                <Button variant="outline" size="sm" className="rounded-xl gap-1.5">
                   <BookOpen className="h-3.5 w-3.5" /> {t("stu.createRevisionPlan")}
-                </Button>
-                <Button variant="outline" size="sm" className="rounded-xl gap-1.5 text-rose-500 border-rose-200 hover:bg-rose-500/10">
-                  <ArrowUpRight className="h-3.5 w-3.5" /> {t("stu.escalate")}
                 </Button>
               </div>
             </Card>

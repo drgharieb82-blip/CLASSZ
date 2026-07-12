@@ -1,6 +1,6 @@
-import { useEffect } from "react";
+﻿import { useEffect } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { getAllEnrolledCourses } from "@/lib/enrolled-courses";
+import { listMyEnrollments } from "@/lib/api/enrollments";
 
 export const Route = createFileRoute("/student/lesson")({
   component: LessonRedirect,
@@ -10,16 +10,29 @@ function LessonRedirect() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const activeCourse = getAllEnrolledCourses().find((c) => c.status === "active");
-    if (activeCourse) {
-      navigate({
-        to: "/student/courses/$courseId/session",
-        params: { courseId: activeCourse.id },
-        replace: true,
+    let active = true;
+    listMyEnrollments()
+      .then((response) => {
+        if (!active) return;
+        const firstCourse = response.items[0];
+        if (firstCourse) {
+          navigate({
+            to: "/courses/$courseId",
+            params: { courseId: firstCourse.course.id },
+            replace: true,
+          });
+        } else {
+          navigate({ to: "/student/courses", replace: true });
+        }
+      })
+      .catch(() => {
+        if (!active) return;
+        navigate({ to: "/student/courses", replace: true });
       });
-    } else {
-      navigate({ to: "/student/courses", replace: true });
-    }
+
+    return () => {
+      active = false;
+    };
   }, [navigate]);
 
   return null;

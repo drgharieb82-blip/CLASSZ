@@ -110,6 +110,7 @@ export function HomeworkCard({ item }: Props) {
 }
 
 export function AttachmentCard({ item }: Props) {
+  const canOpen = item.status !== "locked" && !!item.contentUrl;
   return (
     <div className="overflow-hidden rounded-2xl border bg-card/40">
       <div className="flex flex-col items-center justify-center gap-5 p-8 text-center sm:p-12">
@@ -141,13 +142,22 @@ export function AttachmentCard({ item }: Props) {
         </div>
 
         <div className="flex gap-3">
-          <GradientButton size="lg" disabled={item.status === "locked"}>
+          <GradientButton
+            size="lg"
+            disabled={!canOpen}
+            onClick={() => {
+              if (item.contentUrl) window.open(item.contentUrl, "_blank", "noopener,noreferrer");
+            }}
+          >
             <Download className="h-5 w-5" /> Download
           </GradientButton>
           <GradientButton
             variant="outline"
             size="lg"
-            disabled={item.status === "locked"}
+            disabled={!canOpen}
+            onClick={() => {
+              if (item.contentUrl) window.open(item.contentUrl, "_blank", "noopener,noreferrer");
+            }}
           >
             Preview
           </GradientButton>

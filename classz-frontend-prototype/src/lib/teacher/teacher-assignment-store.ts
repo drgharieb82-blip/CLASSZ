@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { createAssignment as createAssignmentApi } from "@/lib/api/assignments";
 
 export type AssignmentType = "project" | "research" | "presentation" | "custom";
 export type AssignmentStatus = "draft" | "published" | "archived";
@@ -22,6 +23,11 @@ export interface TeacherAssignment {
   visibility: "public" | "enrolled_only" | "private";
   createdAt: string;
   updatedAt: string;
+
+  // Backend sync — rubric/xpReward/visibility/assignmentType have no
+  // backend column and stay local-only.
+  backendId?: string;
+  backendSynced?: boolean;
 }
 
 export type CreateAssignmentData = Pick<TeacherAssignment, "title" | "courseId" | "assignmentType"> &
@@ -42,6 +48,27 @@ interface AssignmentState {
   detachFromSession: (asnId: string, sessionId: string) => void;
 }
 
+async function syncAssignmentToBackend(assignment: TeacherAssignment): Promise<void> {
+  try {
+    const created = await createAssignmentApi({
+      title: assignment.title,
+      description: assignment.description || null,
+      course_id: assignment.courseId,
+      chapter_id: assignment.chapterIds[0] ?? null,
+      session_id: assignment.sessionIds[0] ?? null,
+      deadline_at: assignment.dueDate ? new Date(assignment.dueDate).toISOString() : null,
+      max_points: 100,
+      allow_multiple_submissions: false,
+    });
+    useTeacherAssignmentStore.getState().updateAssignment(assignment.id, {
+      backendId: created.id,
+      backendSynced: true,
+    });
+  } catch {
+    // Leave the assignment as local-only; the teacher's draft isn't lost.
+  }
+}
+
 export const useTeacherAssignmentStore = create<AssignmentState>()(
   persist(
     (set, get) => ({
@@ -57,6 +84,7 @@ export const useTeacherAssignmentStore = create<AssignmentState>()(
           visibility: d.visibility || "enrolled_only", createdAt: now, updatedAt: now,
         };
         set((s) => ({ items: [asn, ...s.items] }));
+        void syncAssignmentToBackend(asn);
         return asn;
       },
       updateAssignment: (id, d) => set((s) => ({ items: s.items.map((a) => a.id === id ? { ...a, ...d, updatedAt: new Date().toISOString() } : a) })),

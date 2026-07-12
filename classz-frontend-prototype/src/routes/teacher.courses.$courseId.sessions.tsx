@@ -41,7 +41,11 @@ function SessionsPage() {
   const { chapter: initialChapter } = Route.useSearch();
   const course = getCourseById(courseId);
   const chapters = listChapters(courseId);
-  const allSessions = useTeacherSessionStore((s) => s.sessions.filter((ses) => ses.courseId === courseId).sort((a, b) => a.order - b.order));
+  const rawSessions = useTeacherSessionStore((s) => s.sessions);
+  const allSessions = useMemo(
+    () => rawSessions.filter((ses) => ses.courseId === courseId).sort((a, b) => a.order - b.order),
+    [rawSessions, courseId],
+  );
   const createSession = useTeacherSessionStore((s) => s.createSession);
   const loadSessions = useTeacherSessionStore((s) => s.loadSessions);
   const isLoading = useTeacherSessionStore((s) => s.isLoading);
@@ -51,6 +55,7 @@ function SessionsPage() {
   const lockSession = useTeacherSessionStore((s) => s.lockSession);
   const unlockSession = useTeacherSessionStore((s) => s.unlockSession);
   const allMaterials = useTeacherMaterialStore((s) => s.materials);
+  const loadMaterials = useTeacherMaterialStore((s) => s.loadMaterials);
   const allQuestions = useTeacherQuestionStore((s) => s.questions);
   const allQuizzes = useTeacherQuizStore((s) => s.quizzes);
   const allExams = useTeacherExamStore((s) => s.exams);
@@ -70,6 +75,7 @@ function SessionsPage() {
 
   useEffect(() => {
     loadSessions(courseId);
+    loadMaterials(courseId);
   }, [courseId]);
 
   const filterOptions: FilterOption[] = [

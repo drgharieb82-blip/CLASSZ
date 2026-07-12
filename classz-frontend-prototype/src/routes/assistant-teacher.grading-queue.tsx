@@ -1,14 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
-import { Inbox, Search, FileText, BookOpen, HelpCircle, Upload, CheckCircle2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Inbox, FileText, HelpCircle, CheckCircle2 } from "lucide-react";
 import { DashPage } from "@/components/common/DashPage";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -16,77 +12,98 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { ROLES } from "@/lib/roles";
 import { cn } from "@/lib/utils";
 import { useApp } from "@/lib/app-context";
-import { gradingQueue, type GradingItem } from "@/lib/assistant-teacher-mock-data";
+import { extractErrorDetail } from "@/hooks/use-assistant-scope";
+import { listPendingGrades, gradeManualGrade, returnManualGrade, type ManualGradeRead } from "@/lib/api/grading";
 
 export const Route = createFileRoute("/assistant-teacher/grading-queue")({ component: GradingQueuePage });
 
-const typeColors: Record<string, string> = {
-  essay: "border-violet-400/40 text-violet-400 bg-violet-500/10",
-  homework: "border-blue-400/40 text-blue-400 bg-blue-500/10",
-  quiz: "border-amber-400/40 text-amber-400 bg-amber-500/10",
-  file: "border-emerald-400/40 text-emerald-400 bg-emerald-500/10",
-};
-
-const priorityColors: Record<string, string> = {
-  low: "border-slate-400/40 text-slate-400 bg-slate-500/10",
-  medium: "border-amber-400/40 text-amber-400 bg-amber-500/10",
-  high: "border-rose-400/40 text-rose-400 bg-rose-500/10",
-};
-
 const statusColors: Record<string, string> = {
-  pending: "border-amber-400/40 text-amber-400 bg-amber-500/10",
-  graded: "border-emerald-400/40 text-emerald-400 bg-emerald-500/10",
-  returned: "border-slate-400/40 text-slate-400 bg-slate-500/10",
+  PENDING: "border-amber-400/40 text-amber-400 bg-amber-500/10",
+  GRADED: "border-emerald-400/40 text-emerald-400 bg-emerald-500/10",
+  RETURNED: "border-slate-400/40 text-slate-400 bg-slate-500/10",
 };
 
-const typeIcons: Record<string, typeof FileText> = {
-  essay: FileText,
-  homework: BookOpen,
-  quiz: HelpCircle,
-  file: Upload,
-};
+function itemKind(item: ManualGradeRead) {
+  return item.assignment_submission ? "homework" : "quiz";
+}
 
 function GradingQueuePage() {
   const { t } = useApp();
-  const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [gradingItem, setGradingItem] = useState<GradingItem | null>(null);
+  const [items, setItems] = useState<ManualGradeRead[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const [gradingItem, setGradingItem] = useState<ManualGradeRead | null>(null);
   const [score, setScore] = useState("");
   const [feedback, setFeedback] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [actionError, setActionError] = useState("");
 
-  const filtered = useMemo(() => {
-    let items = [...gradingQueue];
-    if (search) {
-      const q = search.toLowerCase();
-      items = items.filter((i) => i.student.toLowerCase().includes(q));
+  const refresh = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      setItems(await listPendingGrades());
+    } catch (err) {
+      setError(extractErrorDetail(err));
+    } finally {
+      setLoading(false);
     }
-    if (typeFilter !== "all") items = items.filter((i) => i.type === typeFilter);
-    if (statusFilter !== "all") items = items.filter((i) => i.status === statusFilter);
-    return items;
-  }, [search, typeFilter, statusFilter]);
+  };
 
-  const pendingCount = gradingQueue.filter((g) => g.status === "pending").length;
-  const gradedCount = gradingQueue.filter((g) => g.status === "graded").length;
+  useEffect(() => {
+    void refresh();
+  }, []);
 
-  const openGrading = (item: GradingItem) => {
+  const openGrading = (item: ManualGradeRead) => {
     setGradingItem(item);
     setScore("");
     setFeedback("");
+    setActionError("");
   };
 
-  const handleSaveGrade = () => {
-    setGradingItem(null);
+  const handleSaveGrade = async () => {
+    if (!gradingItem) return;
+    const numericScore = Number(score);
+    if (Number.isNaN(numericScore)) return;
+    setSaving(true);
+    setActionError("");
+    try {
+      await gradeManualGrade(gradingItem.id, { score: numericScore, feedback: feedback.trim() || null });
+      setGradingItem(null);
+      await refresh();
+    } catch (err) {
+      setActionError(extractErrorDetail(err));
+    } finally {
+      setSaving(false);
+    }
   };
+
+  const handleReturn = async () => {
+    if (!gradingItem) return;
+    setSaving(true);
+    setActionError("");
+    try {
+      await returnManualGrade(gradingItem.id, { feedback: feedback.trim() || null });
+      setGradingItem(null);
+      await refresh();
+    } catch (err) {
+      setActionError(extractErrorDetail(err));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const pendingCount = items.filter((i) => i.status === "PENDING").length;
 
   return (
-    <DashPage role="assistant_teacher" title="at.gradingQueue" subtitle="at.gradingQueueSubtitle" icon={ROLES.assistant_teacher.icon}>
-      {/* Summary stats */}
-      <div className="grid gap-3 grid-cols-3">
+    <DashPage role="assistant" title="at.gradingQueue" subtitle="at.gradingQueueSubtitle" icon={ROLES.assistant.icon}>
+      <div className="grid gap-3 grid-cols-2">
         <Card className="flex items-center gap-3 border bg-card p-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
             <Inbox className="h-4.5 w-4.5 text-amber-500" />
@@ -97,178 +114,111 @@ function GradingQueuePage() {
           </div>
         </Card>
         <Card className="flex items-center gap-3 border bg-card p-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
-            <CheckCircle2 className="h-4.5 w-4.5 text-emerald-500" />
-          </div>
-          <div>
-            <p className="text-lg font-bold">{gradedCount}</p>
-            <p className="text-xs text-muted-foreground">{t("at.graded")}</p>
-          </div>
-        </Card>
-        <Card className="flex items-center gap-3 border bg-card p-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10">
             <FileText className="h-4.5 w-4.5 text-blue-500" />
           </div>
           <div>
-            <p className="text-lg font-bold">{gradingQueue.length}</p>
+            <p className="text-lg font-bold">{items.length}</p>
             <p className="text-xs text-muted-foreground">{t("at.total")}</p>
           </div>
         </Card>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder={t("at.searchByStudent")}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="ps-9 h-9 text-sm bg-muted/30 border"
-          />
-        </div>
-        <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="w-[140px] h-9 text-sm bg-muted/30 border">
-            <SelectValue placeholder={t("at.type")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("at.allTypes")}</SelectItem>
-            <SelectItem value="essay">{t("at.essay")}</SelectItem>
-            <SelectItem value="homework">{t("at.homework")}</SelectItem>
-            <SelectItem value="quiz">{t("at.quiz")}</SelectItem>
-            <SelectItem value="file">{t("at.file")}</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[140px] h-9 text-sm bg-muted/30 border">
-            <SelectValue placeholder={t("at.status")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("at.allStatuses")}</SelectItem>
-            <SelectItem value="pending">{t("at.pending")}</SelectItem>
-            <SelectItem value="graded">{t("at.graded")}</SelectItem>
-            <SelectItem value="returned">{t("at.returned")}</SelectItem>
-          </SelectContent>
-        </Select>
-        <Badge variant="outline" className="rounded-full text-xs border-muted-foreground/30">
-          {filtered.length} {t("at.results")}
-        </Badge>
-      </div>
-
-      {/* Table */}
       <Card className="border bg-card overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="hover:bg-transparent">
-              <TableHead className="text-xs">{t("at.student")}</TableHead>
-              <TableHead className="text-xs">{t("at.type")}</TableHead>
-              <TableHead className="text-xs hidden md:table-cell">{t("at.course")}</TableHead>
-              <TableHead className="text-xs hidden lg:table-cell">{t("at.assessment")}</TableHead>
-              <TableHead className="text-xs hidden sm:table-cell">{t("at.submitted")}</TableHead>
-              <TableHead className="text-xs">{t("at.priority")}</TableHead>
-              <TableHead className="text-xs">{t("at.status")}</TableHead>
-              <TableHead className="text-xs text-end">{t("at.actions")}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filtered.map((item) => {
-              const TypeIcon = typeIcons[item.type] || FileText;
-              return (
-                <TableRow key={item.id} className="hover:bg-muted/30">
-                  <TableCell className="text-sm font-medium">{item.student}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={cn("rounded-full text-xs gap-1", typeColors[item.type])}>
-                      <TypeIcon className="h-3 w-3" />{item.type}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-xs text-muted-foreground hidden md:table-cell">{item.course}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground hidden lg:table-cell max-w-[180px] truncate">{item.assessment}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground hidden sm:table-cell">{item.submittedAt}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={cn("rounded-full text-xs", priorityColors[item.priority])}>
-                      {item.priority}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={cn("rounded-full text-xs", statusColors[item.status])}>
-                      {item.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-end">
-                    {item.status === "pending" && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-7 text-xs rounded-lg"
-                        onClick={() => openGrading(item)}
-                      >
-                        {t("at.grade")}
-                      </Button>
-                    )}
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-            {filtered.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-sm text-muted-foreground">
-                  {t("at.noItemsFound")}
-                </TableCell>
+        {loading ? (
+          <p className="p-8 text-center text-sm text-muted-foreground">{t("common.loading")}</p>
+        ) : error ? (
+          <p className="p-8 text-center text-sm text-destructive">{error}</p>
+        ) : items.length === 0 ? (
+          <p className="p-8 text-center text-sm text-muted-foreground">{t("at.noItemsFound")}</p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="text-xs">{t("at.student")}</TableHead>
+                <TableHead className="text-xs">{t("at.type")}</TableHead>
+                <TableHead className="text-xs hidden sm:table-cell">{t("at.submitted")}</TableHead>
+                <TableHead className="text-xs">{t("at.status")}</TableHead>
+                <TableHead className="text-xs text-end">{t("at.actions")}</TableHead>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {items.map((item) => {
+                const kind = itemKind(item);
+                const TypeIcon = kind === "homework" ? FileText : HelpCircle;
+                return (
+                  <TableRow key={item.id} className="hover:bg-muted/30">
+                    <TableCell className="text-sm font-medium">{item.student_id.slice(0, 8)}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="rounded-full text-xs gap-1">
+                        <TypeIcon className="h-3 w-3" />{t(kind === "homework" ? "at.homework" : "at.quiz")}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground hidden sm:table-cell">
+                      {item.assignment_submission?.submitted_at ?? "—"}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={cn("rounded-full text-xs", statusColors[item.status])}>
+                        {item.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-end">
+                      {item.status === "PENDING" && (
+                        <Button variant="outline" size="sm" className="h-7 text-xs rounded-lg" onClick={() => openGrading(item)}>
+                          {t("at.grade")}
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        )}
       </Card>
 
-      {/* Grading Dialog */}
       <Dialog open={!!gradingItem} onOpenChange={(open) => !open && setGradingItem(null)}>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-base">{t("at.gradeSubmission")}</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle className="text-base">{t("at.gradeSubmission")}</DialogTitle></DialogHeader>
           {gradingItem && (
             <div className="space-y-4">
               <div className="space-y-2 rounded-lg border bg-muted/30 p-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{gradingItem.student}</span>
-                  <Badge variant="outline" className={cn("rounded-full text-xs", typeColors[gradingItem.type])}>
-                    {gradingItem.type}
-                  </Badge>
+                  <span className="text-sm font-medium">{gradingItem.student_id.slice(0, 8)}</span>
+                  <Badge variant="outline" className="rounded-full text-xs">{itemKind(gradingItem)}</Badge>
                 </div>
-                <p className="text-xs text-muted-foreground">{gradingItem.assessment}</p>
-                <p className="text-xs text-muted-foreground">{gradingItem.course}</p>
+                <p className="text-xs text-muted-foreground">{t("at.maxScore")}: {gradingItem.max_score}</p>
+                {gradingItem.assignment_submission?.submission_text && (
+                  <p className="text-xs text-muted-foreground line-clamp-3">{gradingItem.assignment_submission.submission_text}</p>
+                )}
               </div>
               <Separator />
               <div className="space-y-2">
                 <Label className="text-sm">{t("at.score")}</Label>
                 <Input
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={score}
-                  onChange={(e) => setScore(e.target.value)}
-                  placeholder="0 - 100"
+                  type="number" min={0} max={gradingItem.max_score}
+                  value={score} onChange={(e) => setScore(e.target.value)}
+                  placeholder={`0 - ${gradingItem.max_score}`}
                   className="h-9 text-sm bg-muted/30 border"
                 />
               </div>
               <div className="space-y-2">
                 <Label className="text-sm">{t("at.feedback")}</Label>
                 <textarea
-                  rows={4}
-                  value={feedback}
-                  onChange={(e) => setFeedback(e.target.value)}
+                  rows={4} value={feedback} onChange={(e) => setFeedback(e.target.value)}
                   placeholder={t("at.feedbackPlaceholder")}
                   className="w-full rounded-lg border bg-muted/30 p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
+              {actionError && <p className="text-sm text-destructive">{actionError}</p>}
             </div>
           )}
           <DialogFooter className="gap-2">
-            <Button variant="outline" size="sm" onClick={() => setGradingItem(null)} className="rounded-lg">
-              {t("at.cancel")}
+            <Button variant="outline" size="sm" onClick={handleReturn} disabled={saving} className="rounded-lg">
+              {t("at.returned")}
             </Button>
-            <Button size="sm" onClick={handleSaveGrade} className="rounded-lg">
-              {t("at.saveGrade")}
+            <Button size="sm" onClick={handleSaveGrade} disabled={saving || score === ""} className="rounded-lg gap-1.5">
+              <CheckCircle2 className="h-3.5 w-3.5" />{t("at.saveGrade")}
             </Button>
           </DialogFooter>
         </DialogContent>

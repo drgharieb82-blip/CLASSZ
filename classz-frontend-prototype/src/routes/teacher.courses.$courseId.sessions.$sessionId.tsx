@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   ArrowLeft, ArrowDown, ArrowUp, BarChart3, BookOpen, Brain, Calendar,
   Check, ChevronDown, ChevronRight, ClipboardList, Clock, Crown, DollarSign,
@@ -32,7 +32,10 @@ import { useTeacherQuestionStore, type TeacherQuestion } from "@/lib/teacher/tea
 import { useTeacherQuizStore } from "@/lib/teacher/teacher-quiz-store";
 import { useTeacherExamStore } from "@/lib/teacher/teacher-exam-store";
 import { useTeacherHomeworkStore } from "@/lib/teacher/teacher-homework-store";
-import { useContentTreeStore, getTreeForCourse, getChildren, getCoverageSummary, type ContentTreeNode } from "@/lib/teacher/content-tree-store";
+import { useTeacherChapterStore } from "@/lib/teacher/teacher-chapter-store";
+import { useTeacherLessonStore } from "@/lib/teacher/teacher-lesson-store";
+import { useTeacherConceptStore } from "@/lib/teacher/teacher-concept-store";
+import { useTeacherAtomicConceptStore } from "@/lib/teacher/teacher-atomic-concept-store";
 import {
   SESSION_TYPE_META, BLOCK_META, NEW_BLOCK_TYPES,
   type SessionWorkspaceType, type SessionBlockType,
@@ -43,6 +46,15 @@ export const Route = createFileRoute("/teacher/courses/$courseId/sessions/$sessi
 });
 
 const BLOCK_TYPES: SessionBlockType[] = [...NEW_BLOCK_TYPES];
+
+type AcademicNodeType = "chapter" | "lesson" | "concept" | "atomic_concept";
+interface AcademicNode {
+  id: string;
+  type: AcademicNodeType;
+  title: string;
+  parentId: string;
+  order: number;
+}
 
 interface CanvasBlock {
   id: string;
@@ -74,13 +86,17 @@ function SessionBuilderPage() {
   const publishSession = useTeacherSessionStore((s) => s.publishSession);
   const archiveSession = useTeacherSessionStore((s) => s.archiveSession);
 
-  const materials = useTeacherMaterialStore((s) =>
-    s.materials.filter((m) => m.sessionId === sessionId || m.linkedSessionIds?.includes(sessionId)).sort((a, b) => a.order - b.order),
-  );
   const allLibraryMaterials = useTeacherMaterialStore((s) => s.materials);
+  const materials = useMemo(
+    () => allLibraryMaterials.filter((m) => m.sessionId === sessionId || m.linkedSessionIds?.includes(sessionId)).sort((a, b) => a.order - b.order),
+    [allLibraryMaterials, sessionId],
+  );
   const createMaterial = useTeacherMaterialStore((s) => s.createMaterial);
   const deleteMaterial = useTeacherMaterialStore((s) => s.deleteMaterial);
   const reorderMaterials = useTeacherMaterialStore((s) => s.reorderMaterials);
+  const loadMaterials = useTeacherMaterialStore((s) => s.loadMaterials);
+  const updateMaterial = useTeacherMaterialStore((s) => s.updateMaterial);
+  const attachMaterialToSession = (materialId: string) => { void updateMaterial(materialId, { sessionId }); };
   const linkSegment = (materialId: string, segmentId: string) => linkSegmentToSession(materialId, segmentId, sessionId);
   const unlinkSegment = (materialId: string, segmentId: string) => unlinkSegmentFromSession(materialId, segmentId, sessionId);
 
@@ -97,27 +113,56 @@ function SessionBuilderPage() {
     return result;
   }, [allLibraryMaterials, sessionId]);
 
-  const questions = useTeacherQuestionStore((s) =>
-    s.questions.filter((q) => q.sessionId === sessionId || q.sessionIds?.includes(sessionId)),
-  );
   const allQuestions = useTeacherQuestionStore((s) => s.questions);
+  const questions = useMemo(
+    () => allQuestions.filter((q) => q.sessionId === sessionId || q.sessionIds?.includes(sessionId)),
+    [allQuestions, sessionId],
+  );
 
-  const quizzes = useTeacherQuizStore((s) => s.quizzes.filter((q) => q.sessionIds?.includes(sessionId)));
-  const allQuizzes = useTeacherQuizStore((s) => s.quizzes.filter((q) => q.courseId === courseId));
+  const rawQuizzes = useTeacherQuizStore((s) => s.quizzes);
+  const quizzes = useMemo(() => rawQuizzes.filter((q) => q.sessionIds?.includes(sessionId)), [rawQuizzes, sessionId]);
+  const allQuizzes = useMemo(() => rawQuizzes.filter((q) => q.courseId === courseId), [rawQuizzes, courseId]);
   const attachQuizToSession = useTeacherQuizStore((s) => s.attachQuizToSession);
   const detachQuizFromSession = useTeacherQuizStore((s) => s.detachQuizFromSession);
 
-  const exams = useTeacherExamStore((s) => s.exams.filter((e) => e.sessionIds?.includes(sessionId)));
-  const allExams = useTeacherExamStore((s) => s.exams.filter((e) => e.courseId === courseId));
+  const rawExams = useTeacherExamStore((s) => s.exams);
+  const exams = useMemo(() => rawExams.filter((e) => e.sessionIds?.includes(sessionId)), [rawExams, sessionId]);
+  const allExams = useMemo(() => rawExams.filter((e) => e.courseId === courseId), [rawExams, courseId]);
   const attachExamToSession = useTeacherExamStore((s) => s.attachToSession);
   const detachExamFromSession = useTeacherExamStore((s) => s.detachFromSession);
 
-  const homework = useTeacherHomeworkStore((s) => s.items.filter((h) => h.sessionIds?.includes(sessionId)));
-  const allHomework = useTeacherHomeworkStore((s) => s.items.filter((h) => h.courseId === courseId));
+  const rawHomework = useTeacherHomeworkStore((s) => s.items);
+  const homework = useMemo(() => rawHomework.filter((h) => h.sessionIds?.includes(sessionId)), [rawHomework, sessionId]);
+  const allHomework = useMemo(() => rawHomework.filter((h) => h.courseId === courseId), [rawHomework, courseId]);
   const attachHomeworkToSession = useTeacherHomeworkStore((s) => s.attachToSession);
   const detachHomeworkFromSession = useTeacherHomeworkStore((s) => s.detachFromSession);
 
-  const treeNodes = useContentTreeStore((s) => s.nodes.filter((n) => n.courseId === courseId));
+  const loadChapters = useTeacherChapterStore((s) => s.loadChapters);
+  const allChapters = useTeacherChapterStore((s) => s.chapters);
+  const loadLessons = useTeacherLessonStore((s) => s.loadLessons);
+  const allLessons = useTeacherLessonStore((s) => s.lessons);
+  const loadConcepts = useTeacherConceptStore((s) => s.loadConcepts);
+  const allConcepts = useTeacherConceptStore((s) => s.concepts);
+  const loadAtomicConcepts = useTeacherAtomicConceptStore((s) => s.loadAtomicConcepts);
+  const allAtomicConcepts = useTeacherAtomicConceptStore((s) => s.atomicConcepts);
+
+  const treeChapters = useMemo(() => allChapters.filter((c) => c.courseId === courseId), [allChapters, courseId]);
+  const treeLessons = useMemo(() => allLessons.filter((l) => treeChapters.some((c) => c.id === l.chapterId)), [allLessons, treeChapters]);
+  const treeConceptsList = useMemo(() => allConcepts.filter((c) => treeLessons.some((l) => l.id === c.lessonId)), [allConcepts, treeLessons]);
+  const treeAtomicConcepts = useMemo(() => allAtomicConcepts.filter((a) => treeConceptsList.some((c) => c.id === a.conceptId)), [allAtomicConcepts, treeConceptsList]);
+
+  useEffect(() => { if (courseId) loadChapters(courseId); }, [courseId]);
+  useEffect(() => { if (courseId) loadMaterials(courseId); }, [courseId]);
+  useEffect(() => { for (const c of treeChapters) loadLessons(c.id); }, [treeChapters.map((c) => c.id).join(",")]);
+  useEffect(() => { for (const l of treeLessons) loadConcepts(l.id); }, [treeLessons.map((l) => l.id).join(",")]);
+  useEffect(() => { for (const c of treeConceptsList) loadAtomicConcepts(c.id); }, [treeConceptsList.map((c) => c.id).join(",")]);
+
+  const treeNodes: AcademicNode[] = useMemo(() => [
+    ...treeChapters.map((c) => ({ id: c.id, type: "chapter" as const, title: c.title, parentId: "", order: c.order })),
+    ...treeLessons.map((l) => ({ id: l.id, type: "lesson" as const, title: l.title, parentId: l.chapterId, order: l.order })),
+    ...treeConceptsList.map((c) => ({ id: c.id, type: "concept" as const, title: c.title, parentId: c.lessonId, order: c.order })),
+    ...treeAtomicConcepts.map((a) => ({ id: a.id, type: "atomic_concept" as const, title: a.title, parentId: a.conceptId, order: a.order })),
+  ], [treeChapters, treeLessons, treeConceptsList, treeAtomicConcepts]);
 
   const [activeTab, setActiveTab] = useState("build");
   const [leftSection, setLeftSection] = useState<string>("materials");
@@ -157,7 +202,12 @@ function SessionBuilderPage() {
     return blocks;
   }, [materials, questions, quizzes, exams, homework, linkedSegments]);
 
-  const coverageSummary = useMemo(() => getCoverageSummary(courseId), [courseId, treeNodes]);
+  const structureCounts = useMemo(() => ({
+    chapters: treeChapters.length,
+    lessons: treeLessons.length,
+    concepts: treeConceptsList.length,
+    atomicConcepts: treeAtomicConcepts.length,
+  }), [treeChapters, treeLessons, treeConceptsList, treeAtomicConcepts]);
 
   if (!course || !session) {
     return (
@@ -330,6 +380,7 @@ function SessionBuilderPage() {
                                 sessionId={sessionId}
                                 onLinkSegment={linkSegment}
                                 onUnlinkSegment={unlinkSegment}
+                                onLinkMaterial={attachMaterialToSession}
                               />
                             ))
                           )}
@@ -761,40 +812,27 @@ function SessionBuilderPage() {
             </Card>
           </TabsContent>
 
-          {/* ═══════════════════ COVERAGE TAB ═══════════════════ */}
+          {/* ═══════════════════ ACADEMIC STRUCTURE TAB ═══════════════════ */}
           <TabsContent value="coverage" className="mt-4">
             <div className="space-y-4">
-              {/* Coverage Summary */}
+              {/* Structure Summary */}
               <Card className="border bg-card p-6">
                 <h3 className="font-semibold flex items-center gap-2 mb-4">
-                  <Target className="h-4 w-4 text-primary" />Course Coverage
+                  <Target className="h-4 w-4 text-primary" />Academic Structure
                 </h3>
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between text-sm mb-1.5">
-                      <span className="font-medium">Overall Coverage</span>
-                      <span className="font-bold text-primary">{coverageSummary.coveragePercent}%</span>
-                    </div>
-                    <Progress value={coverageSummary.coveragePercent} className="h-2.5 rounded-full" />
-                  </div>
-                </div>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   {[
-                    { label: "Chapters", total: coverageSummary.chapters.total, covered: coverageSummary.chapters.covered, icon: BookOpen, cls: "text-blue-600" },
-                    { label: "Lessons", total: coverageSummary.lessons.total, covered: coverageSummary.lessons.covered, icon: Play, cls: "text-emerald-600" },
-                    { label: "Concepts", total: coverageSummary.concepts.total, covered: coverageSummary.concepts.covered, icon: Brain, cls: "text-violet-600" },
-                    { label: "Atomic Concepts", total: coverageSummary.atomicConcepts.total, covered: coverageSummary.atomicConcepts.covered, icon: Zap, cls: "text-amber-600" },
+                    { label: "Chapters", total: structureCounts.chapters, icon: BookOpen, cls: "text-blue-600" },
+                    { label: "Lessons", total: structureCounts.lessons, icon: Play, cls: "text-emerald-600" },
+                    { label: "Concepts", total: structureCounts.concepts, icon: Brain, cls: "text-violet-600" },
+                    { label: "Atomic Concepts", total: structureCounts.atomicConcepts, icon: Zap, cls: "text-amber-600" },
                   ].map((item) => (
                     <div key={item.label} className="rounded-xl border p-3.5">
                       <div className="flex items-center gap-2 mb-2">
                         <item.icon className={cn("h-4 w-4", item.cls)} />
                         <span className="text-xs font-medium">{item.label}</span>
                       </div>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-xl font-bold">{item.covered}</span>
-                        <span className="text-xs text-muted-foreground">/ {item.total}</span>
-                      </div>
-                      <Progress value={item.total > 0 ? (item.covered / item.total) * 100 : 0} className="h-1.5 rounded-full mt-2" />
+                      <span className="text-xl font-bold">{item.total}</span>
                     </div>
                   ))}
                 </div>
@@ -803,23 +841,18 @@ function SessionBuilderPage() {
               {/* Concept Cards */}
               <Card className="border bg-card p-6">
                 <h3 className="font-semibold flex items-center gap-2 mb-4">
-                  <Brain className="h-4 w-4 text-violet-500" />Concept Coverage Detail
+                  <Brain className="h-4 w-4 text-violet-500" />Concepts
                 </h3>
-                {treeNodes.filter((n) => n.type === "concept" && !n.isHidden).length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">No concepts defined in content tree.</p>
+                {treeConceptsList.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">No concepts defined in the content tree yet.</p>
                 ) : (
                   <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                    {treeNodes.filter((n) => n.type === "concept" && !n.isHidden).sort((a, b) => a.order - b.order).map((concept) => {
-                      const atomics = treeNodes.filter((n) => n.parentId === concept.id && n.type === "atomic_concept");
-                      const coveredAtomics = atomics.filter((a) => a.coverageStatus === "covered" || a.coverageStatus === "extra");
+                    {treeConceptsList.slice().sort((a, b) => a.order - b.order).map((concept) => {
+                      const atomicCount = treeAtomicConcepts.filter((a) => a.conceptId === concept.id).length;
                       return (
-                        <div key={concept.id} className={cn("rounded-xl border p-3 transition-colors", concept.coverageStatus === "covered" ? "border-emerald-200 bg-emerald-500/5" : concept.coverageStatus === "partial" ? "border-amber-200 bg-amber-500/5" : "border-muted")}>
-                          <div className="flex items-center justify-between mb-1.5">
-                            <p className="text-xs font-medium truncate">{concept.title}</p>
-                            <CoverageChip status={concept.coverageStatus} />
-                          </div>
-                          <p className="text-[11px] text-muted-foreground">{coveredAtomics.length}/{atomics.length} atomic concepts</p>
-                          <Progress value={atomics.length > 0 ? (coveredAtomics.length / atomics.length) * 100 : 0} className="h-1 rounded-full mt-1.5" />
+                        <div key={concept.id} className="rounded-xl border p-3">
+                          <p className="text-xs font-medium truncate mb-1.5">{concept.title}</p>
+                          <p className="text-[11px] text-muted-foreground">{atomicCount} atomic concept{atomicCount === 1 ? "" : "s"}</p>
                         </div>
                       );
                     })}
@@ -974,7 +1007,7 @@ function SessionBuilderPage() {
 
 /* ── Helper Components ── */
 
-function TreeBranch({ node, nodes, depth }: { node: ContentTreeNode; nodes: ContentTreeNode[]; depth: number }) {
+function TreeBranch({ node, nodes, depth }: { node: AcademicNode; nodes: AcademicNode[]; depth: number }) {
   const [open, setOpen] = useState(depth < 1);
   const children = nodes.filter((n) => n.parentId === node.id).sort((a, b) => a.order - b.order);
   const hasChildren = children.length > 0;
@@ -996,7 +1029,6 @@ function TreeBranch({ node, nodes, depth }: { node: ContentTreeNode; nodes: Cont
         )}
         <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", typeColors[node.type] ? `bg-current ${typeColors[node.type]}` : "bg-muted-foreground")} />
         <span className="truncate flex-1">{node.title}</span>
-        <CoverageChip status={node.coverageStatus} />
       </button>
       {open && children.map((child) => (
         <TreeBranch key={child.id} node={child} nodes={nodes} depth={depth + 1} />
@@ -1005,39 +1037,31 @@ function TreeBranch({ node, nodes, depth }: { node: ContentTreeNode; nodes: Cont
   );
 }
 
-function CoverageChip({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    covered: "bg-emerald-500/10 text-emerald-600",
-    partial: "bg-amber-500/10 text-amber-600",
-    missing_material: "bg-rose-500/10 text-rose-600",
-    not_started: "bg-slate-500/10 text-slate-500",
-    needs_review: "bg-blue-500/10 text-blue-600",
-    extra: "bg-violet-500/10 text-violet-600",
-  };
-  return (
-    <span className={cn("rounded px-1 py-0.5 text-[9px] font-medium shrink-0", styles[status] || styles.not_started)}>
-      {status.replace("_", " ")}
-    </span>
-  );
-}
-
 function LibraryItem({
-  material, isLinked, sessionId, onLinkSegment, onUnlinkSegment,
+  material, isLinked, sessionId, onLinkSegment, onUnlinkSegment, onLinkMaterial,
 }: {
   material: TeacherMaterial; isLinked: boolean; sessionId: string;
   onLinkSegment: (materialId: string, segmentId: string) => void;
   onUnlinkSegment: (materialId: string, segmentId: string) => void;
+  onLinkMaterial: (materialId: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const icons: Record<string, typeof Video> = { video: Video, pdf: FileText, image: Image, attachment: FileText, notes: StickyNote };
+  const icons: Record<string, typeof Video> = { video: Video, pdf: FileText, image: Image, attachment: FileText, notes: StickyNote, document: FileText, audio: Video };
   const Icon = icons[material.type] || FileText;
-  const colors: Record<string, string> = { video: "text-blue-500", pdf: "text-rose-500", image: "text-emerald-500", attachment: "text-amber-500", notes: "text-violet-500" };
+  const colors: Record<string, string> = { video: "text-blue-500", pdf: "text-rose-500", image: "text-emerald-500", attachment: "text-amber-500", notes: "text-violet-500", document: "text-sky-500", audio: "text-fuchsia-500" };
   const segments = material.type === "video" ? material.segments || [] : [];
   const hasSegments = segments.length > 0;
 
   return (
     <div className="mb-1">
-      <div className={cn("flex items-center gap-2 rounded-lg border px-2.5 py-2 text-xs transition-colors", isLinked ? "border-primary/30 bg-primary/5" : "hover:bg-accent/50")}>
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => { if (!isLinked) onLinkMaterial(material.id); }}
+        onKeyDown={(e) => { if (!isLinked && (e.key === "Enter" || e.key === " ")) onLinkMaterial(material.id); }}
+        title={isLinked ? "Already in this session" : "Click to add to this session"}
+        className={cn("flex items-center gap-2 rounded-lg border px-2.5 py-2 text-xs transition-colors", isLinked ? "border-primary/30 bg-primary/5 cursor-default" : "hover:bg-accent/50 cursor-pointer")}
+      >
         <Icon className={cn("h-3 w-3 shrink-0", colors[material.type])} />
         <span className="truncate flex-1">{material.title}</span>
         {isLinked && <Check className="h-3 w-3 text-primary shrink-0" />}
@@ -1045,7 +1069,7 @@ function LibraryItem({
         {hasSegments && (
           <button
             type="button"
-            onClick={() => setExpanded((v) => !v)}
+            onClick={(e) => { e.stopPropagation(); setExpanded((v) => !v); }}
             className="shrink-0 rounded p-0.5 hover:bg-accent transition-colors"
             title={`${segments.length} segment${segments.length === 1 ? "" : "s"}`}
           >

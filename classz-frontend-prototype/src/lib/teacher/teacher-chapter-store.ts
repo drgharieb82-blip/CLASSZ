@@ -2,8 +2,11 @@ import { create } from "zustand";
 import {
   createChapter as createChapterApi,
   listChapters as listChaptersApi,
+  updateChapter as updateChapterApi,
+  deleteChapter as deleteChapterApi,
   type ChapterRead,
 } from "@/lib/api/chapters";
+import { ApiError } from "@/lib/api/client";
 
 export type ChapterStatus = "draft" | "published" | "archived";
 
@@ -30,8 +33,10 @@ interface ChapterState {
   isLoading: boolean;
   createChapter: (data: CreateChapterData) => Promise<TeacherChapter | null>;
   loadChapters: (courseId: string) => Promise<void>;
-  updateChapter: (chapterId: string, data: Partial<TeacherChapter>) => void;
-  deleteChapter: (chapterId: string) => void;
+  /** Persists title changes to the backend; description/status/isLocked have
+   * no backend column (never did) and remain local-only decoration. */
+  updateChapter: (chapterId: string, data: Partial<TeacherChapter>) => Promise<boolean>;
+  deleteChapter: (chapterId: string) => Promise<boolean>;
   publishChapter: (chapterId: string) => void;
   archiveChapter: (chapterId: string) => void;
   reorderChapters: (courseId: string, orderedIds: string[]) => void;
@@ -50,6 +55,10 @@ function toChapter(r: ChapterRead): TeacherChapter {
     createdAt: r.created_at,
     updatedAt: r.created_at,
   };
+}
+
+function isNotFound(err: unknown): boolean {
+  return err instanceof ApiError && err.status === 404;
 }
 
 export const useTeacherChapterStore = create<ChapterState>()((set, get) => ({
@@ -87,24 +96,38 @@ export const useTeacherChapterStore = create<ChapterState>()((set, get) => ({
     }
   },
 
-  updateChapter: (chapterId, data) => {
+  updateChapter: async (chapterId, data) => {
+    if (data.title !== undefined) {
+      try {
+        await updateChapterApi(chapterId, { title: data.title });
+      } catch (err) {
+        if (!isNotFound(err)) return false;
+      }
+    }
     set((state) => ({
       chapters: state.chapters.map((c) =>
         c.id === chapterId ? { ...c, ...data, updatedAt: new Date().toISOString() } : c,
       ),
     }));
+    return true;
   },
 
-  deleteChapter: (chapterId) => {
+  deleteChapter: async (chapterId) => {
+    try {
+      await deleteChapterApi(chapterId);
+    } catch (err) {
+      if (!isNotFound(err)) return false;
+    }
     set((state) => ({ chapters: state.chapters.filter((c) => c.id !== chapterId) }));
+    return true;
   },
 
   publishChapter: (chapterId) => {
-    get().updateChapter(chapterId, { status: "published" });
+    void get().updateChapter(chapterId, { status: "published" });
   },
 
   archiveChapter: (chapterId) => {
-    get().updateChapter(chapterId, { status: "archived" });
+    void get().updateChapter(chapterId, { status: "archived" });
   },
 
   reorderChapters: (courseId, orderedIds) => {

@@ -19,7 +19,7 @@ async def register_teacher(
     session: AsyncSession = Depends(get_db_session),
 ) -> TeacherRegisterResponse:
     try:
-        user, teacher, token = await service.register_teacher(body, session)
+        user, teacher, token, refresh_token = await service.register_teacher(body, session)
     except service.EmailAlreadyRegisteredError:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -28,6 +28,7 @@ async def register_teacher(
 
     return TeacherRegisterResponse(
         access_token=token,
+        refresh_token=refresh_token,
         user=UserRead.model_validate(user),
         teacher=teacher,
     )

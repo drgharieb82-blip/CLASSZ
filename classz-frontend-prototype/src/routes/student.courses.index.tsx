@@ -1,14 +1,15 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { BookOpen } from "lucide-react";
 import { DashPage } from "@/components/common/DashPage";
 import { ROLES } from "@/lib/roles";
 import { Button } from "@/components/ui/button";
-import { getAllEnrolledCourses } from "@/lib/enrolled-courses";
-import { useEnrollmentStore } from "@/lib/stores/enrollment-store";
+import { listMyEnrollments, type EnrollmentRead } from "@/lib/api/enrollments";
 import { EnrolledCourseCard } from "@/components/student/EnrolledCourseCard";
 import { EmptyBookshelf } from "@/components/illustrations/Characters";
 import { useApp } from "@/lib/app-context";
+import { ApiError } from "@/lib/api/client";
 
 export const Route = createFileRoute("/student/courses/")({
   component: Page,
@@ -16,8 +17,29 @@ export const Route = createFileRoute("/student/courses/")({
 
 function Page() {
   const { t } = useApp();
-  useEnrollmentStore((s) => s.enrolledCourseIds);
-  const courses = getAllEnrolledCourses();
+  const [courses, setCourses] = useState<EnrollmentRead[]>([]);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    listMyEnrollments()
+      .then((response) => {
+        if (!active) return;
+        setCourses(response.items);
+        setError("");
+      })
+      .catch((err) => {
+        if (!active) return;
+        setError(
+          err instanceof ApiError && typeof err.body === "object" && err.body !== null && "detail" in err.body
+            ? String((err.body as { detail: string }).detail)
+            : "Failed to load enrollments.",
+        );
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <DashPage
@@ -47,11 +69,12 @@ function Page() {
           transition={{ delay: 0.08, duration: 0.45 }}
           className="grid gap-6 md:grid-cols-2"
         >
-          {courses.map((course) => (
-            <EnrolledCourseCard key={course.id} course={course} />
+          {courses.map((enrollment) => (
+            <EnrolledCourseCard key={enrollment.id} enrollment={enrollment} />
           ))}
         </motion.div>
       )}
+      {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
     </DashPage>
   );
 }

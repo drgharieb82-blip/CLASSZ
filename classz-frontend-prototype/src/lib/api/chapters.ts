@@ -14,10 +14,22 @@ export interface ChapterCreatePayload {
   title: string;
 }
 
+export interface ChapterUpdatePayload {
+  title?: string;
+}
+
 export function createChapter(data: ChapterCreatePayload): Promise<ChapterRead> {
   return api.post<ChapterRead>("/api/chapters", data);
 }
 
 export function listChapters(courseId: string): Promise<ChapterRead[]> {
   return api.get<ChapterRead[]>(`/api/chapters?course_id=${encodeURIComponent(courseId)}`);
+}
+
+export function updateChapter(chapterId: string, data: ChapterUpdatePayload): Promise<ChapterRead> {
+  return api.patch<ChapterRead>(`/api/chapters/${encodeURIComponent(chapterId)}`, data);
+}
+
+export function deleteChapter(chapterId: string): Promise<void> {
+  return api.delete<void>(`/api/chapters/${encodeURIComponent(chapterId)}`);
 }

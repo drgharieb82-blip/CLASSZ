@@ -1,7 +1,7 @@
 import { type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { Logo } from "@/components/brand/Logo";
-import { ThemeToggle, LangSwitcher } from "@/components/brand/Toggles";
+import { ThemeToggle, LangSwitcher, SoundToggle } from "@/components/brand/Toggles";
 import { GraduationCap, Sparkles, BarChart3, Trophy } from "lucide-react";
 
 const highlights = [
@@ -37,6 +37,7 @@ export function AuthLayout({ title, subtitle, children, footer }: { title: strin
         <div className="flex items-center justify-between p-6">
           <Link to="/" className="lg:hidden"><Logo /></Link>
           <div className="ms-auto flex items-center gap-1">
+            <SoundToggle />
             <LangSwitcher />
             <ThemeToggle />
           </div>

@@ -28,7 +28,6 @@ class SubmissionFileRead(BaseModel):
 
 
 class AssignmentSubmissionCreate(BaseModel):
-    student_id: UUID
     submission_text: str | None = None
     files: list[SubmissionFileCreate] = Field(default_factory=list)
 

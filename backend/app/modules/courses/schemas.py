@@ -12,6 +12,7 @@ class CourseBase(BaseModel):
     slug: str = Field(min_length=1, max_length=220, pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
     description: str | None = None
     thumbnail_url: HttpUrl | None = None
+    price: float | None = Field(default=None, ge=0)
     subject: str = Field(min_length=1, max_length=120)
     grade: str = Field(min_length=1, max_length=80)
     teacher_id: UUID
@@ -28,6 +29,7 @@ class CourseRead(CourseBase):
     id: UUID
     public_code: str
     thumbnail_url: str | None = None
+    price: float | None = None
     created_at: datetime
     updated_at: datetime
 

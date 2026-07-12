@@ -24,6 +24,12 @@ def _manual_grade_options():
         selectinload(ManualGrade.question_result).selectinload(QuestionResult.question).selectinload(Question.media),
         selectinload(ManualGrade.question_result).selectinload(QuestionResult.question).selectinload(Question.tags),
         selectinload(ManualGrade.question_result).selectinload(QuestionResult.question).selectinload(Question.category),
+        selectinload(ManualGrade.question_result).selectinload(QuestionResult.question).selectinload(Question.chapters),
+        selectinload(ManualGrade.question_result).selectinload(QuestionResult.question).selectinload(Question.lessons),
+        selectinload(ManualGrade.question_result).selectinload(QuestionResult.question).selectinload(Question.concepts),
+        selectinload(ManualGrade.question_result)
+        .selectinload(QuestionResult.question)
+        .selectinload(Question.atomic_concepts),
         selectinload(ManualGrade.question_result)
         .selectinload(QuestionResult.quiz_result)
         .selectinload(QuizResult.attempt)
@@ -40,6 +46,18 @@ async def list_pending_grades(session: AsyncSession) -> list[ManualGrade]:
     result = await session.execute(
         select(ManualGrade)
         .where(ManualGrade.status == GradeStatus.PENDING)
+        .options(*_manual_grade_options())
+        .order_by(ManualGrade.id.desc())
+    )
+    grades = list(result.scalars().all())
+    _attach_student_answers(grades)
+    return grades
+
+
+async def list_all_grades(session: AsyncSession) -> list[ManualGrade]:
+    await _ensure_pending_manual_grades(session)
+    result = await session.execute(
+        select(ManualGrade)
         .options(*_manual_grade_options())
         .order_by(ManualGrade.id.desc())
     )
@@ -187,6 +205,20 @@ async def _recalculate_quiz_result(session: AsyncSession, quiz_result: QuizResul
     refreshed.percentage = Decimal(str(percentage))
     quiz: Quiz | None = refreshed.attempt.quiz if refreshed.attempt is not None else None
     refreshed.passed = percentage >= quiz.passing_score if quiz is not None else False
+
+
+def resolve_grade_course_id(grade: ManualGrade) -> UUID | None:
+    """Resolves the course a `ManualGrade` belongs to, via whichever source
+    it was created from (assignment submission or quiz question result).
+    Requires `_manual_grade_options()` eager-loads to already be applied —
+    does not issue additional queries."""
+    if grade.assignment_submission is not None and grade.assignment_submission.assignment is not None:
+        return grade.assignment_submission.assignment.course_id
+    if grade.question_result is not None and grade.question_result.quiz_result is not None:
+        attempt = grade.question_result.quiz_result.attempt
+        if attempt is not None and attempt.quiz is not None:
+            return attempt.quiz.course_id
+    return None
 
 
 def _attach_student_answers(grades: list[ManualGrade]) -> None:

@@ -2,7 +2,7 @@ import { type ReactNode, useState } from "react";
 import { Menu, PanelRightOpen, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Logo } from "@/components/brand/Logo";
-import { ThemeToggle, LangSwitcher } from "@/components/brand/Toggles";
+import { ThemeToggle, LangSwitcher, SoundToggle } from "@/components/brand/Toggles";
 import { UserMenu } from "@/components/layout/UserMenu";
 import { Button } from "@/components/ui/button";
 
@@ -32,6 +32,7 @@ export function LessonPlayerLayout({ sidebar, content, panel }: LessonPlayerLayo
           >
             <PanelRightOpen className="h-5 w-5" />
           </Button>
+          <SoundToggle />
           <LangSwitcher />
           <ThemeToggle />
           <UserMenu role="student" />

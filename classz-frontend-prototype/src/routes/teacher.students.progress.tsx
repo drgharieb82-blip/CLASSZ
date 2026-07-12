@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   TrendingUp, BookOpen, Clock, BarChart3, CheckCircle2, Activity,
   Calendar, Search,
@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/table";
 import { ROLES } from "@/lib/roles";
 import { useApp } from "@/lib/app-context";
-import { mockStudents } from "@/lib/students-mock-data";
+import { useTeacherStudentsStore, useLoadTeacherStudentsData, getMergedStudents, relativeTime, formatWatchTime } from "@/lib/teacher/teacher-students-store";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/teacher/students/progress")({
@@ -24,24 +24,40 @@ export const Route = createFileRoute("/teacher/students/progress")({
 
 function ProgressDashboardPage() {
   const { t } = useApp();
+  useLoadTeacherStudentsData();
+  const roster = useTeacherStudentsStore((s) => s.roster);
+  const progressRows = useTeacherStudentsStore((s) => s.progress);
+  const atRisk = useTeacherStudentsStore((s) => s.atRisk);
+  const parents = useTeacherStudentsStore((s) => s.parents);
+  const transactions = useTeacherStudentsStore((s) => s.transactions);
+  const mockStudents = useMemo(() => getMergedStudents(), [roster, progressRows, atRisk, parents, transactions]);
   const [search, setSearch] = useState("");
 
   const filtered = search
     ? mockStudents.filter((s) => s.name.toLowerCase().includes(search.toLowerCase()))
     : mockStudents;
 
-  const avgProgress = Math.round(mockStudents.reduce((s, st) => s + st.progress, 0) / mockStudents.length);
-  const avgQuiz = Math.round(mockStudents.reduce((s, st) => s + st.quizAvg, 0) / mockStudents.length);
-  const avgHW = Math.round(mockStudents.reduce((s, st) => s + st.hwCompletion, 0) / mockStudents.length);
-  const totalWatch = mockStudents.reduce((s, st) => s + parseInt(st.watchTime), 0);
+  const count = mockStudents.length || 1;
+  const avgProgress = Math.round(mockStudents.reduce((s, st) => s + st.progress, 0) / count);
+  const avgQuiz = Math.round(mockStudents.reduce((s, st) => s + st.quizAvg, 0) / count);
+  const avgHW = Math.round(mockStudents.reduce((s, st) => s + st.hwCompletion, 0) / count);
+  const totalWatchMinutes = mockStudents.reduce((s, st) => s + st.watchTimeMinutes, 0);
+  const sessionsCompleted = roster.reduce((s, r) => s + r.sessions_completed, 0);
+  const sessionsTotal = roster.reduce((s, r) => s + r.sessions_total, 0);
+  const sessionCompletionRate = sessionsTotal > 0 ? Math.round((sessionsCompleted / sessionsTotal) * 100) : 0;
+  const mostRecentActivity = mockStudents.reduce<string | null>((latest, s) => {
+    if (!s.lastActivityAt) return latest;
+    if (!latest || new Date(s.lastActivityAt) > new Date(latest)) return s.lastActivityAt;
+    return latest;
+  }, null);
 
   const summaryCards = [
     { key: "Course Progress", icon: BookOpen, value: `${avgProgress}%`, color: "text-blue-400", bg: "bg-blue-500/10" },
-    { key: "Session Completion", icon: CheckCircle2, value: "68%", color: "text-emerald-400", bg: "bg-emerald-500/10" },
-    { key: "Total Watch Time", icon: Clock, value: `${totalWatch}h`, color: "text-violet-400", bg: "bg-violet-500/10" },
+    { key: "Session Completion", icon: CheckCircle2, value: `${sessionCompletionRate}%`, color: "text-emerald-400", bg: "bg-emerald-500/10" },
+    { key: "Total Watch Time", icon: Clock, value: formatWatchTime(totalWatchMinutes), color: "text-violet-400", bg: "bg-violet-500/10" },
     { key: "Quiz Average", icon: BarChart3, value: `${avgQuiz}%`, color: "text-amber-400", bg: "bg-amber-500/10" },
     { key: "HW Completion", icon: Activity, value: `${avgHW}%`, color: "text-pink-400", bg: "bg-pink-500/10" },
-    { key: "Last Activity", icon: Calendar, value: "Today", color: "text-cyan-400", bg: "bg-cyan-500/10" },
+    { key: "Last Activity", icon: Calendar, value: relativeTime(mostRecentActivity), color: "text-cyan-400", bg: "bg-cyan-500/10" },
   ];
 
   return (
@@ -60,30 +76,6 @@ function ProgressDashboardPage() {
           </Card>
         ))}
       </div>
-
-      {/* Mock Trend Chart */}
-      <Card className="border bg-card p-5">
-        <h3 className="font-semibold mb-4">Weekly Progress Trend</h3>
-        <div className="flex items-end gap-2 h-32">
-          {[62, 68, 65, 72, 70, 78, avgProgress].map((val, idx) => (
-            <div key={idx} className="flex-1 flex flex-col items-center gap-1">
-              <span className="text-[10px] font-medium text-muted-foreground">{val}%</span>
-              <div
-                className="w-full rounded-t-lg bg-primary/20 transition-all relative overflow-hidden"
-                style={{ height: `${(val / 100) * 100}%` }}
-              >
-                <div
-                  className="absolute inset-x-0 bottom-0 rounded-t-lg gradient-brand opacity-80"
-                  style={{ height: `${(val / 100) * 100}%` }}
-                />
-              </div>
-              <span className="text-[10px] text-muted-foreground">
-                {["W1", "W2", "W3", "W4", "W5", "W6", "Now"][idx]}
-              </span>
-            </div>
-          ))}
-        </div>
-      </Card>
 
       {/* Progress Table */}
       <Card className="border bg-card overflow-hidden">
@@ -126,7 +118,7 @@ function ProgressDashboardPage() {
                         </Avatar>
                         <div>
                           <p className="font-medium text-sm">{student.name}</p>
-                          <p className="text-xs text-muted-foreground">{student.grade}</p>
+                          <p className="text-xs text-muted-foreground">{student.grade || "—"}</p>
                         </div>
                       </div>
                     </TableCell>
@@ -153,8 +145,8 @@ function ProgressDashboardPage() {
                         <span className="text-xs font-medium">{student.hwCompletion}%</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-sm">{student.watchTime}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{student.lastLogin}</TableCell>
+                    <TableCell className="text-sm">{formatWatchTime(student.watchTimeMinutes)}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{relativeTime(student.lastActivityAt)}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className={cn("rounded-full text-xs font-semibold",
                         overall >= 80 ? "border-emerald-300 text-emerald-500 bg-emerald-500/10" :
@@ -167,6 +159,13 @@ function ProgressDashboardPage() {
                   </TableRow>
                 );
               })}
+              {filtered.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-12 text-muted-foreground text-sm">
+                    No students yet.
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </div>

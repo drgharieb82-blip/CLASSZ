@@ -1,21 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import {
-  HeartHandshake, Search, Phone, Mail, Bell, Calendar,
-  Send, FileText, Users, AlertTriangle, Clock,
+  HeartHandshake, Search, Phone, Mail, Bell, Users, AlertTriangle, Clock, Plus,
 } from "lucide-react";
+import { toast } from "sonner";
 import { DashPage } from "@/components/common/DashPage";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { ROLES } from "@/lib/roles";
 import { useApp } from "@/lib/app-context";
-import { parentRecords } from "@/lib/students-mock-data";
+import { useTeacherStudentsStore, useLoadTeacherStudentsData, getMergedStudents, relativeTime } from "@/lib/teacher/teacher-students-store";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/teacher/students/parents")({
@@ -36,7 +37,22 @@ const alertLabelMap: Record<string, string> = {
 
 function ParentCenterPage() {
   const { t } = useApp();
+  useLoadTeacherStudentsData();
+  const parentRecords = useTeacherStudentsStore((s) => s.parents);
+  const roster = useTeacherStudentsStore((s) => s.roster);
+  const progress = useTeacherStudentsStore((s) => s.progress);
+  const atRisk = useTeacherStudentsStore((s) => s.atRisk);
+  const transactions = useTeacherStudentsStore((s) => s.transactions);
+  const addParentContact = useTeacherStudentsStore((s) => s.addParentContact);
+  const updateParentContact = useTeacherStudentsStore((s) => s.updateParentContact);
+  const students = useMemo(() => getMergedStudents(), [roster, progress, atRisk, parentRecords, transactions]);
+
   const [search, setSearch] = useState("");
+  const [showCreate, setShowCreate] = useState(false);
+  const [newStudentId, setNewStudentId] = useState("");
+  const [newName, setNewName] = useState("");
+  const [newRelation, setNewRelation] = useState("");
+  const [newPhone, setNewPhone] = useState("");
 
   const filtered = useMemo(() => {
     if (!search) return parentRecords;
@@ -44,18 +60,63 @@ function ParentCenterPage() {
     return parentRecords.filter(
       (p) =>
         p.name.toLowerCase().includes(q) ||
-        p.studentName.toLowerCase().includes(q) ||
-        p.email.toLowerCase().includes(q)
+        p.student_name.toLowerCase().includes(q) ||
+        (p.email ?? "").toLowerCase().includes(q)
     );
-  }, [search]);
+  }, [parentRecords, search]);
 
   const totalParents = parentRecords.length;
-  const urgentCount = parentRecords.filter((p) => p.alertStatus === "urgent").length;
-  const sentCount = parentRecords.filter((p) => p.alertStatus === "sent").length;
-  const neverContacted = parentRecords.filter((p) => p.lastContact === "Never").length;
+  const urgentCount = parentRecords.filter((p) => p.alert_status === "urgent").length;
+  const sentCount = parentRecords.filter((p) => p.alert_status === "sent").length;
+  const neverContacted = parentRecords.filter((p) => !p.last_contact_at).length;
+
+  const handleCreate = async () => {
+    if (!newStudentId || !newName.trim() || !newRelation.trim()) return;
+    try {
+      await addParentContact({ studentId: newStudentId, name: newName.trim(), relation: newRelation.trim(), phone: newPhone || undefined, whatsapp: newPhone || undefined });
+      setNewName(""); setNewRelation(""); setNewPhone(""); setNewStudentId(""); setShowCreate(false);
+      toast.success("Parent contact added");
+    } catch {
+      toast.error("Could not add parent contact");
+    }
+  };
+
+  const notify = async (contactId: string) => {
+    try {
+      await updateParentContact(contactId, { alert_status: "sent", last_contact_at: new Date().toISOString() });
+      toast.success("Parent notified");
+    } catch {
+      toast.error("Could not notify parent");
+    }
+  };
 
   return (
-    <DashPage role="teacher" title={t("stu.parents")} subtitle="Communicate with parents and track alerts" icon={ROLES.teacher.icon}>
+    <DashPage
+      role="teacher"
+      title={t("stu.parents")}
+      subtitle="Communicate with parents and track alerts"
+      icon={ROLES.teacher.icon}
+      actions={
+        <Button className="rounded-xl gradient-brand text-white gap-1.5" onClick={() => setShowCreate((v) => !v)}>
+          <Plus className="h-4 w-4" /> Add Contact
+        </Button>
+      }
+    >
+      {showCreate && (
+        <Card className="border bg-card p-4 flex flex-wrap items-center gap-3">
+          <Select value={newStudentId} onValueChange={setNewStudentId}>
+            <SelectTrigger className="w-[220px] rounded-xl"><SelectValue placeholder="Student" /></SelectTrigger>
+            <SelectContent>
+              {students.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Input placeholder="Parent name" value={newName} onChange={(e) => setNewName(e.target.value)} className="rounded-xl w-[180px]" />
+          <Input placeholder="Relation (e.g. Mother)" value={newRelation} onChange={(e) => setNewRelation(e.target.value)} className="rounded-xl w-[160px]" />
+          <Input placeholder="Phone / WhatsApp" value={newPhone} onChange={(e) => setNewPhone(e.target.value)} className="rounded-xl w-[160px]" />
+          <Button className="rounded-xl gradient-brand text-white" onClick={handleCreate}>Save</Button>
+        </Card>
+      )}
+
       {/* Summary */}
       <div className="grid gap-3 sm:grid-cols-4">
         <Card className="flex items-center gap-3 border bg-card p-4">
@@ -118,7 +179,7 @@ function ParentCenterPage() {
                 <TableHead className="w-[200px]">{t("stu.parentName")}</TableHead>
                 <TableHead>Student</TableHead>
                 <TableHead>{t("stu.relation")}</TableHead>
-                <TableHead>WhatsApp</TableHead>
+                <TableHead>Phone</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>{t("stu.lastContact")}</TableHead>
                 <TableHead>{t("stu.alertStatus")}</TableHead>
@@ -138,38 +199,30 @@ function ParentCenterPage() {
                       <span className="font-medium text-sm">{parent.name}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm">{parent.studentName}</TableCell>
+                  <TableCell className="text-sm">{parent.student_name}</TableCell>
                   <TableCell>
                     <Badge variant="outline" className="rounded-full text-xs">{parent.relation}</Badge>
                   </TableCell>
                   <TableCell>
                     <span className="flex items-center gap-1 text-sm">
-                      <Phone className="h-3 w-3 text-emerald-500" /> {parent.whatsapp}
+                      <Phone className="h-3 w-3 text-emerald-500" /> {parent.phone || parent.whatsapp || "—"}
                     </span>
                   </TableCell>
                   <TableCell>
                     <span className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <Mail className="h-3 w-3" /> {parent.email}
+                      <Mail className="h-3 w-3" /> {parent.email || "—"}
                     </span>
                   </TableCell>
-                  <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{parent.lastContact}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{relativeTime(parent.last_contact_at)}</TableCell>
                   <TableCell>
-                    <Badge variant="outline" className={cn("rounded-full text-xs", alertColorMap[parent.alertStatus])}>
-                      {alertLabelMap[parent.alertStatus]}
+                    <Badge variant="outline" className={cn("rounded-full text-xs", alertColorMap[parent.alert_status])}>
+                      {alertLabelMap[parent.alert_status]}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" title={t("stu.sendWeeklyReport")}>
-                        <FileText className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" title={t("stu.notifyParent")}>
-                        <Bell className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" title={t("stu.scheduleCall")}>
-                        <Calendar className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" title={t("stu.notifyParent")} onClick={() => notify(parent.id)}>
+                      <Bell className="h-3.5 w-3.5" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

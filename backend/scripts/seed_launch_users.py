@@ -1,5 +1,5 @@
 """Seed the minimum accounts needed to verify auth on a freshly-migrated launch
-database: one admin, one teacher, one student. Idempotent - safe to re-run.
+database: one admin, one teacher, one student, one parent, one assistant. Idempotent - safe to re-run.
 
 Credentials are intentionally simple and documented in
 DATABASE_LAUNCH_RESET_REPORT.md; rotate them before any real launch.
@@ -16,6 +16,9 @@ LAUNCH_USERS = [
     {"email": "admin@classz-launch.dev", "password": "LaunchAdmin123!", "full_name": "Launch Admin", "role": Role.ADMIN, "public_code": "ADM-26-0001"},
     {"email": "teacher@classz-launch.dev", "password": "LaunchTeacher123!", "full_name": "Launch Teacher", "role": Role.TEACHER, "public_code": "TCH-26-0001"},
     {"email": "student@classz-launch.dev", "password": "LaunchStudent123!", "full_name": "Launch Student", "role": Role.STUDENT, "public_code": "CLS-26-000001"},
+    {"email": "parent@classz-launch.dev", "password": "LaunchParent123!", "full_name": "Launch Parent", "role": Role.PARENT, "public_code": "PRT-26-0001"},
+    {"email": "assistant@classz-launch.dev", "password": "LaunchAssistant123!", "full_name": "Launch Assistant", "role": Role.ASSISTANT, "public_code": "AST-26-0001"},
+    {"email": "finance@classz-launch.dev", "password": "LaunchFinance123!", "full_name": "Launch Finance", "role": Role.FINANCE, "public_code": "FIN-26-0001"},
 ]
 
 

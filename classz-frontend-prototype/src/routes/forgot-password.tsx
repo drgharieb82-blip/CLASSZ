@@ -5,6 +5,7 @@ import { AuthLayout } from "@/components/layout/AuthLayout";
 import { GradientButton } from "@/components/premium/GradientButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { forgotPasswordApi } from "@/lib/api/auth";
 
 export const Route = createFileRoute("/forgot-password")({
   head: () => ({ meta: [{ title: "Reset Password — CLASSZ" }] }),
@@ -20,9 +21,15 @@ function ForgotPasswordPage() {
     e.preventDefault();
     if (!identifier.trim()) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setLoading(false);
-    setSent(true);
+    try {
+      await forgotPasswordApi(identifier.trim());
+    } catch {
+      // Deliberately swallowed — the response never reveals whether the
+      // account exists, so a network hiccup shows the same neutral state.
+    } finally {
+      setLoading(false);
+      setSent(true);
+    }
   };
 
   if (sent) {

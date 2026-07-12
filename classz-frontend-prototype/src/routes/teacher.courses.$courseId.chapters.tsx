@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { toast } from "sonner";
 import { ArrowLeft, FolderTree, Lock, Pencil, Plus, Trash2, Unlock, Upload } from "lucide-react";
 import { DashPage } from "@/components/common/DashPage";
 import { Card } from "@/components/ui/card";
@@ -20,7 +21,11 @@ export const Route = createFileRoute("/teacher/courses/$courseId/chapters")({
 function ChaptersPage() {
   const { courseId } = Route.useParams();
   const course = getCourseById(courseId);
-  const chapters = useTeacherChapterStore((s) => s.chapters.filter((c) => c.courseId === courseId).sort((a, b) => a.order - b.order));
+  const rawChapters = useTeacherChapterStore((s) => s.chapters);
+  const chapters = useMemo(
+    () => rawChapters.filter((c) => c.courseId === courseId).sort((a, b) => a.order - b.order),
+    [rawChapters, courseId],
+  );
   const createChapter = useTeacherChapterStore((s) => s.createChapter);
   const loadChapters = useTeacherChapterStore((s) => s.loadChapters);
   const isLoading = useTeacherChapterStore((s) => s.isLoading);
@@ -55,12 +60,18 @@ function ChaptersPage() {
     setDescription(ch.description);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editId || !title.trim()) return;
-    updateChapter(editId, { title: title.trim(), description: description.trim() });
-    setEditId(null);
-    setTitle("");
-    setDescription("");
+    setSaving(true);
+    try {
+      const ok = await updateChapter(editId, { title: title.trim(), description: description.trim() });
+      if (!ok) { toast.error("Could not save the chapter. Check your connection and try again."); return; }
+      setEditId(null);
+      setTitle("");
+      setDescription("");
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (!course) {
@@ -141,7 +152,7 @@ function ChaptersPage() {
                   </Button>
                   <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => handleEdit(ch)}><Pencil className="h-3.5 w-3.5" /></Button>
                   {ch.status === "draft" && <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => publishChapter(ch.id)}><Upload className="h-3.5 w-3.5 text-emerald-600" /></Button>}
-                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-destructive" onClick={() => deleteChapter(ch.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-destructive" onClick={async () => { const ok = await deleteChapter(ch.id); if (!ok) toast.error("Could not delete the chapter. Check your connection and try again."); }}><Trash2 className="h-3.5 w-3.5" /></Button>
                 </div>
               </Card>
             );

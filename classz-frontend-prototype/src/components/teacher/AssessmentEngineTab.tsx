@@ -23,9 +23,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useTeacherAssessmentStore, ASSESSMENT_TYPE_LABELS, createAssessmentPreset, type AssessmentStatus, type AssessmentType, type TeacherAssessment } from "@/lib/teacher/teacher-assessment-store";
 import { useTeacherChapterStore } from "@/lib/teacher/teacher-chapter-store";
-import { useContentTreeStore, type ContentTreeNode } from "@/lib/teacher/content-tree-store";
 import { useTeacherCourseStore } from "@/lib/teacher/teacher-course-store";
 import { useTeacherLessonStore } from "@/lib/teacher/teacher-lesson-store";
+import { useTeacherConceptStore } from "@/lib/teacher/teacher-concept-store";
+import { useTeacherAtomicConceptStore } from "@/lib/teacher/teacher-atomic-concept-store";
 import { useTeacherQuestionStore, type TeacherQuestion } from "@/lib/teacher/teacher-question-store";
 import { useTeacherSessionStore } from "@/lib/teacher/teacher-session-store";
 import { cn } from "@/lib/utils";
@@ -66,7 +67,12 @@ export function AssessmentEngineTab({ courseId }: { courseId: string }) {
   const courses = useTeacherCourseStore((state) => state.courses);
   const chapters = useTeacherChapterStore((state) => state.chapters);
   const lessons = useTeacherLessonStore((state) => state.lessons);
-  const treeNodes = useContentTreeStore((state) => state.nodes);
+  const concepts = useTeacherConceptStore((state) => state.concepts);
+  const atomicConcepts = useTeacherAtomicConceptStore((state) => state.atomicConcepts);
+  const treeNodes = useMemo(() => [
+    ...concepts.map((c) => ({ id: c.id, type: "concept" as const, title: c.title })),
+    ...atomicConcepts.map((a) => ({ id: a.id, type: "atomic_concept" as const, title: a.title })),
+  ], [concepts, atomicConcepts]);
   const sessions = useTeacherSessionStore((state) => state.sessions);
   const assessments = useMemo(
     () => allAssessments.filter((assessment) => (assessment.courseIds || []).includes(courseId) || (assessment.courseIds || []).length === 0),
@@ -376,7 +382,7 @@ function AssessmentCard({
   courses: Array<{ id: string; title: string }>;
   chapters: Array<{ id: string; title: string }>;
   lessons: Array<{ id: string; title: string }>;
-  treeNodes: ContentTreeNode[];
+  treeNodes: Array<{ id: string; type: string; title: string }>;
   sessions: Array<{ id: string; title: string }>;
 }) {
   const linkedQuestions = assessment.questionIds.map((questionId) => questions.find((question) => question.id === questionId)).filter(Boolean) as TeacherQuestion[];

@@ -1,15 +1,44 @@
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X, Search, Bell, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/brand/Logo";
-import { ThemeToggle, LangSwitcher } from "@/components/brand/Toggles";
+import { ThemeToggle, LangSwitcher, SoundToggle } from "@/components/brand/Toggles";
 import { UserMenu } from "@/components/layout/UserMenu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ROLES, type Role, type NavItem } from "@/lib/roles";
 import { useApp } from "@/lib/app-context";
+import { getMyPermissions } from "@/lib/api/assistants";
+
+/** For the `assistant` role: the union of resources granted across every
+ * ACTIVE teacher link, used to hide nav items the assistant has zero
+ * access to (see `NavItem.assistantResource`). Empty for every other role. */
+function useAssistantVisibleResources(role: Role): Set<string> {
+  const [resources, setResources] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (role !== "assistant") {
+      setResources(new Set());
+      return;
+    }
+    let active = true;
+    void getMyPermissions().then((perTeacher) => {
+      if (!active) return;
+      const union = new Set<string>();
+      for (const teacher of perTeacher) {
+        for (const grant of teacher.permissions) union.add(grant.resource);
+      }
+      setResources(union);
+    });
+    return () => {
+      active = false;
+    };
+  }, [role]);
+
+  return resources;
+}
 
 function CollapsibleNavItem({ item, pathname, onNav, labelFor }: { item: NavItem; pathname: string; onNav?: () => void; labelFor: (label: string) => string }) {
   const parentActive = item.children
@@ -70,6 +99,9 @@ function SidebarContent({ role, onNav }: { role: Role; onNav?: () => void }) {
   const { t } = useApp();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const labelFor = (label: string) => t(label);
+  const visibleResources = useAssistantVisibleResources(role);
+  const isItemVisible = (item: NavItem) =>
+    !item.assistantResource || role !== "assistant" || visibleResources.has(item.assistantResource);
 
   return (
     <div className="flex h-full flex-col">
@@ -90,7 +122,7 @@ function SidebarContent({ role, onNav }: { role: Role; onNav?: () => void }) {
           <div key={group.group}>
             {group.group && <p className="px-3 pb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{labelFor(group.group)}</p>}
             <div className="space-y-0.5">
-              {group.items.map((item) => {
+              {group.items.filter(isItemVisible).map((item) => {
                 if (item.children) {
                   return <CollapsibleNavItem key={item.to} item={item} pathname={pathname} onNav={onNav} labelFor={labelFor} />;
                 }
@@ -121,6 +153,7 @@ export function DashboardLayout({ role, children }: { role: Role; children: Reac
   const [open, setOpen] = useState(false);
   const { dir, t } = useApp();
   const closedX = dir === "rtl" ? "100%" : "-100%";
+  const notificationsPath = ROLES[role].notificationsPath;
 
   return (
     <div className="min-h-screen w-full" dir={dir}>
@@ -156,14 +189,17 @@ export function DashboardLayout({ role, children }: { role: Role; children: Reac
             <Input placeholder={t("common.globalSearchPlaceholder")} className="ps-9 rounded-xl bg-card" />
           </div>
           <div className="ms-auto flex items-center gap-1">
+            <SoundToggle />
             <LangSwitcher />
             <ThemeToggle />
-            <Button asChild variant="ghost" size="icon" className="relative rounded-xl">
-              <Link to="/student/notifications">
-                <Bell className="h-5 w-5" />
-                <span className="absolute end-2 top-2 h-2 w-2 rounded-full bg-destructive" />
-              </Link>
-            </Button>
+            {notificationsPath && (
+              <Button asChild variant="ghost" size="icon" className="relative rounded-xl">
+                <Link to={notificationsPath}>
+                  <Bell className="h-5 w-5" />
+                  <span className="absolute end-2 top-2 h-2 w-2 rounded-full bg-destructive" />
+                </Link>
+              </Button>
+            )}
             <UserMenu role={role} />
           </div>
         </header>

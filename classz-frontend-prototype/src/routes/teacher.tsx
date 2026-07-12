@@ -1,11 +1,9 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { useAuthStore } from "@/lib/stores/auth-store";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { requireRole } from "@/lib/auth-guard";
 
 export const Route = createFileRoute("/teacher")({
   beforeLoad: ({ location }) => {
-    if (!useAuthStore.getState().isAuthenticated) {
-      throw redirect({ to: "/login", search: { returnUrl: location.pathname } });
-    }
+    requireRole({ roles: ["teacher", "assistant"], currentPath: location.pathname });
   },
   component: TeacherLayout,
 });

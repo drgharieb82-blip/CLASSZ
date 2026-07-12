@@ -12,8 +12,8 @@
 
 export type EntityType =
   | "student" | "teacher" | "parent" | "assistant"
-  | "developer" | "content_manager" | "finance" | "admin"
-  | "super_admin" | "content_author"
+  | "developer" | "finance" | "admin"
+  | "super_admin"
   | "course" | "chapter" | "session" | "question" | "quiz" | "assignment"
   | "certificate" | "payment" | "wallet_transaction"
   | "support_ticket" | "ai_request";
@@ -29,11 +29,9 @@ export const CODE_FORMATS: Record<EntityType, CodeFormat> = {
   parent: { prefix: "PRT", sequenceDigits: 4 },
   assistant: { prefix: "AST", sequenceDigits: 4 },
   developer: { prefix: "DEV", sequenceDigits: 4 },
-  content_manager: { prefix: "CNT", sequenceDigits: 4 },
   finance: { prefix: "FIN", sequenceDigits: 4 },
   admin: { prefix: "ADM", sequenceDigits: 4 },
   super_admin: { prefix: "SUP", sequenceDigits: 4 },
-  content_author: { prefix: "AUT", sequenceDigits: 4 },
   course: { prefix: "CRS", sequenceDigits: 4 },
   chapter: { prefix: "CHP", sequenceDigits: 4 },
   session: { prefix: "SES", sequenceDigits: 4 },

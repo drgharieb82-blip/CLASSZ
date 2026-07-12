@@ -24,6 +24,18 @@ def _quiz_options():
         selectinload(Quiz.questions)
         .selectinload(QuizQuestion.question)
         .selectinload(Question.tags),
+        selectinload(Quiz.questions)
+        .selectinload(QuizQuestion.question)
+        .selectinload(Question.chapters),
+        selectinload(Quiz.questions)
+        .selectinload(QuizQuestion.question)
+        .selectinload(Question.lessons),
+        selectinload(Quiz.questions)
+        .selectinload(QuizQuestion.question)
+        .selectinload(Question.concepts),
+        selectinload(Quiz.questions)
+        .selectinload(QuizQuestion.question)
+        .selectinload(Question.atomic_concepts),
     )
 
 
@@ -53,6 +65,10 @@ async def get_quiz_question(session: AsyncSession, quiz_question_id: UUID) -> Qu
             selectinload(QuizQuestion.question).selectinload(Question.choices),
             selectinload(QuizQuestion.question).selectinload(Question.media),
             selectinload(QuizQuestion.question).selectinload(Question.tags),
+            selectinload(QuizQuestion.question).selectinload(Question.chapters),
+            selectinload(QuizQuestion.question).selectinload(Question.lessons),
+            selectinload(QuizQuestion.question).selectinload(Question.concepts),
+            selectinload(QuizQuestion.question).selectinload(Question.atomic_concepts),
         )
     )
     return result.scalar_one_or_none()

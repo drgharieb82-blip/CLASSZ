@@ -1,9 +1,16 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.ai_content.schemas import AIContentRequest, AIContentResponse, ContentType
-from app.modules.ai_core.prompting import prompt_templates
-from app.modules.ai_core.schemas import AICompletionRequest, AIMessage
-from app.modules.ai_core.service import complete_with_ai
+
+try:
+    from app.modules.ai_core.prompting import prompt_templates
+    from app.modules.ai_core.schemas import AICompletionRequest, AIMessage
+    from app.modules.ai_core.service import complete_with_ai
+except ModuleNotFoundError:
+    prompt_templates = None
+    AICompletionRequest = None
+    AIMessage = None
+    complete_with_ai = None
 
 
 def fallback_items(payload: AIContentRequest) -> list[dict[str, object]]:
@@ -31,6 +38,9 @@ def normalize_content_response(payload: AIContentRequest, structured: dict[str, 
 
 
 async def generate_content(payload: AIContentRequest, session: AsyncSession | None = None) -> AIContentResponse:
+    if prompt_templates is None or AICompletionRequest is None or AIMessage is None or complete_with_ai is None:
+        return normalize_content_response(payload, {}, True)
+
     prompt = prompt_templates.render(
         "content.generate",
         content_type=payload.content_type.replace("_", " "),

@@ -13,16 +13,28 @@ from app.modules.lessons.models import Lesson
 from app.modules.sessions.models import Session
 
 
-async def list_courses(session: AsyncSession, teacher_id: UUID | None = None) -> list[Course]:
+async def list_courses(
+    session: AsyncSession,
+    teacher_id: UUID | None = None,
+    *,
+    published_only: bool = False,
+) -> list[Course]:
     q = select(Course).order_by(Course.created_at.desc())
     if teacher_id is not None:
         q = q.where(Course.teacher_id == teacher_id)
+    if published_only:
+        q = q.where(Course.is_published.is_(True))
     result = await session.execute(q)
     return list(result.scalars().all())
 
 
-async def get_course(session: AsyncSession, course_id: UUID) -> Course | None:
-    result = await session.execute(
+async def get_course(
+    session: AsyncSession,
+    course_id: UUID,
+    *,
+    published_only: bool = False,
+) -> Course | None:
+    query = (
         select(Course)
         .where(Course.id == course_id)
         .options(
@@ -37,6 +49,9 @@ async def get_course(session: AsyncSession, course_id: UUID) -> Course | None:
             selectinload(Course.sessions).selectinload(Session.atomic_concepts),
         )
     )
+    if published_only:
+        query = query.where(Course.is_published.is_(True))
+    result = await session.execute(query)
     return result.scalar_one_or_none()
 
 

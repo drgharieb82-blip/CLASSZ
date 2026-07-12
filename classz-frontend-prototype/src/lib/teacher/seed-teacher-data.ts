@@ -14,11 +14,10 @@ import { useTeacherExamStore } from "./teacher-exam-store";
 import { useTeacherHomeworkStore } from "./teacher-homework-store";
 import { useTeacherAssignmentStore } from "./teacher-assignment-store";
 import { useTeacherAssessmentStore } from "./teacher-assessment-store";
-import { useContentTreeStore } from "./content-tree-store";
 
 const SEED_KEY = "classz-teacher-seeded-v2";
 
-export function seedTeacherData() {
+export async function seedTeacherData() {
   // Seeding disabled — data now persists to PostgreSQL via the API
   return;
   if (localStorage.getItem(SEED_KEY)) return;
@@ -33,7 +32,6 @@ export function seedTeacherData() {
   const ex = useTeacherExamStore.getState();
   const hw = useTeacherHomeworkStore.getState();
   const as_ = useTeacherAssignmentStore.getState();
-  const tr = useContentTreeStore.getState();
 
   // ── COURSES ──
   const courses = [
@@ -62,12 +60,20 @@ export function seedTeacherData() {
   const mathChapters = ["Differential Calculus", "Integral Calculus", "Sequences & Series", "Probability & Statistics", "Linear Algebra", "Exam Preparation"];
   const chapterIds: string[] = [];
   for (const title of mathChapters) {
-    const c = ch.createChapter({ courseId: courseIds[0], title }); ch.publishChapter(c.id); chapterIds.push(c.id);
+    const c = await ch.createChapter({ courseId: courseIds[0], title });
+    if (c === null) continue;
+    const chapter = c as NonNullable<typeof c>;
+    ch.publishChapter(chapter.id);
+    chapterIds.push(chapter.id);
   }
   const calcChapters = ["Limits & Continuity", "Differentiation Rules", "Applications of Derivatives", "Integration Techniques"];
   const calcChapterIds: string[] = [];
   for (const title of calcChapters) {
-    const c = ch.createChapter({ courseId: courseIds[1], title }); ch.publishChapter(c.id); calcChapterIds.push(c.id);
+    const c = await ch.createChapter({ courseId: courseIds[1], title });
+    if (c === null) continue;
+    const chapter = c as NonNullable<typeof c>;
+    ch.publishChapter(chapter.id);
+    calcChapterIds.push(chapter.id);
   }
 
   // ── SESSIONS ──
@@ -83,7 +89,10 @@ export function seedTeacherData() {
   ];
   const sessionIds: string[] = [];
   for (const s of sessionData) {
-    const created = se.createSession({ ...s, description: "", currency: "USD" }); sessionIds.push(created.id);
+    const created = await se.createSession({ ...s, description: "", currency: "USD" });
+    if (created === null) continue;
+    const session = created as NonNullable<typeof created>;
+    sessionIds.push(session.id);
   }
 
   // ── MATERIALS ──
@@ -104,8 +113,7 @@ export function seedTeacherData() {
   ];
   type MaterialType = "video" | "pdf" | "image" | "attachment" | "notes";
   for (const m of materialData) {
-    const created = ma.createMaterial({ type: m.type, title: m.title, videoUrl: m.videoUrl, videoDuration: m.videoDuration, fileUrl: m.videoUrl || "https://example.com/file", fileName: m.fileName, fileSize: m.fileSize, status: "published" });
-    ma.updateMaterial(created.id, { reuseCount: Math.floor(Math.random() * 5) + 1, linkedSessionIds: sessionIds.slice(0, Math.floor(Math.random() * 3) + 1) });
+    void ma.createMaterial({ type: m.type, title: m.title, videoUrl: m.videoUrl, videoDuration: m.videoDuration, fileUrl: m.videoUrl || "https://example.com/file", fileName: m.fileName, fileSize: m.fileSize, status: "published", linkedSessionIds: sessionIds.slice(0, Math.floor(Math.random() * 3) + 1) });
   }
 
   // ── QUESTIONS ──
@@ -191,35 +199,6 @@ export function seedTeacherData() {
   asm.createAssessment({ title: "General Assignment", assessmentType: "assignment", courseIds: [courseIds[0]], settings: { dueDate: "2026-07-05" }, status: "published" });
   asm.createAssessment({ title: "Adaptive Calculus Review", assessmentType: "adaptive_assessment", questionIds: questionIds.slice(0, 5), courseIds: [courseIds[0]], status: "draft" });
   asm.createAssessment({ title: "Custom Assessment", assessmentType: "custom", questionIds: questionIds.slice(3, 7), courseIds: [courseIds[0]], status: "draft" });
-
-  // ── CONTENT TREE for first course ──
-  const treeChapters = ["Differential Calculus", "Integral Calculus", "Sequences & Series", "Probability"];
-  const treeLessons: Record<string, string[]> = {
-    "Differential Calculus": ["Limits", "Derivatives", "Chain Rule", "Applications of Derivatives"],
-    "Integral Calculus": ["Antiderivatives", "Definite Integrals", "Integration Techniques", "Applications of Integration"],
-    "Sequences & Series": ["Arithmetic Sequences", "Geometric Sequences", "Convergence Tests"],
-    "Probability": ["Basic Probability", "Conditional Probability", "Distributions"],
-  };
-  const treeConcepts: Record<string, string[]> = {
-    "Limits": ["Limit Definition", "One-Sided Limits", "Limit Laws"],
-    "Derivatives": ["Power Rule", "Product Rule", "Quotient Rule"],
-    "Chain Rule": ["Composite Functions", "Implicit Differentiation"],
-    "Antiderivatives": ["Basic Integration Rules", "Substitution"],
-  };
-
-  for (const chapTitle of treeChapters) {
-    const chapNode = tr.createNode({ type: "chapter", title: chapTitle, parentId: "", courseId: courseIds[0], isOfficial: true });
-    const lessons = treeLessons[chapTitle] || [];
-    for (const lesTitle of lessons) {
-      const lesNode = tr.createNode({ type: "lesson", title: lesTitle, parentId: chapNode.id, courseId: courseIds[0], isOfficial: true });
-      const concepts = treeConcepts[lesTitle] || [];
-      for (const conTitle of concepts) {
-        const conNode = tr.createNode({ type: "concept", title: conTitle, parentId: lesNode.id, courseId: courseIds[0], isOfficial: true });
-        tr.createNode({ type: "atomic_concept", title: `Calculate ${conTitle}`, parentId: conNode.id, courseId: courseIds[0], isOfficial: true });
-        tr.createNode({ type: "atomic_concept", title: `Apply ${conTitle}`, parentId: conNode.id, courseId: courseIds[0], isOfficial: true });
-      }
-    }
-  }
 
   localStorage.setItem(SEED_KEY, "1");
 }

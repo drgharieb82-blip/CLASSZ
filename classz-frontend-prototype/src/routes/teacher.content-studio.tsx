@@ -1,11 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import {
   ArrowDown, ArrowUp, BarChart3, BookOpen, Bot, Brain, Calendar, Check, ChevronDown, ChevronUp,
-  ChevronRight, Clock, Copy, DollarSign, Edit3, Eye, EyeOff, File, FileText,
-  Film, FolderTree, Gift, GripVertical, HelpCircle, ClipboardList, Image, Layers, Link2, Lock,
-  Pencil, PlayCircle, Plus, ScrollText, Sparkles, StickyNote, Target,
+  ChevronRight, Clock, Copy, Download, DollarSign, Edit3, Eye, EyeOff, File, FileSpreadsheet, FileText,
+  Film, FolderTree, Gift, GripVertical, HelpCircle, ClipboardList, Image, Layers, Link2, Loader2, Lock,
+  Music, Pencil, PlayCircle, Plus, ScrollText, Sparkles, StickyNote, Target,
   Trash2, Trophy, Unlock, Upload, Users, Video, X, Zap,
 } from "lucide-react";
 import { DashPage } from "@/components/common/DashPage";
@@ -20,20 +20,22 @@ import { ROLES } from "@/lib/roles";
 import { cn } from "@/lib/utils";
 import { useApp } from "@/lib/app-context";
 import { useTeacherCourseStore } from "@/lib/teacher/teacher-course-store";
+import { useAuthStore } from "@/lib/stores/auth-store";
 import { useTeacherChapterStore } from "@/lib/teacher/teacher-chapter-store";
 import { useTeacherSessionStore, type TeacherSession } from "@/lib/teacher/teacher-session-store";
 import {
   useTeacherMaterialStore, type TeacherMaterial, type MaterialType, type CreateMaterialData, type AcademicLink,
 } from "@/lib/teacher/teacher-material-store";
+import { uploadMaterialFile } from "@/lib/api/uploads";
+import { resolveFileUrl } from "@/lib/api/client";
 import { useTeacherQuestionStore, type TeacherQuestion, type AnswerData, type MCQChoice } from "@/lib/teacher/teacher-question-store";
 import { useTeacherQuizStore } from "@/lib/teacher/teacher-quiz-store";
 import { useTeacherExamStore } from "@/lib/teacher/teacher-exam-store";
 import { useTeacherHomeworkStore } from "@/lib/teacher/teacher-homework-store";
 import { useTeacherAssignmentStore } from "@/lib/teacher/teacher-assignment-store";
-import {
-  useContentTreeStore, getCoverageSummary,
-  type ContentTreeNode,
-} from "@/lib/teacher/content-tree-store";
+import { useTeacherLessonStore, type TeacherLesson } from "@/lib/teacher/teacher-lesson-store";
+import { useTeacherConceptStore, type TeacherConcept } from "@/lib/teacher/teacher-concept-store";
+import { useTeacherAtomicConceptStore, type TeacherAtomicConcept } from "@/lib/teacher/teacher-atomic-concept-store";
 import { SESSION_TYPE_META, type SessionWorkspaceType } from "@/lib/teacher/session-workspace-types";
 import { useTeacherAssessmentStore } from "@/lib/teacher/teacher-assessment-store";
 import { FilterBar, type FilterOption } from "@/components/filters/FilterBar";
@@ -63,6 +65,8 @@ const SESSION_TAB = { key: "sessions", label: "Sessions", icon: PlayCircle };
 
 function ContentStudioPage() {
   const courses = useTeacherCourseStore((s) => s.courses);
+  const loadCourses = useTeacherCourseStore((s) => s.loadCourses);
+  const user = useAuthStore((s) => s.user);
   const [selectedCourseId, setSelectedCourseId] = useState("");
   const [activeTab, setActiveTab] = useState(() => sessionStorage.getItem("classz-content-studio-tab") || "materials");
   const selectedCourse = courses.find((c) => c.id === selectedCourseId);
@@ -70,6 +74,19 @@ function ContentStudioPage() {
   useEffect(() => {
     seedTeacherData();
   }, []);
+
+  useEffect(() => {
+    if (user?.id) {
+      loadCourses(user.id);
+    }
+  }, [user?.id, loadCourses]);
+
+  useEffect(() => {
+    if (courses.length === 0) return;
+    if (!selectedCourseId || !courses.some((course) => course.id === selectedCourseId)) {
+      setSelectedCourseId(courses[0].id);
+    }
+  }, [courses, selectedCourseId]);
 
   return (
     <DashPage role="teacher" title="Content Studio" subtitle="Build, organize, reuse, and publish your complete course content" icon={ROLES.teacher.icon}>
@@ -127,46 +144,196 @@ function ContentStudioPage() {
    1. CONTENT TREE TAB — 3-column layout
    ═══════════════════════════════════════════════════════════════ */
 
-function ContentTreeTab({ courseId, onSwitchTab }: { courseId: string; onSwitchTab: (tab: string) => void }) {
-  const allNodes = useContentTreeStore((s) => s.nodes);
-  const createNode = useContentTreeStore((s) => s.createNode);
-  const updateNode = useContentTreeStore((s) => s.updateNode);
-  const deleteNode = useContentTreeStore((s) => s.deleteNode);
-  const hideNode = useContentTreeStore((s) => s.hideNode);
-  const showNode = useContentTreeStore((s) => s.showNode);
+type AcademicNodeType = "chapter" | "lesson" | "concept" | "atomic_concept";
+
+/** A flattened, read-only view over the real Academic Domain stores
+ * (chapters/lessons/concepts/atomic concepts), shaped like the old mock
+ * ContentTreeNode for the fields every consumer in this file actually needs
+ * (id/type/title/parentId/order). Coverage tracking, hide/show, official
+ * flags, and notes are gone - none of those existed on the backend. */
+interface AcademicTreeNode {
+  id: string;
+  type: AcademicNodeType;
+  title: string;
+  publicCode: string;
+  parentId: string;
+  order: number;
+  createdAt: string;
+}
+
+function useAcademicTreeNodes(courseId: string): AcademicTreeNode[] {
   const allChapters = useTeacherChapterStore((s) => s.chapters);
+  const allLessons = useTeacherLessonStore((s) => s.lessons);
+  const allConcepts = useTeacherConceptStore((s) => s.concepts);
+  const allAtomicConcepts = useTeacherAtomicConceptStore((s) => s.atomicConcepts);
+
+  return useMemo(() => {
+    const chapters = allChapters.filter((c) => c.courseId === courseId);
+    const chapterIds = new Set(chapters.map((c) => c.id));
+    const lessons = allLessons.filter((l) => chapterIds.has(l.chapterId));
+    const lessonIds = new Set(lessons.map((l) => l.id));
+    const concepts = allConcepts.filter((c) => lessonIds.has(c.lessonId));
+    const conceptIds = new Set(concepts.map((c) => c.id));
+    const atomicConcepts = allAtomicConcepts.filter((a) => conceptIds.has(a.conceptId));
+
+    const nodes: AcademicTreeNode[] = [
+      ...chapters.map((c) => ({ id: c.id, type: "chapter" as const, title: c.title, publicCode: c.publicCode, parentId: "", order: c.order, createdAt: c.createdAt })),
+      ...lessons.map((l) => ({ id: l.id, type: "lesson" as const, title: l.title, publicCode: l.publicCode, parentId: l.chapterId, order: l.order, createdAt: l.createdAt })),
+      ...concepts.map((c) => ({ id: c.id, type: "concept" as const, title: c.title, publicCode: c.publicCode, parentId: c.lessonId, order: c.order, createdAt: c.createdAt })),
+      ...atomicConcepts.map((a) => ({ id: a.id, type: "atomic_concept" as const, title: a.title, publicCode: a.publicCode, parentId: a.conceptId, order: a.order, createdAt: a.createdAt })),
+    ];
+    return nodes;
+  }, [allChapters, allLessons, allConcepts, allAtomicConcepts, courseId]);
+}
+
+/** Defensively loads the whole Academic Domain tree for a course - each tab
+ * that needs it calls this itself rather than relying on another tab having
+ * loaded it first (the same lesson learned from the Sessions/Build Session
+ * fix earlier: don't depend on navigation history). */
+function useLoadAcademicTree(courseId: string) {
+  const loadChapters = useTeacherChapterStore((s) => s.loadChapters);
+  const loadLessons = useTeacherLessonStore((s) => s.loadLessons);
+  const loadConcepts = useTeacherConceptStore((s) => s.loadConcepts);
+  const loadAtomicConcepts = useTeacherAtomicConceptStore((s) => s.loadAtomicConcepts);
+
+  const allChapters = useTeacherChapterStore((s) => s.chapters);
+  const allLessons = useTeacherLessonStore((s) => s.lessons);
+  const allConcepts = useTeacherConceptStore((s) => s.concepts);
+
+  const chapters = useMemo(() => allChapters.filter((c) => c.courseId === courseId), [allChapters, courseId]);
+  const lessons = useMemo(() => allLessons.filter((l) => chapters.some((c) => c.id === l.chapterId)), [allLessons, chapters]);
+  const concepts = useMemo(() => allConcepts.filter((c) => lessons.some((l) => l.id === c.lessonId)), [allConcepts, lessons]);
+
+  useEffect(() => { if (courseId) loadChapters(courseId); }, [courseId]);
+  useEffect(() => { for (const c of chapters) loadLessons(c.id); }, [chapters.map((c) => c.id).join(",")]);
+  useEffect(() => { for (const l of lessons) loadConcepts(l.id); }, [lessons.map((l) => l.id).join(",")]);
+  useEffect(() => { for (const c of concepts) loadAtomicConcepts(c.id); }, [concepts.map((c) => c.id).join(",")]);
+}
+
+function ContentTreeTab({ courseId, onSwitchTab }: { courseId: string; onSwitchTab: (tab: string) => void }) {
+  const treeNodes = useAcademicTreeNodes(courseId);
+  useLoadAcademicTree(courseId);
+  const createChapter = useTeacherChapterStore((s) => s.createChapter);
+  const updateChapter = useTeacherChapterStore((s) => s.updateChapter);
+  const deleteChapter = useTeacherChapterStore((s) => s.deleteChapter);
+  const createLesson = useTeacherLessonStore((s) => s.createLesson);
+  const updateLesson = useTeacherLessonStore((s) => s.updateLesson);
+  const deleteLesson = useTeacherLessonStore((s) => s.deleteLesson);
+  const createConcept = useTeacherConceptStore((s) => s.createConcept);
+  const updateConcept = useTeacherConceptStore((s) => s.updateConcept);
+  const deleteConcept = useTeacherConceptStore((s) => s.deleteConcept);
+  const createAtomicConcept = useTeacherAtomicConceptStore((s) => s.createAtomicConcept);
+  const updateAtomicConcept = useTeacherAtomicConceptStore((s) => s.updateAtomicConcept);
+  const deleteAtomicConcept = useTeacherAtomicConceptStore((s) => s.deleteAtomicConcept);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [addTitle, setAddTitle] = useState("");
-  const [editingNote, setEditingNote] = useState(false);
-  const [noteDraft, setNoteDraft] = useState("");
+  const [isBusy, setIsBusy] = useState(false);
 
-  const treeNodes = useMemo(() => allNodes.filter((n) => n.courseId === courseId), [allNodes, courseId]);
-  const chapters = useMemo(() => allChapters.filter((c) => c.courseId === courseId).sort((a, b) => a.order - b.order), [allChapters, courseId]);
   const selectedNode = useMemo(() => treeNodes.find((n) => n.id === selectedId), [treeNodes, selectedId]);
   const children = useMemo(() => selectedNode ? treeNodes.filter((n) => n.parentId === selectedNode.id).sort((a, b) => a.order - b.order) : [], [treeNodes, selectedNode]);
-  const coverage = useMemo(() => getCoverageSummary(courseId), [courseId, allNodes]);
-  const rootNodes = useMemo(() => treeNodes.filter((n) => n.type === "chapter" && !n.parentId).sort((a, b) => a.order - b.order), [treeNodes]);
+  const rootNodes = useMemo(() => treeNodes.filter((n) => n.type === "chapter").sort((a, b) => a.order - b.order), [treeNodes]);
+  const counts = useMemo(() => ({
+    chapter: treeNodes.filter((n) => n.type === "chapter").length,
+    lesson: treeNodes.filter((n) => n.type === "lesson").length,
+    concept: treeNodes.filter((n) => n.type === "concept").length,
+    atomic_concept: treeNodes.filter((n) => n.type === "atomic_concept").length,
+  }), [treeNodes]);
 
-  const childTypeMap: Record<string, string> = { chapter: "lesson", lesson: "concept", concept: "atomic_concept" };
+  const childTypeMap: Record<AcademicNodeType, AcademicNodeType | undefined> = { chapter: "lesson", lesson: "concept", concept: "atomic_concept", atomic_concept: undefined };
 
-  const handleAddChild = () => {
-    if (!addTitle.trim() || !selectedNode) return;
+  const handleAddChapter = async () => {
+    const title = prompt("New chapter title:");
+    if (!title?.trim() || isBusy) return;
+    setIsBusy(true);
+    try {
+      const created = await createChapter({ courseId, title: title.trim() });
+      if (!created) toast.error("Could not create the chapter. Check your connection and try again.");
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
+  const handleAddChild = async () => {
+    if (!addTitle.trim() || !selectedNode || isBusy) return;
     const childType = childTypeMap[selectedNode.type];
     if (!childType) return;
-    createNode({ type: childType as any, title: addTitle.trim(), parentId: selectedNode.id, courseId, isOfficial: true });
-    setAddTitle("");
+    setIsBusy(true);
+    try {
+      let created;
+      if (childType === "lesson") created = await createLesson({ chapterId: selectedNode.id, title: addTitle.trim() });
+      else if (childType === "concept") created = await createConcept({ lessonId: selectedNode.id, title: addTitle.trim() });
+      else if (childType === "atomic_concept") created = await createAtomicConcept({ conceptId: selectedNode.id, title: addTitle.trim() });
+      if (!created) { toast.error("Could not create it. Check your connection and try again."); return; }
+      setAddTitle("");
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
+  const handleEditTitle = async () => {
+    if (!selectedNode || isBusy) return;
+    const newTitle = prompt("Edit title:", selectedNode.title);
+    if (!newTitle?.trim() || newTitle === selectedNode.title) return;
+    setIsBusy(true);
+    try {
+      let ok = false;
+      if (selectedNode.type === "chapter") ok = await updateChapter(selectedNode.id, { title: newTitle.trim() });
+      else if (selectedNode.type === "lesson") ok = await updateLesson(selectedNode.id, { title: newTitle.trim() });
+      else if (selectedNode.type === "concept") ok = await updateConcept(selectedNode.id, { title: newTitle.trim() });
+      else ok = await updateAtomicConcept(selectedNode.id, { title: newTitle.trim() });
+      if (!ok) toast.error("Could not rename it. Check your connection and try again.");
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedNode || isBusy) return;
+    setIsBusy(true);
+    try {
+      let ok = false;
+      if (selectedNode.type === "chapter") ok = await deleteChapter(selectedNode.id);
+      else if (selectedNode.type === "lesson") ok = await deleteLesson(selectedNode.id);
+      else if (selectedNode.type === "concept") ok = await deleteConcept(selectedNode.id);
+      else ok = await deleteAtomicConcept(selectedNode.id);
+
+      if (!ok) { toast.error("Could not delete it. Check your connection and try again."); return; }
+
+      // The backend already cascades the delete (FK ON DELETE CASCADE); mirror
+      // that in local state by clearing out descendants across the other
+      // stores too - each deleteX call below hits an already-404 row, which
+      // the store treats as an idempotent success and still removes it locally.
+      if (selectedNode.type === "chapter") {
+        for (const lesson of treeNodes.filter((n) => n.type === "lesson" && n.parentId === selectedNode.id)) {
+          for (const concept of treeNodes.filter((n) => n.type === "concept" && n.parentId === lesson.id)) {
+            for (const atomic of treeNodes.filter((n) => n.type === "atomic_concept" && n.parentId === concept.id)) await deleteAtomicConcept(atomic.id);
+            await deleteConcept(concept.id);
+          }
+          await deleteLesson(lesson.id);
+        }
+      } else if (selectedNode.type === "lesson") {
+        for (const concept of treeNodes.filter((n) => n.type === "concept" && n.parentId === selectedNode.id)) {
+          for (const atomic of treeNodes.filter((n) => n.type === "atomic_concept" && n.parentId === concept.id)) await deleteAtomicConcept(atomic.id);
+          await deleteConcept(concept.id);
+        }
+      } else if (selectedNode.type === "concept") {
+        for (const atomic of treeNodes.filter((n) => n.type === "atomic_concept" && n.parentId === selectedNode.id)) await deleteAtomicConcept(atomic.id);
+      }
+      setSelectedId(null);
+    } finally {
+      setIsBusy(false);
+    }
   };
 
   return (
     <div className="space-y-4">
-      {/* Coverage Summary */}
-      <div className="grid gap-3 sm:grid-cols-5">
+      {/* Node counts */}
+      <div className="grid gap-3 sm:grid-cols-4">
         {[
-          { label: "Chapters", v: `${coverage.chapters.covered}/${coverage.chapters.total}`, cls: "text-blue-600" },
-          { label: "Lessons", v: `${coverage.lessons.covered}/${coverage.lessons.total}`, cls: "text-emerald-600" },
-          { label: "Concepts", v: `${coverage.concepts.covered}/${coverage.concepts.total}`, cls: "text-violet-600" },
-          { label: "Atomics", v: `${coverage.atomicConcepts.covered}/${coverage.atomicConcepts.total}`, cls: "text-amber-600" },
-          { label: "Coverage", v: `${coverage.coveragePercent}%`, cls: "text-primary" },
+          { label: "Chapters", v: counts.chapter, cls: "text-blue-600" },
+          { label: "Lessons", v: counts.lesson, cls: "text-emerald-600" },
+          { label: "Concepts", v: counts.concept, cls: "text-violet-600" },
+          { label: "Atomic Concepts", v: counts.atomic_concept, cls: "text-amber-600" },
         ].map((s) => (
           <Card key={s.label} className="border bg-card p-3 text-center">
             <p className={cn("text-lg font-bold", s.cls)}>{s.v}</p>
@@ -181,17 +348,12 @@ function ContentTreeTab({ courseId, onSwitchTab }: { courseId: string; onSwitchT
         <Card className="border bg-card overflow-hidden">
           <div className="p-3 border-b flex items-center justify-between">
             <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Course Structure</h4>
-            <Button variant="ghost" size="sm" className="h-6 text-xs px-2" onClick={() => {
-              const title = prompt("New chapter title:");
-              if (title?.trim()) createNode({ type: "chapter", title: title.trim(), parentId: "", courseId, isOfficial: true });
-            }}><Plus className="h-3 w-3" /></Button>
+            <Button variant="ghost" size="sm" className="h-6 text-xs px-2" disabled={isBusy} onClick={handleAddChapter}><Plus className="h-3 w-3" /></Button>
           </div>
           <div className="max-h-[32rem] overflow-y-auto">
             <div className="p-2 space-y-0.5">
-              {rootNodes.length === 0 && chapters.length === 0 ? (
-                <p className="text-xs text-muted-foreground p-2">No content tree nodes. Add chapters to get started.</p>
-              ) : rootNodes.length === 0 ? (
-                <p className="text-xs text-muted-foreground p-2">No tree nodes yet. Use Content Tree store to build the hierarchy.</p>
+              {rootNodes.length === 0 ? (
+                <p className="text-xs text-muted-foreground p-2">No chapters yet. Add a chapter to get started.</p>
               ) : (
                 rootNodes.map((node) => (
                   <TreeBranch key={node.id} node={node} nodes={treeNodes} depth={0} selectedId={selectedId} onSelect={setSelectedId} />
@@ -210,47 +372,14 @@ function ContentTreeTab({ courseId, onSwitchTab }: { courseId: string; onSwitchT
                   <Target className="h-7 w-7 text-primary" />
                 </div>
                 <h3 className="font-semibold">Select a node from the tree</h3>
-                <p className="text-sm text-muted-foreground max-w-sm">Click any chapter, lesson, concept, or atomic concept in the left panel to view its details and linked content.</p>
-                <div className="grid gap-2 sm:grid-cols-3 w-full max-w-md mt-2">
-                  {[
-                    { label: "Materials Linked", value: coverage.materialsLinked, icon: Video },
-                    { label: "Sessions Linked", value: coverage.sessionsLinked, icon: PlayCircle },
-                    { label: "Total Nodes", value: coverage.totalNodes, icon: Layers },
-                  ].map((s) => (
-                    <div key={s.label} className="rounded-xl border p-3 text-center">
-                      <s.icon className="h-4 w-4 text-primary mx-auto mb-1" />
-                      <p className="text-lg font-bold">{s.value}</p>
-                      <p className="text-[10px] text-muted-foreground">{s.label}</p>
-                    </div>
-                  ))}
-                </div>
+                <p className="text-sm text-muted-foreground max-w-sm">Click any chapter, lesson, concept, or atomic concept in the left panel to view its details.</p>
               </div>
             ) : (
               <div className="p-5 space-y-5">
                 <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge variant="outline" className="rounded-full text-[10px] capitalize">{selectedNode.type.replace("_", " ")}</Badge>
-                    <CoverageBadge status={selectedNode.coverageStatus} />
-                    {selectedNode.isOfficial && <Badge className="rounded-full bg-blue-500/10 text-blue-600 border-0 text-[10px]">Official</Badge>}
-                    {selectedNode.isHidden && <Badge className="rounded-full bg-slate-500/10 text-slate-500 border-0 text-[10px]">Hidden</Badge>}
-                  </div>
+                  <Badge variant="outline" className="rounded-full text-[10px] capitalize mb-1">{selectedNode.type.replace("_", " ")}</Badge>
                   <h3 className="text-lg font-semibold">{selectedNode.title}</h3>
                   <p className="text-xs text-muted-foreground font-mono mt-1">{selectedNode.publicCode}</p>
-                </div>
-
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="rounded-xl border p-3 text-center">
-                    <p className="text-xl font-bold text-blue-600">{(selectedNode.linkedMaterialIds || []).length}</p>
-                    <p className="text-[10px] text-muted-foreground">Materials</p>
-                  </div>
-                  <div className="rounded-xl border p-3 text-center">
-                    <p className="text-xl font-bold text-emerald-600">{(selectedNode.linkedSessionIds || []).length}</p>
-                    <p className="text-[10px] text-muted-foreground">Sessions</p>
-                  </div>
-                  <div className="rounded-xl border p-3 text-center">
-                    <p className="text-xl font-bold text-violet-600">{(selectedNode.linkedQuestionIds || []).length}</p>
-                    <p className="text-[10px] text-muted-foreground">Questions</p>
-                  </div>
                 </div>
 
                 {/* Children */}
@@ -261,32 +390,22 @@ function ContentTreeTab({ courseId, onSwitchTab }: { courseId: string; onSwitchT
                       {children.map((c) => (
                         <button key={c.id} onClick={() => setSelectedId(c.id)} className="flex items-center gap-2 w-full rounded-lg border px-3 py-2 text-xs text-start hover:bg-accent/50 transition-colors">
                           <span className="truncate flex-1">{c.title}</span>
-                          <CoverageBadge status={c.coverageStatus} />
                         </button>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {/* Notes */}
-                {selectedNode.note && (
-                  <div>
-                    <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Note</h4>
-                    <p className="text-sm text-muted-foreground">{selectedNode.note}</p>
-                  </div>
-                )}
-
                 {/* Timestamps */}
                 <div className="border-t pt-3 space-y-1 text-[11px] text-muted-foreground">
                   <p>Created: {new Date(selectedNode.createdAt).toLocaleString()}</p>
-                  <p>Updated: {new Date(selectedNode.updatedAt).toLocaleString()}</p>
                 </div>
               </div>
             )}
           </div>
         </Card>
 
-        {/* RIGHT — Structure Actions & Coverage */}
+        {/* RIGHT — Structure Actions */}
         <Card className="border bg-card overflow-hidden">
           <div className="max-h-[32rem] overflow-y-auto">
             <div className="p-4 space-y-4">
@@ -298,95 +417,40 @@ function ContentTreeTab({ courseId, onSwitchTab }: { courseId: string; onSwitchT
                     <div className="space-y-1.5">
                       {childTypeMap[selectedNode.type] && (
                         <div className="space-y-1.5 mb-2">
-                          <Label className="text-[11px]">Add {childTypeMap[selectedNode.type].replace("_", " ")}</Label>
+                          <Label className="text-[11px]">Add {childTypeMap[selectedNode.type]!.replace("_", " ")}</Label>
                           <div className="flex gap-1.5">
                             <Input value={addTitle} onChange={(e) => setAddTitle(e.target.value)} placeholder="Title..." className="h-8 rounded-lg text-xs flex-1" onKeyDown={(e) => e.key === "Enter" && handleAddChild()} />
-                            <Button variant="outline" size="sm" className="h-8 rounded-lg text-xs shrink-0" onClick={handleAddChild} disabled={!addTitle.trim()}>
+                            <Button variant="outline" size="sm" className="h-8 rounded-lg text-xs shrink-0" onClick={handleAddChild} disabled={!addTitle.trim() || isBusy}>
                               <Plus className="h-3 w-3" />
                             </Button>
                           </div>
                         </div>
                       )}
-                      <Button variant="outline" size="sm" className="w-full rounded-lg text-xs h-8 justify-start gap-2" onClick={() => {
-                        const newTitle = prompt("Edit title:", selectedNode.title);
-                        if (newTitle?.trim() && newTitle !== selectedNode.title) updateNode(selectedNode.id, { title: newTitle.trim() });
-                      }}>
+                      <Button variant="outline" size="sm" className="w-full rounded-lg text-xs h-8 justify-start gap-2" onClick={handleEditTitle} disabled={isBusy}>
                         <Pencil className="h-3 w-3" />Edit Title
                       </Button>
-                      {selectedNode.isHidden ? (
-                        <Button variant="outline" size="sm" className="w-full rounded-lg text-xs h-8 justify-start gap-2" onClick={() => showNode(selectedNode.id)}>
-                          <Eye className="h-3 w-3" />Show Node
-                        </Button>
-                      ) : (
-                        <Button variant="outline" size="sm" className="w-full rounded-lg text-xs h-8 justify-start gap-2" onClick={() => hideNode(selectedNode.id)}>
-                          <EyeOff className="h-3 w-3" />Hide / Mark Optional
-                        </Button>
-                      )}
-                      <Button variant="outline" size="sm" className="w-full rounded-lg text-xs h-8 justify-start gap-2" onClick={() => updateNode(selectedNode.id, { isRequired: !selectedNode.isRequired })}>
-                        {selectedNode.isRequired ? <><Check className="h-3 w-3" />Required</> : <><X className="h-3 w-3" />Optional</>}
-                      </Button>
-                      <Button variant="outline" size="sm" className="w-full rounded-lg text-xs h-8 justify-start gap-2" onClick={() => updateNode(selectedNode.id, { isOfficial: !selectedNode.isOfficial })}>
-                        {selectedNode.isOfficial ? <><FolderTree className="h-3 w-3" />Official</> : <><FolderTree className="h-3 w-3" />Custom</>}
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Note */}
-                  <div className="border-t pt-3">
-                    <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Note</h4>
-                    {editingNote ? (
-                      <div className="space-y-1.5">
-                        <textarea value={noteDraft} onChange={(e) => setNoteDraft(e.target.value)} rows={3} className="w-full rounded-lg border bg-background px-2.5 py-1.5 text-xs resize-none" placeholder="Add a note..." />
-                        <div className="flex gap-1.5">
-                          <Button variant="outline" size="sm" className="h-7 rounded-lg text-xs" onClick={() => { updateNode(selectedNode.id, { note: noteDraft }); setEditingNote(false); }}>Save</Button>
-                          <Button variant="ghost" size="sm" className="h-7 rounded-lg text-xs" onClick={() => setEditingNote(false)}>Cancel</Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <button onClick={() => { setNoteDraft(selectedNode.note || ""); setEditingNote(true); }} className="w-full text-start rounded-lg border border-dashed px-2.5 py-2 text-xs text-muted-foreground hover:bg-accent/30 transition-colors">
-                        {selectedNode.note || "Click to add note..."}
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Coverage (read-only) */}
-                  <div className="border-t pt-3">
-                    <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Linked Content</h4>
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between rounded-lg border px-2.5 py-2 text-xs">
-                        <span className="flex items-center gap-1.5"><Video className="h-3 w-3 text-blue-500" />Materials</span>
-                        <span className="font-semibold">{(selectedNode.linkedMaterialIds || []).length}</span>
-                      </div>
-                      <div className="flex items-center justify-between rounded-lg border px-2.5 py-2 text-xs">
-                        <span className="flex items-center gap-1.5"><HelpCircle className="h-3 w-3 text-emerald-500" />Questions</span>
-                        <span className="font-semibold">{(selectedNode.linkedQuestionIds || []).length}</span>
-                      </div>
-                      <div className="flex items-center justify-between rounded-lg border px-2.5 py-2 text-xs">
-                        <span className="flex items-center gap-1.5"><PlayCircle className="h-3 w-3 text-violet-500" />Sessions</span>
-                        <span className="font-semibold">{(selectedNode.linkedSessionIds || []).length}</span>
-                      </div>
                     </div>
                   </div>
 
                   {/* Navigate to other tabs */}
                   <div className="border-t pt-3">
-                    <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">View in Tab</h4>
+                    <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Jump to Tab</h4>
                     <div className="space-y-1.5">
                       <Button variant="outline" size="sm" className="w-full rounded-lg text-xs h-8 justify-start gap-2" onClick={() => onSwitchTab("materials")}>
-                        <FileText className="h-3 w-3 text-blue-500" />Materials for this node
+                        <FileText className="h-3 w-3 text-blue-500" />Materials
                       </Button>
                       <Button variant="outline" size="sm" className="w-full rounded-lg text-xs h-8 justify-start gap-2" onClick={() => onSwitchTab("questions")}>
-                        <HelpCircle className="h-3 w-3 text-emerald-500" />Questions for this node
+                        <HelpCircle className="h-3 w-3 text-emerald-500" />Questions
                       </Button>
                       <Button variant="outline" size="sm" className="w-full rounded-lg text-xs h-8 justify-start gap-2" onClick={() => onSwitchTab("sessions")}>
-                        <PlayCircle className="h-3 w-3 text-violet-500" />Sessions for this node
+                        <PlayCircle className="h-3 w-3 text-violet-500" />Sessions
                       </Button>
                     </div>
                   </div>
 
                   {/* Danger zone */}
                   <div className="border-t pt-3">
-                    <Button variant="outline" size="sm" className="w-full rounded-lg text-xs h-8 justify-start gap-2 text-destructive" onClick={() => { deleteNode(selectedNode.id); setSelectedId(null); }}>
+                    <Button variant="outline" size="sm" className="w-full rounded-lg text-xs h-8 justify-start gap-2 text-destructive" onClick={handleDelete} disabled={isBusy}>
                       <Trash2 className="h-3 w-3" />Delete Node
                     </Button>
                   </div>
@@ -394,11 +458,8 @@ function ContentTreeTab({ courseId, onSwitchTab }: { courseId: string; onSwitchT
               ) : (
                 <div className="space-y-3 text-center py-4">
                   <Target className="h-8 w-8 text-muted-foreground mx-auto" />
-                  <p className="text-xs text-muted-foreground">Select a node to edit structure and view linked content.</p>
-                  <Button variant="outline" size="sm" className="rounded-lg text-xs gap-1.5" onClick={() => {
-                    const title = prompt("New chapter title:");
-                    if (title?.trim()) createNode({ type: "chapter", title: title.trim(), parentId: "", courseId, isOfficial: true });
-                  }}>
+                  <p className="text-xs text-muted-foreground">Select a node to edit structure.</p>
+                  <Button variant="outline" size="sm" className="rounded-lg text-xs gap-1.5" disabled={isBusy} onClick={handleAddChapter}>
                     <Plus className="h-3 w-3" />Add Chapter
                   </Button>
                 </div>
@@ -553,18 +614,16 @@ function SessionsBuilderTab({ courseId }: { courseId: string }) {
   const unlockSession = useTeacherSessionStore((s) => s.unlockSession);
   const updateSession = useTeacherSessionStore((s) => s.updateSession);
   const rawChapters = useTeacherChapterStore((s) => s.chapters);
-  const loadChapters = useTeacherChapterStore((s) => s.loadChapters);
   const allMaterials = useTeacherMaterialStore((s) => s.materials);
   const allQuestions = useTeacherQuestionStore((s) => s.questions);
   const allQuizzes = useTeacherQuizStore((s) => s.quizzes);
   const allExams = useTeacherExamStore((s) => s.exams);
   const allHomework = useTeacherHomeworkStore((s) => s.items);
   const allAssessments = useTeacherAssessmentStore((s) => s.assessments);
-  const allTreeNodes = useContentTreeStore((s) => s.nodes);
+  const treeNodes = useAcademicTreeNodes(courseId);
 
   const sessions = useMemo(() => rawSessions.filter((session) => session.courseId === courseId).sort((a, b) => a.order - b.order), [rawSessions, courseId]);
   const chapters = useMemo(() => rawChapters.filter((chapter) => chapter.courseId === courseId).sort((a, b) => a.order - b.order), [rawChapters, courseId]);
-  const treeNodes = useMemo(() => allTreeNodes.filter((node) => node.courseId === courseId), [allTreeNodes, courseId]);
   const chapterMap = useMemo(() => new Map(chapters.map((chapter) => [chapter.id, chapter.title])), [chapters]);
   const [selectedId, setSelectedId] = useState("");
   const [search, setSearch] = useState("");
@@ -581,9 +640,7 @@ function SessionsBuilderTab({ courseId }: { courseId: string }) {
   // Content Studio never routed through the dedicated Chapters/Sessions pages that
   // normally trigger these backend loads - fetch them here so Build Session works
   // regardless of navigation history.
-  useEffect(() => {
-    if (courseId) loadChapters(courseId);
-  }, [courseId]);
+  useLoadAcademicTree(courseId);
 
   useEffect(() => {
     if (courseId) loadSessions(courseId);
@@ -751,7 +808,7 @@ function BuilderAccess({ session, sb, updateSession, lockSession, unlockSession 
   return <div className="grid gap-4 lg:grid-cols-2"><Card className="border bg-background p-4"><h4 className="mb-3 font-semibold">{sb("access.heading")}</h4><div className="grid gap-3"><BuilderToggle label={sb("ui.free")} checked={!paid} onCheckedChange={(checked) => updateSession(session.id, { price: checked ? 0 : Math.max(session.price, 25), isFreePreview: checked })} /><BuilderField label={sb("ui.price")}><Input type="number" value={session.price} onChange={(event) => updateSession(session.id, { price: Number(event.target.value) || 0 })} className="rounded-xl" /></BuilderField><BuilderToggle label={sb("access.previous")} checked={session.order > 1} /><BuilderToggle label={sb("access.payment")} checked={paid} /><BuilderToggle label={sb("access.replay")} checked /><BuilderToggle label={sb("ui.visible")} checked={session.accessStatus !== "locked"} onCheckedChange={(checked) => checked ? unlockSession(session.id) : lockSession(session.id)} /></div></Card><Card className="border bg-background p-4"><h4 className="mb-3 font-semibold">{sb("ui.availability")}</h4><div className="grid gap-3"><BuilderField label={sb("ui.openDate")}><Input type="datetime-local" value={session.openAt.slice(0, 16)} onChange={(event) => updateSession(session.id, { openAt: event.target.value })} className="rounded-xl" /></BuilderField><BuilderField label={sb("ui.closeDate")}><Input type="datetime-local" value={session.closeAt.slice(0, 16)} onChange={(event) => updateSession(session.id, { closeAt: event.target.value })} className="rounded-xl" /></BuilderField><div className="rounded-xl border bg-muted/30 p-3 text-xs text-muted-foreground">{paid ? sb("access.payment") : sb("ui.free")}</div></div></Card></div>;
 }
 
-function BuilderConcepts({ session, chapterName, treeNodes, blocks, sb }: { session: TeacherSession; chapterName?: string; treeNodes: ContentTreeNode[]; blocks: BuilderBlock[]; sb: SessionBuilderTranslator }) {
+function BuilderConcepts({ session, chapterName, treeNodes, blocks, sb }: { session: TeacherSession; chapterName?: string; treeNodes: AcademicTreeNode[]; blocks: BuilderBlock[]; sb: SessionBuilderTranslator }) {
   const concepts = treeNodes.filter((node) => node.type === "concept");
   const atomics = treeNodes.filter((node) => node.type === "atomic_concept");
   const coverage = Math.min(100, 48 + blocks.length * 4 + (session.conceptIds?.length || 0) * 8 + (session.atomicConceptIds?.length || 0) * 5);
@@ -851,11 +908,11 @@ function SessionsTab({ courseId }: { courseId: string }) {
   const allExams = useTeacherExamStore((s) => s.exams);
   const allHomework = useTeacherHomeworkStore((s) => s.items);
   const allAssessments = useTeacherAssessmentStore((s) => s.assessments);
-  const allTreeNodes = useContentTreeStore((s) => s.nodes);
+  const treeNodes = useAcademicTreeNodes(courseId);
+  useLoadAcademicTree(courseId);
 
   const allSessions = useMemo(() => rawSessions.filter((ses) => ses.courseId === courseId).sort((a, b) => a.order - b.order), [rawSessions, courseId]);
   const chapters = useMemo(() => rawChapters.filter((c) => c.courseId === courseId).sort((a, b) => a.order - b.order), [rawChapters, courseId]);
-  const treeNodes = useMemo(() => allTreeNodes.filter((n) => n.courseId === courseId), [allTreeNodes, courseId]);
   const treeConcepts = useMemo(() => treeNodes.filter((n) => n.type === "concept"), [treeNodes]);
 
   const [search, setSearch] = useState("");
@@ -929,10 +986,10 @@ function SessionsTab({ courseId }: { courseId: string }) {
   const paginated = filtered.slice((page - 1) * 10, page * 10);
   const chapterMap = useMemo(() => new Map(chapters.map((c) => [c.id, c.title])), [chapters]);
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!title.trim() || !chapterId) return;
-    const ses = createSession({ courseId, chapterIds: [chapterId], title: title.trim(), description: "", price: Number(price), currency: "USD" });
-    if (sesConceptIds.length > 0) updateSession(ses.id, { conceptIds: sesConceptIds });
+    const ses = await createSession({ courseId, chapterIds: [chapterId], title: title.trim(), description: "", price: Number(price), currency: "USD" });
+    if (ses && sesConceptIds.length > 0) updateSession(ses.id, { conceptIds: sesConceptIds });
     setTitle(""); setPrice("0"); setSesConceptIds([]); setShowCreate(false);
   };
 
@@ -1239,23 +1296,40 @@ const MAT_TYPE_META: Record<MaterialType, { icon: typeof Video; label: string; c
   video: { icon: Video, label: "Video", color: "text-blue-500 bg-blue-500/10" },
   pdf: { icon: FileText, label: "PDF", color: "text-rose-500 bg-rose-500/10" },
   image: { icon: Image, label: "Image", color: "text-emerald-500 bg-emerald-500/10" },
+  document: { icon: FileSpreadsheet, label: "Document", color: "text-sky-500 bg-sky-500/10" },
+  audio: { icon: Music, label: "Audio", color: "text-fuchsia-500 bg-fuchsia-500/10" },
   attachment: { icon: File, label: "Attachment", color: "text-amber-500 bg-amber-500/10" },
   notes: { icon: StickyNote, label: "Notes", color: "text-violet-500 bg-violet-500/10" },
 };
 
+// Accepted <input type="file"> MIME types per material type — must stay in
+// sync with backend ALLOWED_CONTENT_TYPES in uploads/router.py.
+const MAT_ACCEPT: Record<MaterialType, string> = {
+  video: "video/mp4,video/webm,video/quicktime",
+  pdf: "application/pdf",
+  image: "image/jpeg,image/png,image/webp",
+  document: ".doc,.docx,.ppt,.pptx,.xls,.xlsx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  audio: "audio/mpeg,audio/wav,audio/mp4,audio/ogg",
+  attachment: "application/zip,application/x-zip-compressed",
+  notes: "",
+};
+
 const MAT_FILTER_OPTIONS: FilterOption[] = [
-  { key: "type", label: "Type", options: [{ value: "video", label: "Video" }, { value: "pdf", label: "PDF" }, { value: "image", label: "Image" }, { value: "attachment", label: "Attachment" }, { value: "notes", label: "Notes" }] },
+  { key: "type", label: "Type", options: [{ value: "video", label: "Video" }, { value: "pdf", label: "PDF" }, { value: "image", label: "Image" }, { value: "document", label: "Document" }, { value: "audio", label: "Audio" }, { value: "attachment", label: "Attachment" }, { value: "notes", label: "Notes" }] },
   { key: "status", label: "Status", options: [{ value: "draft", label: "Draft" }, { value: "published", label: "Published" }] },
 ];
 
 function MaterialsTab({ courseId }: { courseId: string }) {
   const allMaterials = useTeacherMaterialStore((s) => s.materials);
   const createMaterial = useTeacherMaterialStore((s) => s.createMaterial);
+  const loadMaterials = useTeacherMaterialStore((s) => s.loadMaterials);
+  const updateMaterial = useTeacherMaterialStore((s) => s.updateMaterial);
   const deleteMaterial = useTeacherMaterialStore((s) => s.deleteMaterial);
   const publishMaterial = useTeacherMaterialStore((s) => s.publishMaterial);
   const unpublishMaterial = useTeacherMaterialStore((s) => s.unpublishMaterial);
-  const allTreeNodes = useContentTreeStore((s) => s.nodes);
-  const treeNodes = useMemo(() => allTreeNodes.filter((n) => n.courseId === courseId), [allTreeNodes, courseId]);
+  const treeNodes = useAcademicTreeNodes(courseId);
+  useLoadAcademicTree(courseId);
+  useEffect(() => { if (courseId) loadMaterials(courseId); }, [courseId]);
   const materials = useMemo(() => allMaterials.filter((m) => m.courseId === courseId || !m.courseId), [allMaterials, courseId]);
 
   const [search, setSearch] = useState("");
@@ -1271,6 +1345,30 @@ function MaterialsTab({ courseId }: { courseId: string }) {
   const [customThumb, setCustomThumb] = useState("");
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
   const [acLinks, setAcLinks] = useState<AcademicLink[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedFileSize, setUploadedFileSize] = useState<number | undefined>(undefined);
+  const [uploadedMimeType, setUploadedMimeType] = useState<string | undefined>(undefined);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-selecting the same file later
+    if (!file) return;
+    setIsUploading(true);
+    try {
+      const uploaded = await uploadMaterialFile({ file, courseId });
+      setUploadUrl(uploaded.url);
+      setUploadFileName(uploaded.file_name);
+      setUploadedFileSize(uploaded.size_bytes);
+      setUploadedMimeType(uploaded.mime_type);
+      if (!uploadTitle.trim()) setUploadTitle(uploaded.file_name.replace(/\.[^.]+$/, ""));
+      toast.success(`${uploaded.file_name} uploaded`);
+    } catch {
+      toast.error("Upload failed. Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const treeChapters = useMemo(() => treeNodes.filter((n) => n.type === "chapter"), [treeNodes]);
   const getLessons = (chId: string) => treeNodes.filter((n) => n.type === "lesson" && n.parentId === chId);
@@ -1310,6 +1408,7 @@ function MaterialsTab({ courseId }: { courseId: string }) {
   const handleUpload = () => {
     if (!uploadTitle.trim()) return;
     if (sourceMode === "url" && !uploadUrl.trim() && uploadType !== "notes") return;
+    if (sourceMode === "upload" && !uploadUrl.trim() && uploadType !== "notes") return; // must finish a real upload first
     const data: CreateMaterialData = {
       type: uploadType, title: uploadTitle.trim(), courseId,
       sourceMode,
@@ -1325,11 +1424,13 @@ function MaterialsTab({ courseId }: { courseId: string }) {
       data.notesContent = "";
     } else {
       data.fileUrl = uploadUrl || undefined;
-      data.fileName = uploadFileName || `${uploadTitle.trim()}.${uploadType === "pdf" ? "pdf" : "zip"}`;
-      data.fileSize = "2.4 MB";
+      data.fileName = uploadFileName || undefined;
+      data.fileSize = uploadedFileSize != null ? undefined : "2.4 MB";
     }
     if (sourceMode === "upload") {
-      data.uploadFileName = uploadFileName || `${uploadTitle.trim()}.${uploadType}`;
+      data.uploadFileName = uploadFileName || undefined;
+      data.uploadFileSize = uploadedFileSize;
+      data.uploadMimeType = uploadedMimeType;
       data.uploadStatus = "ready";
       data.processingStatus = "ready";
     }
@@ -1338,6 +1439,7 @@ function MaterialsTab({ courseId }: { courseId: string }) {
     }
     createMaterial(data);
     setUploadTitle(""); setUploadUrl(""); setUploadDuration(""); setUploadFileName(""); setCustomThumb("");
+    setUploadedFileSize(undefined); setUploadedMimeType(undefined);
     setAcLinks([]); setShowUpload(false);
   };
 
@@ -1398,24 +1500,40 @@ function MaterialsTab({ courseId }: { courseId: string }) {
           {/* Source: Upload */}
           {sourceMode === "upload" && uploadType !== "notes" && (
             <div className="rounded-xl border-2 border-dashed p-6 text-center transition-colors hover:border-primary/30">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept={MAT_ACCEPT[uploadType]}
+                className="hidden"
+                onChange={handleFileSelected}
+              />
               <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-              <p className="text-sm font-medium">Drag & drop or browse</p>
+              <p className="text-sm font-medium">Browse to select a file</p>
               <p className="text-[11px] text-muted-foreground mt-1">
-                {uploadType === "video" ? "MP4, MOV, WEBM — Max 2 GB" : uploadType === "pdf" ? "PDF — Max 100 MB" : uploadType === "image" ? "JPG, PNG, WEBP — Max 20 MB" : "Any file — Max 500 MB"}
+                {uploadType === "video" ? "MP4, MOV, WEBM — Max 2 GB" : uploadType === "pdf" ? "PDF — Max 2 GB" : uploadType === "image" ? "JPG, PNG, WEBP — Max 2 GB" : uploadType === "document" ? "DOC, PPT, XLS (+X) — Max 2 GB" : uploadType === "audio" ? "MP3, WAV, M4A, OGG — Max 2 GB" : "ZIP — Max 2 GB"}
               </p>
-              <Button variant="outline" size="sm" className="rounded-lg text-xs mt-3 gap-1.5">
-                <Upload className="h-3 w-3" />Browse Files
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-lg text-xs mt-3 gap-1.5"
+                disabled={isUploading}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {isUploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
+                {isUploading ? "Uploading..." : "Browse Files"}
               </Button>
-              {uploadFileName && (
+              {uploadFileName && !isUploading && (
                 <div className="mt-3 flex items-center justify-center gap-2 text-xs">
                   <Check className="h-3 w-3 text-emerald-500" />
                   <span className="text-muted-foreground">{uploadFileName}</span>
-                  <button onClick={() => setUploadFileName("")} className="text-destructive"><X className="h-3 w-3" /></button>
+                  {uploadedFileSize != null && (
+                    <span className="text-muted-foreground/70">
+                      ({(uploadedFileSize / (1024 * 1024)).toFixed(2)} MB)
+                    </span>
+                  )}
+                  <button onClick={() => { setUploadFileName(""); setUploadUrl(""); setUploadedFileSize(undefined); setUploadedMimeType(undefined); }} className="text-destructive"><X className="h-3 w-3" /></button>
                 </div>
               )}
-              <div className="mt-3 h-1.5 w-full rounded-full bg-muted overflow-hidden">
-                <div className="h-full w-0 rounded-full bg-primary transition-all" />
-              </div>
             </div>
           )}
 
@@ -1534,7 +1652,7 @@ function MaterialsTab({ courseId }: { courseId: string }) {
 
           {/* Actions */}
           <div className="flex gap-2 border-t pt-4">
-            <Button onClick={handleUpload} disabled={!uploadTitle.trim() || (sourceMode === "url" && !uploadUrl.trim() && uploadType !== "notes")} className="rounded-xl gradient-brand border-0 text-white" size="sm">
+            <Button onClick={handleUpload} disabled={isUploading || !uploadTitle.trim() || (sourceMode === "url" && !uploadUrl.trim() && uploadType !== "notes") || (sourceMode === "upload" && !uploadUrl.trim() && uploadType !== "notes")} className="rounded-xl gradient-brand border-0 text-white" size="sm">
               <Upload className="me-1.5 h-4 w-4" />{sourceMode === "upload" ? "Upload & Save" : "Save Material"}
             </Button>
             <Button variant="ghost" size="sm" className="rounded-xl" onClick={() => setShowUpload(false)}>Cancel</Button>
@@ -1554,8 +1672,8 @@ function MaterialsTab({ courseId }: { courseId: string }) {
       ) : (
         <div className={cn(viewMode === "cards" ? "grid gap-3 sm:grid-cols-2 lg:grid-cols-3" : "space-y-2")}>
           {paginated.map((mat) => viewMode === "cards"
-            ? <MatCard key={mat.id} mat={mat} treeNodes={treeNodes} onPublish={() => publishMaterial(mat.id)} onUnpublish={() => unpublishMaterial(mat.id)} onDelete={() => deleteMaterial(mat.id)} />
-            : <MatRow key={mat.id} mat={mat} onPublish={() => publishMaterial(mat.id)} onUnpublish={() => unpublishMaterial(mat.id)} onDelete={() => deleteMaterial(mat.id)} />
+            ? <MatCard key={mat.id} mat={mat} treeNodes={treeNodes} onPublish={() => publishMaterial(mat.id)} onUnpublish={() => unpublishMaterial(mat.id)} onDelete={() => { void deleteMaterial(mat.id); }} onRename={(title: string) => { void updateMaterial(mat.id, { title }); }} />
+            : <MatRow key={mat.id} mat={mat} onPublish={() => publishMaterial(mat.id)} onUnpublish={() => unpublishMaterial(mat.id)} onDelete={() => { void deleteMaterial(mat.id); }} onRename={(title: string) => { void updateMaterial(mat.id, { title }); }} />
           )}
         </div>
       )}
@@ -1574,7 +1692,8 @@ function QuestionsTab({ courseId }: { courseId: string }) {
   const publishQuestion = useTeacherQuestionStore((s) => s.publishQuestion);
   const duplicateQuestion = useTeacherQuestionStore((s) => s.duplicateQuestion);
   const courses = useTeacherCourseStore((s) => s.courses);
-  const allTreeNodes = useContentTreeStore((s) => s.nodes);
+  const allTreeNodes = useAcademicTreeNodes(courseId);
+  useLoadAcademicTree(courseId);
   const questions = useMemo(() => allQuestions.filter((q) => q.courseId === courseId), [allQuestions, courseId]);
 
   const [search, setSearch] = useState("");
@@ -2170,7 +2289,7 @@ function AssignmentsTab({ courseId }: { courseId: string }) {
    SHARED HELPERS
    ═══════════════════════════════════════════════════════════════ */
 
-function TreeBranch({ node, nodes, depth, selectedId, onSelect }: { node: ContentTreeNode; nodes: ContentTreeNode[]; depth: number; selectedId: string | null; onSelect: (id: string) => void }) {
+function TreeBranch({ node, nodes, depth, selectedId, onSelect }: { node: AcademicTreeNode; nodes: AcademicTreeNode[]; depth: number; selectedId: string | null; onSelect: (id: string) => void }) {
   const [open, setOpen] = useState(depth < 1);
   const children = nodes.filter((n) => n.parentId === node.id).sort((a, b) => a.order - b.order);
   const hasChildren = children.length > 0;
@@ -2189,28 +2308,11 @@ function TreeBranch({ node, nodes, depth, selectedId, onSelect }: { node: Conten
         ) : <span className="w-3 shrink-0" />}
         <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", typeColors[node.type] ? `bg-current ${typeColors[node.type]}` : "bg-muted-foreground")} />
         <span className="truncate flex-1">{node.title}</span>
-        <CoverageBadge status={node.coverageStatus} />
       </button>
       {open && children.map((child) => (
         <TreeBranch key={child.id} node={child} nodes={nodes} depth={depth + 1} selectedId={selectedId} onSelect={onSelect} />
       ))}
     </div>
-  );
-}
-
-function CoverageBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    covered: "bg-emerald-500/10 text-emerald-600",
-    partial: "bg-amber-500/10 text-amber-600",
-    missing_material: "bg-rose-500/10 text-rose-600",
-    not_started: "bg-slate-500/10 text-slate-500",
-    needs_review: "bg-blue-500/10 text-blue-600",
-    extra: "bg-violet-500/10 text-violet-600",
-  };
-  return (
-    <span className={cn("rounded px-1 py-0.5 text-[9px] font-medium shrink-0", styles[status] || styles.not_started)}>
-      {status.replace(/_/g, " ")}
-    </span>
   );
 }
 
@@ -2225,11 +2327,33 @@ const PROVIDER_LABELS: Record<string, { label: string; cls: string }> = {
   external_url: { label: "URL", cls: "bg-slate-500/10 text-slate-500" },
 };
 
-function MatCard({ mat, treeNodes, onPublish, onUnpublish, onDelete }: {
-  mat: TeacherMaterial; treeNodes: ContentTreeNode[];
-  onPublish: () => void; onUnpublish: () => void; onDelete: () => void;
-}) {
+type MatCardProps = {
+  mat: TeacherMaterial;
+  treeNodes: AcademicTreeNode[];
+  onPublish: () => void;
+  onUnpublish: () => void;
+  onDelete: () => void;
+  onRename: (title: string) => void;
+};
+
+type MatRowProps = {
+  mat: TeacherMaterial;
+  onPublish: () => void;
+  onUnpublish: () => void;
+  onDelete: () => void;
+  onRename: (title: string) => void;
+};
+
+function MatCard({ mat, treeNodes, onPublish, onUnpublish, onDelete, onRename }: MatCardProps) {
   const meta = MAT_TYPE_META[mat.type]; const Icon = meta.icon;
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [renameValue, setRenameValue] = useState(mat.title);
+  const previewUrl = resolveFileUrl(mat.videoUrl || mat.fileUrl);
+  const commitRename = () => {
+    const trimmed = renameValue.trim();
+    if (trimmed && trimmed !== mat.title) onRename(trimmed);
+    setIsRenaming(false);
+  };
   const sessionCount = (mat.linkedSessionIds?.length || 0) + (mat.sessionId ? 1 : 0);
   const links = mat.academicLinks || [];
   const linkCount = links.length;
@@ -2256,7 +2380,18 @@ function MatCard({ mat, treeNodes, onPublish, onUnpublish, onDelete }: {
       <div className="p-3.5 space-y-2.5">
         {/* Title + code + type info */}
         <div>
-          <p className="text-sm font-semibold truncate">{mat.title}</p>
+          {isRenaming ? (
+            <Input
+              autoFocus
+              value={renameValue}
+              onChange={(e) => setRenameValue(e.target.value)}
+              onBlur={commitRename}
+              onKeyDown={(e) => { if (e.key === "Enter") commitRename(); if (e.key === "Escape") { setRenameValue(mat.title); setIsRenaming(false); } }}
+              className="h-7 rounded-lg text-sm font-semibold"
+            />
+          ) : (
+            <p className="text-sm font-semibold truncate cursor-text" onDoubleClick={() => setIsRenaming(true)}>{mat.title}</p>
+          )}
           {displayTitle && <p className="text-[11px] text-muted-foreground truncate">Student sees: {displayTitle}</p>}
           <p className="text-[11px] text-muted-foreground mt-0.5">
             {meta.label}{mat.videoDuration ? ` · ${mat.videoDuration}` : ""}{mat.fileSize ? ` · ${mat.fileSize}` : ""}
@@ -2314,24 +2449,68 @@ function MatCard({ mat, treeNodes, onPublish, onUnpublish, onDelete }: {
           {mat.status === "draft"
             ? <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={onPublish} title="Publish"><Eye className="h-3.5 w-3.5 text-emerald-600" /></Button>
             : <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={onUnpublish} title="Unpublish"><EyeOff className="h-3.5 w-3.5 text-amber-600" /></Button>}
-          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-destructive" onClick={onDelete} title="Delete"><Trash2 className="h-3.5 w-3.5" /></Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => setIsRenaming(true)} title="Rename"><Pencil className="h-3.5 w-3.5" /></Button>
+          {previewUrl && (
+            <>
+              <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" asChild title="Preview">
+                <a href={previewUrl} target="_blank" rel="noopener noreferrer"><PlayCircle className="h-3.5 w-3.5" /></a>
+              </Button>
+              <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" asChild title="Download">
+                <a href={previewUrl} download={mat.fileName || mat.title}><Download className="h-3.5 w-3.5" /></a>
+              </Button>
+            </>
+          )}
+          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-destructive ms-auto" onClick={onDelete} title="Delete"><Trash2 className="h-3.5 w-3.5" /></Button>
         </div>
       </div>
     </Card>
   );
 }
 
-function MatRow({ mat, onPublish, onUnpublish, onDelete }: { mat: TeacherMaterial; onPublish: () => void; onUnpublish: () => void; onDelete: () => void }) {
+function MatRow({ mat, onPublish, onUnpublish, onDelete, onRename }: MatRowProps) {
   const meta = MAT_TYPE_META[mat.type]; const Icon = meta.icon;
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [renameValue, setRenameValue] = useState(mat.title);
+  const previewUrl = resolveFileUrl(mat.videoUrl || mat.fileUrl);
+  const commitRename = () => {
+    const trimmed = renameValue.trim();
+    if (trimmed && trimmed !== mat.title) onRename(trimmed);
+    setIsRenaming(false);
+  };
   return (
     <Card className="flex items-center gap-3 border bg-card px-4 py-3">
       <div className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-lg", meta.color)}><Icon className="h-4 w-4" /></div>
-      <div className="min-w-0 flex-1"><p className="text-sm font-medium truncate">{mat.title}</p><p className="text-xs text-muted-foreground">{meta.label}{mat.videoDuration ? ` · ${mat.videoDuration}` : ""}</p></div>
+      <div className="min-w-0 flex-1">
+        {isRenaming ? (
+          <Input
+            autoFocus
+            value={renameValue}
+            onChange={(e) => setRenameValue(e.target.value)}
+            onBlur={commitRename}
+            onKeyDown={(e) => { if (e.key === "Enter") commitRename(); if (e.key === "Escape") { setRenameValue(mat.title); setIsRenaming(false); } }}
+            className="h-7 rounded-lg text-sm"
+          />
+        ) : (
+          <p className="text-sm font-medium truncate cursor-text" onDoubleClick={() => setIsRenaming(true)}>{mat.title}</p>
+        )}
+        <p className="text-xs text-muted-foreground">{meta.label}{mat.videoDuration ? ` · ${mat.videoDuration}` : ""}{mat.fileSize ? ` · ${mat.fileSize}` : ""}</p>
+      </div>
       <Badge variant="outline" className={cn("rounded-full text-xs", mat.status === "published" ? "border-emerald-300 text-emerald-600" : "border-amber-300 text-amber-600")}>{mat.status}</Badge>
       <div className="flex gap-0.5 shrink-0">
         {mat.status === "draft"
           ? <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={onPublish}><Eye className="h-3.5 w-3.5 text-emerald-600" /></Button>
           : <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={onUnpublish}><EyeOff className="h-3.5 w-3.5 text-amber-600" /></Button>}
+        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => setIsRenaming(true)}><Pencil className="h-3.5 w-3.5" /></Button>
+        {previewUrl && (
+          <>
+            <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" asChild>
+              <a href={previewUrl} target="_blank" rel="noopener noreferrer"><PlayCircle className="h-3.5 w-3.5" /></a>
+            </Button>
+            <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" asChild>
+              <a href={previewUrl} download={mat.fileName || mat.title}><Download className="h-3.5 w-3.5" /></a>
+            </Button>
+          </>
+        )}
         <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-destructive" onClick={onDelete}><Trash2 className="h-3.5 w-3.5" /></Button>
       </div>
     </Card>

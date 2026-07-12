@@ -4,6 +4,16 @@ import type { TeacherQuiz } from "./teacher-quiz-store";
 import type { TeacherExam } from "./teacher-exam-store";
 import type { TeacherHomework } from "./teacher-homework-store";
 import type { TeacherAssignment } from "./teacher-assignment-store";
+import { addQuizQuestion as addQuizQuestionApi, createQuiz as createQuizApi } from "@/lib/api/quizzes";
+import { createAssignment as createAssignmentApi } from "@/lib/api/assignments";
+import { useTeacherQuestionStore } from "@/lib/teacher/teacher-question-store";
+
+// question_bank has no generic "assessment" concept — every assessment type
+// maps onto one of the two real backends that exist: quizzes (question-
+// based) or assignments (submission-based).
+const ASSIGNMENT_BACKED_TYPES: ReadonlySet<AssessmentType> = new Set([
+  "homework", "assignment", "project", "research", "presentation",
+]);
 
 /* ═══════════════════════════════════════════════════════════
    ASSESSMENT TYPES
@@ -107,6 +117,12 @@ export interface TeacherAssessment {
   updatedBy?: string;
   updatedAt: string;
   version?: number;
+
+  // Backend sync — maps onto quizzes (question-based) or assignments
+  // (submission-based); most `settings`/`rewards` fields have no backend
+  // column and stay local-only.
+  backendId?: string;
+  backendSynced?: boolean;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -210,6 +226,63 @@ interface AssessmentState {
   detachFromSession: (assessmentId: string, sessionId: string) => void;
 }
 
+async function syncAssessmentQuestionsToBackend(quizBackendId: string, questionIds: string[]): Promise<void> {
+  const questionState = useTeacherQuestionStore.getState();
+  for (const [index, questionId] of questionIds.entries()) {
+    const question = questionState.questions.find((q) => q.id === questionId);
+    if (!question?.backendId) continue;
+    try {
+      await addQuizQuestionApi(quizBackendId, { question_id: question.backendId, position: index });
+    } catch {
+      // Skip — best-effort sync, local assessment state is unaffected.
+    }
+  }
+}
+
+async function syncAssessmentToBackend(assessment: TeacherAssessment): Promise<void> {
+  const courseId = assessment.courseIds?.[0];
+  if (!courseId) return;
+
+  try {
+    if (ASSIGNMENT_BACKED_TYPES.has(assessment.assessmentType)) {
+      const created = await createAssignmentApi({
+        title: assessment.title,
+        description: assessment.description || null,
+        course_id: courseId,
+        chapter_id: assessment.chapterIds?.[0] ?? null,
+        session_id: assessment.sessionIds?.[0] ?? null,
+        deadline_at: assessment.settings.dueDate ? new Date(assessment.settings.dueDate).toISOString() : null,
+        max_points: assessment.settings.totalScore ?? 100,
+        allow_multiple_submissions: assessment.settings.allowLateSubmission ?? false,
+      });
+      useTeacherAssessmentStore.getState().updateAssessment(assessment.id, {
+        backendId: created.id,
+        backendSynced: true,
+      });
+    } else {
+      const created = await createQuizApi({
+        title: assessment.title,
+        description: assessment.description || null,
+        course_id: courseId,
+        chapter_id: assessment.chapterIds?.[0] ?? null,
+        session_id: assessment.sessionIds?.[0] ?? null,
+        duration_minutes: assessment.settings.durationMinutes ?? 30,
+        passing_score: assessment.settings.passingScorePercent ?? 70,
+        is_published: assessment.status === "published",
+      });
+      useTeacherAssessmentStore.getState().updateAssessment(assessment.id, {
+        backendId: created.id,
+        backendSynced: true,
+      });
+      if (assessment.questionIds.length > 0) {
+        await syncAssessmentQuestionsToBackend(created.id, assessment.questionIds);
+      }
+    }
+  } catch {
+    // Leave the assessment as local-only; the teacher's draft isn't lost.
+  }
+}
+
 export const useTeacherAssessmentStore = create<AssessmentState>()(
   persist(
     (set, get) => ({
@@ -246,12 +319,20 @@ export const useTeacherAssessmentStore = create<AssessmentState>()(
           updatedAt: now,
         };
         set((s) => ({ assessments: [assessment, ...s.assessments] }));
+        void syncAssessmentToBackend(assessment);
         return assessment;
       },
 
-      updateAssessment: (id, data) => set((s) => ({
-        assessments: s.assessments.map((a) => a.id === id ? { ...a, ...data, updatedAt: new Date().toISOString() } : a),
-      })),
+      updateAssessment: (id, data) => {
+        const before = get().assessments.find((a) => a.id === id);
+        set((s) => ({
+          assessments: s.assessments.map((a) => a.id === id ? { ...a, ...data, updatedAt: new Date().toISOString() } : a),
+        }));
+        if (before?.backendId && data.questionIds && !ASSIGNMENT_BACKED_TYPES.has(before.assessmentType)) {
+          const newIds = data.questionIds.filter((qid) => !before.questionIds.includes(qid));
+          if (newIds.length > 0) void syncAssessmentQuestionsToBackend(before.backendId, newIds);
+        }
+      },
 
       deleteAssessment: (id) => set((s) => ({ assessments: s.assessments.filter((a) => a.id !== id) })),
       publishAssessment: (id) => get().updateAssessment(id, { status: "published" }),

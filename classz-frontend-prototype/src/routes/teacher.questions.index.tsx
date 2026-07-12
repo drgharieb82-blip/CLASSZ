@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { DashPage } from "@/components/common/DashPage";
-import { TeacherQuestionBankWorkspace } from "@/components/question/TeacherQuestionBankWorkspace";
+import { QuestionWorkspace } from "@/components/question/QuestionWorkspace";
 import { Button } from "@/components/ui/button";
 import { ROLES } from "@/lib/roles";
 
@@ -11,9 +11,8 @@ export const Route = createFileRoute("/teacher/questions/")({
 
 function QuestionBankPage() {
   return (
-    <DashPage role="teacher" title="Question Bank" subtitle="Create and manage questions for quizzes and exams" icon={ROLES.teacher.icon}>
-      <TeacherQuestionBankWorkspace
-        mode="manage"
+      <DashPage role="teacher" title="Question Bank" subtitle="Create and manage questions for quizzes and exams" icon={ROLES.teacher.icon}>
+      <QuestionWorkspace
         showInsights
         createAction={(
           <Button asChild className="rounded-xl gradient-brand border-0 text-white" size="sm">

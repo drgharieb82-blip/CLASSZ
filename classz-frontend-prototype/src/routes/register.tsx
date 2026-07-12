@@ -162,8 +162,17 @@ function RegisterPage() {
         email: form.email,
         password: form.password,
         full_name: form.fullName,
+        date_of_birth: form.dob || null,
+        gender: form.gender || null,
+        national_id: form.nationalId || null,
+        whatsapp: form.whatsapp || null,
+        nickname: form.nickname || null,
+        avatar: form.avatar || null,
+        parent_name: form.parentName || null,
+        parent_relation: form.relationship || null,
+        parent_whatsapp: form.parentWhatsapp || null,
       });
-      login(res.access_token, res.user);
+      login(res.access_token, res.user, res.refresh_token);
       setDone(true);
       setTimeout(() => navigate({ to: "/courses" }), 3200);
     } catch (err) {

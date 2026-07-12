@@ -23,7 +23,10 @@ import {
 } from "@/components/ui/select";
 import { ROLES } from "@/lib/roles";
 import { useApp } from "@/lib/app-context";
-import { mockStudents, wrongQuestions, studentPayments, type MockStudent } from "@/lib/students-mock-data";
+import {
+  useTeacherStudentsStore, useLoadTeacherStudentsData, getMergedStudents, relativeTime, formatWatchTime,
+  type MergedStudent,
+} from "@/lib/teacher/teacher-students-store";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/teacher/students/all")({
@@ -45,17 +48,26 @@ const statusColorMap: Record<string, string> = {
 
 function AllStudentsPage() {
   const { t } = useApp();
+  useLoadTeacherStudentsData();
+  const roster = useTeacherStudentsStore((s) => s.roster);
+  const progress = useTeacherStudentsStore((s) => s.progress);
+  const atRisk = useTeacherStudentsStore((s) => s.atRisk);
+  const parents = useTeacherStudentsStore((s) => s.parents);
+  const transactions = useTeacherStudentsStore((s) => s.transactions);
+  const wrongQuestions = useTeacherStudentsStore((s) => s.wrongQuestions);
+  const mockStudents = useMemo(() => getMergedStudents(), [roster, progress, atRisk, parents, transactions]);
+
   const [search, setSearch] = useState("");
   const [courseFilter, setCourseFilter] = useState("all");
   const [riskFilter, setRiskFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedStudent, setSelectedStudent] = useState<MockStudent | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<MergedStudent | null>(null);
 
   const courses = useMemo(() => {
     const all = new Set<string>();
     mockStudents.forEach((s) => s.courses.forEach((c) => all.add(c)));
     return Array.from(all);
-  }, []);
+  }, [mockStudents]);
 
   const filtered = useMemo(() => {
     let result = [...mockStudents];
@@ -69,15 +81,15 @@ function AllStudentsPage() {
     if (riskFilter !== "all") result = result.filter((s) => s.riskLevel === riskFilter);
     if (statusFilter !== "all") result = result.filter((s) => s.status === statusFilter);
     return result;
-  }, [search, courseFilter, riskFilter, statusFilter]);
+  }, [mockStudents, search, courseFilter, riskFilter, statusFilter]);
 
   const hasFilters = courseFilter !== "all" || riskFilter !== "all" || statusFilter !== "all";
 
   const studentWrongQs = selectedStudent
-    ? wrongQuestions.filter((wq) => wq.studentId === selectedStudent.id)
+    ? wrongQuestions.filter((wq) => wq.student_id === selectedStudent.id)
     : [];
   const studentPaymentList = selectedStudent
-    ? studentPayments.filter((p) => p.studentId === selectedStudent.id)
+    ? transactions.filter((p) => p.student_id === selectedStudent.id)
     : [];
 
   return (
@@ -154,7 +166,6 @@ function AllStudentsPage() {
                 <TableHead>{t("stu.avgScore")}</TableHead>
                 <TableHead>{t("stu.riskLevel")}</TableHead>
                 <TableHead>{t("stu.lastLogin")}</TableHead>
-                <TableHead>{t("stu.assistantTeacher")}</TableHead>
                 <TableHead>{t("stu.parentContact")}</TableHead>
                 <TableHead className="w-[60px]">Actions</TableHead>
               </TableRow>
@@ -175,11 +186,11 @@ function AllStudentsPage() {
                       </Avatar>
                       <div>
                         <p className="font-medium text-sm">{student.name}</p>
-                        <p className="text-xs text-muted-foreground">{student.id}</p>
+                        <p className="text-xs text-muted-foreground">{student.id.slice(0, 8)}</p>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm">{student.grade}</TableCell>
+                  <TableCell className="text-sm">{student.grade || "—"}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
                       {student.courses.map((c) => (
@@ -208,12 +219,11 @@ function AllStudentsPage() {
                       {t(`stu.${student.riskLevel}`)}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{student.lastLogin}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{student.assistantTeacher}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{relativeTime(student.lastActivityAt)}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
                       <Phone className="h-3 w-3 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground truncate max-w-[100px]">{student.parentPhone}</span>
+                      <span className="text-xs text-muted-foreground truncate max-w-[100px]">{student.parentPhone || "—"}</span>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -228,7 +238,7 @@ function AllStudentsPage() {
               ))}
               {filtered.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center py-12">
+                  <TableCell colSpan={9} className="text-center py-12">
                     <div className="flex flex-col items-center gap-2 text-muted-foreground">
                       <Users className="h-8 w-8" />
                       <p className="text-sm">No students match your filters</p>
@@ -255,7 +265,7 @@ function AllStudentsPage() {
                   </Avatar>
                   <div>
                     <SheetTitle>{selectedStudent.name}</SheetTitle>
-                    <p className="text-sm text-muted-foreground">{selectedStudent.id} &middot; {selectedStudent.grade}</p>
+                    <p className="text-sm text-muted-foreground">{selectedStudent.id.slice(0, 8)} &middot; {selectedStudent.grade || "—"}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 mt-2">
@@ -269,10 +279,9 @@ function AllStudentsPage() {
               </SheetHeader>
 
               <Tabs defaultValue="overview" className="mt-6">
-                <TabsList className="w-full grid grid-cols-6">
+                <TabsList className="w-full grid grid-cols-5">
                   <TabsTrigger value="overview" className="text-xs">Overview</TabsTrigger>
                   <TabsTrigger value="progress" className="text-xs">{t("stu.progress")}</TabsTrigger>
-                  <TabsTrigger value="quizzes" className="text-xs">Quizzes</TabsTrigger>
                   <TabsTrigger value="wrong" className="text-xs">Wrong Q</TabsTrigger>
                   <TabsTrigger value="parent" className="text-xs">Parent</TabsTrigger>
                   <TabsTrigger value="payments" className="text-xs">Pay</TabsTrigger>
@@ -291,7 +300,7 @@ function AllStudentsPage() {
                     </Card>
                     <Card className="border bg-card p-3">
                       <p className="text-xs text-muted-foreground">Watch Time</p>
-                      <p className="text-xl font-bold">{selectedStudent.watchTime}</p>
+                      <p className="text-xl font-bold">{formatWatchTime(selectedStudent.watchTimeMinutes)}</p>
                     </Card>
                     <Card className="border bg-card p-3">
                       <p className="text-xs text-muted-foreground">HW Completion</p>
@@ -324,15 +333,11 @@ function AllStudentsPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Joined</span>
-                      <span>{selectedStudent.joinedDate}</span>
+                      <span>{new Date(selectedStudent.joinedDate).toLocaleDateString()}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">{t("stu.lastLogin")}</span>
-                      <span>{selectedStudent.lastLogin}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">{t("stu.assistantTeacher")}</span>
-                      <span>{selectedStudent.assistantTeacher}</span>
+                      <span>{relativeTime(selectedStudent.lastActivityAt)}</span>
                     </div>
                   </div>
                 </TabsContent>
@@ -358,43 +363,12 @@ function AllStudentsPage() {
                   <div className="grid grid-cols-2 gap-3">
                     <Card className="border bg-card p-3">
                       <p className="text-xs text-muted-foreground">Watch Time</p>
-                      <p className="text-lg font-bold">{selectedStudent.watchTime}</p>
+                      <p className="text-lg font-bold">{formatWatchTime(selectedStudent.watchTimeMinutes)}</p>
                     </Card>
                     <Card className="border bg-card p-3">
                       <p className="text-xs text-muted-foreground">{t("stu.lastLogin")}</p>
-                      <p className="text-lg font-bold">{selectedStudent.lastLogin}</p>
+                      <p className="text-lg font-bold">{relativeTime(selectedStudent.lastActivityAt)}</p>
                     </Card>
-                  </div>
-                </TabsContent>
-
-                {/* Quiz History Tab */}
-                <TabsContent value="quizzes" className="mt-4">
-                  <div className="space-y-3">
-                    <Card className="border bg-card p-3">
-                      <p className="text-xs text-muted-foreground">Quiz Average</p>
-                      <p className="text-2xl font-bold">{selectedStudent.quizAvg}%</p>
-                    </Card>
-                    <div className="rounded-xl border p-3">
-                      <p className="text-sm font-medium mb-2">Recent Quiz Results</p>
-                      {[
-                        { name: "Limits Quiz", score: Math.max(selectedStudent.quizAvg - 5, 0), date: "Jun 20" },
-                        { name: "Derivatives Quiz", score: selectedStudent.quizAvg, date: "Jun 15" },
-                        { name: "Integration Quiz", score: Math.min(selectedStudent.quizAvg + 8, 100), date: "Jun 10" },
-                      ].map((q) => (
-                        <div key={q.name} className="flex items-center justify-between py-2 border-b last:border-0">
-                          <div>
-                            <p className="text-sm">{q.name}</p>
-                            <p className="text-xs text-muted-foreground">{q.date}</p>
-                          </div>
-                          <Badge variant="outline" className={cn("rounded-full",
-                            q.score >= 80 ? "text-emerald-500 border-emerald-300" :
-                              q.score >= 60 ? "text-amber-500 border-amber-300" : "text-rose-500 border-rose-300"
-                          )}>
-                            {q.score}%
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
                   </div>
                 </TabsContent>
 
@@ -408,18 +382,18 @@ function AllStudentsPage() {
                   ) : (
                     <div className="space-y-2">
                       {studentWrongQs.map((wq) => (
-                        <div key={wq.id} className="rounded-xl border p-3">
+                        <div key={`${wq.question_id}`} className="rounded-xl border p-3">
                           <div className="flex items-center justify-between">
-                            <p className="text-sm font-medium">{wq.concept}</p>
+                            <p className="text-sm font-medium">{wq.question_title}</p>
                             <Badge variant="outline" className={cn("rounded-full text-xs",
-                              wq.difficulty === "hard" ? "border-rose-300 text-rose-500" :
-                                wq.difficulty === "medium" ? "border-amber-300 text-amber-500" : "border-emerald-300 text-emerald-500"
-                            )}>{wq.difficulty}</Badge>
+                              wq.difficulty === "HARD" ? "border-rose-300 text-rose-500" :
+                                wq.difficulty === "MEDIUM" ? "border-amber-300 text-amber-500" : "border-emerald-300 text-emerald-500"
+                            )}>{wq.difficulty.toLowerCase()}</Badge>
                           </div>
-                          <p className="text-xs text-muted-foreground mt-1">{wq.course} &middot; {wq.chapter} &middot; {wq.atomicConcept}</p>
+                          <p className="text-xs text-muted-foreground mt-1">{wq.course_title} &middot; {wq.chapter || "—"} &middot; {wq.concept || "—"}</p>
                           <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                            <span>Retries: {wq.retryCount}</span>
-                            <span>Last: {wq.lastWrongDate}</span>
+                            <span>Retries: {wq.retry_count}</span>
+                            <span>Last: {relativeTime(wq.last_wrong_at)}</span>
                           </div>
                         </div>
                       ))}
@@ -432,24 +406,20 @@ function AllStudentsPage() {
                   <div className="space-y-3 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">{t("stu.parentName")}</span>
-                      <span className="font-medium">{selectedStudent.parentName}</span>
+                      <span className="font-medium">{selectedStudent.parentName || "Not recorded"}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">{t("stu.relation")}</span>
-                      <span>{selectedStudent.parentRelation}</span>
+                      <span>{selectedStudent.parentRelation || "—"}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">WhatsApp</span>
-                      <span className="flex items-center gap-1"><Phone className="h-3 w-3" /> {selectedStudent.parentPhone}</span>
+                      <span className="text-muted-foreground">Phone</span>
+                      <span className="flex items-center gap-1"><Phone className="h-3 w-3" /> {selectedStudent.parentPhone || "—"}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">{t("team.email")}</span>
-                      <span className="flex items-center gap-1"><Mail className="h-3 w-3" /> {selectedStudent.parentEmail}</span>
+                      <span className="flex items-center gap-1"><Mail className="h-3 w-3" /> {selectedStudent.parentEmail || "—"}</span>
                     </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="rounded-xl flex-1">{t("stu.notifyParent")}</Button>
-                    <Button variant="outline" size="sm" className="rounded-xl flex-1">{t("stu.sendWeeklyReport")}</Button>
                   </div>
                 </TabsContent>
 
@@ -458,15 +428,15 @@ function AllStudentsPage() {
                   <div className="grid grid-cols-3 gap-3 mb-4">
                     <Card className="border bg-card p-3">
                       <p className="text-xs text-muted-foreground">Total Paid</p>
-                      <p className="text-lg font-bold text-emerald-500">${selectedStudent.totalPaid}</p>
+                      <p className="text-lg font-bold text-emerald-500">${selectedStudent.totalPaid.toFixed(0)}</p>
                     </Card>
                     <Card className="border bg-card p-3">
                       <p className="text-xs text-muted-foreground">Pending</p>
-                      <p className="text-lg font-bold text-amber-500">${selectedStudent.pendingPayment}</p>
+                      <p className="text-lg font-bold text-amber-500">${selectedStudent.pendingPayment.toFixed(0)}</p>
                     </Card>
                     <Card className="border bg-card p-3">
                       <p className="text-xs text-muted-foreground">Wallet</p>
-                      <p className="text-lg font-bold">${selectedStudent.walletBalance}</p>
+                      <p className="text-lg font-bold">${selectedStudent.walletBalance.toFixed(0)}</p>
                     </Card>
                   </div>
                   {studentPaymentList.length === 0 ? (
@@ -479,12 +449,12 @@ function AllStudentsPage() {
                       {studentPaymentList.map((pay) => (
                         <div key={pay.id} className="rounded-xl border p-3">
                           <div className="flex items-center justify-between">
-                            <p className="text-sm font-medium">{pay.course}</p>
-                            <span className="text-sm font-bold text-emerald-500">${pay.paid}</span>
+                            <p className="text-sm font-medium">{pay.course_title || "General"}</p>
+                            <span className="text-sm font-bold text-emerald-500">${pay.amount.toFixed(0)}</span>
                           </div>
-                          <p className="text-xs text-muted-foreground mt-0.5">{pay.purchase} &middot; {pay.date}</p>
-                          {pay.coupon && (
-                            <Badge variant="outline" className="rounded-full text-[10px] mt-1">{pay.coupon}</Badge>
+                          <p className="text-xs text-muted-foreground mt-0.5">{pay.type} &middot; {new Date(pay.created_at).toLocaleDateString()}</p>
+                          {pay.coupon_code && (
+                            <Badge variant="outline" className="rounded-full text-[10px] mt-1">{pay.coupon_code}</Badge>
                           )}
                         </div>
                       ))}

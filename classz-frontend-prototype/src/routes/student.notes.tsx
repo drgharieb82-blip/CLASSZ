@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import {
@@ -34,6 +34,13 @@ import {
   type NoteSmartType,
   type NoteImportance,
 } from "@/lib/notesMock";
+import {
+  createMyNote,
+  deleteMyNote,
+  listMyNotes,
+  updateMyNote,
+  type StudentNoteRead,
+} from "@/lib/api/student-memory";
 
 export const Route = createFileRoute("/student/notes")({
   component: MyNotesPage,
@@ -53,7 +60,7 @@ type GroupBy = "none" | "session-item" | "smart-type" | "importance";
 // ── Component ───────────────────────────────────────────────────────
 
 function MyNotesPage() {
-  const [notes, setNotes] = useState<SessionNote[]>(() => [...initialNotes]);
+  const [notes, setNotes] = useState<SessionNote[]>([]);
   const [view, setView] = useState<ViewState>({ level: "subjects" });
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("cards");
@@ -67,6 +74,35 @@ function MyNotesPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [editId, setEditId] = useState<string | null>(null);
   const [editBody, setEditBody] = useState("");
+  const [composeOpen, setComposeOpen] = useState(false);
+  const [composeBody, setComposeBody] = useState("");
+  const [composeTags, setComposeTags] = useState("");
+  const [composeImportance, setComposeImportance] = useState<NoteImportance>("medium");
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    async function loadNotes() {
+      setLoading(true);
+      setLoadError("");
+      try {
+        const items = await listMyNotes();
+        if (!active) return;
+        setNotes(items.map(mapApiNote));
+      } catch {
+        if (!active) return;
+        setNotes([...initialNotes]);
+        setLoadError("Using local sample notes until your saved notes are available.");
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+    void loadNotes();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // ── Derived data ──
 
@@ -162,12 +198,18 @@ function MyNotesPage() {
   // ── Actions ──
 
   const togglePin = useCallback((id: string) => {
-    setNotes((p) => p.map((n) => (n.id === id ? { ...n, pinned: !n.pinned } : n)));
-  }, []);
+    const current = notes.find((note) => note.id === id);
+    if (!current) return;
+    void updateMyNote(id, { pinned: !current.pinned }).then((updated) => {
+      setNotes((p) => p.map((n) => (n.id === id ? mapApiNote(updated) : n)));
+    });
+  }, [notes]);
 
   const deleteNote = useCallback((id: string) => {
-    setNotes((p) => p.filter((n) => n.id !== id));
-    setSelectedIds((p) => { const s = new Set(p); s.delete(id); return s; });
+    void deleteMyNote(id).then(() => {
+      setNotes((p) => p.filter((n) => n.id !== id));
+      setSelectedIds((p) => { const s = new Set(p); s.delete(id); return s; });
+    });
   }, []);
 
   const copyNote = useCallback((body: string) => {
@@ -181,23 +223,44 @@ function MyNotesPage() {
 
   const saveEdit = useCallback(() => {
     if (!editId || !editBody.trim()) return;
-    setNotes((p) => p.map((n) => n.id === editId ? { ...n, body: editBody.trim(), updatedAt: new Date().toISOString() } : n));
-    setEditId(null);
-    setEditBody("");
-  }, [editId, editBody]);
+    const current = notes.find((note) => note.id === editId);
+    void updateMyNote(editId, {
+      body: editBody.trim(),
+      subject_name: current?.subjectName,
+      course_name: current?.courseName,
+      session_title: current?.sessionTitle,
+      session_item_title: current?.sessionItemTitle,
+      session_item_id: current?.sessionItemId,
+      item_type: current?.itemType,
+      tags: current?.tags,
+      importance: current?.importance,
+      smart_type: current?.smartType,
+    }).then((updated) => {
+      setNotes((p) => p.map((n) => (n.id === editId ? mapApiNote(updated) : n)));
+      setEditId(null);
+      setEditBody("");
+    });
+  }, [editId, editBody, notes]);
 
   const toggleSelect = useCallback((id: string) => {
     setSelectedIds((p) => { const s = new Set(p); if (s.has(id)) s.delete(id); else s.add(id); return s; });
   }, []);
 
   const bulkPin = useCallback(() => {
-    setNotes((p) => p.map((n) => selectedIds.has(n.id) ? { ...n, pinned: true } : n));
-    setSelectedIds(new Set());
+    const ids = [...selectedIds];
+    Promise.all(ids.map((id) => updateMyNote(id, { pinned: true }))).then((updated) => {
+      const updatedById = new Map(updated.map((note) => [note.id, mapApiNote(note)]));
+      setNotes((current) => current.map((note) => updatedById.get(note.id) ?? note));
+      setSelectedIds(new Set());
+    });
   }, [selectedIds]);
 
   const bulkDelete = useCallback(() => {
-    setNotes((p) => p.filter((n) => !selectedIds.has(n.id)));
-    setSelectedIds(new Set());
+    const ids = [...selectedIds];
+    Promise.all(ids.map((id) => deleteMyNote(id))).finally(() => {
+      setNotes((p) => p.filter((n) => !selectedIds.has(n.id)));
+      setSelectedIds(new Set());
+    });
   }, [selectedIds]);
 
   const bulkCopy = useCallback(() => {
@@ -205,6 +268,35 @@ function MyNotesPage() {
     navigator.clipboard.writeText(bodies).catch(() => {});
     setSelectedIds(new Set());
   }, [notes, selectedIds]);
+
+  const composeSubject = view.level === "notes" ? view.subject : "";
+  const composeSession = view.level === "notes" ? view.session : "";
+
+  const createNote = useCallback(() => {
+    if (view.level !== "notes") return;
+    if (!composeBody.trim()) return;
+    const subjectName = composeSubject;
+    const sessionTitle = composeSession;
+    const courseName = notes.find((note) => note.subjectName === subjectName && note.sessionTitle === sessionTitle)?.courseName ?? subjectName;
+    void createMyNote({
+      body: composeBody.trim(),
+      subject_name: subjectName,
+      course_name: courseName,
+      session_title: sessionTitle,
+      session_item_title: "Manual Note",
+      session_item_id: `manual-${Date.now().toString(36)}`,
+      item_type: "notes",
+      tags: composeTags.split(",").map((tag) => tag.trim()).filter(Boolean),
+      importance: composeImportance,
+      smart_type: detectSmartTypeLocal(composeBody),
+    }).then((created) => {
+      setNotes((current) => [mapApiNote(created), ...current]);
+      setComposeBody("");
+      setComposeTags("");
+      setComposeImportance("medium");
+      setComposeOpen(false);
+    });
+  }, [composeBody, composeImportance, composeTags, composeSession, composeSubject, notes, view.level]);
 
   // ── Subtitle ──
   const subtitle = view.level === "subjects"
@@ -217,6 +309,16 @@ function MyNotesPage() {
     <DashPage role="student" title="My Notes" subtitle={subtitle} icon={ROLES.student.icon}>
       <BrainGlow size="sm" className="mx-auto" />
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06, duration: 0.45 }} className="space-y-5">
+        {loadError && (
+          <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+            {loadError}
+          </div>
+        )}
+        {loading && notes.length === 0 ? (
+          <div className="rounded-2xl border border-white/10 bg-card/60 px-4 py-6 text-sm text-slate-400">
+            Loading your saved notes…
+          </div>
+        ) : null}
 
         {/* ═══ BREADCRUMB ═══ */}
         {view.level !== "subjects" && (
@@ -245,6 +347,81 @@ function MyNotesPage() {
             className="h-10 w-full rounded-xl border bg-card/60 pl-10 pr-4 text-sm outline-none focus:border-primary/40"
           />
         </div>
+
+        {view.level === "notes" && (
+          <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,24,42,0.96),rgba(10,14,28,0.92))] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-white">Add a note</p>
+                <p className="text-xs text-slate-400">
+                  Saved to your account and available on every device.
+                </p>
+              </div>
+              <button
+                onClick={() => setComposeOpen((current) => !current)}
+                className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:bg-white/[0.06]"
+              >
+                {composeOpen ? "Close" : "New note"}
+              </button>
+            </div>
+            {composeOpen && (
+              <div className="mt-4 space-y-3">
+                <textarea
+                  rows={4}
+                  value={composeBody}
+                  onChange={(event) => setComposeBody(event.target.value)}
+                  placeholder="Write the note you want to keep..."
+                  className="w-full rounded-2xl border bg-background/60 px-4 py-3 text-sm outline-none focus:border-primary/40"
+                />
+                <div className="grid gap-3 md:grid-cols-[1fr_200px]">
+                  <input
+                    value={composeTags}
+                    onChange={(event) => setComposeTags(event.target.value)}
+                    placeholder="Tags separated by commas"
+                    className="h-10 rounded-xl border bg-background/60 px-3 text-sm outline-none focus:border-primary/40"
+                  />
+                  <select
+                    value={composeImportance}
+                    onChange={(event) => setComposeImportance(event.target.value as NoteImportance)}
+                    className="h-10 rounded-xl border bg-background/60 px-3 text-sm outline-none focus:border-primary/40"
+                  >
+                    <option value="low">Low priority</option>
+                    <option value="medium">Medium priority</option>
+                    <option value="high">High priority</option>
+                  </select>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-full bg-primary/15 px-2 py-1 text-[11px] font-medium text-primary">
+                    {view.subject}
+                  </span>
+                  <span className="rounded-full bg-white/[0.04] px-2 py-1 text-[11px] font-medium text-slate-300">
+                    {view.session}
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={createNote}
+                    disabled={!composeBody.trim()}
+                    className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                  >
+                    Save note
+                  </button>
+                  <button
+                    onClick={() => {
+                      setComposeBody("");
+                      setComposeTags("");
+                      setComposeImportance("medium");
+                      setComposeOpen(false);
+                    }}
+                    className="rounded-xl border border-white/10 px-4 py-2 text-sm text-slate-300"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* ═══ LEVEL: SUBJECTS ═══ */}
         {view.level === "subjects" && (
@@ -492,6 +669,35 @@ function MyNotesPage() {
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────
+
+function mapApiNote(note: StudentNoteRead): SessionNote {
+  return {
+    id: note.id,
+    body: note.body,
+    subjectName: note.subject_name,
+    courseName: note.course_name,
+    sessionTitle: note.session_title,
+    sessionItemTitle: note.session_item_title,
+    sessionItemId: note.session_item_id,
+    itemType: note.item_type,
+    createdAt: note.created_at,
+    updatedAt: note.updated_at,
+    tags: note.tags,
+    importance: note.importance,
+    pinned: note.pinned,
+    smartType: note.smart_type,
+  };
+}
+
+function detectSmartTypeLocal(text: string): NoteSmartType {
+  const body = text.toLowerCase();
+  if (/\b(mol|ph|ksp|kc|kp|equilibrium|acid|base|ion)\b/.test(body) || /[a-z][⁺⁻]/.test(body)) return "chemistry-equation";
+  if (/\b(newton|force|velocity|acceleration|energy|momentum|wave|volt|ohm|ampere)\b/.test(body)) return "physics-law";
+  if (/(∫|∑|lim|d\/dx|derivative|integral|sin|cos|tan|log|ln|sqrt|slope|function)/.test(body)) return "math-formula";
+  if (/\b(is defined as|means|refers to|is the|definition|is called)\b/.test(body)) return "definition";
+  if (body.includes("?") || /^(why|how|what|when|where|does|can|is it|should)\b/.test(body)) return "question";
+  return "general";
+}
 
 function NoteActions({ note, onPin, onEdit, onCopy, onDelete }: {
   note: SessionNote;

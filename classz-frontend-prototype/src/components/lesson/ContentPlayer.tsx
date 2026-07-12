@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { Play, Pause, Volume2, Maximize, Settings } from "lucide-react";
-import { cn } from "@/lib/utils";
-
 interface ContentPlayerProps {
   title: string;
   type: "video" | "text" | "pdf" | "youtube";
   thumbnailEmoji?: string;
+  src?: string;
 }
 
 export function ContentPlayer({ title, type, thumbnailEmoji = "📐" }: ContentPlayerProps) {

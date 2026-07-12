@@ -1,13 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import {
-  HelpCircle, Search, Printer, Send, BookOpen, Filter,
+  HelpCircle, Search, BookOpen, Filter,
   BarChart3, AlertTriangle, RefreshCcw,
 } from "lucide-react";
 import { DashPage } from "@/components/common/DashPage";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -17,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { ROLES } from "@/lib/roles";
 import { useApp } from "@/lib/app-context";
-import { wrongQuestions } from "@/lib/students-mock-data";
+import { useTeacherStudentsStore, useLoadTeacherStudentsData, relativeTime } from "@/lib/teacher/teacher-students-store";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/teacher/students/wrong-questions")({
@@ -25,21 +24,23 @@ export const Route = createFileRoute("/teacher/students/wrong-questions")({
 });
 
 const difficultyColors: Record<string, string> = {
-  easy: "border-emerald-300 text-emerald-500 bg-emerald-500/10",
-  medium: "border-amber-300 text-amber-500 bg-amber-500/10",
-  hard: "border-rose-300 text-rose-500 bg-rose-500/10",
+  EASY: "border-emerald-300 text-emerald-500 bg-emerald-500/10",
+  MEDIUM: "border-amber-300 text-amber-500 bg-amber-500/10",
+  HARD: "border-rose-300 text-rose-500 bg-rose-500/10",
 };
 
 function WrongQuestionsPage() {
   const { t } = useApp();
+  useLoadTeacherStudentsData();
+  const wrongQuestions = useTeacherStudentsStore((s) => s.wrongQuestions);
   const [search, setSearch] = useState("");
   const [courseFilter, setCourseFilter] = useState("all");
   const [difficultyFilter, setDifficultyFilter] = useState("all");
 
   const courses = useMemo(() => {
-    const all = new Set(wrongQuestions.map((wq) => wq.course));
+    const all = new Set(wrongQuestions.map((wq) => wq.course_title));
     return Array.from(all);
-  }, []);
+  }, [wrongQuestions]);
 
   const filtered = useMemo(() => {
     let result = [...wrongQuestions];
@@ -47,19 +48,20 @@ function WrongQuestionsPage() {
       const q = search.toLowerCase();
       result = result.filter(
         (wq) =>
-          wq.studentName.toLowerCase().includes(q) ||
-          wq.concept.toLowerCase().includes(q) ||
-          wq.atomicConcept.toLowerCase().includes(q)
+          wq.full_name.toLowerCase().includes(q) ||
+          (wq.concept ?? "").toLowerCase().includes(q) ||
+          (wq.atomic_concept ?? "").toLowerCase().includes(q) ||
+          wq.question_title.toLowerCase().includes(q)
       );
     }
-    if (courseFilter !== "all") result = result.filter((wq) => wq.course === courseFilter);
+    if (courseFilter !== "all") result = result.filter((wq) => wq.course_title === courseFilter);
     if (difficultyFilter !== "all") result = result.filter((wq) => wq.difficulty === difficultyFilter);
     return result;
-  }, [search, courseFilter, difficultyFilter]);
+  }, [wrongQuestions, search, courseFilter, difficultyFilter]);
 
-  const totalRetries = wrongQuestions.reduce((s, wq) => s + wq.retryCount, 0);
-  const hardCount = wrongQuestions.filter((wq) => wq.difficulty === "hard").length;
-  const uniqueStudents = new Set(wrongQuestions.map((wq) => wq.studentId)).size;
+  const totalRetries = wrongQuestions.reduce((s, wq) => s + wq.retry_count, 0);
+  const hardCount = wrongQuestions.filter((wq) => wq.difficulty === "HARD").length;
+  const uniqueStudents = new Set(wrongQuestions.map((wq) => wq.student_id)).size;
 
   return (
     <DashPage role="teacher" title={t("stu.wrongQuestions")} subtitle="Track and analyze student mistakes for targeted revision" icon={ROLES.teacher.icon}>
@@ -134,9 +136,9 @@ function WrongQuestionsPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Difficulties</SelectItem>
-              <SelectItem value="easy">Easy</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="hard">Hard</SelectItem>
+              <SelectItem value="EASY">Easy</SelectItem>
+              <SelectItem value="MEDIUM">Medium</SelectItem>
+              <SelectItem value="HARD">Hard</SelectItem>
             </SelectContent>
           </Select>
           <Badge variant="outline" className="rounded-full ms-auto">{filtered.length} records</Badge>
@@ -155,52 +157,38 @@ function WrongQuestionsPage() {
                 <TableHead>Difficulty</TableHead>
                 <TableHead>{t("stu.retryCount")}</TableHead>
                 <TableHead>Last Wrong</TableHead>
-                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.map((wq) => (
-                <TableRow key={wq.id} className="hover:bg-accent/50">
-                  <TableCell className="font-medium text-sm">{wq.studentName}</TableCell>
-                  <TableCell className="text-sm">{wq.course}</TableCell>
-                  <TableCell className="text-sm">{wq.chapter}</TableCell>
-                  <TableCell className="text-sm">{wq.concept}</TableCell>
-                  <TableCell className="text-sm">{wq.atomicConcept}</TableCell>
+                <TableRow key={`${wq.student_id}-${wq.question_id}`} className="hover:bg-accent/50">
+                  <TableCell className="font-medium text-sm">{wq.full_name}</TableCell>
+                  <TableCell className="text-sm">{wq.course_title}</TableCell>
+                  <TableCell className="text-sm">{wq.chapter ?? "—"}</TableCell>
+                  <TableCell className="text-sm">{wq.concept ?? "—"}</TableCell>
+                  <TableCell className="text-sm">{wq.atomic_concept ?? "—"}</TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="rounded-full text-xs">{wq.questionType}</Badge>
+                    <Badge variant="outline" className="rounded-full text-xs">{wq.question_type}</Badge>
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className={cn("rounded-full text-xs", difficultyColors[wq.difficulty])}>
-                      {wq.difficulty}
+                      {wq.difficulty.toLowerCase()}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <span className={cn("text-sm font-semibold",
-                      wq.retryCount >= 5 ? "text-rose-500" :
-                        wq.retryCount >= 3 ? "text-amber-500" : "text-muted-foreground"
+                      wq.retry_count >= 5 ? "text-rose-500" :
+                        wq.retry_count >= 3 ? "text-amber-500" : "text-muted-foreground"
                     )}>
-                      {wq.retryCount}
+                      {wq.retry_count}
                     </span>
                   </TableCell>
-                  <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{wq.lastWrongDate}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" title={t("stu.assignPractice")}>
-                        <BookOpen className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" title={t("stu.printSheet")}>
-                        <Printer className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" title={t("stu.sendRevision")}>
-                        <Send className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </TableCell>
+                  <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{relativeTime(wq.last_wrong_at)}</TableCell>
                 </TableRow>
               ))}
               {filtered.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center py-12">
+                  <TableCell colSpan={9} className="text-center py-12">
                     <div className="flex flex-col items-center gap-2 text-muted-foreground">
                       <HelpCircle className="h-8 w-8" />
                       <p className="text-sm">No wrong questions found</p>

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ChevronDown, Image, Plus, Save, Search, Send, Upload, X } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,7 +15,10 @@ import {
   type QuestionType, type QuestionDifficulty, type AnswerData, type MCQChoice, type QuestionAcademicLink,
 } from "@/lib/teacher/teacher-question-store";
 import { useTeacherCourseStore } from "@/lib/teacher/teacher-course-store";
-import { useContentTreeStore } from "@/lib/teacher/content-tree-store";
+import { useTeacherChapterStore } from "@/lib/teacher/teacher-chapter-store";
+import { useTeacherLessonStore } from "@/lib/teacher/teacher-lesson-store";
+import { useTeacherConceptStore } from "@/lib/teacher/teacher-concept-store";
+import { useTeacherAtomicConceptStore } from "@/lib/teacher/teacher-atomic-concept-store";
 
 /**
  * The single reusable Question Builder. Used both by the standalone
@@ -37,7 +40,14 @@ export function QuestionBuilder({ mode, questionId, defaultCourseId, onExit }: Q
   const updateQuestion = useTeacherQuestionStore((s) => s.updateQuestion);
   const question = useTeacherQuestionStore((s) => (questionId ? s.questions.find((q) => q.id === questionId) : undefined));
   const courses = useTeacherCourseStore((s) => s.courses);
-  const allTreeNodes = useContentTreeStore((s) => s.nodes);
+  const allChapters = useTeacherChapterStore((s) => s.chapters);
+  const loadChapters = useTeacherChapterStore((s) => s.loadChapters);
+  const allLessons = useTeacherLessonStore((s) => s.lessons);
+  const loadLessons = useTeacherLessonStore((s) => s.loadLessons);
+  const allConcepts = useTeacherConceptStore((s) => s.concepts);
+  const loadConcepts = useTeacherConceptStore((s) => s.loadConcepts);
+  const allAtomicConcepts = useTeacherAtomicConceptStore((s) => s.atomicConcepts);
+  const loadAtomicConcepts = useTeacherAtomicConceptStore((s) => s.loadAtomicConcepts);
 
   const [type, setType] = useState<QuestionType>(question?.type || "mcq");
   const [showAllTypes, setShowAllTypes] = useState(false);
@@ -68,8 +78,23 @@ export function QuestionBuilder({ mode, questionId, defaultCourseId, onExit }: Q
   const [negativeMarks, setNegativeMarks] = useState(String(question?.negativeMarks ?? 0));
   const [partialCredit, setPartialCredit] = useState(question?.partialCreditAllowed ?? false);
 
-  const treeNodes = useMemo(() => courseId ? allTreeNodes.filter((n) => n.courseId === courseId) : [], [allTreeNodes, courseId]);
-  const treeChapters = useMemo(() => treeNodes.filter((n) => n.type === "chapter"), [treeNodes]);
+  const chapters = useMemo(() => courseId ? allChapters.filter((c) => c.courseId === courseId) : [], [allChapters, courseId]);
+  const lessons = useMemo(() => allLessons.filter((l) => chapters.some((c) => c.id === l.chapterId)), [allLessons, chapters]);
+  const concepts = useMemo(() => allConcepts.filter((c) => lessons.some((l) => l.id === c.lessonId)), [allConcepts, lessons]);
+  const atomicConcepts = useMemo(() => allAtomicConcepts.filter((a) => concepts.some((c) => c.id === a.conceptId)), [allAtomicConcepts, concepts]);
+
+  useEffect(() => { if (courseId) loadChapters(courseId); }, [courseId]);
+  useEffect(() => { for (const c of chapters) loadLessons(c.id); }, [chapters.map((c) => c.id).join(",")]);
+  useEffect(() => { for (const l of lessons) loadConcepts(l.id); }, [lessons.map((l) => l.id).join(",")]);
+  useEffect(() => { for (const c of concepts) loadAtomicConcepts(c.id); }, [concepts.map((c) => c.id).join(",")]);
+
+  const treeChapters = useMemo(() => chapters.map((c) => ({ id: c.id, title: c.title })), [chapters]);
+  const treeNodes = useMemo(() => [
+    ...chapters.map((c) => ({ id: c.id, type: "chapter", title: c.title, parentId: "" })),
+    ...lessons.map((l) => ({ id: l.id, type: "lesson", title: l.title, parentId: l.chapterId })),
+    ...concepts.map((c) => ({ id: c.id, type: "concept", title: c.title, parentId: c.lessonId })),
+    ...atomicConcepts.map((a) => ({ id: a.id, type: "atomic_concept", title: a.title, parentId: a.conceptId })),
+  ], [chapters, lessons, concepts, atomicConcepts]);
   const currentTypeInfo = TYPE_CATALOG.find((t) => t.value === type) || TYPE_CATALOG[0];
   const filteredTypes = useMemo(() => { if (!typeSearch) return TYPE_CATALOG; const q = typeSearch.toLowerCase(); return TYPE_CATALOG.filter((t) => t.label.toLowerCase().includes(q) || t.group.toLowerCase().includes(q)); }, [typeSearch]);
   const typeGroups = useMemo(() => { const g = new Map<string, TypeInfo[]>(); for (const t of filteredTypes) { const a = g.get(t.group) || []; a.push(t); g.set(t.group, a); } return g; }, [filteredTypes]);
@@ -169,7 +194,7 @@ export function QuestionWorkspaceUI(props: {
   negativeMarks: string; setNegativeMarks: (v: string) => void;
   partialCredit: boolean; setPartialCredit: (v: boolean) => void;
   courses: { id: string; title: string }[];
-  treeNodes: { id: string; type: string; title: string; parentId: string; courseId: string }[];
+  treeNodes: { id: string; type: string; title: string; parentId: string }[];
   treeChapters: { id: string; title: string }[];
   currentTypeInfo: TypeInfo;
   filteredTypes: TypeInfo[];

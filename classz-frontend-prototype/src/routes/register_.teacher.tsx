@@ -243,7 +243,7 @@ function RegisterTeacherPage() {
         certification_text: form.certificationText.trim() || undefined,
         certification_document_url: form.certificationDocumentUrl || undefined,
       });
-      login(res.access_token, res.user);
+      login(res.access_token, res.user, res.refresh_token);
       setDone(true);
       setTimeout(() => navigate({ to: "/teacher" }), 3200);
     } catch (err) {

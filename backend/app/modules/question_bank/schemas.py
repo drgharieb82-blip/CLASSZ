@@ -1,9 +1,15 @@
 from datetime import datetime
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 
 from app.modules.question_bank.models import Difficulty, MediaType, QuestionType
+
+
+class QuestionCategoryCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+    description: str | None = None
 
 
 class QuestionCategoryRead(BaseModel):
@@ -21,7 +27,15 @@ class QuestionTagRead(BaseModel):
     name: str
 
 
+class QuestionAcademicNodeRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    title: str
+
+
 class QuestionChoiceCreate(BaseModel):
+    client_id: str | None = None
     choice_text: str = Field(min_length=1)
     is_correct: bool = False
     position: int = Field(ge=0)
@@ -52,8 +66,15 @@ class QuestionCreate(BaseModel):
     question_type: QuestionType
     difficulty: Difficulty
     explanation: str | None = None
+    course_id: UUID | None = None
+    answer_data_json: dict[str, Any] | None = None
     points: int = Field(default=1, ge=0)
     is_active: bool = True
+    chapter_ids: list[UUID] = Field(default_factory=list)
+    lesson_ids: list[UUID] = Field(default_factory=list)
+    concept_ids: list[UUID] = Field(default_factory=list)
+    atomic_concept_ids: list[UUID] = Field(default_factory=list)
+    choices: list[QuestionChoiceCreate] = Field(default_factory=list)
 
 
 class QuestionRead(QuestionCreate):
@@ -65,6 +86,10 @@ class QuestionRead(QuestionCreate):
     choices: list[QuestionChoiceRead] = Field(default_factory=list)
     media: list[QuestionMediaRead] = Field(default_factory=list)
     tags: list[QuestionTagRead] = Field(default_factory=list)
+    chapters: list[QuestionAcademicNodeRead] = Field(default_factory=list)
+    lessons: list[QuestionAcademicNodeRead] = Field(default_factory=list)
+    concepts: list[QuestionAcademicNodeRead] = Field(default_factory=list)
+    atomic_concepts: list[QuestionAcademicNodeRead] = Field(default_factory=list)
 
 
 class QuestionTagAttach(BaseModel):

@@ -1,5 +1,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import {
+  createQuestion as createQuestionApi,
+  getDefaultCategoryId,
+  type BackendDifficulty,
+  type BackendQuestionType,
+} from "@/lib/api/questions";
 
 /* ═══════════════════════════════════════════════════════════
    QUESTION TYPES
@@ -156,6 +162,12 @@ export interface TeacherQuestion {
   solutionImages?: string[];
   attachments?: string[];
 
+  // Backend sync (only mcq/multi_select/true_false/fill_blank/matching/
+  // ordering/essay can sync — question_bank has no equivalent for the other
+  // ~21 question types, which stay local-only)
+  backendId?: string;
+  backendSynced?: boolean;
+
   // Academic mapping (optional — can all be empty)
   academicLinks?: QuestionAcademicLink[];
   chapterIds: string[];
@@ -238,6 +250,23 @@ export type CreateQuestionData = Pick<TeacherQuestion, "type" | "text"> & {
 /* ═══════════════════════════════════════════════════════════
    HELPERS
    ═══════════════════════════════════════════════════════════ */
+
+const BACKEND_TYPE_MAP: Partial<Record<QuestionType, BackendQuestionType>> = {
+  mcq: "MCQ",
+  multi_select: "MULTIPLE_SELECT",
+  true_false: "TRUE_FALSE",
+  fill_blank: "FILL_BLANK",
+  matching: "MATCHING",
+  ordering: "ORDERING",
+  essay: "ESSAY",
+};
+
+const BACKEND_DIFFICULTY_MAP: Record<QuestionDifficulty, BackendDifficulty> = {
+  easy: "EASY",
+  medium: "MEDIUM",
+  hard: "HARD",
+  advanced: "HARD",
+};
 
 let codeCounter = 0;
 
@@ -407,6 +436,63 @@ interface QuestionState {
   incrementQuestionUse: (questionId: string, usageType: string, usageId: string) => void;
 }
 
+/** Fire-and-forget: creates the question (and MCQ/multi-select choices) on
+ * the backend so it has a real id usable by quizzes/exams. Silently no-ops
+ * for question types the backend doesn't support — those stay local-only. */
+async function syncQuestionToBackend(question: TeacherQuestion): Promise<void> {
+  const backendType = BACKEND_TYPE_MAP[question.type];
+  if (!backendType) return;
+
+  try {
+    const categoryId = await getDefaultCategoryId();
+    const answerData = question.answerData;
+    const choices =
+      answerData?.kind === "mcq"
+        ? answerData.choices.map((choice, index) => ({
+            client_id: choice.id,
+            choice_text: choice.text,
+            is_correct: choice.id === answerData.correctChoiceId,
+            position: index,
+          }))
+        : answerData?.kind === "multi_select"
+          ? answerData.choices.map((choice, index) => ({
+              client_id: choice.id,
+              choice_text: choice.text,
+              is_correct: answerData.correctChoiceIds.includes(choice.id),
+              position: index,
+            }))
+          : answerData?.kind === "true_false"
+            ? [
+                { client_id: "true", choice_text: "True", is_correct: answerData.correctBoolean === true, position: 0 },
+                { client_id: "false", choice_text: "False", is_correct: answerData.correctBoolean === false, position: 1 },
+              ]
+            : [];
+    const created = await createQuestionApi({
+      category_id: categoryId,
+      title: question.title || question.text,
+      question_type: backendType,
+      difficulty: BACKEND_DIFFICULTY_MAP[question.difficulty],
+      explanation: question.explanation || null,
+      course_id: question.courseId || null,
+      answer_data_json: (question.answerData as Record<string, unknown> | undefined) ?? null,
+      points: question.points ?? 1,
+      chapter_ids: question.chapterIds || [],
+      lesson_ids: question.lessonIds || [],
+      concept_ids: question.conceptIds || [],
+      atomic_concept_ids: question.atomicConceptIds || [],
+      choices,
+    });
+
+    useTeacherQuestionStore.getState().updateQuestion(question.id, {
+      backendId: created.id,
+      backendSynced: true,
+    });
+  } catch {
+    // Leave the question as local-only; the teacher's draft isn't lost, it
+    // just won't be usable in a real quiz until sync succeeds on retry.
+  }
+}
+
 export const useTeacherQuestionStore = create<QuestionState>()(
   persist(
     (set, get) => ({
@@ -485,6 +571,7 @@ export const useTeacherQuestionStore = create<QuestionState>()(
           pendingReviewCount: 0,
         };
         set((state) => ({ questions: [question, ...state.questions] }));
+        void syncQuestionToBackend(question);
         return question;
       },
 

@@ -8,6 +8,7 @@ from app.modules.chapters.schemas import ChapterRead
 from app.modules.concepts.schemas import ConceptRead
 from app.modules.lessons.schemas import LessonRead
 from app.modules.session_blocks.schemas import SessionBlockRead
+from app.modules.sessions.models import SessionStatus
 
 
 class SessionBase(BaseModel):
@@ -20,6 +21,7 @@ class SessionBase(BaseModel):
     hide_at: datetime | None = None
     requires_previous_completion: bool = False
     is_locked: bool = False
+    status: SessionStatus = SessionStatus.draft
 
 
 class SessionCreate(BaseModel):
@@ -35,6 +37,17 @@ class SessionCreate(BaseModel):
     lesson_ids: list[UUID] = Field(default_factory=list)
     concept_ids: list[UUID] = Field(default_factory=list)
     atomic_concept_ids: list[UUID] = Field(default_factory=list)
+
+
+class SessionUpdate(BaseModel):
+    title: str | None = Field(default=None, min_length=1, max_length=200)
+    description: str | None = None
+    is_free_preview: bool | None = None
+    release_at: datetime | None = None
+    hide_at: datetime | None = None
+    requires_previous_completion: bool | None = None
+    is_locked: bool | None = None
+    status: SessionStatus | None = None
 
 
 class SessionRead(SessionBase):

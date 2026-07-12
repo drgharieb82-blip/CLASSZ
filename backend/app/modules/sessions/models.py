@@ -1,11 +1,18 @@
+import enum
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Table, Text, UniqueConstraint, func
+from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, String, Table, Text, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+
+
+class SessionStatus(str, enum.Enum):
+    draft = "draft"
+    published = "published"
+    archived = "archived"
 
 # Session <-> Academic Domain link tables. All four follow the identical
 # shape on purpose: a Session references any combination of chapters,
@@ -68,6 +75,9 @@ class Session(Base):
     hide_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     requires_previous_completion: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     is_locked: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    status: Mapped[SessionStatus] = mapped_column(
+        Enum(SessionStatus, name="session_status_enum"), nullable=False, default=SessionStatus.draft
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

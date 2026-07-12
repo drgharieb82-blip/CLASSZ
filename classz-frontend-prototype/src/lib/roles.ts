@@ -19,13 +19,19 @@ import {
 
 export type Role =
   | "student" | "teacher" | "assistant" | "parent" | "admin"
-  | "developer" | "content" | "finance" | "superadmin" | "assistant_teacher";
+  | "developer" | "finance" | "superadmin";
 
 export interface NavItem {
   label: string;
   to: string;
   icon: LucideIcon;
   children?: { label: string; to: string; icon: LucideIcon }[];
+  /** For the `assistant` role only: hides this nav item unless the
+   * logged-in assistant has been granted at least one action on this
+   * resource by one of their linked teachers. Items without this field are
+   * always shown (account-level features, not tied to a delegated
+   * resource). See `useAssistantVisibleResources` in DashboardLayout.tsx. */
+  assistantResource?: string;
 }
 
 export interface RoleConfig {
@@ -35,17 +41,19 @@ export interface RoleConfig {
   color: string;
   icon: LucideIcon;
   home: string;
+  notificationsPath?: string;
   nav: { group: string; items: NavItem[] }[];
 }
 
 export const ROLES: Record<Role, RoleConfig> = {
   student: {
     key: "student", name: "role.student", tagline: "role.studentTagline", color: "from-violet-500 to-blue-500",
-    icon: GraduationCap, home: "/student",
+    icon: GraduationCap, home: "/student", notificationsPath: "/student/notifications",
     nav: [
       { group: "nav.learning", items: [
         { label: "workspace.dashboard", to: "/student", icon: LayoutDashboard },
         { label: "workspace.myCourses", to: "/student/courses", icon: BookOpen },
+        { label: "student.assignments", to: "/student/assignments", icon: ClipboardList },
         { label: "student.smartRevision", to: "/student/revision", icon: Activity },
         { label: "student.myNotes", to: "/student/notes", icon: StickyNote },
         { label: "student.progress", to: "/student/progress", icon: BarChart3 },
@@ -61,8 +69,16 @@ export const ROLES: Record<Role, RoleConfig> = {
         { label: "student.wallet", to: "/student/wallet", icon: Wallet },
       ]},
       { group: "nav.more", items: [
-        { label: "student.aiAssistant", to: "/assistant", icon: Bot },
+        { label: "student.aiAssistant", to: "/assistant", icon: Bot, children: [
+          { label: "Chat", to: "/assistant", icon: Bot },
+          { label: "Explain Concept", to: "/assistant/explain", icon: Brain },
+          { label: "Solve Question", to: "/assistant/solve", icon: Sparkles },
+          { label: "Analyze Mistakes", to: "/assistant/analyze", icon: Activity },
+          { label: "Study Plan", to: "/assistant/study-plan", icon: CalendarDays },
+        ]},
         { label: "student.notifications", to: "/student/notifications", icon: Bell },
+        { label: "Profile", to: "/student/profile", icon: UserCog },
+        { label: "Settings", to: "/student/settings", icon: Settings },
       ]},
     ],
   },
@@ -90,6 +106,7 @@ export const ROLES: Record<Role, RoleConfig> = {
           { label: "stu.reports", to: "/teacher/students/reports", icon: FileBarChart },
         ]},
         { label: "assess.title", to: "/teacher/assessment", icon: CheckSquare, children: [
+          { label: "assess.assignments", to: "/teacher/assignments", icon: ClipboardList },
           { label: "assess.gradingQueue", to: "/teacher/assessment/grading-queue", icon: Inbox },
           { label: "assess.manualGrading", to: "/teacher/assessment/manual-grading", icon: PenTool },
           { label: "assess.submissions", to: "/teacher/assessment/submissions", icon: FileCheck },
@@ -142,32 +159,25 @@ export const ROLES: Record<Role, RoleConfig> = {
       ]},
     ],
   },
-  assistant: {
-    key: "assistant", name: "AI Assistant", tagline: "Smart study help", color: "from-fuchsia-500 to-violet-500",
-    icon: Sparkles, home: "/assistant",
-    nav: [
-      { group: "Assistant", items: [
-        { label: "Chat", to: "/assistant", icon: Bot },
-        { label: "Explain Concept", to: "/assistant/explain", icon: Brain },
-        { label: "Solve Question", to: "/assistant/solve", icon: Sparkles },
-        { label: "Analyze Mistakes", to: "/assistant/analyze", icon: Activity },
-        { label: "Study Plan", to: "/assistant/study-plan", icon: CalendarDays },
-      ]},
-    ],
-  },
   parent: {
     key: "parent", name: "role.parent", tagline: "role.parentTagline", color: "from-emerald-500 to-teal-500",
-    icon: Users, home: "/parent",
+    icon: Users, home: "/parent", notificationsPath: "/parent/notifications",
     nav: [
       { group: "", items: [
         { label: "parent.dashboard", to: "/parent", icon: LayoutDashboard },
+        { label: "parent.progress", to: "/parent/progress", icon: BarChart3 },
+        { label: "parent.attendance", to: "/parent/attendance", icon: CalendarCheck },
+        { label: "parent.homework", to: "/parent/homework", icon: ClipboardList },
+        { label: "parent.messages", to: "/parent/messages", icon: MessageSquare },
+        { label: "parent.linkChild", to: "/parent/link-child", icon: UserCheck },
+        { label: "parent.notifications", to: "/parent/notifications", icon: Bell },
         { label: "parent.settings", to: "/parent/settings", icon: Settings },
       ]},
     ],
   },
   admin: {
     key: "admin", name: "Admin", tagline: "Run the platform", color: "from-orange-500 to-amber-500",
-    icon: Shield, home: "/admin",
+    icon: Shield, home: "/admin", notificationsPath: "/admin/notifications",
     nav: [
       { group: "Overview", items: [
         { label: "Dashboard", to: "/admin", icon: LayoutDashboard },
@@ -204,23 +214,6 @@ export const ROLES: Record<Role, RoleConfig> = {
       ]},
     ],
   },
-  content: {
-    key: "content", name: "cm.roleName", tagline: "cm.roleTagline", color: "from-pink-500 to-rose-500",
-    icon: Layers, home: "/content",
-    nav: [
-      { group: "cm.content", items: [
-        { label: "cm.dashboard", to: "/content", icon: LayoutDashboard },
-        { label: "cm.questionReview", to: "/content/question-review", icon: ListChecks },
-        { label: "cm.importJobs", to: "/content/import", icon: Upload },
-        { label: "cm.mediaLibrary", to: "/content/media", icon: Image },
-      ]},
-      { group: "cm.manage", items: [
-        { label: "cm.tagsConcepts", to: "/content/tags-concepts", icon: Hash },
-        { label: "cm.publishingQueue", to: "/content/publishing-queue", icon: Send },
-        { label: "cm.reports", to: "/content/reports", icon: FileBarChart },
-      ]},
-    ],
-  },
   finance: {
     key: "finance", name: "Finance", tagline: "Money & growth", color: "from-green-500 to-emerald-500",
     icon: Wallet, home: "/finance",
@@ -237,7 +230,7 @@ export const ROLES: Record<Role, RoleConfig> = {
   },
   superadmin: {
     key: "superadmin", name: "Super Admin", tagline: "Total control", color: "from-violet-600 to-fuchsia-600",
-    icon: Globe, home: "/admin",
+    icon: Globe, home: "/admin", notificationsPath: "/admin/notifications",
     nav: [
       { group: "", items: [
         { label: "sa.platform", to: "/admin", icon: LayoutDashboard, children: [
@@ -264,22 +257,17 @@ export const ROLES: Record<Role, RoleConfig> = {
       ]},
     ],
   },
-  assistant_teacher: {
-    key: "assistant_teacher", name: "at.roleName", tagline: "at.roleTagline", color: "from-teal-500 to-cyan-500",
+  assistant: {
+    key: "assistant", name: "at.roleName", tagline: "at.roleTagline", color: "from-teal-500 to-cyan-500",
     icon: UserCheck, home: "/assistant-teacher",
     nav: [
       { group: "at.main", items: [
         { label: "at.dashboard", to: "/assistant-teacher", icon: LayoutDashboard },
-        { label: "at.studentPods", to: "/assistant-teacher/student-pods", icon: UsersRound },
-        { label: "at.gradingQueue", to: "/assistant-teacher/grading-queue", icon: Inbox },
-        { label: "at.messages", to: "/assistant-teacher/messages", icon: MessageSquare },
-        { label: "at.followUp", to: "/assistant-teacher/follow-up", icon: AlertTriangle },
-      ]},
-      { group: "at.work", items: [
-        { label: "at.tasks", to: "/assistant-teacher/tasks", icon: KanbanSquare },
-        { label: "at.notes", to: "/assistant-teacher/notes", icon: StickyNote },
-        { label: "at.schedule", to: "/assistant-teacher/schedule", icon: CalendarDays },
-        { label: "at.performance", to: "/assistant-teacher/performance", icon: BarChart3 },
+        { label: "Invitations", to: "/assistant-teacher/invitations", icon: UserCheck },
+        { label: "at.studentPods", to: "/assistant-teacher/student-pods", icon: UsersRound, assistantResource: "pods" },
+        { label: "at.gradingQueue", to: "/assistant-teacher/grading-queue", icon: Inbox, assistantResource: "grading" },
+        { label: "at.followUp", to: "/assistant-teacher/follow-up", icon: AlertTriangle, assistantResource: "students_data" },
+        { label: "at.performance", to: "/assistant-teacher/performance", icon: BarChart3, assistantResource: "students_data" },
       ]},
     ],
   },

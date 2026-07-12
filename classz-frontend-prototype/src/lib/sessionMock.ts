@@ -1,6 +1,9 @@
 import { getCourseById as getTeacherCourse } from "./teacher/teacher-course-store";
 import { getPublishedSessions as getTeacherSessions } from "./teacher/teacher-session-store";
 import { getPublishedMaterials } from "./teacher/teacher-material-store";
+import { getPublishedQuizzesForSession } from "./teacher/teacher-quiz-store";
+import { getPublishedExamsForSession } from "./teacher/teacher-exam-store";
+import { getPublishedHomeworkForSession } from "./teacher/teacher-homework-store";
 
 export type SessionItemType = "video" | "quiz" | "homework" | "attachment" | "notes" | "discussion";
 
@@ -10,6 +13,7 @@ export interface SessionItem {
   title: string;
   duration?: string;
   status: "completed" | "active" | "available" | "locked";
+  contentUrl?: string;
   // Video-specific
   videoDescription?: string;
   // Quiz-specific
@@ -295,18 +299,46 @@ function buildTeacherSessionCourse(courseId: string): SessionCourse | undefined 
   if (pubSessions.length === 0) return undefined;
 
   const sessions: Session[] = pubSessions.map((s) => {
-    const mats = getPublishedMaterials(s.id);
-    const items: SessionItem[] = mats.map((m) => ({
+    const materialItems: SessionItem[] = getPublishedMaterials(s.id).map((m) => ({
       id: m.id,
       type: (m.type === "notes" ? "notes" : m.type === "video" ? "video" : "attachment") as SessionItemType,
       title: m.title,
       duration: m.videoDuration || undefined,
       status: (s.accessStatus === "unlocked" ? "available" : "locked") as SessionItem["status"],
+      contentUrl: m.videoUrl || m.fileUrl,
       videoDescription: m.description || undefined,
       fileName: m.fileName,
       fileSize: m.fileSize,
       fileType: m.fileType,
     }));
+    const quizItems: SessionItem[] = getPublishedQuizzesForSession(s.id).map((quiz) => ({
+      id: quiz.id,
+      type: "quiz",
+      title: quiz.title,
+      status: (s.accessStatus === "unlocked" ? "available" : "locked") as SessionItem["status"],
+      questionCount: quiz.questionIds.length,
+      quizDuration: `${quiz.durationMinutes} min`,
+      passingScore: quiz.passingScorePercent,
+    }));
+    const examItems: SessionItem[] = getPublishedExamsForSession(s.id).map((exam) => ({
+      id: exam.id,
+      type: "quiz",
+      title: exam.title,
+      status: (s.accessStatus === "unlocked" ? "available" : "locked") as SessionItem["status"],
+      questionCount: exam.questionIds.length,
+      quizDuration: `${exam.durationMinutes} min`,
+      passingScore: exam.passingScorePercent,
+    }));
+    const homeworkItems: SessionItem[] = getPublishedHomeworkForSession(s.id).map((homework) => ({
+      id: homework.id,
+      type: "homework",
+      title: homework.title,
+      status: (s.accessStatus === "unlocked" ? "available" : "locked") as SessionItem["status"],
+      dueDate: homework.dueDate,
+      attemptsAllowed: 1,
+      fileName: homework.attachments[0],
+    }));
+    const items: SessionItem[] = [...materialItems, ...quizItems, ...examItems, ...homeworkItems];
     return {
       id: s.id,
       title: s.title,

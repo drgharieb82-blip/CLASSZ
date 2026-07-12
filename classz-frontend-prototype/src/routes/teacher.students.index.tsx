@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMemo } from "react";
 import {
   Users, UserPlus, TrendingUp, AlertTriangle, BarChart3, CheckCircle2,
   DollarSign, Bell, ArrowRight, Eye, UsersRound, CreditCard, FileBarChart,
@@ -12,44 +13,12 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { ROLES } from "@/lib/roles";
 import { useApp } from "@/lib/app-context";
-import { mockStudents } from "@/lib/students-mock-data";
+import { useTeacherStudentsStore, useLoadTeacherStudentsData, getMergedStudents, relativeTime } from "@/lib/teacher/teacher-students-store";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/teacher/students/")({
   component: StudentsOverview,
 });
-
-const stats = [
-  { key: "stu.totalStudents", icon: Users, value: "12", color: "text-blue-400", bg: "bg-blue-500/10" },
-  { key: "stu.activeThisWeek", icon: Activity, value: "9", color: "text-emerald-400", bg: "bg-emerald-500/10" },
-  { key: "stu.newEnrollments", icon: UserPlus, value: "3", color: "text-violet-400", bg: "bg-violet-500/10" },
-  { key: "stu.atRisk", icon: AlertTriangle, value: "3", color: "text-rose-400", bg: "bg-rose-500/10" },
-  { key: "stu.avgScore", icon: BarChart3, value: "79%", color: "text-amber-400", bg: "bg-amber-500/10" },
-  { key: "stu.completionRate", icon: CheckCircle2, value: "72%", color: "text-cyan-400", bg: "bg-cyan-500/10" },
-  { key: "stu.totalRevenue", icon: DollarSign, value: "$2,380", color: "text-green-400", bg: "bg-green-500/10" },
-  { key: "stu.parentAlerts", icon: Bell, value: "2", color: "text-orange-400", bg: "bg-orange-500/10" },
-];
-
-const quickActions = [
-  { key: "stu.allStudents", icon: Users, to: "/teacher/students/all" },
-  { key: "stu.pods", icon: UsersRound, to: "/teacher/students/pods" },
-  { key: "stu.payments", icon: CreditCard, to: "/teacher/students/payments" },
-  { key: "stu.reports", icon: FileBarChart, to: "/teacher/students/reports" },
-];
-
-const recentActivity = [
-  { id: 1, student: "Aya Mansour", action: "Completed Session 14", time: "2 hours ago", type: "progress" },
-  { id: 2, student: "Karim Adel", action: "Failed Quiz: Derivatives", time: "3 hours ago", type: "risk" },
-  { id: 3, student: "Tamer Gamal", action: "Submitted Homework Ch.7", time: "5 hours ago", type: "homework" },
-  { id: 4, student: "Ali Shaker", action: "Missed 3rd consecutive session", time: "1 day ago", type: "risk" },
-  { id: 5, student: "Lina Fares", action: "Scored 98% on Mid-term", time: "1 day ago", type: "progress" },
-];
-
-const activityTypeColors: Record<string, string> = {
-  progress: "bg-emerald-500/10 text-emerald-500",
-  risk: "bg-rose-500/10 text-rose-500",
-  homework: "bg-blue-500/10 text-blue-500",
-};
 
 const riskColorMap: Record<string, string> = {
   high: "border-rose-300 text-rose-600 bg-rose-500/10",
@@ -60,8 +29,61 @@ const riskColorMap: Record<string, string> = {
 
 function StudentsOverview() {
   const { t } = useApp();
-  const topStudents = [...mockStudents].sort((a, b) => b.progress - a.progress).slice(0, 3);
-  const atRiskStudents = mockStudents.filter((s) => s.riskLevel !== "none").slice(0, 3);
+  useLoadTeacherStudentsData();
+  const reports = useTeacherStudentsStore((s) => s.reports);
+  const wrongQuestions = useTeacherStudentsStore((s) => s.wrongQuestions);
+  const parents = useTeacherStudentsStore((s) => s.parents);
+  const roster = useTeacherStudentsStore((s) => s.roster);
+  const progress = useTeacherStudentsStore((s) => s.progress);
+  const atRisk = useTeacherStudentsStore((s) => s.atRisk);
+  const transactions = useTeacherStudentsStore((s) => s.transactions);
+  const students = useMemo(() => getMergedStudents(), [roster, progress, atRisk, parents, transactions]);
+
+  const totalStudents = students.length;
+  const activeThisWeek = students.filter((s) => s.status === "active").length;
+  const newEnrollments = students.filter((s) => s.status === "new").length;
+  const atRiskCount = students.filter((s) => s.riskLevel !== "none").length;
+  const avgScore = totalStudents ? Math.round(students.reduce((sum, s) => sum + s.avgScore, 0) / totalStudents) : 0;
+  const completionRate = totalStudents ? Math.round(students.reduce((sum, s) => sum + s.progress, 0) / totalStudents) : 0;
+  const totalRevenue = reports.reduce((sum, r) => sum + r.total_revenue, 0);
+  const parentAlerts = parents.filter((p) => p.alert_status === "urgent" || p.alert_status === "sent").length;
+
+  const stats = [
+    { key: "stu.totalStudents", icon: Users, value: String(totalStudents), color: "text-blue-400", bg: "bg-blue-500/10" },
+    { key: "stu.activeThisWeek", icon: Activity, value: String(activeThisWeek), color: "text-emerald-400", bg: "bg-emerald-500/10" },
+    { key: "stu.newEnrollments", icon: UserPlus, value: String(newEnrollments), color: "text-violet-400", bg: "bg-violet-500/10" },
+    { key: "stu.atRisk", icon: AlertTriangle, value: String(atRiskCount), color: "text-rose-400", bg: "bg-rose-500/10" },
+    { key: "stu.avgScore", icon: BarChart3, value: `${avgScore}%`, color: "text-amber-400", bg: "bg-amber-500/10" },
+    { key: "stu.completionRate", icon: CheckCircle2, value: `${completionRate}%`, color: "text-cyan-400", bg: "bg-cyan-500/10" },
+    { key: "stu.totalRevenue", icon: DollarSign, value: `$${totalRevenue.toFixed(0)}`, color: "text-green-400", bg: "bg-green-500/10" },
+    { key: "stu.parentAlerts", icon: Bell, value: String(parentAlerts), color: "text-orange-400", bg: "bg-orange-500/10" },
+  ];
+
+  const quickActions = [
+    { key: "stu.allStudents", icon: Users, to: "/teacher/students/all" },
+    { key: "stu.pods", icon: UsersRound, to: "/teacher/students/pods" },
+    { key: "stu.payments", icon: CreditCard, to: "/teacher/students/payments" },
+    { key: "stu.reports", icon: FileBarChart, to: "/teacher/students/reports" },
+  ];
+
+  const topStudents = [...students].sort((a, b) => b.progress - a.progress).slice(0, 3);
+  const atRiskStudents = students.filter((s) => s.riskLevel !== "none").slice(0, 3);
+
+  const recentActivity = useMemo(() => {
+    const fromProgress = students
+      .filter((s) => s.lastActivityAt)
+      .map((s) => ({ id: `p-${s.id}`, student: s.name, action: `Progress ${s.progress}%`, at: s.lastActivityAt!, type: "progress" as const }));
+    const fromWrong = wrongQuestions
+      .filter((w) => w.last_wrong_at)
+      .map((w) => ({ id: `w-${w.student_id}-${w.question_id}`, student: w.full_name, action: `Missed: ${w.question_title}`, at: w.last_wrong_at!, type: "risk" as const }));
+    return [...fromProgress, ...fromWrong].sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime()).slice(0, 5);
+  }, [students, wrongQuestions]);
+
+  const activityTypeColors: Record<string, string> = {
+    progress: "bg-emerald-500/10 text-emerald-500",
+    risk: "bg-rose-500/10 text-rose-500",
+    homework: "bg-blue-500/10 text-blue-500",
+  };
 
   return (
     <DashPage
@@ -113,6 +135,7 @@ function StudentsOverview() {
             <h3 className="font-semibold">{t("stu.recentActivity")}</h3>
           </div>
           <div className="mt-4 space-y-3">
+            {recentActivity.length === 0 && <p className="text-sm text-muted-foreground">No recent activity yet.</p>}
             {recentActivity.map((item) => (
               <div key={item.id} className="flex items-start gap-3">
                 <Avatar className="mt-0.5 h-8 w-8 shrink-0">
@@ -129,7 +152,7 @@ function StudentsOverview() {
                   </div>
                   <p className="text-xs text-muted-foreground">{item.action}</p>
                   <p className="mt-0.5 text-[10px] text-muted-foreground/70">
-                    <Clock className="inline h-3 w-3 me-0.5" />{item.time}
+                    <Clock className="inline h-3 w-3 me-0.5" />{relativeTime(item.at)}
                   </p>
                 </div>
               </div>
@@ -151,6 +174,7 @@ function StudentsOverview() {
             </Link>
           </div>
           <div className="mt-4 space-y-3">
+            {topStudents.length === 0 && <p className="text-sm text-muted-foreground">No students yet.</p>}
             {topStudents.map((s, idx) => (
               <div key={s.id} className="flex items-center gap-3 rounded-xl border p-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
@@ -186,6 +210,7 @@ function StudentsOverview() {
             </Link>
           </div>
           <div className="mt-4 space-y-3">
+            {atRiskStudents.length === 0 && <p className="text-sm text-muted-foreground">No at-risk students right now.</p>}
             {atRiskStudents.map((s) => (
               <div key={s.id} className="flex items-center gap-3 rounded-xl border border-rose-500/20 p-3">
                 <Avatar className="h-9 w-9">
@@ -210,7 +235,7 @@ function StudentsOverview() {
                 </div>
                 <div className="text-end shrink-0">
                   <p className="text-sm font-bold text-rose-500">{s.avgScore}%</p>
-                  <p className="text-[10px] text-muted-foreground">{s.lastLogin}</p>
+                  <p className="text-[10px] text-muted-foreground">{relativeTime(s.lastActivityAt)}</p>
                 </div>
               </div>
             ))}

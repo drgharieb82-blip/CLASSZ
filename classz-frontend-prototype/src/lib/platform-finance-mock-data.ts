@@ -231,7 +231,7 @@ export const platformInvoices: PlatformInvoice[] = [
   { id: "INV-20005", relatedUser: "CLASSZ Platform", userType: "platform", academy: "-", amount: 24_500, tax: 3_675, status: "issued", date: "2026-06-01" },
   { id: "INV-20006", relatedUser: "Mr. Tarek Mostafa", userType: "teacher", academy: "Physics Pro", amount: 99, tax: 14.85, status: "overdue", date: "2026-05-20" },
   { id: "INV-20007", relatedUser: "Lina Fares", userType: "student", academy: "Physics Pro", amount: 250, tax: 37.5, status: "paid", date: "2026-06-23" },
-  { id: "INV-20008", relatedUser: "Ms. Dina Farouk", userType: "teacher", academy: "Chemistry World", amount: 49, tax: 7.35, status: "pending", date: "2026-06-05" },
+  { id: "INV-20008", relatedUser: "Ms. Dina Farouk", userType: "teacher", academy: "Chemistry World", amount: 49, tax: 7.35, status: "issued", date: "2026-06-05" },
   { id: "INV-20009", relatedUser: "CLASSZ Platform", userType: "platform", academy: "-", amount: 48_000, tax: 7_200, status: "paid", date: "2026-05-01" },
   { id: "INV-20010", relatedUser: "Mohamed Sami", userType: "student", academy: "Bio Academy", amount: 30, tax: 4.5, status: "cancelled", date: "2026-06-19" },
 ];

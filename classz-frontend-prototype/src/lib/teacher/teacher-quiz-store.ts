@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { addQuizQuestion as addQuizQuestionApi, createQuiz as createQuizApi } from "@/lib/api/quizzes";
+import { useTeacherQuestionStore } from "@/lib/teacher/teacher-question-store";
 
 export type QuizType = "practice" | "session_quiz" | "revision" | "homework_quiz" | "checkpoint" | "exam_prep" | "standalone";
 export type QuizStatus = "draft" | "published" | "archived";
@@ -31,6 +33,11 @@ export interface TeacherQuiz {
   visibility: QuizVisibility;
   createdAt: string;
   updatedAt: string;
+
+  // Backend sync — attemptLimit/shuffle*/xpReward/showAnswers* etc have no
+  // backend column and stay local-only, same as the other teacher stores.
+  backendId?: string;
+  backendSynced?: boolean;
 }
 
 export type CreateQuizData = Pick<TeacherQuiz,
@@ -58,6 +65,45 @@ function generateId(): string {
 function generateCode(): string {
   codeCounter++;
   return `QZ-26-${codeCounter.toString().padStart(4, "0")}`;
+}
+
+/** Best-effort backend sync for a batch of question ids: only questions
+ * already synced to the backend (see teacher-question-store.ts) can be
+ * attached to a real quiz — unsynced/unsupported-type questions are skipped
+ * silently rather than blocking quiz creation. */
+async function syncQuizQuestionsToBackend(quizBackendId: string, questionIds: string[]): Promise<void> {
+  const questionState = useTeacherQuestionStore.getState();
+  for (const [index, questionId] of questionIds.entries()) {
+    const question = questionState.questions.find((q) => q.id === questionId);
+    if (!question?.backendId) continue;
+    try {
+      await addQuizQuestionApi(quizBackendId, { question_id: question.backendId, position: index });
+    } catch {
+      // Skip — the question may already be attached, or the quiz/question
+      // ownership check rejected it; the local quiz state is unaffected.
+    }
+  }
+}
+
+async function syncQuizToBackend(quiz: TeacherQuiz): Promise<void> {
+  try {
+    const created = await createQuizApi({
+      title: quiz.title,
+      description: quiz.description || null,
+      course_id: quiz.courseId,
+      chapter_id: quiz.chapterIds[0] ?? null,
+      session_id: quiz.sessionIds[0] ?? null,
+      duration_minutes: quiz.durationMinutes,
+      passing_score: quiz.passingScorePercent,
+      is_published: quiz.status === "published",
+    });
+    useTeacherQuizStore.getState().updateQuiz(quiz.id, { backendId: created.id, backendSynced: true });
+    if (quiz.questionIds.length > 0) {
+      await syncQuizQuestionsToBackend(created.id, quiz.questionIds);
+    }
+  } catch {
+    // Leave the quiz as local-only; the teacher's draft isn't lost.
+  }
 }
 
 export const useTeacherQuizStore = create<QuizState>()(
@@ -95,15 +141,21 @@ export const useTeacherQuizStore = create<QuizState>()(
           updatedAt: now,
         };
         set((state) => ({ quizzes: [quiz, ...state.quizzes] }));
+        void syncQuizToBackend(quiz);
         return quiz;
       },
 
       updateQuiz: (quizId, data) => {
+        const before = get().quizzes.find((q) => q.id === quizId);
         set((state) => ({
           quizzes: state.quizzes.map((q) =>
             q.id === quizId ? { ...q, ...data, updatedAt: new Date().toISOString() } : q,
           ),
         }));
+        if (before?.backendId && data.questionIds) {
+          const newIds = data.questionIds.filter((id) => !before.questionIds.includes(id));
+          if (newIds.length > 0) void syncQuizQuestionsToBackend(before.backendId, newIds);
+        }
       },
 
       deleteQuiz: (quizId) => {

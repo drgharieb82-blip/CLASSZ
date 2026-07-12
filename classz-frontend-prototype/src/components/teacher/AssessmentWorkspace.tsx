@@ -23,7 +23,8 @@ import {
   type TeacherAssessment,
 } from "@/lib/teacher/teacher-assessment-store";
 import { useTeacherChapterStore } from "@/lib/teacher/teacher-chapter-store";
-import { useContentTreeStore } from "@/lib/teacher/content-tree-store";
+import { useTeacherConceptStore } from "@/lib/teacher/teacher-concept-store";
+import { useTeacherAtomicConceptStore } from "@/lib/teacher/teacher-atomic-concept-store";
 import { useTeacherCourseStore } from "@/lib/teacher/teacher-course-store";
 import { useTeacherLessonStore } from "@/lib/teacher/teacher-lesson-store";
 import { useTeacherQuestionStore } from "@/lib/teacher/teacher-question-store";
@@ -259,9 +260,14 @@ export function AssessmentWorkspace({
   const unlinkQuestionFromAssessment = useTeacherQuestionStore((state) => state.unlinkQuestionFromAssessment);
   const courses = useTeacherCourseStore((state) => state.courses);
   const chapters = useTeacherChapterStore((state) => state.chapters);
+  const loadChapters = useTeacherChapterStore((state) => state.loadChapters);
   const lessons = useTeacherLessonStore((state) => state.lessons);
+  const loadLessons = useTeacherLessonStore((state) => state.loadLessons);
+  const concepts = useTeacherConceptStore((state) => state.concepts);
+  const loadConcepts = useTeacherConceptStore((state) => state.loadConcepts);
+  const atomicConcepts = useTeacherAtomicConceptStore((state) => state.atomicConcepts);
+  const loadAtomicConcepts = useTeacherAtomicConceptStore((state) => state.loadAtomicConcepts);
   const sessions = useTeacherSessionStore((state) => state.sessions);
-  const treeNodes = useContentTreeStore((state) => state.nodes);
   const existingAssessment = assessments.find((assessment) => assessment.id === assessmentId);
 
   const [activeStep, setActiveStep] = useState<(typeof ASSESSMENT_CREATE_STEPS)[number]>("Type");
@@ -276,6 +282,26 @@ export function AssessmentWorkspace({
     buildAcademicRowsFromDraft(existingAssessment ? buildDraftFromAssessment(existingAssessment) : buildTemplateDraft(template, defaultCourseId)),
   );
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Lazily cascade the Academic Linking dropdowns: load lessons/concepts/atomic
+  // concepts only for whatever chapter/lesson/concept is currently selected in
+  // any row, rather than eagerly loading the whole course tree.
+  const selectedCourseIds = academicRows.map((row) => row.courseId).filter(Boolean).join(",");
+  const selectedChapterIds = academicRows.map((row) => row.chapterId).filter(Boolean).join(",");
+  const selectedLessonIds = academicRows.map((row) => row.lessonId).filter(Boolean).join(",");
+  const selectedConceptIds = academicRows.map((row) => row.conceptId).filter(Boolean).join(",");
+  useEffect(() => {
+    for (const courseId of selectedCourseIds ? selectedCourseIds.split(",") : []) loadChapters(courseId);
+  }, [selectedCourseIds]);
+  useEffect(() => {
+    for (const chapterId of selectedChapterIds ? selectedChapterIds.split(",") : []) loadLessons(chapterId);
+  }, [selectedChapterIds]);
+  useEffect(() => {
+    for (const lessonId of selectedLessonIds ? selectedLessonIds.split(",") : []) loadConcepts(lessonId);
+  }, [selectedLessonIds]);
+  useEffect(() => {
+    for (const conceptId of selectedConceptIds ? selectedConceptIds.split(",") : []) loadAtomicConcepts(conceptId);
+  }, [selectedConceptIds]);
 
   useEffect(() => {
     if (existingAssessment) {
@@ -1134,13 +1160,13 @@ export function AssessmentWorkspace({
                     ? chapters.filter((chapter) => chapter.courseId === row.courseId)
                     : [];
                   const rowLessons = row.chapterId
-                    ? lessons.filter((lesson) => lesson.chapterIds.includes(row.chapterId))
+                    ? lessons.filter((lesson) => lesson.chapterId === row.chapterId)
                     : [];
                   const rowConcepts = row.lessonId
-                    ? treeNodes.filter((node) => node.type === "concept" && node.parentId === row.lessonId)
+                    ? concepts.filter((concept) => concept.lessonId === row.lessonId)
                     : [];
                   const rowAtomicConcepts = row.conceptId
-                    ? treeNodes.filter((node) => node.type === "atomic_concept" && node.parentId === row.conceptId)
+                    ? atomicConcepts.filter((atomicConcept) => atomicConcept.conceptId === row.conceptId)
                     : [];
                   const rowSessions = row.courseId
                     ? sessions.filter(

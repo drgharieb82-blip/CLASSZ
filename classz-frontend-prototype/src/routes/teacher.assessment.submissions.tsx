@@ -1,12 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
-  FileCheck, Search, Filter, Download, ArrowUpDown,
+  FileCheck, Search, Filter, ArrowUpDown, Loader2,
 } from "lucide-react";
 import { DashPage } from "@/components/common/DashPage";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -14,12 +13,32 @@ import {
 } from "@/components/ui/table";
 import { ROLES } from "@/lib/roles";
 import { useApp } from "@/lib/app-context";
-import { submissionRecords } from "@/lib/assessment-mock-data";
+import { useAuthStore } from "@/lib/stores/auth-store";
+import { useTeacherCourseStore } from "@/lib/teacher/teacher-course-store";
+import { listAllGrades } from "@/lib/api/grading";
+import { listAssignments } from "@/lib/api/assignments";
+import { listQuizzes } from "@/lib/api/quizzes";
+import { listQuizSubmissions } from "@/lib/api/quiz-attempts";
+import { getQuizResult } from "@/lib/api/results";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/teacher/assessment/submissions")({
   component: SubmissionsPage,
 });
+
+interface SubmissionRow {
+  id: string;
+  studentId: string;
+  course: string;
+  assessment: string;
+  type: "quiz" | "homework" | "essay";
+  submittedAt: string;
+  score: number | null;
+  maxScore: number;
+  status: "graded" | "pending" | "returned";
+  attempts: number;
+  grader: string;
+}
 
 const statusColors: Record<string, string> = {
   pending: "border-amber-300 text-amber-600 bg-amber-500/10",
@@ -29,20 +48,93 @@ const statusColors: Record<string, string> = {
 
 const typeColors: Record<string, string> = {
   quiz: "border-blue-300 text-blue-600 bg-blue-500/10",
-  exam: "border-violet-300 text-violet-600 bg-violet-500/10",
   homework: "border-amber-300 text-amber-600 bg-amber-500/10",
   essay: "border-pink-300 text-pink-600 bg-pink-500/10",
-  practice: "border-cyan-300 text-cyan-600 bg-cyan-500/10",
 };
 
 const typeLabels: Record<string, string> = {
-  quiz: "Quiz", exam: "Exam", homework: "Homework", essay: "Essay", practice: "Practice",
+  quiz: "Quiz", homework: "Homework", essay: "Essay",
 };
 
-type SortKey = "studentName" | "submittedAt" | "score" | "attempts";
+type SortKey = "studentId" | "submittedAt" | "score" | "attempts";
+
+/** Builds the submissions log from two independent real sources:
+ * (1) manual grades (essay questions + assignment/homework submissions),
+ * (2) auto-graded quiz attempts (one row per student per quiz, the latest
+ * submitted attempt). There is no single backend endpoint for this — it's
+ * assembled client-side, same pattern as teacher-students-store.ts. */
+async function loadSubmissions(courseIds: string[], courseTitleById: Map<string, string>): Promise<SubmissionRow[]> {
+  const rows: SubmissionRow[] = [];
+
+  const [grades, assignments, quizzes] = await Promise.all([
+    listAllGrades().catch(() => []),
+    listAssignments().catch(() => []),
+    listQuizzes().catch(() => []),
+  ]);
+
+  const assignmentById = new Map(assignments.map((a) => [a.id, a]));
+
+  for (const grade of grades) {
+    const isAssignment = grade.assignment_submission !== null;
+    const assignment = isAssignment ? assignmentById.get(grade.assignment_submission!.assignment_id) : undefined;
+    if (assignment && !courseIds.includes(assignment.course_id)) continue;
+
+    rows.push({
+      id: grade.id,
+      studentId: grade.student_id,
+      course: assignment ? (courseTitleById.get(assignment.course_id) ?? "—") : "—",
+      assessment: assignment?.title ?? (isAssignment ? "Assignment submission" : "Essay question"),
+      type: isAssignment ? "homework" : "essay",
+      submittedAt: grade.assignment_submission?.submitted_at ?? "—",
+      score: grade.status === "PENDING" ? null : grade.score,
+      maxScore: grade.max_score,
+      status: grade.status.toLowerCase() as SubmissionRow["status"],
+      attempts: 1,
+      grader: grade.status === "PENDING" ? "—" : "Manual",
+    });
+  }
+
+  const relevantQuizzes = quizzes.filter((q) => courseIds.includes(q.course_id));
+  for (const quiz of relevantQuizzes) {
+    const attempts = await listQuizSubmissions(quiz.id).catch(() => []);
+    const latestByStudent = new Map<string, (typeof attempts)[number]>();
+    for (const attempt of attempts) {
+      if (attempt.status !== "SUBMITTED") continue;
+      const current = latestByStudent.get(attempt.student_id);
+      if (!current || attempt.attempt_number > current.attempt_number) {
+        latestByStudent.set(attempt.student_id, attempt);
+      }
+    }
+
+    for (const attempt of latestByStudent.values()) {
+      const result = await getQuizResult(attempt.id).catch(() => null);
+      rows.push({
+        id: attempt.id,
+        studentId: attempt.student_id,
+        course: courseTitleById.get(quiz.course_id) ?? "—",
+        assessment: quiz.title,
+        type: "quiz",
+        submittedAt: attempt.submitted_at ?? "—",
+        score: result?.score ?? null,
+        maxScore: result?.max_score ?? 0,
+        status: result ? "graded" : "pending",
+        attempts: attempt.attempt_number,
+        grader: "Auto",
+      });
+    }
+  }
+
+  return rows;
+}
 
 function SubmissionsPage() {
   const { t } = useApp();
+  const user = useAuthStore((s) => s.user);
+  const teacherCourses = useTeacherCourseStore((s) => s.courses);
+  const loadCourses = useTeacherCourseStore((s) => s.loadCourses);
+
+  const [submissions, setSubmissions] = useState<SubmissionRow[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
@@ -50,14 +142,33 @@ function SubmissionsPage() {
   const [sortBy, setSortBy] = useState<SortKey>("submittedAt");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
-  const courses = useMemo(() => Array.from(new Set(submissionRecords.map((s) => s.course))), []);
+  useEffect(() => {
+    if (user?.id) void loadCourses(user.id);
+  }, [user?.id, loadCourses]);
+
+  useEffect(() => {
+    if (teacherCourses.length === 0) {
+      setSubmissions([]);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    const courseIds = teacherCourses.map((c) => c.id);
+    const courseTitleById = new Map(teacherCourses.map((c) => [c.id, c.title]));
+    loadSubmissions(courseIds, courseTitleById)
+      .then(setSubmissions)
+      .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [teacherCourses.map((c) => c.id).join(",")]);
+
+  const courses = useMemo(() => Array.from(new Set(submissions.map((s) => s.course))), [submissions]);
 
   const filtered = useMemo(() => {
-    let items = [...submissionRecords];
+    let items = [...submissions];
     if (search) {
       const q = search.toLowerCase();
       items = items.filter((i) =>
-        i.studentName.toLowerCase().includes(q) ||
+        i.studentId.toLowerCase().includes(q) ||
         i.assessment.toLowerCase().includes(q) ||
         i.course.toLowerCase().includes(q)
       );
@@ -68,14 +179,14 @@ function SubmissionsPage() {
 
     items.sort((a, b) => {
       let cmp = 0;
-      if (sortBy === "score") cmp = (a.score / a.maxScore) - (b.score / b.maxScore);
+      if (sortBy === "score") cmp = (a.score ?? -1) / (a.maxScore || 1) - (b.score ?? -1) / (b.maxScore || 1);
       else if (sortBy === "attempts") cmp = a.attempts - b.attempts;
       else if (sortBy === "submittedAt") cmp = a.submittedAt.localeCompare(b.submittedAt);
-      else cmp = a.studentName.localeCompare(b.studentName);
+      else cmp = a.studentId.localeCompare(b.studentId);
       return sortOrder === "asc" ? cmp : -cmp;
     });
     return items;
-  }, [search, filterType, filterStatus, filterCourse, sortBy, sortOrder]);
+  }, [submissions, search, filterType, filterStatus, filterCourse, sortBy, sortOrder]);
 
   const handleSort = (key: SortKey) => {
     if (sortBy === key) setSortOrder((o) => o === "asc" ? "desc" : "asc");
@@ -120,10 +231,8 @@ function SubmissionsPage() {
             >
               <option value="all">{t("assess.type")}: {t("assess.all")}</option>
               <option value="quiz">Quiz</option>
-              <option value="exam">Exam</option>
               <option value="homework">Homework</option>
               <option value="essay">Essay</option>
-              <option value="practice">Practice</option>
             </select>
             <select
               value={filterStatus}
@@ -146,7 +255,7 @@ function SubmissionsPage() {
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/30">
-                <TableHead><SortHeader label={t("assess.student")} sortKey="studentName" /></TableHead>
+                <TableHead><SortHeader label={t("assess.student")} sortKey="studentId" /></TableHead>
                 <TableHead className="font-semibold">{t("assess.course")}</TableHead>
                 <TableHead className="font-semibold">{t("assess.assessment")}</TableHead>
                 <TableHead className="font-semibold">{t("assess.type")}</TableHead>
@@ -158,7 +267,16 @@ function SubmissionsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.length === 0 ? (
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center py-12">
+                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                      <p className="text-sm">Loading submissions...</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : filtered.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center py-12">
                     <div className="flex flex-col items-center gap-2 text-muted-foreground">
@@ -169,13 +287,12 @@ function SubmissionsPage() {
                 </TableRow>
               ) : (
                 filtered.map((sub) => {
-                  const pct = Math.round((sub.score / sub.maxScore) * 100);
+                  const pct = sub.score != null && sub.maxScore > 0 ? Math.round((sub.score / sub.maxScore) * 100) : null;
                   return (
                     <TableRow key={sub.id} className="hover:bg-accent/50">
                       <TableCell>
                         <div>
-                          <p className="text-sm font-medium">{sub.studentName}</p>
-                          <p className="text-xs text-muted-foreground">{sub.studentId}</p>
+                          <p className="text-sm font-medium">Student {sub.studentId.slice(0, 8)}</p>
                         </div>
                       </TableCell>
                       <TableCell className="text-sm">{sub.course}</TableCell>
@@ -189,12 +306,16 @@ function SubmissionsPage() {
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{sub.submittedAt}</TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2 min-w-[120px]">
-                          <Progress value={pct} className={cn("h-1.5 flex-1", pct < 50 ? "[&>div]:bg-rose-500" : pct < 70 ? "[&>div]:bg-amber-500" : "[&>div]:bg-emerald-500")} />
-                          <span className={cn("text-sm font-semibold tabular-nums whitespace-nowrap", pct < 50 ? "text-rose-500" : pct < 70 ? "text-amber-500" : "text-emerald-500")}>
-                            {sub.score}/{sub.maxScore}
-                          </span>
-                        </div>
+                        {pct == null ? (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        ) : (
+                          <div className="flex items-center gap-2 min-w-[120px]">
+                            <Progress value={pct} className={cn("h-1.5 flex-1", pct < 50 ? "[&>div]:bg-rose-500" : pct < 70 ? "[&>div]:bg-amber-500" : "[&>div]:bg-emerald-500")} />
+                            <span className={cn("text-sm font-semibold tabular-nums whitespace-nowrap", pct < 50 ? "text-rose-500" : pct < 70 ? "text-amber-500" : "text-emerald-500")}>
+                              {sub.score}/{sub.maxScore}
+                            </span>
+                          </div>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className={cn("rounded-full text-xs", statusColors[sub.status])}>

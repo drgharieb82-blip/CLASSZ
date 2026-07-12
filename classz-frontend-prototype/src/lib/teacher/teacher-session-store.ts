@@ -2,8 +2,15 @@ import { create } from "zustand";
 import {
   createSession as createSessionApi,
   listSessions as listSessionsApi,
+  updateSession as updateSessionApi,
+  deleteSession as deleteSessionApi,
   type SessionRead as ApiSessionRead,
 } from "@/lib/api/sessions";
+import { ApiError } from "@/lib/api/client";
+
+function isNotFound(err: unknown): boolean {
+  return err instanceof ApiError && err.status === 404;
+}
 
 export type SessionStatus = "draft" | "published" | "archived";
 export type AccessStatus = "locked" | "unlocked" | "scheduled";
@@ -66,8 +73,8 @@ interface SessionState {
   isLoading: boolean;
   createSession: (data: CreateSessionData) => Promise<TeacherSession | null>;
   loadSessions: (courseId: string) => Promise<void>;
-  updateSession: (sessionId: string, data: Partial<TeacherSession>) => void;
-  deleteSession: (sessionId: string) => void;
+  updateSession: (sessionId: string, data: Partial<TeacherSession>) => Promise<boolean>;
+  deleteSession: (sessionId: string) => Promise<boolean>;
   publishSession: (sessionId: string) => void;
   lockSession: (sessionId: string) => void;
   unlockSession: (sessionId: string) => void;
@@ -87,7 +94,7 @@ function toSession(r: ApiSessionRead): TeacherSession {
     order: r.position + 1,
     price: 0,
     currency: "USD",
-    status: "draft",
+    status: r.status,
     accessStatus: r.is_locked ? "locked" : "unlocked",
     openAt: r.release_at || "",
     closeAt: r.hide_at || "",
@@ -153,32 +160,57 @@ export const useTeacherSessionStore = create<SessionState>()((set, get) => ({
     }
   },
 
-  updateSession: (sessionId, data) => {
+  updateSession: async (sessionId, data) => {
+    const hasRealChange = data.title !== undefined || data.description !== undefined ||
+      data.status !== undefined || data.accessStatus !== undefined ||
+      data.isFreePreview !== undefined || data.openAt !== undefined || data.closeAt !== undefined;
+    if (hasRealChange) {
+      try {
+        await updateSessionApi(sessionId, {
+          title: data.title,
+          description: data.description,
+          status: data.status,
+          is_locked: data.accessStatus === undefined ? undefined : data.accessStatus === "locked",
+          is_free_preview: data.isFreePreview,
+          release_at: data.openAt,
+          hide_at: data.closeAt,
+        });
+      } catch (err) {
+        if (!isNotFound(err)) return false;
+      }
+    }
     set((state) => ({
       sessions: state.sessions.map((s) =>
         s.id === sessionId ? { ...s, ...data, updatedAt: new Date().toISOString() } : s,
       ),
     }));
+    return true;
   },
 
-  deleteSession: (sessionId) => {
+  deleteSession: async (sessionId) => {
+    try {
+      await deleteSessionApi(sessionId);
+    } catch (err) {
+      if (!isNotFound(err)) return false;
+    }
     set((state) => ({ sessions: state.sessions.filter((s) => s.id !== sessionId) }));
+    return true;
   },
 
   publishSession: (sessionId) => {
-    get().updateSession(sessionId, { status: "published" });
+    void get().updateSession(sessionId, { status: "published" });
   },
 
   lockSession: (sessionId) => {
-    get().updateSession(sessionId, { accessStatus: "locked" });
+    void get().updateSession(sessionId, { accessStatus: "locked" });
   },
 
   unlockSession: (sessionId) => {
-    get().updateSession(sessionId, { accessStatus: "unlocked" });
+    void get().updateSession(sessionId, { accessStatus: "unlocked" });
   },
 
   archiveSession: (sessionId) => {
-    get().updateSession(sessionId, { status: "archived" });
+    void get().updateSession(sessionId, { status: "archived" });
   },
 
   reorderSessions: (chapterId, orderedIds) => {

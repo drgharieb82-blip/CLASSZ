@@ -17,8 +17,6 @@ class Role(str, enum.Enum):
     STUDENT = "student"
     PARENT = "parent"
     DEVELOPER = "developer"
-    CONTENT_MANAGER = "content_manager"
-    CONTENT_AUTHOR = "content_author"
     FINANCE = "finance"
 
 

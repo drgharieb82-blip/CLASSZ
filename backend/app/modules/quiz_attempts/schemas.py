@@ -10,7 +10,6 @@ from app.modules.quizzes.schemas import QuizRead
 
 class QuizAttemptStart(BaseModel):
     quiz_id: UUID
-    student_id: UUID
     time_limit_minutes: int | None = Field(default=None, ge=1)
     ip_address: str | None = None
     user_agent: str | None = None

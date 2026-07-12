@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { createAssignment as createAssignmentApi } from "@/lib/api/assignments";
 
 export type HomeworkType = "worksheet" | "essay" | "file_upload" | "mixed";
 export type HomeworkStatus = "draft" | "published" | "archived";
@@ -23,6 +24,12 @@ export interface TeacherHomework {
   visibility: "public" | "enrolled_only" | "private";
   createdAt: string;
   updatedAt: string;
+
+  // Backend sync — homework reuses the assignments backend module
+  // (question_bank has no dedicated "homework" concept); homeworkType/
+  // xpReward/visibility have no backend column and stay local-only.
+  backendId?: string;
+  backendSynced?: boolean;
 }
 
 export type CreateHomeworkData = Pick<TeacherHomework, "title" | "courseId" | "homeworkType"> &
@@ -43,6 +50,27 @@ interface HomeworkState {
   detachFromSession: (hwId: string, sessionId: string) => void;
 }
 
+async function syncHomeworkToBackend(homework: TeacherHomework): Promise<void> {
+  try {
+    const created = await createAssignmentApi({
+      title: homework.title,
+      description: homework.description || null,
+      course_id: homework.courseId,
+      chapter_id: homework.chapterIds[0] ?? null,
+      session_id: homework.sessionIds[0] ?? null,
+      deadline_at: homework.dueDate ? new Date(homework.dueDate).toISOString() : null,
+      max_points: homework.maxScore,
+      allow_multiple_submissions: homework.allowLateSubmission,
+    });
+    useTeacherHomeworkStore.getState().updateHomework(homework.id, {
+      backendId: created.id,
+      backendSynced: true,
+    });
+  } catch {
+    // Leave the homework as local-only; the teacher's draft isn't lost.
+  }
+}
+
 export const useTeacherHomeworkStore = create<HomeworkState>()(
   persist(
     (set, get) => ({
@@ -59,6 +87,7 @@ export const useTeacherHomeworkStore = create<HomeworkState>()(
           createdAt: now, updatedAt: now,
         };
         set((s) => ({ items: [hw, ...s.items] }));
+        void syncHomeworkToBackend(hw);
         return hw;
       },
       updateHomework: (id, d) => set((s) => ({ items: s.items.map((h) => h.id === id ? { ...h, ...d, updatedAt: new Date().toISOString() } : h) })),
