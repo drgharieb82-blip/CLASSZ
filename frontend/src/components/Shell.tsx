@@ -9,16 +9,21 @@ type ShellProps = {
   title: string;
   roleLabel: string;
   accent: string;
+  navItems?: Array<{
+    labelKey: string;
+    href: string;
+    icon: typeof LayoutDashboard;
+  }>;
 };
 
-const navItems = [
+const defaultNavItems = [
   { labelKey: "nav.dashboard", href: "/", icon: LayoutDashboard },
   { labelKey: "nav.courses", href: "/courses", icon: BookOpen },
   { labelKey: "nav.people", href: "/people", icon: Users },
   { labelKey: "nav.learning", href: "/learning", icon: GraduationCap },
 ];
 
-export function Shell({ title, roleLabel, accent }: ShellProps) {
+export function Shell({ title, roleLabel, accent, navItems = defaultNavItems }: ShellProps) {
   const { t } = useTranslation();
   const theme = useThemeStore((state) => state.theme);
   const toggleTheme = useThemeStore((state) => state.toggleTheme);

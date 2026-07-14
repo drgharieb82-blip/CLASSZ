@@ -3,31 +3,31 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.modules.lesson_blocks.schemas import LessonBlockRead
+from app.modules.concepts.schemas import ConceptDetails
 
 
 class LessonBase(BaseModel):
     chapter_id: UUID
     title: str = Field(min_length=1, max_length=200)
-    description: str | None = None
     position: int = Field(ge=0)
-    is_free_preview: bool = False
-    release_at: datetime | None = None
-    hide_at: datetime | None = None
-    requires_previous_completion: bool = False
-    is_locked: bool = False
 
 
-class LessonCreate(LessonBase):
-    pass
+class LessonCreate(BaseModel):
+    chapter_id: UUID
+    title: str = Field(min_length=1, max_length=200)
+
+
+class LessonUpdate(BaseModel):
+    title: str | None = Field(default=None, min_length=1, max_length=200)
 
 
 class LessonRead(LessonBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID
+    public_code: str
     created_at: datetime
 
 
 class LessonDetails(LessonRead):
-    blocks: list[LessonBlockRead] = Field(default_factory=list)
+    concepts: list[ConceptDetails] = Field(default_factory=list)

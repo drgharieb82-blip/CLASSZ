@@ -17,12 +17,12 @@ class VideoProvider(str, enum.Enum):
 
 class Video(Base):
     __tablename__ = "videos"
-    __table_args__ = (UniqueConstraint("lesson_block_id", name="uq_videos_lesson_block_id"),)
+    __table_args__ = (UniqueConstraint("session_block_id", name="uq_videos_session_block_id"),)
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    lesson_block_id: Mapped[uuid.UUID] = mapped_column(
+    session_block_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("lesson_blocks.id", ondelete="CASCADE"),
+        ForeignKey("session_blocks.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -44,4 +44,4 @@ class Video(Base):
         nullable=False,
     )
 
-    lesson_block: Mapped["LessonBlock"] = relationship("LessonBlock", back_populates="video")
+    session_block: Mapped["SessionBlock"] = relationship("SessionBlock", back_populates="video")

@@ -12,54 +12,58 @@ from app.modules.quizzes.models import Quiz, QuizQuestion
 from app.modules.results.models import QuestionResult, QuizResult
 
 
+def _question_full_options(base):
+    """Every path in this module that nests a full QuestionRead must eager-load
+    all relationships QuestionRead serializes — chapters/lessons/concepts/
+    atomic_concepts included — or FastAPI's response serialization crashes
+    with a MissingGreenlet error on any lazy access outside the request's
+    async context."""
+    return (
+        base.selectinload(Question.choices),
+        base.selectinload(Question.media),
+        base.selectinload(Question.tags),
+        base.selectinload(Question.category),
+        base.selectinload(Question.chapters),
+        base.selectinload(Question.lessons),
+        base.selectinload(Question.concepts),
+        base.selectinload(Question.atomic_concepts),
+    )
+
+
 def _result_options():
     return (
-        selectinload(QuizResult.question_results).selectinload(QuestionResult.question).selectinload(Question.choices),
-        selectinload(QuizResult.question_results).selectinload(QuestionResult.question).selectinload(Question.media),
-        selectinload(QuizResult.question_results).selectinload(QuestionResult.question).selectinload(Question.tags),
-        selectinload(QuizResult.question_results).selectinload(QuestionResult.question).selectinload(Question.category),
+        *_question_full_options(selectinload(QuizResult.question_results).selectinload(QuestionResult.question)),
         selectinload(QuizResult.attempt).selectinload(QuizAttempt.answers),
-        selectinload(QuizResult.attempt)
-        .selectinload(QuizAttempt.quiz)
-        .selectinload(Quiz.questions)
-        .selectinload(QuizQuestion.question)
-        .selectinload(Question.choices),
-        selectinload(QuizResult.attempt)
-        .selectinload(QuizAttempt.quiz)
-        .selectinload(Quiz.questions)
-        .selectinload(QuizQuestion.question)
-        .selectinload(Question.media),
+        *_question_full_options(
+            selectinload(QuizResult.attempt)
+            .selectinload(QuizAttempt.quiz)
+            .selectinload(Quiz.questions)
+            .selectinload(QuizQuestion.question)
+        ),
     )
 
 
 def _attempt_options():
     return (
         selectinload(QuizAttempt.answers),
-        selectinload(QuizAttempt.quiz)
-        .selectinload(Quiz.questions)
-        .selectinload(QuizQuestion.question)
-        .selectinload(Question.choices),
-        selectinload(QuizAttempt.quiz)
-        .selectinload(Quiz.questions)
-        .selectinload(QuizQuestion.question)
-        .selectinload(Question.media),
-        selectinload(QuizAttempt.quiz)
-        .selectinload(Quiz.questions)
-        .selectinload(QuizQuestion.question)
-        .selectinload(Question.tags),
-        selectinload(QuizAttempt.quiz)
-        .selectinload(Quiz.questions)
-        .selectinload(QuizQuestion.question)
-        .selectinload(Question.category),
+        *_question_full_options(
+            selectinload(QuizAttempt.quiz).selectinload(Quiz.questions).selectinload(QuizQuestion.question)
+        ),
     )
 
 
-async def get_result_by_attempt(session: AsyncSession, attempt_id: UUID) -> QuizResult | None:
-    result = await session.execute(
-        select(QuizResult)
-        .where(QuizResult.attempt_id == attempt_id)
-        .options(*_result_options())
-    )
+async def get_result_by_attempt(
+    session: AsyncSession,
+    attempt_id: UUID,
+    student_id: UUID | None = None,
+) -> QuizResult | None:
+    query = select(QuizResult).where(QuizResult.attempt_id == attempt_id)
+    if student_id is not None:
+        query = query.join(QuizAttempt, QuizAttempt.id == QuizResult.attempt_id).where(
+            QuizAttempt.student_id == student_id,
+        )
+
+    result = await session.execute(query.options(*_result_options()))
     return result.scalar_one_or_none()
 
 

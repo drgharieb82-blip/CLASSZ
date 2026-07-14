@@ -7,7 +7,7 @@ from app.modules.videos.models import VideoProvider
 
 
 class VideoBase(BaseModel):
-    lesson_block_id: UUID
+    session_block_id: UUID
     title: str = Field(min_length=1, max_length=200)
     provider: VideoProvider
     provider_video_id: str = Field(min_length=1, max_length=255)

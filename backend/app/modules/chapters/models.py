@@ -6,6 +6,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+from app.modules.sessions.models import session_chapter_links
 
 
 class Chapter(Base):
@@ -13,6 +14,7 @@ class Chapter(Base):
     __table_args__ = (UniqueConstraint("course_id", "position", name="uq_chapters_course_position"),)
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    public_code: Mapped[str] = mapped_column(String(20), unique=True, nullable=False)
     course_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("courses.id", ondelete="CASCADE"),
@@ -33,4 +35,9 @@ class Chapter(Base):
         back_populates="chapter",
         cascade="all, delete-orphan",
         order_by="Lesson.position",
+    )
+    sessions: Mapped[list["Session"]] = relationship(
+        "Session",
+        secondary=session_chapter_links,
+        back_populates="chapters",
     )

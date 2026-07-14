@@ -8,10 +8,10 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
 
-class LessonProgress(Base):
-    __tablename__ = "lesson_progress"
+class SessionProgress(Base):
+    __tablename__ = "session_progress"
     __table_args__ = (
-        UniqueConstraint("student_id", "lesson_id", name="uq_lesson_progress_student_lesson"),
+        UniqueConstraint("student_id", "session_id", name="uq_session_progress_student_session"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -21,9 +21,9 @@ class LessonProgress(Base):
         nullable=False,
         index=True,
     )
-    lesson_id: Mapped[uuid.UUID] = mapped_column(
+    session_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("lessons.id", ondelete="CASCADE"),
+        ForeignKey("sessions.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -43,4 +43,4 @@ class LessonProgress(Base):
         nullable=False,
     )
 
-    lesson: Mapped["Lesson"] = relationship("Lesson", back_populates="progress_records")
+    session: Mapped["Session"] = relationship("Session", back_populates="progress_records")

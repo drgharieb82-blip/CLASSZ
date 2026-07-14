@@ -11,7 +11,7 @@ class QuizBase(BaseModel):
     description: str | None = None
     course_id: UUID
     chapter_id: UUID | None = None
-    lesson_id: UUID | None = None
+    session_id: UUID | None = None
     duration_minutes: int = Field(default=30, ge=0)
     passing_score: int = Field(default=70, ge=0, le=100)
     is_published: bool = False

@@ -9,7 +9,8 @@
     "dashboard": "لوحة التحكم",
     "courses": "الدورات",
     "people": "الأشخاص",
-    "learning": "التعلم"
+    "learning": "التعلم",
+    "settings": "الإعدادات"
   },
   "roles": {
     "adminWorkspace": "مساحة المدير",
@@ -214,6 +215,249 @@
       "pending": "معلق",
       "graded": "تم التصحيح",
       "returned": "مُعاد"
+    }
+  },
+  "parentPortal": {
+    "header": {
+      "eyebrow": "نظرة العائلة",
+      "greeting": "مرحباً بعودتك، {{parentName}}",
+      "description": "شاهد كل طفل بوضوح من صفحة واحدة مميزة: الحالة، التنبيهات، التقدم، المدفوعات، ملاحظات المعلمين، والتقارير العائلية القابلة للطباعة.",
+      "childSelector": "اختيار الطفل"
+    },
+    "view": {
+      "selectedChild": "عرض الطفل المحدد",
+      "allChildren": "عرض ملخص جميع الأطفال"
+    },
+    "actions": {
+      "addChild": "إضافة طفل",
+      "exportPdf": "تصدير PDF",
+      "contactTeacher": "التواصل مع المعلم",
+      "payNow": "ادفع الآن"
+    },
+    "childCards": {
+      "mainCourse": "الدورة الرئيسية",
+      "status": "الحالة العامة",
+      "progress": "التقدم",
+      "alerts": "تنبيهات"
+    },
+    "family": {
+      "totalChildren": "الأطفال",
+      "totalChildrenHelper": "مرتبطون بهذا الحساب",
+      "averageProgress": "متوسط التقدم",
+      "averageProgressHelper": "عبر جميع الأطفال المرتبطين",
+      "openAlerts": "التنبيهات المفتوحة",
+      "openAlertsHelper": "المبلغ العائلي المعلق: {{amount}}"
+    },
+    "allChildren": {
+      "eyebrow": "ملخص جميع الأطفال",
+      "title": "قارن جميع الأطفال بسرعة",
+      "description": "اعرض الحالة والتقدم والدرجة والواجبات الناقصة والحضور والمدفوعات وآخر ملاحظة لكل طفل.",
+      "latestTeacherNote": "آخر ملاحظة من المعلم"
+    },
+    "smartSummary": {
+      "eyebrow": "ملخص ذكي لولي الأمر",
+      "title": "{{name}} هذا الأسبوع",
+      "description": "شرح واضح لولي الأمر يوضح ما يسير جيداً، وما يحتاج الانتباه، وما الخطوة التالية.",
+      "doingWell": "هل الطفل بخير؟",
+      "mainProblem": "ما المشكلة الرئيسية؟",
+      "actionThisWeek": "ماذا يجب على ولي الأمر فعله هذا الأسبوع؟"
+    },
+    "summaryCards": {
+      "overallStatus": "الحالة العامة",
+      "overallStatusHelper": "حالة التعلم الحالية لـ {{name}}",
+      "courseProgress": "تقدم الدورات",
+      "courseProgressHelper": "عبر الصفوف النشطة",
+      "averageScore": "متوسط الدرجات",
+      "averageScoreHelper": "آخر الأعمال المصححة",
+      "attendance": "الحضور",
+      "attendanceHelper": "حضور الجلسات المباشرة",
+      "missingHomework": "واجبات ناقصة",
+      "missingHomeworkHelper": "يحتاج متابعة",
+      "upcomingExams": "اختبارات قادمة",
+      "upcomingExamsHelper": "مجدولة قريباً",
+      "paymentStatus": "حالة الدفع",
+      "paymentStatusHelper": "وضع الفواتير الحالي"
+    },
+    "progress": {
+      "eyebrow": "التقدم حسب الدورة",
+      "title": "التقدم عبر الدورات المسجلة",
+      "description": "تعرض كل دورة فقط ما يحتاجه ولي الأمر: التقدم، وقت المشاهدة، وآخر نشاط.",
+      "watchTime": "وقت المشاهدة",
+      "lastActivity": "آخر نشاط"
+    },
+    "results": {
+      "eyebrow": "النتائج الأخيرة",
+      "title": "الاختبارات والواجبات والامتحانات",
+      "description": "جدول واحد واضح لولي الأمر لعرض النتائج الحديثة والعناصر المعلقة.",
+      "type": "النوع",
+      "titleLabel": "العنوان",
+      "date": "التاريخ",
+      "score": "الدرجة / الحالة",
+      "note": "ملاحظة المعلم"
+    },
+    "alerts": {
+      "eyebrow": "مركز التنبيهات",
+      "title": "ما يحتاج الانتباه",
+      "description": "الواجبات الناقصة، عدم الدخول، انخفاض الدرجات، الامتحانات القادمة، تذكير الدفع، وملاحظات المعلم.",
+      "severity": {
+        "critical": "حرج",
+        "warning": "تحذير",
+        "info": "معلومة",
+        "positive": "إيجابي"
+      }
+    },
+    "attendance": {
+      "eyebrow": "الحضور",
+      "title": "نظرة عامة على الحضور",
+      "description": "يتم تبسيط الحضور إلى حاضر، غائب، متأخر، ونسبة الحضور العامة.",
+      "present": "حاضر",
+      "absent": "غائب",
+      "late": "متأخر",
+      "rate": "نسبة الحضور"
+    },
+    "weaknesses": {
+      "eyebrow": "نقاط الضعف",
+      "title": "خطة دعم مناسبة لولي الأمر",
+      "description": "الفصل الأضعف، الموضوع الأضعف، الإجراء الموصى به، واقتراحات تدريب إضافية.",
+      "weakTopic": "الموضوع الأضعف",
+      "recommendedAction": "الإجراء الموصى به",
+      "extraPractice": "اقتراح تدريب إضافي"
+    },
+    "payments": {
+      "eyebrow": "المدفوعات",
+      "title": "الدورات والفواتير والأرصدة",
+      "description": "تابع انتهاء الدورات، المبلغ المعلق، رصيد المحفظة، وأزرار الدفع أو التجديد السريعة.",
+      "walletBalance": "رصيد المحفظة",
+      "downloadInvoice": "تنزيل الفاتورة",
+      "payButton": "ادفع",
+      "renewButton": "جدّد",
+      "pendingAmount": "المبلغ المعلق"
+    },
+    "messages": {
+      "eyebrow": "رسائل المعلمين",
+      "title": "ملاحظات المعلم والمساعد",
+      "description": "تظهر الرسائل كملاحظات واضحة مع إجراء رد بسيط.",
+      "reply": "رد",
+      "sendMessage": "إرسال رسالة",
+      "placeholder": "اكتب رسالة قصيرة لفريق المعلمين...",
+      "send": "إرسال",
+      "sent": "تم إرسال الرسالة التجريبية."
+    },
+    "timeline": {
+      "eyebrow": "الخط الزمني",
+      "title": "نشاط الطفل الأخير",
+      "description": "الجلسات المشاهدة، الاختبارات المحلولة، الواجبات الفائتة، ملاحظات المعلم، وأحداث الدفع."
+    },
+    "report": {
+      "title": "تقرير PDF",
+      "familyTitle": "تقرير ملخص العائلة",
+      "familyDescription": "يجمع هذا التصدير أهم عناصر المقارنة لكل طفل مرتبط.",
+      "alerts": "التنبيهات",
+      "teacherNotes": "ملاحظات المعلم",
+      "print": "طباعة",
+      "downloadPdf": "تنزيل PDF",
+      "downloadMocked": "تم تجهيز تنزيل PDF التجريبي."
+    },
+    "linking": {
+      "registrationEyebrow": "الربط أثناء تسجيل الطالب",
+      "registrationTitle": "ربط تلقائي عبر واتساب الموثق",
+      "registrationDescription": "يمكن لتسجيل الطالب ربط حساب ولي الأمر الموثق عند تطابق رقم واتساب، أو إنشاء ملف ولي أمر معلق وإرسال دعوة تفعيل.",
+      "selfEyebrow": "تسجيل ولي الأمر لاحقاً",
+      "selfTitle": "ربط آمن للطفل عبر الكود",
+      "selfDescription": "يمكن لولي الأمر التسجيل لاحقاً وربط الأطفال فقط من خلال كود ربط طالب مؤقت.",
+      "dialogTitle": "إضافة طفل بشكل آمن",
+      "dialogDescription": "أدخل كود ربط الطالب المؤقت المرسل إلى واتساب الطالب الموثق أو الظاهر داخل حساب الطالب.",
+      "linkCodeInput": "كود ربط الطالب",
+      "linkCodePlaceholder": "أدخل كود الربط المؤقت",
+      "codeSentAction": "حالة إرسال الكود",
+      "verifyCode": "التحقق من الكود",
+      "demoCodes": "أكواد تجريبية",
+      "status": {
+        "idle": "بانتظار الكود",
+        "codeSent": "تم إرسال الكود",
+        "invalid": "الكود غير صحيح",
+        "expired": "انتهت صلاحية الكود",
+        "success": "تم ربط الطفل بنجاح"
+      },
+      "statusDescriptions": {
+        "idle": "لا يمكن لولي الأمر البحث باسم الطالب. الربط يعمل فقط باستخدام كود مؤقت.",
+        "codeSent": "تم إرسال كود ربط طالب مؤقت إلى واتساب الطالب الموثق وهو ظاهر أيضاً داخل حساب الطالب.",
+        "invalid": "هذا الكود لا يطابق أي طفل متاح. اطلب من الطالب مشاركة الكود المؤقت الحالي.",
+        "expired": "انتهت صلاحية هذا الكود. اطلب كود ربط طالب مؤقت جديد من حساب الطالب.",
+        "success": "تم الآن ربط {{name}} وظهر في قائمة اختيار الأطفال."
+      }
+    },
+    "contactModal": {
+      "title": "التواصل مع المعلم",
+      "familyModeTitle": "وضع التواصل العائلي",
+      "familyModeDescription": "استخدم هذا الوضع عندما تريد مراسلة فريق المعلمين بخصوص أكثر من طفل.",
+      "openWhatsApp": "فتح واتساب"
+    },
+    "payModal": {
+      "title": "ادفع الآن",
+      "familyTitle": "ملخص مدفوعات العائلة",
+      "familyDescription": "إجمالي المبلغ المعلق عبر جميع الأطفال: {{amount}}",
+      "childDescription": "المبلغ المعلق لهذا الطفل: {{amount}}",
+      "paymentRequested": "تم فتح مسار الدفع التجريبي."
+    },
+    "settings": {
+      "eyebrow": "إعدادات ولي الأمر",
+      "title": "إعدادات الحساب العائلي",
+      "description": "راجع رقم واتساب المرتبط، تفضيلات التنبيهات، وقواعد ربط الحساب الخاصة بدور ولي الأمر.",
+      "whatsAppTitle": "واتساب موثق",
+      "whatsAppDescription": "يرتبط حساب ولي الأمر هذا بالرقم {{whatsapp}} للدعوات وأكواد ربط الأطفال.",
+      "alertsTitle": "تفضيلات التنبيهات",
+      "alertsDescription": "يتلقى أولياء الأمور التحديثات الحرجة والتحذيرية والمعلوماتية والإيجابية داخل البوابة وعبر إشعارات واتساب.",
+      "securityTitle": "أمان الربط",
+      "securityDescription": "لا يمكن ربط الأطفال إلا عبر تطابق واتساب الموثق أو كود ربط طالب مؤقت."
+    },
+    "auth": {
+      "eyebrow": "دخول ولي الأمر",
+      "loginTitle": "تسجيل دخول ولي الأمر",
+      "loginDescription": "سجّل الدخول باستخدام رقم واتساب الموثق المرتبط بحساب العائلة.",
+      "registerTitle": "التسجيل كولي أمر",
+      "registerDescription": "أنشئ حساب ولي أمر لاحقاً وأضف الأطفال بشكل آمن باستخدام أكواد ربط الطالب المؤقتة.",
+      "featureWhatsApp": "مطابقة واتساب الموثق تحافظ على أمان ربط الطلاب.",
+      "featureCodes": "أكواد ربط الطالب المؤقتة تنتهي صلاحيتها ولا يمكن تخمينها بالاسم.",
+      "featureChildren": "يمكن لحساب ولي الأمر الواحد إدارة عدة أطفال من لوحة واحدة.",
+      "whatsAppLabel": "واتساب ولي الأمر",
+      "whatsAppPlaceholder": "أدخل رقم واتساب الموثق",
+      "passwordLabel": "كلمة المرور",
+      "linkCodeLabel": "كود ربط طالب اختياري",
+      "linkCodePlaceholder": "أضف طفلاً أثناء التسجيل",
+      "loginButton": "الدخول كولي أمر",
+      "registerButton": "التسجيل كولي أمر",
+      "demoEntry": "فتح عرض لوحة التحكم"
+    },
+    "values": {
+      "onTrack": "مستقر",
+      "needsSupport": "يحتاج دعماً",
+      "watchClosely": "يحتاج متابعة قريبة",
+      "gettingStarted": "في البداية",
+      "paid": "مدفوع",
+      "paymentDue": "الدفع مستحق",
+      "pendingFirstInstallment": "القسط الأول معلق",
+      "renewSoon": "يحتاج تجديداً قريباً",
+      "active": "نشط",
+      "trialAccess": "وصول تجريبي",
+      "teacher": "معلم",
+      "assistantTeacher": "مساعد معلم",
+      "quiz": "اختبار قصير",
+      "homework": "واجب",
+      "exam": "امتحان",
+      "watchedSession": "شاهد جلسة",
+      "solvedQuiz": "حل اختباراً قصيراً",
+      "missedHomework": "فاته واجب",
+      "teacherNote": "ملاحظة معلم",
+      "paymentCompleted": "اكتمل الدفع",
+      "missingHomeworkAlert": "واجب ناقص",
+      "upcomingExamAlert": "اختبار قادم",
+      "paymentDueAlert": "دفعة مستحقة",
+      "scoreDroppedAlert": "انخفضت الدرجة",
+      "noLoginAlert": "لا يوجد دخول",
+      "missing": "ناقص",
+      "submitted": "تم التسليم",
+      "upcoming": "قادم"
     }
   }
 }

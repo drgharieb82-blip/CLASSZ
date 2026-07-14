@@ -13,6 +13,10 @@ dist/
 .vite/
 *.tsbuildinfo
 
+# User-uploaded files and backups
+backend/uploads/
+backend/db_backups/
+
 # Environment
 .env
 .env.*
@@ -21,3 +25,24 @@ dist/
 # Editors and OS
 .DS_Store
 Thumbs.db
+
+# Local browser profiles
+classz-frontend-prototype/.qa-chrome-profile/
+
+# Local verification artifacts
+image/
+verification-screenshots/
+reports/
+*.log
+
+# Playwright
+playwright-report/
+test-results/
+
+# IDE
+.vscode/
+.idea/
+
+# Claude Code
+.claude/
+
